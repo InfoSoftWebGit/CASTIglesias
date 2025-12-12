@@ -1,0 +1,503 @@
+﻿@using System.Text.Json
+@{
+    ViewBag.Title = "Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // 🔑 Uso de los ViewBag del controlador
+    var loggedInSedeID = ViewBag.sedeID ?? 0;
+    var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
+}
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="index.html">Resumen</a></li>
+    <li class="breadcrumb-item active">Usuarios</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i> Lista de Usuarios
+    </div>
+
+    <div class="table-responsive">
+        <div class="row">
+            <div class="col-12 mb-2">
+                <button type="button" class="btn btn-success" onclick="abrirModalUsuarios(null)">Añadir nuevo usuario</button>
+            </div>
+        </div>
+        <hr />
+        <table id="tablaUsuarios" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Correo electrónico</th>
+                    <th>Activo</th>
+                    <th>Sede</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalUsuarios" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del usuario</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body g-2">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtID_sede" type="hidden" value="0" /> @* 🔑 Campo oculto para ID de Sede *@
+                <div class="row g-2">
+                    <div class="col-sm-6 mb-2">
+                        <label for="txtNombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="txtNombres" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label for="txtApellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="txtApellido" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label for="txtCorreo_electronico" class="form-label">Correo</label>
+                        <input type="text" class="form-control" id="txtCorreo_electronico" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label for="txtContrasenia" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="txtContrasenia" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label for="cboActivo" class="form-label">Activo</label>
+                        <select id="cboActivo" class="form-select">
+                            <option value="" disabled selected>Selecciona un valor</option>
+                            <option value="1">Sí</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label for="cboRol" class="form-label">Rol</label>
+                        <select id="cboRol" class="form-select">
+                            <option value="" disabled selected>Selecciona un rol</option>
+                            <option value="3">PastorSede</option>
+                            <option value="4">Miembro</option>
+                        </select>
+                    </div>
+                    <div class="row mt-3" id="contenedorPermisos" style="display: none;">
+                        <div class="col-12">
+                            <h5>Permisos Específicos (Solo para Rol Miembro)</h5>
+                            <hr class="mt-0" />
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkMiembros">
+                                <label class="form-check-label" for="checkMiembros">Gestión de Miembros</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkFamilias">
+                                <label class="form-check-label" for="checkFamilias">Gestión de Familias</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkGrupos">
+                                <label class="form-check-label" for="checkGrupos">Gestión de Grupos</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkZonas">
+                                <label class="form-check-label" for="checkZonas">Gestión de Zonas</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkDiezmos">
+                                <label class="form-check-label" for="checkDiezmos">Gestión de Diezmos</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkConceptos">
+                                <label class="form-check-label" for="checkConceptos">Gestión de Conceptos</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input check-permiso" type="checkbox" id="checkAsistencias">
+                                <label class="form-check-label" for="checkConceptos">Gestión de Asistencias</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        @* La sede solo se muestra, se asigna automáticamente al crear un usuario *@
+                        <input type="text" class="form-control" id="txtSede" readonly hidden>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger" role="alert" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarUsuario()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+
+    <script>
+        var tabladata;
+        var filaSeleccionada;
+
+        // 🔑 Variables globales para la sede del usuario logueado (Usando los ViewBag)
+        // Se asume que ViewBag.sedeID es un int o null y ViewBag.rolID es un int o null.
+        const loggedInSedeID = @Html.Raw(JsonSerializer.Serialize(ViewBag.sedeID ?? 0));
+        const loggedInSedeNombre = "@(ViewBag.nombre_sede?.ToString() ?? string.Empty)";
+
+        // SOLUCIÓN: Usamos Html.Raw para inyectar valores directamente y evitar problemas de comillas extra.
+        const loggedInUserRoleID = @Html.Raw(JsonSerializer.Serialize(ViewBag.rolID ?? 4));
+        const ID_SEDE_GLOBAL = 1000;
+
+
+        const ROLES = {
+            1: "AdminGlobal",
+            2: "PastorGeneral",
+            3: "PastorSede",
+            4: "Miembro"
+        };
+
+        // **NUEVO** Objeto de mapeo inverso
+        const ROL_TO_ID = {
+            "AdminGlobal": 1,
+            "PastorGeneral": 2,
+            "PastorSede": 3,
+            "Miembro": 4
+        };
+
+        // Función para obtener la data de la fila (maneja DataTables responsive)
+        function getFilaData(button) {
+            var tr = $(button).closest("tr");
+            var data = tabladata.row(tr).data();
+            if (!data) {
+                // Lógica para DataTables Responsive (fila hija)
+                tr = tr.prev("tr");
+                data = tabladata.row(tr).data();
+            }
+            return { tr: tr, data: data };
+        }
+
+        function actualizarVisibilidadPermisos() {
+            // El rol "Miembro" tiene el valor 4
+            const rolSeleccionado = $("#cboRol").val();
+            if (rolSeleccionado === "4") {
+                $("#contenedorPermisos").show();
+            } else {
+                $("#contenedorPermisos").hide();
+                // Desmarcar todos los checks al ocultar para evitar enviar basura
+                $(".check-permiso").prop('checked', false);
+            }
+        }
+
+        function cargarPermisosEnModal(permisos) {
+            // Limpiar todos los checks primero
+            $(".check-permiso").prop('checked', false);
+
+            if (permisos) {
+                // Se asume que 'permisos' es un objeto con propiedades booleanas
+                if (permisos.usuarios === true) $("#checkUsuarios").prop('checked', true);
+                if (permisos.miembros === true) $("#checkMiembros").prop('checked', true);
+                if (permisos.familias === true) $("#checkFamilias").prop('checked', true);
+                if (permisos.grupos === true) $("#checkGrupos").prop('checked', true);
+                if (permisos.zonas === true) $("#checkZonas").prop('checked', true);
+                if (permisos.diezmos === true) $("#checkDiezmos").prop('checked', true);
+                if (permisos.conceptos === true) $("#checkConceptos").prop('checked', true);
+                if (permisos.asistencia === true) $("#checkAsistencias").prop('checked', true);
+            }
+        }
+
+        $(document).ready(function () {
+            $("#cboRol").on('change', actualizarVisibilidadPermisos);
+
+            // Inicializar DataTable
+            tabladata = $("#tablaUsuarios").DataTable({
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarUsuarios", "Mantenedor")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data",
+                    error: function(xhr, error, code) {
+                        console.error("Error al cargar datos de DataTables:", code);
+                    }
+                },
+                columns: [
+                    { data: "nombre_usuario" },
+                    { data: "apellido_usuario" },
+                    { data: "correo_electronico" },
+                    {
+                        data: "activo",
+                        render: valor => valor
+                            ? '<span class="badge bg-success">Sí</span>'
+                            : '<span class="badge bg-danger">No</span>'
+                    },
+                    { data: "nombre_sede" },
+                    { data: "rol" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-primary btn-sm btn-editarUsuario">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-eliminarUsuario">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        className: "text-center align-middle",
+                        width: "100px"
+                    }
+                ],
+                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+            });
+
+            $("#tablaUsuarios tbody").on("click", ".btn-editarUsuario", function () {
+                var fila = getFilaData(this);
+                if (fila.data) {
+                    filaSeleccionada = fila.tr;
+                    abrirModalUsuarios(fila.data);
+                } else {
+                    console.error("No se pudo obtener el usuario para editar");
+                }
+            });
+
+            $("#tablaUsuarios tbody").on("click", ".btn-eliminarUsuario", function () {
+                var fila = getFilaData(this);
+                if (!fila.data || fila.data.iD_usuario === undefined) {
+                    console.error("No se encontró el ID del usuario para eliminar", fila.data);
+                    Swal.fire("Error", "No se pudo obtener la información del usuario a eliminar.", "error");
+                    return;
+                }
+                const trAEliminar = fila.tr;
+                const { iD_usuario, nombre_usuario, apellido_usuario } = fila.data;
+
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `¿Desea eliminar al usuario ${nombre_usuario} ${apellido_usuario}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "No"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post('@Url.Action("EliminarUsuario", "Mantenedor")',
+                            { id: iD_usuario, sedeID: loggedInSedeID },
+                            function(resp) {
+                                if (resp.resultado) {
+                                    tabladata.row(trAEliminar).remove().draw(false);
+                                    filaSeleccionada = null;
+                                    Swal.fire("Eliminado", "El usuario fue eliminado", "success");
+                                } else {
+                                    Swal.fire("Error", resp.mensaje, "error");
+                                }
+                            }).fail(function(xhr, status, error) {
+                                console.error(xhr.responseText);
+                                Swal.fire("Error", "No se pudo eliminar el usuario: " + error, "error");
+                            });
+                    }
+                    filaSeleccionada = null;
+                });
+            });
+        });
+
+                function abrirModalUsuarios(usuario) {
+            $("#mensajeError").hide().text("");
+            $("#txtContrasenia").val("");
+            // Se limpia el estado de los checkboxes al abrir el modal,
+            // y luego se cargarán si se cumplen las condiciones de edición y rol.
+            $(".check-permiso").prop('checked', false);
+
+            $("#cboRol option").prop('hidden', false).prop('disabled', false);
+
+            let nombreSedeMostrar = loggedInSedeNombre;
+            let idSedeMostrar = loggedInSedeID;
+            let rolUsuarioPorDefecto = 4;
+            let rolSeleccionadoID = 4;
+
+            if (usuario) {
+                $("#txtid").val(usuario.iD_usuario);
+                $("#txtNombres").val(usuario.nombre_usuario);
+                $("#txtApellido").val(usuario.apellido_usuario);
+                $("#txtCorreo_electronico").val(usuario.correo_electronico);
+                $("#cboActivo").val(usuario.activo ? 1 : 0);
+
+                const rolNombre = usuario.rol ? usuario.rol.trim() : "";
+                rolSeleccionadoID = ROL_TO_ID[rolNombre] || 4;
+                $("#cboRol").val(String(rolSeleccionadoID));
+
+                idSedeMostrar = usuario.ID_sede || loggedInSedeID;
+                nombreSedeMostrar = usuario.nombre_sede || loggedInSedeNombre;
+
+                $("#txtID_sede").val(idSedeMostrar);
+                $("#txtSede").val(nombreSedeMostrar);
+
+            } else {
+                $("#txtid").val(0);
+                $("#txtNombres").val("");
+                $("#txtApellido").val("");
+                $("#txtCorreo_electronico").val("");
+                $("#cboActivo").val("1");
+
+                if (loggedInUserRoleID > 2) {
+                    $("#cboRol option[value='1'], #cboRol option[value='2']").prop('hidden', true).prop('disabled', true);
+
+                    if (loggedInUserRoleID === 3) {
+                        rolUsuarioPorDefecto = 3;de
+                    } else {
+                        rolUsuarioPorDefecto = 4;
+                    }
+                }
+
+                rolSeleccionadoID = rolUsuarioPorDefecto;
+                $("#cboRol").val(String(rolSeleccionadoID));
+
+                $("#txtID_sede").val(loggedInSedeID);
+                $("#txtSede").val(loggedInSedeNombre);
+            }
+            if (!$("#cboRol option:selected").is(':enabled')) {
+                $("#cboRol").val("");
+                if (!usuario && loggedInUserRoleID > 2) {
+                    $("#cboRol").val(String(rolUsuarioPorDefecto));
+                }
+                rolSeleccionadoID = parseInt($("#cboRol").val() || 0);
+            }
+
+            if (usuario && rolSeleccionadoID === 4) {
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerPermisosUsuario", "Mantenedor")',
+                    type: 'GET',
+                    data: { id: usuario.iD_usuario },
+                    dataType: 'json',
+                    success: function (response) {
+                        $(".modal-body").LoadingOverlay("hide");
+                        if (response.resultado && response.data) {
+                            cargarPermisosEnModal(response.data);
+                        } else {
+                            console.warn("No se encontraron permisos específicos para el usuario. Permisos por defecto: ninguno.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $(".modal-body").LoadingOverlay("hide");
+                        console.error("Error al obtener permisos:", error);
+                        Swal.fire("Error", "No se pudieron cargar los permisos del usuario. " + (xhr.responseJSON?.mensaje || ""), "error");
+                    }
+                });
+            }
+            actualizarVisibilidadPermisos();
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalUsuarios"));
+            modal.show();
+        }
+        function GuardarUsuario() {
+            var iD_usuario = parseInt($("#txtid").val());
+            var contrasenia = $("#txtContrasenia").val();
+            var activo = $("#cboActivo").val();
+            var rolID = parseInt($("#cboRol").val());
+
+            if ($("#txtNombres").val().trim() === "" || $("#txtApellido").val().trim() === "" || $("#txtCorreo_electronico").val().trim() === "") {
+                $("#mensajeError").text("Todos los campos de Nombre, Apellido y Correo son obligatorios.").show();
+                return;
+            }
+
+            if (iD_usuario === 0 && contrasenia === "") {
+                $("#mensajeError").text("La contraseña es obligatoria para nuevos usuarios.").show();
+                return;
+            }
+
+             if (isNaN(rolID) || !ROLES[rolID]) {
+                $("#mensajeError").text("Debe seleccionar un Rol válido.").show();
+                return;
+            }
+
+            var permisos = null;
+            if (rolID === 4) {
+                permisos = {
+                    Usuarios: $("#checkUsuarios").is(':checked'),
+                    Miembros: $("#checkMiembros").is(':checked'),
+                    Familias: $("#checkFamilias").is(':checked'),
+                    Grupos: $("#checkGrupos").is(':checked'),
+                    Zonas: $("#checkZonas").is(':checked'),
+                    Diezmos: $("#checkDiezmos").is(':checked'),
+                    Conceptos: $("#checkConceptos").is(':checked'),
+                    Asistencia: $("#checkAsistencias").is(':checked')
+                };
+            }
+
+            var Usuario = {
+                iD_usuario: iD_usuario,
+                nombre_usuario: $("#txtNombres").val(),
+                apellido_usuario: $("#txtApellido").val(),
+                correo_electronico: $("#txtCorreo_electronico").val(),
+                contrasenia: contrasenia,
+                activo: activo == "1",
+                rol: ROLES[rolID] || "Miembro",
+                ID_sede: parseInt($("#txtID_sede").val()) || loggedInSedeID
+            };
+
+            if (permisos !== null) {
+                Usuario.Permisos = permisos;
+            }
+
+            $("#mensajeError").hide();
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+
+            $.post('@Url.Action("GuardarUsuario", "Mantenedor")', Usuario, function(data) {
+                $(".modal-body").LoadingOverlay("hide");
+
+                if (iD_usuario === 0) {
+                    if (data.resultado != 0) {
+                        Usuario.iD_usuario = data.resultado;
+                        Usuario.nombre_sede = loggedInSedeNombre;
+                        tabladata.row.add(Usuario).draw(false);
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalUsuarios")).hide();
+                    } else {
+                        $("#mensajeError").text(data.mensaje).show();
+                    }
+                } else {
+                    if (data.resultado) {
+
+                        Usuario.nombre_sede = $("#txtSede").val();
+                        tabladata.row(filaSeleccionada).data(Usuario).draw(false);
+                        filaSeleccionada = null;
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalUsuarios")).hide();
+                    } else {
+                        $("#mensajeError").text(data.mensaje).show();
+                    }
+                }
+            }).fail(function(xhr, status, error) {
+                $(".modal-body").LoadingOverlay("hide");
+                $("#mensajeError").text("Error al guardar el usuario: " + (xhr.responseJSON?.mensaje || error)).show();
+            });
+        }
+    </script>
+}

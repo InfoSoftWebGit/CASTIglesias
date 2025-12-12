@@ -1,0 +1,88 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cambiar Contraseña - MiApp</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="~/css/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Tu CSS propio -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body class="bg-primary d-flex flex-column min-vh-100">
+    <div id="layoutAuthentication" class="flex-grow-1">
+        <div id="layoutAuthentication_content">
+            <main>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7">
+                            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                                <div class="card-header">
+                                    <h3 class="text-center font-weight-light my-4">Cambiar contraseña</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form asp-controller="Acceso" asp-action="CambiarClave" method="post">
+                                        <input type="hidden" name="idusuario" value="@ViewBag.ID_usuario" />
+
+                                        <!-- Contraseña Actual -->
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" type="password" id="inputClaveActual" name="claveactual" placeholder=" " required />
+                                            <label for="inputClaveActual">Contraseña Actual</label>
+                                        </div>
+
+                                        <!-- Nueva Contraseña -->
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" type="password" id="inputNuevaClave" name="nuevaclave" placeholder=" " required />
+                                            <label for="inputNuevaClave">Nueva Contraseña</label>
+                                        </div>
+
+                                        <!-- Confirmar Nueva Contraseña -->
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" type="password" id="inputConfirmarClave" name="confirmarclave" placeholder=" " required />
+                                            <label for="inputConfirmarClave">Confirmar Nueva Contraseña</label>
+                                        </div>
+
+                                        <!-- Mostrar errores -->
+                                        @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+                                        {
+                                            <div class="alert alert-danger" role="alert">
+                                                @ViewBag.Error
+                                            </div>
+                                        }
+
+                                        <div class="mt-4 mb-0">
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary btn-block">Cambiar contraseña</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="card-footer text-center py-3">
+                                    <div class="small">
+                                        <a asp-controller="Acceso" asp-action="Index">Volver</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="custom-footer">
+        © Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados.
+        Soporte: <a href="mailto:tlezcanobarios@gmail.com">tlezcanobarios@gmail.com</a>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

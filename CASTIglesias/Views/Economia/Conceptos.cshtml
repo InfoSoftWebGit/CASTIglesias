@@ -1,0 +1,288 @@
+﻿@{
+    ViewData["Title"] = "Conceptos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* 
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Conceptos</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-tags me-1"></i> Lista de Conceptos
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalConcepto()">Añadir nuevo concepto</button>
+            </div>
+        </div>
+
+        <table id="tablaConceptos" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre del Concepto</th>
+                    <th>Sede</th>
+                    <th style="width: 100px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+@* <style>
+    #tablaConceptos thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaConceptos th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaConceptos tbody td {
+        color: black !important;
+    }
+</style> *@
+
+<div class="modal fade" id="FormModalConceptos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Datos del Concepto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtidConcepto" type="hidden" value="0" />
+                <input id="txtID_sede" type="hidden" value="@(ViewBag.sedeID ?? 0)" />
+
+                <div class="row g-2">
+                    <div class="col-sm-12">
+                        <label class="form-label">Nombre del Concepto<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreConcepto" placeholder="Ej: Diezmo, Ofrenda, Primicia" autocomplete="off" />
+                    </div>
+
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="txtSede" hidden />
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeErrorConcepto" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarConcepto()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        // 🔑 Obtenemos el nombre de la sede del ViewBag (asumo que se llama 'nombreSede')
+        const NOMBRE_SEDE_ACTUAL = '@(ViewBag.nombreSede?.ToString() ?? "Sede Desconocida")';
+        const LOGGED_IN_SEDE_ID = @(ViewBag.sedeID ?? 0);
+        const ID_ADMIN_GLOBAL = 1000;
+
+        // Función auxiliar para obtener datos de la fila (maneja DataTables responsive)
+        function getFilaData(button) {
+            var tr = $(button).closest("tr");
+            var data = tabladata.row(tr).data();
+            if (!data) {
+                // Manejar el modo responsive de DataTables
+                tr = tr.prev("tr");
+                data = tabladata.row(tr).data();
+            }
+            return { tr: tr, data: data };
+        }
+
+
+        $(document).ready(function () {
+            if ($.fn.DataTable.isDataTable("#tablaConceptos")) {
+                $("#tablaConceptos").DataTable().clear().destroy();
+            }
+
+            // Inicialización de DataTables para Conceptos
+            tabladata = $("#tablaConceptos").DataTable({
+                responsive: true,
+                ordering: true,
+                ajax: {
+                    url: '@Url.Action("ListarConceptos", "Economia")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "nombre_concepto" },
+                    // 🔑 Muestra el nombre de la sede asociada al concepto
+                    { data: "nombre_sede" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarConcepto">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarConcepto">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                }
+            });
+
+            // Eventos para Editar
+            $("#tablaConceptos tbody").on("click", ".btn-editarConcepto", function () {
+                const fila = getFilaData(this);
+                if (fila.data) {
+                    filaSeleccionada = fila.tr;
+                    abrirModalConcepto(fila.data);
+                }
+            });
+
+            // Eventos para Eliminar
+            $("#tablaConceptos tbody").on("click", ".btn-eliminarConcepto", function () {
+                const fila = getFilaData(this);
+                if (!fila.data) return;
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `¿Desea eliminar el concepto: ${fila.data.nombre_concepto}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarConcepto", "Economia")',
+                            type: "POST",
+                            // 🔑 Usamos iD_concepto, asumiendo que el controlador espera 'id'
+                            data: { id: fila.data.iD_concepto },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila.tr).remove().draw(false);
+                                    Swal.fire("Eliminado", "El concepto fue eliminado correctamente.", "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje || "No se pudo eliminar el concepto.", "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "Error en la solicitud de eliminación.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+
+        // Función de apertura de Modal para Conceptos
+        function abrirModalConcepto(json = null) {
+            $("#mensajeErrorConcepto").addClass("d-none").text("");
+
+            // 🔑 Restricción: Si el usuario es Admin Global, no puede crear/editar conceptos sin selector.
+            if (!json && LOGGED_IN_SEDE_ID === ID_ADMIN_GLOBAL) {
+                Swal.fire("Restricción de Acceso", "El Administrador Global no puede crear conceptos sin seleccionar una sede. Use la opción de cambio de sede.", "warning");
+                return;
+            }
+
+            $("#txtidConcepto").val(json?.iD_concepto || 0);
+
+            if (json) {
+                // Modo Edición
+                $("#txtNombreConcepto").val(json.nombre_concepto || "");
+                $("#txtSedeConcepto").val(json.nombre_sede || "Sede Desconocida");
+                $("#exampleModalLabel").text("Editar Concepto");
+
+            } else {
+                // Modo Nuevo
+                $("#txtNombreConcepto").val("");
+                $("#txtSedeConcepto").val(NOMBRE_SEDE_ACTUAL);
+                $("#exampleModalLabel").text("Datos del nuevo Concepto");
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalConceptos"));
+            modal.show();
+        }
+
+
+        function GuardarConcepto() {
+            // Crear el objeto Concepto (solo con los datos a enviar)
+            const Concepto = {
+                iD_concepto: parseInt($("#txtidConcepto").val()) || 0,
+                nombre_concepto: $("#txtNombreConcepto").val().trim()
+            };
+
+            if (Concepto.nombre_concepto === "") {
+                $("#mensajeErrorConcepto").removeClass("d-none").text("El nombre del concepto no puede ser vacío.");
+                return;
+            } else {
+                $("#mensajeErrorConcepto").addClass("d-none");
+            }
+
+            $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
+
+            // El endpoint de Guardar Concepto será el mismo, el controlador determina si es INSERT o UPDATE
+            const url = '@Url.Action("GuardarConcepto", "Economia")';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: Concepto,
+                dataType: "json",
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+
+                    if (data.resultado !== 0 && !data.error) {
+                        // El controlador debe devolver el objeto completo, incluyendo nombre_sede, para actualizar la tabla
+                        const nuevoConcepto = data.objeto;
+
+                        // Actualizar o añadir a la tabla
+                        if (Concepto.iD_concepto === 0) {
+                            tabladata.row.add(nuevoConcepto).draw(false);
+                        } else {
+                            tabladata.row(filaSeleccionada).data(nuevoConcepto).draw(false);
+                        }
+
+                        // Limpieza y cierre del modal
+                        $("#txtidConcepto").val("0");
+                        $("#txtNombreConcepto").val("");
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalConceptos")).hide();
+                    } else {
+                        $("#mensajeErrorConcepto").removeClass("d-none").text(data.mensaje || "Error al procesar la solicitud.");
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeErrorConcepto").removeClass("d-none").text("Error en la solicitud AJAX.");
+                }
+            });
+        }
+
+    </script>
+}

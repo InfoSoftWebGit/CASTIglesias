@@ -1,0 +1,73 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reestablecer Contraseña - MiApp</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="~/css/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Tu CSS propio -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body class="bg-primary d-flex flex-column min-vh-100">
+    <div id="layoutAuthentication" class="flex-grow-1">
+        <div id="layoutAuthentication_content">
+            <main>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-5">
+                            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                                <div class="card-header">
+                                    <h3 class="text-center font-weight-light my-4">Recuperar contraseña</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="small mb-3 text-muted">
+                                        Ingresa tu correo electrónico y te enviaremos una nueva clave de acceso temporal.
+                                    </div>
+                                    <form asp-controller="Acceso" asp-action="Reestablecer" method="post">
+                                        <!-- INPUT EMAIL -->
+                                        <div class="form-floating mb-3">
+                                            <input class="form-control" type="email" name="correo" id="inputEmail" placeholder=" " autocomplete="off" required />
+                                            <label for="inputEmail">Correo electrónico</label>
+                                        </div>
+
+                                        <!-- CONTROL DE ERRORES -->
+                                        @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+                                        {
+                                            <div class="alert alert-danger" role="alert">
+                                                @ViewBag.Error
+                                            </div>
+                                        }
+
+                                        <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
+                                            <a class="small" asp-controller="Acceso" asp-action="Index">Volver</a>
+                                            <button type="submit" class="btn btn-primary">Reestablecer contraseña</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="card-footer text-center py-3">
+                                    @* Puedes agregar enlaces adicionales aquí si quieres *@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="custom-footer">
+        © Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados.
+        Soporte: <a href="mailto:tlezcanobarios@gmail.com">tlezcanobarios@gmail.com</a>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

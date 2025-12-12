@@ -1,0 +1,252 @@
+﻿@{
+    ViewBag.Title = "Grupos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Grupos</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i> Lista de Grupos
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalGrupos()">Añadir nuevo grupo</button>
+            </div>
+        </div>
+
+        <table id="tablaGrupos" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Acciones</th> @* Nueva columna para los botones de Editar y Eliminar *@
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalGrupos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Datos del nuevo grupo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-sm-12">
+                        @* Ajustado a 12 para que ocupe todo el ancho, ya que solo hay un campo *@
+                        <label class="form-label">Descripcion</label>
+                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripcion" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarGrupo()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+@* <style>
+    #tablaGrupos thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaGrupos th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaGrupos tbody td {
+        color: black !important;
+    }
+</style> *@
+
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        $(document).ready(function () {
+            // Destruir instancia previa si existe
+            if ($.fn.DataTable.isDataTable("#tablaGrupos")) {
+                $("#tablaGrupos").DataTable().clear().destroy();
+            }
+
+            tabladata = $("#tablaGrupos").DataTable({
+                dom: 'Bfrtip',
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarGrupos", "Mantenedor")',
+                    type: "GET",
+                    dataType: "json"
+                },
+                columns: [
+                    { data: "descripcion" }, // Columna 1: Descripción
+                    { // Columna 2: Acciones
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarGrupo">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarGrupo">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    $('#tablaGrupos thead').css({
+                        'background-color': '#1877F2',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
+                }
+            });
+
+            // Botón editar
+            $("#tablaGrupos tbody").on("click", ".btn-editarGrupo", function () {
+                filaSeleccionada = $(this).closest("tr");
+                const data = tabladata.row(filaSeleccionada).data();
+                console.log("CLICK EDITAR - row data:", data);
+                abrirModalGrupos(data);
+            });
+
+            // Botón eliminar
+            $("#tablaGrupos tbody").on("click", ".btn-eliminarGrupo", function () {
+
+                const fila = $(this).closest("tr");
+                const data = tabladata.row(fila).data();
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "¿Desea eliminar este grupo?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarGrupo", "Mantenedor")',
+                            type: "POST",
+                            data: { id: data.iD_grupo }, // Se usa iD_grupo
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila).remove().draw();
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo eliminar", "error");
+                            }
+                        });
+
+
+                    }
+                });
+            });
+        });
+
+        // Abrir modal
+        function abrirModalGrupos(json = null) {
+            // Se asume 'iD_grupo' como la propiedad del ID.
+            $("#txtid").val(json?.iD_grupo || 0);
+            $("#txtDescripcion").val(json?.descripcion || "");
+            $("#mensajeError").addClass("d-none").text("");
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalGrupos"));
+            modal.show();
+        }
+
+        // Guardar
+        function GuardarGrupo() {
+            const descripcion = $("#txtDescripcion").val().trim();
+
+            if (descripcion === "") {
+                $("#mensajeError").removeClass("d-none").text("La descripción del grupo no puede estar vacía.");
+                return; // detenemos ejecución
+            }
+
+            const Grupo = {
+                // Usamos 'iD_grupo' en minúsculas, consistente con la lectura de DataTables y la función Eliminar.
+                iD_grupo: parseInt($("#txtid").val()) || 0,
+                descripcion: descripcion,
+            };
+
+            console.log(">> GuardarGrupo() - objeto enviado:", Grupo);
+
+            $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
+
+            const url = '@Url.Action("GuardarGrupos", "Mantenedor")';
+
+            // Nota: Se ha omitido contentType y dataType JSON.stringify(Grupo) ya que en tu código original
+            // estabas enviando un objeto JavaScript plano, lo que C# interpreta como form-data.
+            // Si el controlador espera JSON, habría que volver a usar JSON.stringify y establecer 'contentType: "application/json"'.
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: Grupo, // Envía como form-data
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+
+                    if (Grupo.iD_grupo === 0) {
+                        if (data.resultado !== 0) {
+                            Grupo.iD_grupo = data.resultado;
+                            tabladata.row.add(Grupo).draw(false);
+                            bootstrap.Modal.getInstance(document.getElementById("FormModalGrupos")).hide();
+                        } else {
+                            $("#mensajeError").removeClass("d-none").text(data.mensaje);
+                        }
+                    } else {
+                        if (data.resultado) {
+                            tabladata.row(filaSeleccionada).data(Grupo).draw(false);
+                            filaSeleccionada = null;
+                            bootstrap.Modal.getInstance(document.getElementById("FormModalGrupos")).hide();
+                        } else {
+                            $("#mensajeError").removeClass("d-none").text(data.mensaje);
+                        }
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
+                }
+            });
+        }
+
+
+    </script>
+}

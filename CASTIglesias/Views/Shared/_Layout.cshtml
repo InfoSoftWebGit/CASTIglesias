@@ -1,0 +1,369 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions
+@using CapaEntidad
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - CASTIglesias</title>
+
+    <!-- ✅ Se elimina integrity para evitar error de verificación -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+    <!-- ✅ Bootstrap 5.3.8 sin integrity -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+   @*  <style>
+        /* Estilo para los enlaces de submenú */
+        .sb-sidenav-menu .nav-link.collapsed-sub-item {
+            padding-left: 2.25rem;
+        }
+
+        /* Flecha de colapso animada */
+        .nav-link-collapse-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .nav-link:not(.collapsed) .nav-link-collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* Animación sidebar */
+        body.sb-sidenav-toggled #layoutSidenav_nav {
+            transform: translateX(-250px);
+            transition: transform 0.3s ease;
+        }
+
+        #layoutSidenav_nav {
+            transition: transform 0.3s ease;
+        }
+
+        /* Evita que el dropdown de sede quede cortado */
+        .dropdown-menu-dark {
+            position: fixed !important;
+            bottom: 60px;
+        }
+    </style> *@
+</head>
+
+<body class="sb-nav-fixed">
+
+    <!-- NAV SUPERIOR -->
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <a class="navbar-brand ps-3" href="@Url.Action("Index", "Home")">
+            <span style="color: #2996db; font-weight: bold;">CASTIglesias</span>
+        </a>
+
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <ul class="navbar-nav ms-auto me-0 me-md-3 my-2 my-md-0">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="opcionesUsuario" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="opcionesUsuario">
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" href="@Url.Action("CerrarSesion", "Acceso")">Cerrar sesión</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
+                            Dashboard
+                        </a>
+
+                        @{
+                            var tieneAccesoTotal = User.IsInRole("AdminGlobal") || User.IsInRole("PastorGeneral") || User.IsInRole("PastorSede");
+                            var permisosMiembro = ViewBag.PermisosMiembro as Permisos ?? new Permisos();
+                        }
+                        <!-- BLOQUE ASISTENCIA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
+                                Congregantes
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseCongregantes" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Visitantes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Visitantes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-street-view">></i></div>
+                                            Visitantes
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Simpatizantes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Simpatizantes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-handshake"></i></div>
+                                            Simpatizantes
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Proceso)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Proceso", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-forward"></i></div>
+                                            En proceso
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Miembros", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
+                                            Miembros
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                        <!-- BLOQUE MANTENIMIENTO -->
+                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Zonas || permisosMiembro.Grupos)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMantenimiento" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                                Organización Pastoral
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseMantenimiento" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    
+                                    @if (tieneAccesoTotal || permisosMiembro.Familias)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fa fa-heart"></i></div>
+                                            Familias
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Zonas)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Zonas", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                            Zonas
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Grupos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Grupos", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+                                            Grupos
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ministerio)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Ministerios", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+                                            Ministerios
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+
+                        <!-- BLOQUE ECONOMÍA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseEconomia" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                                Finanzas
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseEconomia" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Diezmos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
+                                            Diezmos
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Conceptos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Conceptos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                            Conceptos
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+
+                        <!-- BLOQUE ASISTENCIA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Asistencia)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAsistencia" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
+                                Control
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseAsistencia" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Asistencia)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Asistencia", "Asistencia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
+                                            Asistencia
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                        @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAjustes" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
+                                Ajustes
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseAjustes" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Usuarios)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Usuarios", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fa-solid fa-handshake"></i></div>
+                                            Usuarios
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                    </div>
+                    
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    <div class="fw-bold">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
+
+                    @if (User.HasClaim("Multisede", "true") || User.IsInRole("AdminGlobal") || User.IsInRole("PastorGeneral"))
+                    {
+                        <div class="dropup mt-2">
+                            <button class="btn btn-link dropdown-toggle text-decoration-none text-white btn-sede-custom"
+                                    id="dropdownSede"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    style="padding-left: 0; padding-right: 0;">
+                                <i class="fas fa-church fa-fw me-1 text-white-50"></i>
+                                Sede: @ViewBag.NombreSedeActual
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownSede">
+                                @if (ViewBag.ListaSedes != null)
+                                {
+                                    @foreach (var sede in ViewBag.ListaSedes)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item @(sede.ID == ViewBag.SedeIDActual ? "active" : "")"
+                                               href="#"
+                                               onclick="cambiarSedeYRecargar(@sede.ID)">
+                                                @sede.nombre_sede
+                                            </a>
+                                        </li>
+                                    }
+                                }
+                                else
+                                {
+                                    <li><span class="dropdown-item disabled">No hay sedes disponibles.</span></li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </nav>
+        </div>
+
+        <div id="layoutSidenav_content" class="d-flex flex-column">
+            <main class="flex-grow-1">
+                <div class="container-fluid px-4">
+                    @RenderBody()
+                </div>
+            </main>
+
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">© Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados.</div>
+                        <div>Soporte: <a href="mailto:tlezcanobarios@gmail.com">tlezcanobarios@gmail.com</a></div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sidebar toggle
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', e => {
+                    e.preventDefault();
+                    document.body.classList.toggle('sb-sidenav-toggled');
+                });
+            }
+
+            // Expandir menú activo
+            const currentPath = window.location.pathname.toLowerCase();
+            document.querySelectorAll('.sb-sidenav-menu-nested a.nav-link').forEach(link => {
+                const linkUrl = new URL(link.href).pathname.toLowerCase();
+                if (currentPath === linkUrl || (linkUrl.endsWith('/') && currentPath.startsWith(linkUrl))) {
+                    const collapseDiv = link.closest('.collapse');
+                    if (collapseDiv) {
+                        const collapseTargetId = '#' + collapseDiv.id;
+                        $(collapseTargetId).collapse('show');
+                        const parentLink = document.querySelector('[data-bs-target="' + collapseTargetId + '"]');
+                        if (parentLink) {
+                            parentLink.classList.remove('collapsed');
+                            parentLink.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                }
+            });
+
+            // Dropdown sede estable
+            const sedeBtn = document.getElementById('dropdownSede');
+            if (sedeBtn) {
+                new bootstrap.Dropdown(sedeBtn, {
+                    popperConfig: { strategy: 'fixed' }
+                });
+            }
+        });
+
+        // Cambiar sede
+        function cambiarSedeYRecargar(nuevoSedeID) {
+            const returnUrl = window.location.pathname + window.location.search;
+            $.ajax({
+                type: "POST",
+                url: "/Home/CambiarSede",
+                data: { nuevoSedeID, returnUrl },
+                success: function (response) {
+                    if (response.success && response.redirectUrl)
+                        window.location.href = response.redirectUrl;
+                    else
+                        alert("Error al cambiar de sede: " + (response.message || "Desconocido"));
+                },
+                error: function () {
+                    alert("Error de conexión al cambiar de sede. Inténtalo de nuevo.");
+                }
+            });
+        }
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

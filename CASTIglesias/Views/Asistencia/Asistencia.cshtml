@@ -1,0 +1,305 @@
+﻿@{
+    ViewData["Title"] = "Asistencia";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}@* 
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Asistencia</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-handshake me-1"></i> Lista de Asistencias
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalAsistencia()">Añadir nueva asistencia</button>
+            </div>
+        </div>
+
+        <table id="tablaAsistencias" class="table table-bordered table-striped border-top">
+            <thead>
+                <tr>
+                    <th>Turno</th>
+                    <th>Fecha</th>
+                    <th>Total de asistidos</th>
+                    <th>Miembro a cargo</th>
+                    <th>Fecha de registro</th>
+                    <th style="width: 100px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalAsistencias" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="modalLabel">Datos de la Asistencia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtidAsistencia" type="hidden" value="0" />
+                <input id="txtID_sede" type="hidden" value="@(ViewBag.SedeIDActual ?? 0)" />
+
+                <div class="row g-2">
+                    <div class="col-sm-12">
+                        <label class="form-label">Turno del culto<span class="text-danger">*</span></label>
+                        <select class="form-select" id="cboTurno">
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noche">Noche</option>
+                            <option value="Oración">Oración</option>
+                            <option value="Especial">Especial</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label">Fecha<span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFecha" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Adultos<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="txtAdultos" min="0" value="0" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Niños<span class="text-danger">*</span></label>
+                        @* CORRECCIÓN HTML: Cambiado de txtNinos a txtNiños para la coherencia con JS *@
+                        <input type="number" class="form-control" id="txtNiños" min="0" value="0" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Nuevos<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="txtNuevos" min="0" value="0" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Invitados/Visita<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="txtInvitados" min="0" value="0" />
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label">Miembro a cargo<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Nombre del miembro que registra" />
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeErrorAsistencia" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarAsistencia()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>@* 
+<style>
+    #tablaAsistencias thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaAsistencias th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaAsistencias tbody td {
+        color: black !important;
+    }
+</style> *@
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        // CORRECCIÓN 1: Asegura que Razor renderice solo el número para evitar errores de sintaxis TS1005
+        const LOGGED_IN_SEDE_ID = @(ViewBag.SedeIDActual ?? 0);
+        const ID_ADMIN_GLOBAL = 1000;
+
+        function getFilaData(button) {
+            let tr = $(button).closest("tr");
+            let data = tabladata.row(tr).data();
+            if (!data) {
+                tr = tr.prev("tr");
+                data = tabladata.row(tr).data();
+            }
+            return { tr: tr, data: data };
+        }
+
+        $(document).ready(function () {
+            tabladata = $("#tablaAsistencias").DataTable({
+                responsive: true,
+                ordering: true,
+                ajax: {
+                    url: '@Url.Action("ListarAsistencias", "Asistencia")',
+                    type: "GET",
+                    dataType: "json",
+                    // CORRECCIÓN 2: dataSrc debe ser "data" para el formato de JSON recibido
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "turno_culto" },
+                    {
+                        data: "fecha_asistencia_culto",
+                        // Agregado formato explícito para asegurar dd/mm/aaaa
+                        render: data => data ? new Date(data).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }) : ""
+                    },
+                    {
+                        data: null,
+                        render: data => (data.adulto_asistencia_culto || 0)
+                            // CORRECCIÓN 3: Uso de 'niños_asistencia_culto' (con ñ) del modelo de datos
+                            + (data.niños_asistencia_culto || 0)
+                            + (data.nuevos_asistencia_culto || 0)
+                            + (data.invi_visit_asistencia_culto || 0)
+                    },
+                    { data: "miembro_registra_asistencia" },
+                    {
+                        data: "fecha_registro_asistencia",
+                        // Agregado formato explícito para asegurar dd/mm/aaaa
+                        render: data => data ? new Date(data).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' }) : ""
+                    },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-primary btn-sm btn-editarAsistencia"><i class="fas fa-pen"></i></button>
+                                <button class="btn btn-danger btn-sm btn-eliminarAsistencia"><i class="fas fa-trash"></i></button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+            });
+
+            $("#tablaAsistencias tbody").on("click", ".btn-editarAsistencia", function () {
+                const fila = getFilaData(this);
+                if (fila.data) abrirModalAsistencia(fila.data);
+            });
+
+            $("#tablaAsistencias tbody").on("click", ".btn-eliminarAsistencia", function () {
+                const fila = getFilaData(this);
+                if (fila.data) EliminarAsistencia(fila.data.idasistencia_culto, fila.tr);
+            });
+        });
+
+        // CORRECCIÓN 4: Uso de lógica ternaria simple y el ID del campo 'txtNiños' para evitar errores de compilación
+        function abrirModalAsistencia(json = null) {
+            $("#mensajeErrorAsistencia").addClass("d-none").text("");
+
+            if (!json && LOGGED_IN_SEDE_ID === ID_ADMIN_GLOBAL) {
+                Swal.fire("Restricción", "El Administrador Global debe seleccionar una sede.", "warning");
+                return;
+            }
+
+            $("#txtidAsistencia").val(json ? json.idasistencia_culto : 0);
+            $("#cboTurno").val(json ? json.turno_culto : "Mañana");
+
+            const fecha = (json && json.fecha_asistencia_culto) ? json.fecha_asistencia_culto.substring(0, 10) : new Date().toISOString().substring(0, 10);
+            $("#txtFecha").val(fecha);
+
+            $("#txtAdultos").val(json ? json.adulto_asistencia_culto : 0);
+            $("#txtNiños").val(json ? json.niños_asistencia_culto : 0); // Lee del campo corregido en el HTML
+            $("#txtNuevos").val(json ? json.nuevos_asistencia_culto : 0);
+            $("#txtInvitados").val(json ? json.invi_visit_asistencia_culto : 0);
+
+            $("#txtNombreMiembro").val(json ? json.miembro_registra_asistencia : "");
+
+            $("#modalLabel").text(json ? "Editar Asistencia" : "Nueva Asistencia");
+
+            $("#FormModalAsistencias").modal("show");
+        }
+
+        function GuardarAsistencia() {
+            const Asistencia = {
+                idasistencia_culto: parseInt($("#txtidAsistencia").val()),
+                ID_sede: parseInt($("#txtID_sede").val()),
+                turno_culto: $("#cboTurno").val(),
+                fecha_asistencia_culto: $("#txtFecha").val(),
+                adulto_asistencia_culto: parseInt($("#txtAdultos").val()) || 0,
+                // CORRECCIÓN 5: Usar el ID del input corregido 'txtNiños' para leer el valor
+                niños_asistencia_culto: parseInt($("#txtNiños").val()) || 0,
+                nuevos_asistencia_culto: parseInt($("#txtNuevos").val()) || 0,
+                invi_visit_asistencia_culto: parseInt($("#txtInvitados").val()) || 0,
+                miembro_registra_asistencia: $("#txtNombreMiembro").val().trim()
+            };
+
+            if (!Asistencia.turno_culto || !Asistencia.fecha_asistencia_culto) {
+                $("#mensajeErrorAsistencia").removeClass("d-none").text("El turno y la fecha son obligatorios.");
+                return;
+            }
+            if (!Asistencia.miembro_registra_asistencia) {
+                $("#mensajeErrorAsistencia").removeClass("d-none").text("Debe ingresar el nombre del miembro a cargo.");
+                return;
+            }
+
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+
+            const url = Asistencia.idasistencia_culto === 0
+                ? '@Url.Action("RegistrarAsistencia", "Asistencia")'
+                : '@Url.Action("EditarAsistencia", "Asistencia")';
+
+            const method = Asistencia.idasistencia_culto === 0 ? "POST" : "PUT";
+
+            $.ajax({
+                url,
+                type: method,
+                contentType: "application/json",
+                data: JSON.stringify(Asistencia),
+                dataType: "json",
+                success: res => {
+                    $(".modal-body").LoadingOverlay("hide");
+                    if (res.success) {
+                        tabladata.ajax.reload(null, false);
+                        $("#FormModalAsistencias").modal("hide");
+                        Swal.fire("Éxito", "Asistencia guardada correctamente.", "success");
+                    } else {
+                        $("#mensajeErrorAsistencia").removeClass("d-none").text(res.message || "Error al guardar.");
+                    }
+                },
+                error: jqXHR => {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeErrorAsistencia").removeClass("d-none").text("Error de conexión con el servidor.");
+                }
+            });
+        }
+
+        function EliminarAsistencia(idAsistencia, filaTabla) {
+            Swal.fire({
+                title: "¿Eliminar asistencia?",
+                text: `¿Desea eliminar el registro con ID ${idAsistencia}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, eliminar",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("EliminarAsistencia", "Asistencia")' + '?idAsistencia=' + idAsistencia,
+                        type: "DELETE",
+                        success: res => {
+                            if (res.success) {
+                                tabladata.row(filaTabla).remove().draw(false);
+                                Swal.fire("Eliminado", "Asistencia eliminada correctamente.", "success");
+                            } else {
+                                Swal.fire("Error", res.message || "No se pudo eliminar.", "error");
+                            }
+                        },
+                        error: () => Swal.fire("Error", "Error en la solicitud de eliminación.", "error")
+                    });
+                }
+            });
+        }
+    </script>
+}

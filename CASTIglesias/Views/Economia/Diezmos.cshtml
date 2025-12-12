@@ -1,0 +1,657 @@
+﻿@{
+    ViewData["Title"] = "Diezmos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMD/CDQ4/4R0N/S6w825JmFvC63t7K7qJ/dE0D+vI/I" crossorigin="anonymous" referrerpolicy="no-referrer" /> *@
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Diezmos</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i> Lista de Diezmos
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalDiezmos()">Añadir nuevo concepto</button>
+            </div>
+        </div>
+
+        <table id="tablaDiezmos" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Concepto</th>
+                    <th>Cantidad</th>
+                    <th>Sede</th>
+                    <th></th>@* Acciones *@
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalDiezmos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Datos del nuevo Concepto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row mb-3"> </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="" id="chkAnonimo">
+                            <label class="form-check-label" for="chkAnonimo">
+                                **Donante Anónimo**
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Número de Miembro</label>
+                        <input type="text" class="form-control" id="txtNumeroMiembro" placeholder="Ej: 198" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Fecha<span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" id="txtFecha" name="fecha" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre del miembro<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Nombre" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Apellido del miembro<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtApellidoMiembro" placeholder="Apellido" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Concepto<span class="text-danger">*</span></label>
+                        <select id="ddlConcepto" class="form-select"></select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Cantidad<span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="txtCantidad" placeholder="0.0€" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="txtSede" hidden />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarDiezmo()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>@* 
+<style>
+    #tablaDiezmos thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaDiezmos th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaDiezmos tbody td {
+        color: black !important;
+    }
+</style> *@
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        // Guarda el NUMERO DE MIEMBRO (ID visible) del miembro seleccionado. 0 si es anónimo.
+        let NUMERO_MIEMBRO_SELECCIONADO = 0;
+
+        const NOMBRE_SEDE_ACTUAL = '@ViewBag.NombreSedeActual';
+
+
+        // Función para resetear los campos del miembro y HABILITAR LA EDICIÓN
+        function resetearCamposMiembro() {
+            NUMERO_MIEMBRO_SELECCIONADO = 0; // Resetear la variable de control
+            $("#txtNumeroMiembro").val("");
+            $("#txtNombreMiembro").val("");
+            $("#txtApellidoMiembro").val("");
+
+            // Aseguramos que los campos estén HABILITADOS (SOLUCIÓN 2 & 3: Liberar campos)
+            $("#txtNombreMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+            $("#txtApellidoMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+            // SOLUCIÓN 3: Habilitar el campo Numero de Miembro
+            $("#txtNumeroMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+
+            // SOLUCIÓN 1: Asegurar que el checkbox se desmarque
+            $("#chkAnonimo").prop('checked', false);
+        }
+
+        // Función para cargar los datos del miembro seleccionado/buscado
+        function cargarDatosMiembro(miembro) {
+            // Guardamos el NUMERO_MIEMBRO (ID visible)
+            // 💡 IMPORTANTE: 'numero_miembro' es el campo visible (169, 198, etc.). 'iD_miembro' es la PK interna.
+            NUMERO_MIEMBRO_SELECCIONADO = miembro.numero_miembro;
+
+            // Rellenar los campos con los datos del miembro
+            $("#txtNumeroMiembro").val(miembro.numero_miembro);
+            $("#txtNombreMiembro").val(miembro.nombre_miembro);
+            $("#txtApellidoMiembro").val(miembro.apellidos_miembro);
+
+            // Bloquear la edición de nombre/apellido una vez cargado un miembro real
+            $("#txtNombreMiembro").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+            $("#txtApellidoMiembro").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+            // Dejamos el campo NumeroMiembro editable para corrección (SOLUCIÓN 3)
+            $("#txtNumeroMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+
+            // Desmarcar Anónimo si se carga un miembro
+            $("#chkAnonimo").prop('checked', false);
+            $("#mensajeError").addClass("d-none"); // Limpiar cualquier error
+        }
+
+        $(document).ready(function () {
+
+            $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+                // Renderiza el item en la lista desplegable del autocomplete
+                return $("<li>")
+                    .append(`<div>${item.label}</div>`) // Usa el 'label' que ya construyes
+                    .appendTo(ul);
+            };
+
+            $("#txtFecha").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', new Date());
+            obtenerConceptos();
+
+            if ($.fn.DataTable.isDataTable("#tablaDiezmos")) {
+                $("#tablaDiezmos").DataTable().clear().destroy();
+            }
+
+            tabladata = $("#tablaDiezmos").DataTable({
+                dom: 'Bfrtip',
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarDiezmos", "Economia")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    {
+                        data: "fecha_diezmo",
+                        render: function (data, type, row) {
+                            if (data) {
+                                const fecha = new Date(data);
+                                const dia = String(fecha.getDate()).padStart(2, '0');
+                                const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                                const anio = fecha.getFullYear();
+                                return `${dia}/${mes}/${anio}`;
+                            }
+                            return "";
+                        }
+                    },
+                    { data: "nombre_miembro" },
+                    { data: "apellidos_miembro" },
+                    { data: "nombre_concepto" },
+                    { data: "cantidad_diezmo" },
+                    { data: "sede" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarDiezmo">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarDiezmo">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    $('#tablaDiezmos thead').css({
+                        'background-color': '#1877F2',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
+                }
+            });
+
+            /// 🌟 IMPLEMENTACIÓN DE BÚSQUEDA por TEXTO (Nombre/Apellido) - Autocompletado
+            $("#txtNombreMiembro").autocomplete({
+                source: function (request, response) {
+                    const busqueda = request.term.trim();
+                    if (!busqueda || busqueda.length < 1 || $("#chkAnonimo").is(':checked')) {
+                        return response([]);
+                    }
+
+                    // Se envía la búsqueda al controlador
+                    $.ajax({
+                        url: '@Url.Action("BuscarMiembros", "Economia")',
+                        type: "GET",
+                        dataType: "json",
+                        // Enviamos el término de búsqueda actual
+                        data: { busqueda: busqueda },
+                        success: function (data) {
+                            if (data.data && data.data.length > 0) {
+                                response($.map(data.data, function (item) {
+                                    return {
+                                        // 💡 label: Es el texto que se MUESTRA en la lista desplegable
+                                        label: `N° ${item.numero_miembro} - ${item.nombre_miembro} ${item.apellidos_miembro}`,
+                                        // value: Es el texto que se PONE en el campo de texto (Nombre) al seleccionar
+                                        value: item.nombre_miembro,
+                                        miembro: item // El objeto completo del miembro para cargar datos
+                                    };
+                                }));
+                            } else {
+                                response([]);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error en la búsqueda de miembros:", error);
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    // Acción al seleccionar un miembro de la lista: Cargar todos los datos
+                    cargarDatosMiembro(ui.item.miembro);
+
+                    // Evitamos que jQuery Autocomplete ponga el 'label' completo en el input
+                    $("#txtNombreMiembro").val(ui.item.miembro.nombre_miembro);
+                    $("#txtApellidoMiembro").val(ui.item.miembro.apellidos_miembro);
+
+                    return false;
+                }
+            });
+
+            // 💡 IMPORTANTE: Si un miembro es seleccionado a través del Autocomplete,
+            // el campo de Número de Miembro no debería disparar su evento 'blur'
+            // porque ya cargamos los datos. Por eso lo revisamos.
+            $("#txtNumeroMiembro").on("blur", function () {
+                const busquedaID = $(this).val().trim();
+
+                if (busquedaID === "" || busquedaID === "0") {
+                    resetearCamposMiembro();
+                    // Aseguramos que la variable de control se actualice a 0
+                    NUMERO_MIEMBRO_SELECCIONADO = 0;
+                    return;
+                }
+
+                // 💡 Ajuste: Si se acaba de seleccionar un miembro (NUMERO_MIEMBRO_SELECCIONADO != 0),
+                // y el texto en el campo coincide con ese número, ignoramos el blur.
+                if (NUMERO_MIEMBRO_SELECCIONADO.toString() === busquedaID && NUMERO_MIEMBRO_SELECCIONADO !== 0) {
+                    return;
+                }
+
+                // Si está vacío, limpiamos y salimos.
+                if (busquedaID === "") {
+                    resetearCamposMiembro();
+                    return;
+                }
+
+                // Si se está editando un Anónimo (numero 0), no buscamos
+                if ($("#chkAnonimo").is(':checked')) {
+                    return;
+                }
+
+                // Si no es un número, mostramos error y salimos
+                if (isNaN(parseInt(busquedaID))) {
+                    NUMERO_MIEMBRO_SELECCIONADO = 0;
+                    $("#txtNombreMiembro").val("");
+                    $("#txtApellidoMiembro").val("");
+                    $("#mensajeError").removeClass("d-none").text(`El valor "${busquedaID}" no es un número de miembro válido.`);
+                    return;
+                }
+
+
+                $.ajax({
+                    url: '@Url.Action("BuscarMiembros", "Economia")',
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        busqueda: busquedaID, // Enviamos el número de miembro como 'busqueda'
+                        tipoBusqueda: "Numero" // 👈 INDICA QUE LA BÚSQUEDA ES POR NÚMERO
+                    },
+                    success: function (data) {
+                        const miembroEncontrado = data.data.length > 0 ? data.data[0] : null;
+
+                        if (miembroEncontrado) {
+                            cargarDatosMiembro(miembroEncontrado);
+                            $("#mensajeError").addClass("d-none"); // Limpiar cualquier error previo
+                        } else {
+                            // Limpiamos los campos de texto
+                            NUMERO_MIEMBRO_SELECCIONADO = 0;
+                            $("#txtNombreMiembro").val("");
+                            $("#txtApellidoMiembro").val("");
+                            $("#txtNumeroMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+                            $("#txtNombreMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+                            $("#txtApellidoMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
+
+                            $("#mensajeError").removeClass("d-none").text(`No se encontró un miembro con el Número de Miembro ${busquedaID}.`);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la búsqueda por ID:", error);
+                        $("#mensajeError").removeClass("d-none").text("Error al buscar el miembro por ID.");
+                    }
+                });
+            });
+
+            $("#txtApellidoMiembro").autocomplete({
+                // El 'source' es exactamente el mismo, solo que ahora el 'request.term' viene del campo Apellido.
+                source: function (request, response) {
+                    const busqueda = request.term.trim();
+                    if (!busqueda || busqueda.length < 1) {
+                        return response([]);
+                    }
+
+                    if ($("#chkAnonimo").is(':checked')) {
+                        return response([]);
+                    }
+
+                    $.ajax({
+                        url: '@Url.Action("BuscarMiembros", "Economia")',
+                        type: "GET",
+                        dataType: "json",
+                        data: { busqueda: busqueda },
+                        success: function (data) {
+                            if (data.data && data.data.length > 0) {
+                                response($.map(data.data, function (item) {
+                                    return {
+                                        label: `N° ${item.numero_miembro} - ${item.nombre_miembro} ${item.apellidos_miembro}`,
+                                        // Al seleccionar, se pone el apellido en la caja
+                                        value: item.apellidos_miembro, // 👈 CORRECCIÓN APLICADA
+                                        miembro: item
+                                    };
+                                }));
+                            } else {
+                                response([]);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error en la búsqueda de miembros:", error);
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function (event, ui) {
+                    cargarDatosMiembro(ui.item.miembro);
+
+                    // Al seleccionar de la lista, aseguramos que los campos se rellenen correctamente.
+                    $("#txtNombreMiembro").val(ui.item.miembro.nombre_miembro);
+                    $("#txtApellidoMiembro").val(ui.item.miembro.apellidos_miembro);
+
+                    return false;
+                }
+            });
+
+
+            // Eventos de DataTables para editar y eliminar
+            $("#tablaDiezmos tbody").on("click", ".btn-editarDiezmo", function () {
+                filaSeleccionada = $(this).closest("tr");
+                const data = tabladata.row(filaSeleccionada).data();
+                abrirModalDiezmos(data);
+            });
+
+            $("#tablaDiezmos tbody").on("click", ".btn-eliminarDiezmo", function () {
+                const fila = $(this).closest("tr");
+                const data = tabladata.row(fila).data();
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "¿Desea eliminar este diezmo?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarDiezmo", "Economia")',
+                            type: "POST",
+                            data: { id: data.iD_diezmo },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila).remove().draw();
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo eliminar", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 💡 SOLUCIÓN 1 & 2: Gestión del Checkbox Anónimo
+            $("#chkAnonimo").change(function() {
+                if (this.checked) {
+                    // 1. Resetear cualquier búsqueda previa/datos
+                    // Llamar a resetearCamposMiembro ANTES de bloquear garantiza que todo se limpie.
+                    resetearCamposMiembro();
+
+                    // 2. Rellenar y Bloquear para Anónimo
+                    NUMERO_MIEMBRO_SELECCIONADO = 0; // 0 o NULL para el campo numero_miembro
+                    // La siguiente línea sobrescribe el resetearCamposMiembro para poner '0' y bloquear.
+                    $("#txtNumeroMiembro").val("0").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtNombreMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtApellidoMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#mensajeError").addClass("d-none");
+                    // Aseguramos que el checkbox esté marcado
+                    $(this).prop('checked', true);
+                } else {
+                    // Limpiar y HABILITAR todo al desmarcar (SOLUCIÓN 2)
+                    resetearCamposMiembro();
+                }
+            });
+        });
+
+        function abrirModalDiezmos(json = null) {
+            // Limpiar errores previos
+            $("#mensajeError").addClass("d-none").text("");
+
+            // 🌟 1. Resetear el formulario (habilita campos de Nombre/Apellido/ID visible)
+            resetearCamposMiembro();
+
+            $("#txtid").val(json?.iD_diezmo || 0);
+
+            if (json && json.fecha_diezmo) {
+                // Modo Edición:
+                const fecha = new Date(json.fecha_diezmo);
+                $("#txtFecha").datepicker('setDate', fecha);
+
+                // Verificación robusta para el estado Anónimo
+                const esAnonimo = (json.numero_miembro === 0 || json.numero_miembro === null) && json.nombre_miembro === "Anónimo" && json.apellidos_miembro === "Anónimo";
+
+                if (esAnonimo) {
+                    // SOLUCIÓN 1: Marcar el checkbox en modo edición
+                    $("#chkAnonimo").prop('checked', true);
+
+                    // Rellenar y Bloquear para Anónimo
+                    NUMERO_MIEMBRO_SELECCIONADO = 0;
+                    $("#txtNumeroMiembro").val("0").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtNombreMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtApellidoMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                } else {
+                    // SOLUCIÓN 1: Desmarcar el checkbox si es un miembro real
+                    $("#chkAnonimo").prop('checked', false);
+
+                    // 💡 AJUSTE CLAVE: Asegurar que se use el 'numero_miembro' correcto para el campo visible.
+                    // Priorizamos el campo 'numero_miembro' (visible), si no, usamos 'iD_miembro' (PK).
+                    const numero_miembro_real = json.numero_miembro || json.iD_miembro;
+
+                    // Cargar datos del miembro real (y BLOQUEAR campos de nombre/apellido, pero NO el numero)
+                    const miembroData = {
+                        numero_miembro: numero_miembro_real, // 👈 USAMOS LA PROPIEDAD CORRECTA
+                        nombre_miembro: json.nombre_miembro,
+                        apellidos_miembro: json.apellidos_miembro
+                    };
+                    cargarDatosMiembro(miembroData);
+                }
+
+                $("#ddlConcepto").val(json.iD_concepto || "");
+                $("#txtCantidad").val(json.cantidad_diezmo || "");
+                $("#txtSede").val(json.sede || "Sede Desconocida");
+
+            } else {
+                // Modo Nuevo:
+                $("#txtFecha").datepicker('setDate', new Date());
+                $("#ddlConcepto").val("");
+                $("#txtCantidad").val("");
+                $("#txtSede").val(NOMBRE_SEDE_ACTUAL);
+                // resetearCamposMiembro() ya se encargó de HABILITAR los campos y desmarcar el checkbox.
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalDiezmos"));
+            modal.show();
+        }
+
+        function GuardarDiezmo() {
+            debugger;
+            const fechaString = $("#txtFecha").val();
+            const fechaPartes = fechaString.split("/");
+            // Formato ISO YYYY-MM-DD para el backend
+            const fechaISO = `${fechaPartes[2]}-${fechaPartes[1]}-${fechaPartes[0]}`;
+            const nombreConceptoSeleccionado = $("#ddlConcepto option:selected").text();
+
+            const Diezmo = {
+                fecha_diezmo: fechaISO,
+                iD_diezmo: parseInt($("#txtid").val()) || 0,
+                // 💡 Usamos la variable de control que tiene el NUMERO_MIEMBRO
+                numero_miembro: NUMERO_MIEMBRO_SELECCIONADO,
+                nombre_miembro: $("#txtNombreMiembro").val().trim(),
+                apellidos_miembro: $("#txtApellidoMiembro").val().trim(),
+                cantidad_diezmo: parseFloat($("#txtCantidad").val()) || 0,
+                sede: $("#txtSede").val().trim(),
+                iD_concepto: parseInt($("#ddlConcepto").val()) || 0,
+                nombre_concepto: nombreConceptoSeleccionado
+            };
+
+            // Validación: Si el miembro es 'Anónimo' o '0', no se requiere Apellido, sino que los dos deben ser Anónimo.
+            const esAnonimo = $("#chkAnonimo").is(':checked') || Diezmo.numero_miembro === 0;
+
+            // Validación: La cantidad, el concepto y el nombre (si no es anónimo) no pueden ser vacíos o cero.
+            if (Diezmo.cantidad_diezmo <= 0 || Diezmo.iD_concepto === 0) {
+                $("#mensajeError").removeClass("d-none").text("El concepto y la cantidad deben ser válidos (no cero o vacíos).");
+                return;
+            }
+
+            // Si NO es anónimo y el número de miembro es 0, significa que no se seleccionó/buscó un miembro válido.
+            if (!esAnonimo && Diezmo.numero_miembro === 0) {
+                $("#mensajeError").removeClass("d-none").text("Para un miembro no anónimo, debe seleccionar un miembro de la lista de sugerencias o usar el campo Número de Miembro.");
+                return;
+            }
+
+            // Si no se han cumplido las validaciones anteriores, es seguro proceder.
+            $("#mensajeError").addClass("d-none");
+            $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
+
+            const url = '@Url.Action("IngresarDiezmo", "Economia")';
+            console.log("Objeto a enviar:", Diezmo);
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: Diezmo,
+                dataType: "json",
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+
+                    if (data.resultado !== 0) {
+                        const nuevoDiezmo = data.objeto;
+
+                        if (nuevoDiezmo.iD_diezmo === 0) {
+                            nuevoDiezmo.iD_diezmo = data.resultado;
+                        }
+
+                        if (parseInt($("#txtid").val()) === 0) {
+                            tabladata.row.add(nuevoDiezmo).draw(false);
+                        } else {
+                            tabladata.row(filaSeleccionada).data(nuevoDiezmo).draw(false);
+                        }
+
+                        // Limpieza después de guardar
+                        $("#txtid").val("0");
+                        $("#txtFecha").datepicker('setDate', new Date());
+                        $("#ddlConcepto").val("");
+                        $("#txtCantidad").val("");
+                        $("#txtSede").val(NOMBRE_SEDE_ACTUAL);
+                        resetearCamposMiembro(); // Limpiamos los campos de miembro para el siguiente registro
+                        $("#chkAnonimo").prop('checked', false); // Aseguramos que Anónimo esté desmarcado después de guardar.
+
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalDiezmos")).hide();
+                    } else {
+                        $("#mensajeError").removeClass("d-none").text(data.mensaje);
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
+                }
+            });
+        }
+
+        function obtenerConceptos() {
+            $.ajax({
+                url: '@Url.Action("ObtenerConceptos", "Economia")',
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    if (response.data) {
+                        var ddl = $("#ddlConcepto");
+                        ddl.empty();
+                        ddl.append('<option value="">-- Seleccionar --</option>');
+
+                        $.each(response.data, function (i, item) {
+                            ddl.append($('<option>', {
+                                value: item.iD_concepto,
+                                text: item.nombre_concepto
+                            }));
+                        });
+                    } else if (response.error) {
+                        console.error("Error al cargar conceptos:", response.error);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error en la petición de conceptos:", error);
+                }
+            });
+        }
+    </script>
+}

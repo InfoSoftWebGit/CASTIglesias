@@ -1,0 +1,719 @@
+﻿@using System.Text.Json
+@{
+    ViewBag.Title = "Usuarios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // 🔑 Uso de los ViewBag del controlador
+    var loggedInSedeID = ViewBag.sedeID ?? 0;
+    var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
+}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="index.html">Resumen</a></li>
+    <li class="breadcrumb-item active">Simpatizantes</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i> Lista de simpatizantes
+    </div>
+
+    <div class="table-responsive">
+        <div class="row">
+            @* <div class="col-12 mb-2">
+                <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">Añadir nuevo miembro</button>
+            </div> *@
+        </div>
+
+        <hr />
+        <table id="tablaMiembros" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Correo electrónico</th>
+                    <th>Teléfono</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
+                    <th>Sede</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalMiembros" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del nuevo miembro</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            @*--------------APARTADO DE INFORMACIÓN BÁSICA-------------------*@
+            <div class="modal-body g-3">
+                <input id="txtid" type="hidden" value="0" />
+                <input id="txtID_sede" type="hidden" value="0" />
+
+                <h5>Información principal</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtNombres" class="form-label">Nombres</label>
+                        <input type="text" class="form-control" id="txtNombres" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtApellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="txtApellido" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtCorreo_electronico" class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="txtCorreo_electronico" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtTelefonoMovil" class="form-label">Teléfono móvil</label>
+                        <input type="number" class="form-control" id="txtTelefonoMovil" autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtTelefonoFijo" class="form-label">Teléfono fijo</label>
+                        <input type="number" class="form-control" id="txtTelefonoFijo" autocomplete="off">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtEdad" class="form-label">Edad</label>
+                        <input type="number" class="form-control" id="txtEdad" autocomplete="off">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboSexo" class="form-label">Sexo</label>
+                        <select id="cboSexo" class="form-select">
+                            <option value="" disabled selected>Selecciona un valor</option>
+                            <option value="Hombre">Hombre</option>
+                            <option value="Mujer">Mujer</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label"></label>
+                        <input type="text" class="form-control" id="txtSede" hidden />
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE INFORMACIÓN BÁSICA-------------------*@
+
+                @*--------------APARTADO DE DIRECCIONES-------------------*@
+                <hr />
+                <h5>Dirección</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtDireccion" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="txtDireccion">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboProvincia" class="form-label">Provincia</label>
+                        <select id="cboProvincia" class="form-select">
+                            <option value="0" disabled selected>Selecciona una provincia</option>
+                            @if (ViewBag.ListaProvincias != null)
+                            {
+                                foreach (var p in ViewBag.ListaProvincias)
+                                {
+                                    <option value="@p.idProvincia">@p.nombre_provincia</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboMunicipio" class="form-label">Municipio</label>
+                        <select id="cboMunicipio" class="form-select">
+                            <option value="" disabled selected>Selecciona un Municipio</option>
+                            @* Las opciones se cargan dinámicamente por JS/AJAX *@
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtCP" class="form-label">Código Postal</label>
+                        <input type="number" class="form-control" id="txtCP">
+                    </div>
+                </div>
+                <hr />
+                @*--------------FIN APARTADO DE DIRECCIONES-------------------*@
+
+                @*--------------APARTADO DE FECHAS-------------------*@
+
+                <h5>Fechas Específicas</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtFechaLlegada" class="form-label">Fecha de Llegada a la Iglesia</label>
+                        <input type="date" class="form-control" id="txtFechaLlegada">
+                    </div>
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label for="txtFechaCumpleanos" class="form-label">Fecha de Cumpleaños</label>
+                    <input type="date" class="form-control" id="txtFechaCumpleanos">
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label for="txtFechaBoda" class="form-label">Fecha de Boda</label>
+                    <input type="date" class="form-control" id="txtFechaBoda">
+                </div>
+                <div class="col-sm-4 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="checkBautizado">
+                        <label class="form-check-label" for="checkBautizado">¿Bautizado?</label>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
+                    <input type="date" class="form-control" id="txtFechaBautismo">
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
+                    <input type="text" class="form-control" id="txtLugarBautismo">
+                </div>
+                <hr />
+                @*--------------FIN APARTADO DE FECHAS-------------------*@
+                @*--------------APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
+                <div class="col-sm-6 mb-3">
+                    <label for="txtPais" class="form-label">País de nacimiento</label>
+                    <input type="text" class="form-control" id="txtPais_nacimiento">
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label for="cboEstadoCivil" class="form-label">Estado civil</label>
+                    <select id="cboEstadoCivil" class="form-select">
+                        <option value="" disabled selected>Selecciona un valor</option>
+                        <option value="Soltero/a">Soltero/a</option>
+                        <option value="Casado/a">Casado/a</option>
+                        <option value="Viudo/a">Viudo/a</option>
+                        <option value="Divorciado/a">Divorciado/a</option>
+                        <option value="Separado/a">Separado/a</option>
+                        <option value="Unión de hecho/a">Unión de hecho/a</option>
+                    </select>
+                </div>
+
+                <div class="col-sm-6 mb-3">
+                    <label for="txtPersonaCargo" class="form-label">Persona a cargo</label>
+                    <input type="text" class="form-control" id="txtPersonaCargo">
+                </div>
+
+                <div class="col-sm-6 mb-3">
+                    <label for="txtObservaciones" class="form-label">Observaciones</label>
+                    <textarea class="form-control" id="txtObservaciones" rows="3" maxlength="200"></textarea>
+                </div>
+                <label for="txtNumeroHijos" class="form-label">Número de hijos </label>
+                <input id="txtNumeroHijos" type="number" class="form-control mb-2" placeholder="Número de hijos" />
+                @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
+                @*--------------APARTADO DE PRIVACIDAD-------------------*@
+                <h5>Privacidad</h5>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chkAceptaLOPD">
+                            <label class="form-check-label" for="chkAceptaLOPD">
+                                **Acepta la Ley Orgánica de Protección de Datos (LOPD)**
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE PRIVACIDAD-------------------*@
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div id="mensajeError" class="alert alert-danger" role="alert" style="display:none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between w-100">
+
+                <div>
+                    <button type="button" class="btn btn-warning" id="btnRetrocederEstado">
+                        ⬅️ Retroceder Estado
+                    </button>
+
+                    <button type="button" class="btn btn-info text-white" id="btnAvanzarEstado">
+                        ➡️ Avanzar Estado
+                    </button>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">Guardar</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        var tabladata;
+        var filaSeleccionada;
+
+        const loggedInSedeNombre = "@ViewBag.nombre_sede";
+        const loggedInSedeID = "@ViewBag.sedeID" ? parseInt("@ViewBag.sedeID") : 0;
+
+        function formatearFecha(fechaString) {
+            if (!fechaString) return "";
+            try {
+                let date;
+                if (fechaString.indexOf("/Date(") === 0) {
+                    const millis = parseInt(fechaString.replace(/\/Date\(([0-9]+)\)\//, "$1"));
+                    date = new Date(millis);
+                } else {
+                    date = new Date(fechaString);
+                }
+
+                if (!isNaN(date.getTime())) {
+                    const offset = date.getTimezoneOffset() * 60000;
+                    const localDate = new Date(date.getTime() - offset);
+                    return localDate.toISOString().substring(0, 10);
+                }
+                return "";
+            } catch (e) {
+                console.error("Error al formatear fecha:", e);
+                return "";
+            }
+        }
+
+        $(document).ready(function () {
+            if (!$('link[href*="dataTables.bootstrap5.min.css"]').length) {
+                $('head').append('<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />');
+            }
+
+            if ($.fn.DataTable.isDataTable("#tablaMiembros")) {
+                $("#tablaMiembros").DataTable().destroy();
+            }
+
+            tabladata = $("#tablaMiembros").DataTable({
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarSimpatizantes", "Congregantes")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "nombre_miembro" },
+                    { data: "apellidos_miembro" },
+                    { data: "correo_electronico" },
+                    { data: "telefono_movil" },
+                    { data: "edad" },
+                    {
+                        data: "sexo",
+                        render: function (valor) {
+                            return valor
+                                ? '<span class="badge bg-primary">Hombre</span>'
+                                : '<span class="badge bg-warning text-dark">Mujer</span>';
+                        }
+                    },
+                    { data: "nombre_sede" },
+                    {
+                            defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarMiembro">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "140px",
+                        className: "text-center align-middle"
+                    }
+                ],
+                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+            });
+            $("#tablaMiembros tbody").on("click", ".btn-editarMiembro", function () {
+                filaSeleccionada = $(this).closest("tr");
+                var data = tabladata.row(filaSeleccionada).data();
+                abrirModalMiembros(data);
+            });
+            $("#tablaMiembros tbody").on("click", ".btn-eliminarMiembro", function () {
+                const fila = $(this).closest("tr");
+                const data = tabladata.row(fila).data();
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `Desea eliminar al miembro ${data.nombre_miembro} ${data.apellidos_miembro}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarMiembro", "Congregantes")',
+                            type: "POST",
+                            data: { id: data.iD_miembro },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila).remove().draw();
+                                    Swal.fire("Eliminado!", "El miembro ha sido eliminado.", "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo eliminar al miembro", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $("#cboProvincia").change(function() {
+                var provinciaSeleccionadaId = $(this).val();
+                if (provinciaSeleccionadaId !== "0" && provinciaSeleccionadaId !== null) {
+                    cargarMunicipios(provinciaSeleccionadaId, 0);
+                } else {
+                    $("#cboMunicipio").empty().append('<option value="0" disabled selected>Selecciona un municipio</option>').prop('disabled', true);
+                }
+            });
+        });
+
+        // ✅ ABRIR MODAL MIEMBRO
+        function abrirModalMiembros(data) {
+            $("#mensajeError").hide().text("");
+
+            if (!data) {
+                //IDENTIFICADORES
+                $("#txtid").val(0);
+                //FIN IDENTIFICADORES
+                //INFORMACIÓN BÁSICA
+                $("#txtNombres").val("");
+                $("#txtApellido").val("");
+                $("#txtCorreo_electronico").val("");
+                $("#txtTelefonoMovil").val("");
+                $("#txtTelefonoFijo").val("");
+                $("#txtEdad").val("");
+                $("#cboSexo").val("");
+                $("#txtID_sede").val(loggedInSedeID);
+                $("#txtSede").val(loggedInSedeNombre);
+                //FIN INFORMACIÓN BÁSICA
+                //DIRECCIÓN
+                $("#txtDireccion").val("");
+                $("#cboProvincia").val("0").change();
+                $("#cboMunicipio").val("0").change();
+                $("#txtCP").val("");
+                //FIN DIRECCIÓN
+                //FECHAS
+                $("#txtFechaLlegada").val("");
+                $("#txtFechaCumpleanos").val("");
+                $("#txtFechaBoda").val("");
+                $("#txtFechaBautismo").val("");
+                $("#txtLugarBautismo").val("");
+                //FIN FECHAS
+                //INFORMACIÓN ADICIONAL
+                $("#cboEstadoCivil").val("");
+                $("#txtPais_nacimiento").val("");
+                $("#checkBautizado").prop("checked", false);
+                $("#txtNumeroHijos").val(0);
+                $("#chkAceptaLOPD").prop("checked", false);
+                //FIN INFORMACIÓN ADICIONAL
+            }
+               else {
+                // IDENTIFICADORES
+                $("#txtid").val(data.iD_miembro || 0);
+                //FIN IDENTIFICADORES
+                //DATOS BÁSICOS
+                $("#txtNombres").val(data.nombre_miembro || "");
+                $("#txtApellido").val(data.apellidos_miembro || "");
+                $("#txtCorreo_electronico").val(data.correo_electronico || "");
+                $("#txtTelefonoMovil").val(data.telefono_movil || "");
+                $("#txtEdad").val(data.edad || "");
+                $("#cboSexo").val(data.sexo || "");
+                $("#txtID_sede").val(data.ID_sede || loggedInSedeID);
+                $("#txtSede").val(data.nombre_sede || loggedInSedeNombre);
+                //FIN DATOS BÁSICOS
+
+                // DIRECCIÓN
+                $("#txtDireccion").val(data.direccion || "");
+                $("#txtCP").val(data.codigo_Postal || "");
+
+                var provinciaId = data.idProvincia || 0;
+                var municipioId = data.idMunicipio || 0;
+                $("#cboProvincia").val(provinciaId.toString() || "0");
+                $("#cboProvincia").change();
+                // FIN DIRECCIÓN
+                // FECHAS
+                $("#txtFechaLlegada").val(formatearFecha(data.fecha_llegada_iglesia) || "");
+                $("#txtFechaCumpleanos").val(formatearFecha(data.fecha_cumpleanios) || "");
+                $("#txtFechaBoda").val(formatearFecha(data.fecha_boda) || "");
+                $("#txtFechaBautismo").val(formatearFecha(data.fecha_bautismo) || "");
+                // FIN FECHAS
+                // INFORMACIÓN ADICIONAL
+                $("#txtLugarBautismo").val(data.lugar_bautismo || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
+                $("#txtPais_nacimiento").val(data.pais_nacimiento || "");
+                $("#cboEstadoCivil").val(data.estado_Civil || "");
+                $("#cboEstado").val(data.estado || ""); // Añadido este campo faltante
+                //CHECK BOXES
+                $("#checkBautizado").prop("checked", data.bautizado === false);
+                $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
+                // FIN CHECK BOXES
+                $("#txtPersonaCargo").val(data.persona_cargo || "");
+                $("#txtObservaciones").val(data.observaciones || "");
+                $("#txtNumeroHijos").val(data.numero_hijos || 0);
+                // FIN INFORMACIÓN ADICIONAL
+                if (provinciaId > 0) {
+                    cargarMunicipios(provinciaId, municipioId);
+                }
+        }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalMiembros"));
+            modal.show();
+        }
+
+        // ✅ GUARDAR MIEMBRO
+        function GuardarMiembro() {
+            let miembroDTO = {
+                iD_miembro: parseInt($("#txtid").val() || 0),
+                numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
+
+                diezmo_individual: parseInt($("#txtDiezmoIndividual").val() || 0),
+                diezmo_familiar: parseInt($("#txtDiezmoFamiliar").val() || 0),
+
+                nombre_miembro: $("#txtNombres").val() || "",
+                apellidos_miembro: $("#txtApellido").val() || "",
+                correo_electronico: $("#txtCorreo_electronico").val() || "",
+
+                edad: parseInt($("#txtEdad").val() || 0),
+
+                iD_sede: parseInt($("#txtID_sede").val() || 0),
+
+                telefono_movil: parseInt($("#txtTelefonoMovil").val() || 0),
+                telefono_fijo: parseInt($("#txtTelefonoFijo").val() || 0),
+
+                sexo: $("#cboSexo").val() || "",   // <--- STRING, NO BOOLEAN
+
+                direccion: $("#txtDireccion").val() || "",
+
+                codigo_Postal: parseInt($("#txtCP").val() || 0),
+                idProvincia: parseInt($("#cboProvincia").val() || 0),
+                idMunicipio: parseInt($("#cboMunicipio").val() || 0),
+
+                pais_nacimiento: $("#txtPais_nacimiento").val() || "",
+                lugar_bautismo: $("#txtLugarBautismo").val() || "",
+
+                estado_Civil: $("#cboEstadoCivil").val() || "",
+                estado: $("#cboEstado").val() || "",
+
+                persona_cargo: $("#txtPersonaCargo").val() || "",
+
+                observaciones: $("#txtObservaciones").val() || "",
+
+                numero_hijos: parseInt($("#txtNumeroHijos").val() || 0),
+
+                alumno_VyF: $("#checkAlumno_vyf").prop("checked"),
+                curso_acabado: $("#checkCurso_acabado").prop("checked"),
+                acepta_LOPD: $("#chkAceptaLOPD").prop("checked"),
+                fallecido: $("#checkFallecido").prop("checked"),
+                excluir_directorio: $("#checkExcluir_directorio").prop("checked"),
+                bautizado: $("#checkBautizado").prop("checked"),
+
+
+
+                fecha_llegada_iglesia: $("#txtFechaLlegada").val() || null,
+                fecha_bautismo: $("#txtFechaBautismo").val() || null,
+                fecha_cumpleanios: $("#txtFechaCumpleanos").val() || null,
+                fecha_boda: $("#txtFechaBoda").val() || null,
+                fecha_baja: $("#txtFechaBaja").val() || null,
+                fecha_fallecido: $("#txtFechaFallecimiento").val() || null,
+            };
+            $.ajax({
+                url: '@Url.Action("RegistrarMiembroVisitante", "Congregantes")',
+                type: "POST",
+                data: JSON.stringify(miembroDTO),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function () {
+                    $.LoadingOverlay("show");
+                },
+                success: function (res) {
+                    $.LoadingOverlay("hide");
+                    if (res.resultado) {
+                        $("#FormModalMiembros").modal("hide");
+                        tabladata.ajax.reload(null, false);
+                        Swal.fire("Éxito", "Miembro guardado correctamente", "success");
+                    } else {
+                        $("#mensajeError").text(res.mensaje).show();
+                    }
+                },
+                error: function (err) {
+                    $.LoadingOverlay("hide");
+                    console.error("Error en GuardarMiembro:", err);
+                    Swal.fire("Error", "Ocurrió un problema al guardar el miembro.", "error");
+                }
+            });
+            };
+        // ✅ CARGAR MUNICIPIOS
+        function cargarMunicipios(idProvincia, idMunicipioSeleccionado) {
+            $("#cboMunicipio").prop('disabled', true).html('<option>Cargando...</option>');
+
+            $.ajax({
+                url: '@Url.Action("ListarMunicipiosPorProvincia", "Mantenedor")',
+                type: "GET",
+                data: { idProvincia: idProvincia },
+                success: function (res) {
+                    $("#cboMunicipio").empty().prop('disabled', false);
+                    $("#cboMunicipio").append('<option disabled selected>Selecciona un municipio</option>');
+
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(m => {
+                            $("#cboMunicipio").append(`<option value="${m.idMunicipio}">${m.nombre_municipio}</option>`);
+                        });
+                    }
+
+                    if (idMunicipioSeleccionado > 0) {
+                        $("#cboMunicipio").val(idMunicipioSeleccionado.toString());
+                    }
+                }
+            });
+        }
+
+        function configurarAutocomplete({
+            inputSelector,
+            listaSelector,
+            contenedorSeleccionadas,
+            urlBackend,
+            claseBadge,
+            asignarFuncion
+        }) {
+            $(inputSelector).on("keyup", function () {
+                let filtro = $(this).val().trim();
+
+                if (filtro.length < 2) {
+                    $(listaSelector).empty();
+                    return;
+                }
+
+                $.ajax({
+                    url: urlBackend,
+                    type: "GET",
+                    data: { nombre: filtro },
+                    success: function (resp) {
+                        if (resp.error) {
+                            console.error(resp.mensaje);
+                            return;
+                        }
+
+                        $(listaSelector).empty();
+
+                        resp.forEach(item => {
+                            const nombreSeguro = $('<div>').text(item.nombre).html();
+                            $(listaSelector).append(`
+                                <button class="list-group-item list-group-item-action"
+                                    onclick="${asignarFuncion}(${item.id}, '${nombreSeguro}')">
+                                    ${nombreSeguro}
+                                </button>
+                            `);
+                        });
+
+                    }
+                });
+            });
+        }
+                                   // ======================
+        // BOTONES DE ESTADO
+        // ======================
+        $("#btnAvanzarEstado").click(function () {
+            AvanzarEstadoMiembro();
+        });
+
+        $("#btnRetrocederEstado").click(function () {
+            RetrocederEstadoMiembro();
+        });
+
+        // ======================
+        // FUNCIONES
+        // ======================
+        function AvanzarEstadoMiembro() {
+            const idMiembro = parseInt($("#txtid").val());
+
+            if (!idMiembro || idMiembro === 0) {
+                Swal.fire("Aviso", "Primero debes guardar el miembro antes de avanzar su estado.", "warning");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Avanzar estado?",
+                text: "Esto cambiará el estado del miembro al siguiente.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Sí, avanzar",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("AvanzarEstado", "Congregantes")',
+                        type: "POST",
+                        data: { idMiembro: idMiembro },
+                        beforeSend: function () { $.LoadingOverlay("show"); },
+                        success: function (res) {
+                            $.LoadingOverlay("hide");
+                            if (res.success) {
+                                Swal.fire("Perfecto", "El estado fue avanzado.", "success");
+                                tabladata.ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        },
+                        error: function () {
+                            $.LoadingOverlay("hide");
+                            Swal.fire("Error", "No se pudo avanzar el estado.", "error");
+                        }
+                    });
+                }
+            });
+        }
+
+        function RetrocederEstadoMiembro() {
+            const idMiembro = parseInt($("#txtid").val());
+
+            if (!idMiembro || idMiembro === 0) {
+                Swal.fire("Aviso", "Primero debes guardar el miembro antes de retroceder su estado.", "warning");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Retroceder estado?",
+                text: "Esto cambiará el estado del miembro al anterior.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Sí, retroceder",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("RetrocederEstado", "Congregantes")',
+                        type: "POST",
+                        data: { idMiembro: idMiembro },
+                        beforeSend: function () { $.LoadingOverlay("show"); },
+                        success: function (res) {
+                            $.LoadingOverlay("hide");
+                            if (res.success) {
+                                Swal.fire("Perfecto", "El estado fue retrocedido.", "success");
+                                tabladata.ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        },
+                        error: function () {
+                            $.LoadingOverlay("hide");
+                            Swal.fire("Error", "No se pudo retroceder el estado.", "error");
+                        }
+                    });
+                }
+            });
+        }
+
+
+    </script>
+}

@@ -1,0 +1,280 @@
+﻿@{
+    ViewBag.Title = "Familias";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Familias</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-users me-1"></i> Lista de Familias
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalFamilias()">Añadir nueva familia</button>
+            </div>
+        </div>
+
+        <table id="tablaFamilias" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre Familia</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Dirección</th>
+                    <th>Ciudad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalFamilias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Datos de la nueva familia</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre familiar</label>
+                        <input type="text" class="form-control" id="txtNombres" placeholder="Nombre Familia" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="txtTelefono" placeholder="999555444" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Correo</label>
+                        <input type="email" class="form-control" id="txtCorreo_familia" placeholder="correo@ejemplo.com" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Ciudad</label>
+                        <input type="text" class="form-control" id="txtCiudad" placeholder="Ciudad" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarFamilia()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>@* 
+<style>
+    #tablaFamilias thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaFamilias th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaFamilias tbody td {
+        color: black !important;
+    }
+</style> *@
+
+
+---
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        $(document).ready(function () {
+            // Destruir instancia previa si existe
+            if ($.fn.DataTable.isDataTable("#tablaFamilias")) {
+                $("#tablaFamilias").DataTable().clear().destroy();
+            }
+
+            tabladata = $("#tablaFamilias").DataTable({
+                dom: 'Bfrtip',
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    // Esta URL debe devolver familias filtradas por el sedeID de la sesión
+                    url: '@Url.Action("ListarFamilias", "Mantenedor")',
+                    type: "GET",
+                    dataType: "json"
+                },
+                columns: [
+                    { data: "nombre_familia" },
+                    { data: "telefono_familia" },
+                    { data: "correo_electronico_familiar" },
+                    { data: "direccion1" },
+                    { data: "ciudad" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarFamilia">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarFamilia">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    // Color cabecera azul tipo Facebook
+                    $('#tablaFamilias thead').css({
+                        'background-color': '#1877F2',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
+                }
+            });
+
+            // Botón editar
+            $("#tablaFamilias tbody").on("click", ".btn-editarFamilia", function () {
+                filaSeleccionada = $(this).closest("tr");
+                const data = tabladata.row(filaSeleccionada).data();
+                abrirModalFamilias(data);
+            });
+
+            // Botón eliminar
+            $("#tablaFamilias tbody").on("click", ".btn-eliminarFamilia", function () {
+
+                const fila = $(this).closest("tr");
+                const data = tabladata.row(fila).data();
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: "¿Desea eliminar a esta familia?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarFamilia", "Mantenedor")',
+                            type: "POST",
+                            data: { id: data.iD_familia }, // <-- Se usa el ID correcto para la eliminación
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila).remove().draw();
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo eliminar", "error");
+                            }
+                        });
+
+                    }
+                });
+            });
+        });
+
+        // Abrir modal
+        function abrirModalFamilias(json = null) {
+            // Se asume 'iD_familia' como la propiedad del ID, basándonos en 'GuardarFamilia' y 'EliminarFamilia'.
+            $("#txtid").val(json?.iD_familia || 0);
+            $("#txtNombres").val(json?.nombre_familia || "");
+            $("#txtTelefono").val(json?.telefono_familia || "");
+            $("#txtCorreo_familia").val(json?.correo_electronico_familiar || "");
+            $("#txtDireccion").val(json?.direccion1 || "");
+            $("#txtCiudad").val(json?.ciudad || "");
+            $("#mensajeError").addClass("d-none").text("");
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalFamilias"));
+            modal.show();
+
+            console.log("Objeto que abre el modal:", json);
+            console.log("ID asignado al txtid:", $("#txtid").val());
+        }
+
+
+
+        // Guardar
+        function GuardarFamilia() {
+            const Familia = {
+                // Se usa iD_familia, el cual esperamos que esté en el modelo del controlador
+                iD_familia: parseInt($("#txtid").val()) || 0,
+                nombre_familia: $("#txtNombres").val().trim(),
+                telefono_familia: parseInt($("#txtTelefono").val()) || 0,
+                correo_electronico_familiar: $("#txtCorreo_familia").val().trim(),
+                direccion1: $("#txtDireccion").val().trim(),
+                ciudad: $("#txtCiudad").val().trim()
+            };
+
+            console.log("Objeto familia:", Familia);
+
+            $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
+
+            const url = '@Url.Action("GuardarFamilia", "Mantenedor")';
+
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: JSON.stringify(Familia),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+
+                    if (Familia.iD_familia === 0) {
+                        if (data.resultado !== 0) {
+                            Familia.iD_familia = data.resultado;
+                            tabladata.row.add(Familia).draw(false);
+                            bootstrap.Modal.getInstance(document.getElementById("FormModalFamilias")).hide();
+                        } else {
+                            $("#mensajeError").removeClass("d-none").text(data.mensaje);
+                        }
+                    } else {
+                        if (data.resultado) {
+                            tabladata.row(filaSeleccionada).data(Familia).draw(false);
+                            filaSeleccionada = null;
+                            bootstrap.Modal.getInstance(document.getElementById("FormModalFamilias")).hide();
+                        } else {
+                            $("#mensajeError").removeClass("d-none").text(data.mensaje);
+                        }
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
+                }
+            })
+        }
+    </script>
+}

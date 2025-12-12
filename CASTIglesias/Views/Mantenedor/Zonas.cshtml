@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "Zonas";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Zonas</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-sitemap me-1"></i> Lista de Zonas
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalZonas()">Añadir nueva Zona</button>
+            </div>
+        </div>
+
+        <table id="tablaZonas" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre Zona</th>
+                    <th>Nombre del líder</th>
+                    <th>Descripción</th>
+                    <th style="width: 100px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalZonas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Datos de la Zona</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre Zona</label>
+                        <input type="text" class="form-control" id="txtNombreZona" placeholder="Nombre Zona" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre del líder</label>
+                        <input type="text" class="form-control" id="txtNombreLider" placeholder="Nombre Líder" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripción" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarZona()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* <style>
+    #tablaZonas thead {
+        background-color: #1877F2 !important;
+    }
+
+    #tablaZonas th {
+        color: white !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+    }
+
+    #tablaZonas tbody td {
+        color: black !important;
+    }
+</style> *@
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        let tabladata;
+        let filaSeleccionada;
+
+        // Función auxiliar para obtener datos de la fila (maneja DataTables responsive)
+        function getFilaData(button) {
+            var tr = $(button).closest("tr");
+            var data = tabladata.row(tr).data();
+            if (!data) {
+                // Manejar el modo responsive de DataTables
+                tr = tr.prev("tr");
+                data = tabladata.row(tr).data();
+            }
+            return { tr: tr, data: data };
+        }
+
+
+        $(document).ready(function () {
+            // Inicialización de DataTables
+            tabladata = $("#tablaZonas").DataTable({
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarZonas", "Mantenedor")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "nombre_zona" },
+                    { data: "nombre_lider" },
+                    { data: "descripcion" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarZona">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarZona">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                }
+            });
+
+            // Evento para Editar
+            $("#tablaZonas tbody").on("click", ".btn-editarZona", function () {
+                const fila = getFilaData(this);
+                if (fila.data) {
+                    filaSeleccionada = fila.tr;
+                    abrirModalZonas(fila.data);
+                }
+            });
+
+            // Evento para Eliminar
+            $("#tablaZonas tbody").on("click", ".btn-eliminarZona", function () {
+                const fila = getFilaData(this);
+                if (!fila.data) return;
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `¿Desea eliminar la Zona: ${fila.data.nombre_zona}?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarZona", "Mantenedor")',
+                            type: "POST",
+                            // 🔑 CORRECCIÓN: Usamos la propiedad que viene en el JSON para el post.
+                            data: { id: fila.data.iD_zona },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila.tr).remove().draw(false);
+                                    Swal.fire("Eliminada", "La Zona fue eliminada correctamente.", "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje || "No se pudo eliminar la Zona.", "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "Error en la solicitud de eliminación.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        // Abrir modal
+        function abrirModalZonas(json = null) {
+            $("#mensajeError").addClass("d-none").text(""); // Limpia y oculta errores
+
+            if (json) {
+                // Modo Edición
+                $("#txtid").val(json.iD_zona);
+                $("#txtNombreZona").val(json.nombre_zona);
+                $("#txtNombreLider").val(json.nombre_lider);
+                $("#txtDescripcion").val(json.descripcion);
+                $("#exampleModalLabel").text("Editar Zona");
+            } else {
+                // Modo Nuevo Registro
+                $("#txtid").val(0);
+                $("#txtNombreZona").val("");
+                $("#txtNombreLider").val("");
+                $("#txtDescripcion").val("");
+                $("#exampleModalLabel").text("Datos de la nueva Zona");
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalZonas"));
+            modal.show();
+        }
+
+
+        // Guardar
+        function GuardarZona() {
+            const Zona = {
+                // 🔑 Usamos iD_zona para ser consistentes al enviar el objeto
+                iD_zona: parseInt($("#txtid").val()) || 0,
+                nombre_zona: $("#txtNombreZona").val().trim(),
+                nombre_lider: $("#txtNombreLider").val().trim(),
+                descripcion: $("#txtDescripcion").val().trim()
+            };
+
+            if (Zona.nombre_zona === "" || Zona.nombre_lider === "") {
+                $("#mensajeError").removeClass("d-none").text("Nombre de zona y líder no pueden ser vacíos.");
+                return;
+            }
+
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+
+            const url = '@Url.Action("GuardarZona", "Mantenedor")';
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: Zona,
+                dataType: "json",
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").addClass("d-none");
+
+                    if (data.resultado !== 0) {
+                        // Edición
+                        if (Zona.iD_zona > 0) {
+                            tabladata.row(filaSeleccionada).data(Zona).draw(false);
+                            filaSeleccionada = null;
+                        } else {
+                            // Creación (resultado es el nuevo ID)
+                            Zona.iD_zona = data.resultado;
+                            tabladata.row.add(Zona).draw(false);
+                        }
+
+                        // Oculta el modal y limpia el ID
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalZonas")).hide();
+                        $("#txtid").val("0");
+                    } else {
+                        $("#mensajeError").removeClass("d-none").text(data.mensaje || "Error al guardar la Zona.");
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX al guardar.");
+                }
+            });
+        }
+    </script>
+}
