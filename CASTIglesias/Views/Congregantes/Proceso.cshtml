@@ -362,7 +362,7 @@
 
                 <div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">Guardar</button>
+                    <button type="button" id="btnGuardarZGM" class="btn btn-primary" onclick="GuardarZGM()">Guardar</button>
                 </div>
 
             </div>
@@ -965,7 +965,7 @@
             }
         });
 
-        $("#btnGuardarZGM").click(function () {
+        function GuardarZGM() {
             const idMiembro = $("#txtid").val();
             let idZona = 0, idGrupo = 0, idMinisterio = 0;
             const listaZGM = [];
@@ -1007,7 +1007,7 @@
                     Swal.fire("Error", "No se pudo guardar la información.", "error");
                 }
             });
-        });
+        };
 
         function configurarAutocomplete({
             inputSelector,
@@ -1203,7 +1203,5 @@
                 }
             });
         }
-
-
     </script>
 }

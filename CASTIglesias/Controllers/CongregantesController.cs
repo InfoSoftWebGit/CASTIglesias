@@ -13,6 +13,7 @@ namespace CASTIglesias.Controllers
         CN_Grupos cnGrupos,
         CN_Sedes cnSedes,
         CN_Provincia cnProvincia,
+        CN_Ministerio cnMinisterio,
         CN_Municipio cnMunicipio,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
@@ -21,7 +22,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Provincia _cnProvincias = cnProvincia;
         private readonly CN_Municipio _cnMunicipios = cnMunicipio;
         private readonly CN_Grupos _cnGrupos = cnGrupos;
-        private readonly CN_Ministerio _cnMinisterio;
+        private readonly CN_Ministerio _cnMinisterio = cnMinisterio;
         private readonly CN_Familias _cnFamilias = cnFamilias;
         private readonly CN_Zonas _cnZonas = cnZonas;
         private readonly CN_Sedes _cnSedes = cnSedes;

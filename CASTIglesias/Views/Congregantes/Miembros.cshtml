@@ -276,9 +276,23 @@
                     <div id="mensajeError" class="alert alert-danger" role="alert" style="display:none;"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">Guardar</button>
+            <div class="modal-footer d-flex justify-content-between w-100">
+
+                <div>
+                    <button type="button" class="btn btn-warning" id="btnRetrocederEstado">
+                        ⬅️ Retroceder Estado
+                    </button>
+
+                    <button type="button" class="btn btn-info text-white" id="btnAvanzarEstado">
+                        ➡️ Avanzar Estado
+                    </button>
+                </div>
+
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">Guardar</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1089,6 +1103,55 @@
         });
         function asignarMinisterio(id, nombre) {
             agregarElementoSeleccionado(id, nombre, "#ministeriosSeleccionados", "bg-warning text-dark");
+        }
+                    // ======================
+        // BOTONES DE ESTADO
+        // ======================
+        $("#btnRetrocederEstado").click(function () {
+            RetrocederEstadoMiembro();
+        });
+
+        // ======================
+        // FUNCIONES
+        // ======================
+        function RetrocederEstadoMiembro() {
+            const idMiembro = parseInt($("#txtid").val());
+
+            if (!idMiembro || idMiembro === 0) {
+                Swal.fire("Aviso", "Primero debes guardar el miembro antes de retroceder su estado.", "warning");
+                return;
+            }
+
+            Swal.fire({
+                title: "¿Retroceder estado?",
+                text: "Esto cambiará el estado del miembro al anterior.",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Sí, retroceder",
+                cancelButtonText: "Cancelar"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("RetrocederEstado", "Congregantes")',
+                        type: "POST",
+                        data: { idMiembro: idMiembro },
+                        beforeSend: function () { $.LoadingOverlay("show"); },
+                        success: function (res) {
+                            $.LoadingOverlay("hide");
+                            if (res.success) {
+                                Swal.fire("Perfecto", "El estado fue retrocedido.", "success");
+                                tabladata.ajax.reload(null, false);
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        },
+                        error: function () {
+                            $.LoadingOverlay("hide");
+                            Swal.fire("Error", "No se pudo retroceder el estado.", "error");
+                        }
+                    });
+                }
+            });
         }
     </script>
 }
