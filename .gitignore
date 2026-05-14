@@ -6,6 +6,10 @@
 ## Ignore appsettings
 appsettings*.json
 
+# data ignore
+*.csv
+*.xlsx
+
 
 # User-specific files
 *.rsuser
