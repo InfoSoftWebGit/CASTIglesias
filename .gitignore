@@ -10,7 +10,7 @@ appsettings*.json
 *.csv
 *.xlsx
 *.txt
-
+*.ps1
 
 # User-specific files
 *.rsuser
