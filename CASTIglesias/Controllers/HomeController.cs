@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 
 namespace CASTIglesias.Controllers
 {
-    // 1. 🌟 Heredar de BaseController (Correcto)
     [Authorize]
     public class HomeController : BaseController
     {

@@ -33,19 +33,19 @@ namespace CapaNegocio
         public int RegistrarMiembro(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
 
             var errores = new List<string>();
 
-            if (obj.Numero_miembro <= 0)
+            if (obj.numero_miembro <= 0)
                 errores.Add("El número del miembro no puede ser 0 o menor.");
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.Apellidos_miembro))
+            if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.Correo_electronico))
+            if (string.IsNullOrWhiteSpace(obj.correo_electronico))
                 errores.Add("El correo del miembro no puede ser vacío.");
-            if (obj.Telefono_movil == null)
+            if (string.IsNullOrWhiteSpace(obj.telefono_movil))
                 errores.Add("El teléfono móvil del miembro no puede ser vacío.");
 
             if (errores.Any())
@@ -67,19 +67,19 @@ namespace CapaNegocio
         public bool EditarMiembro(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
 
             var errores = new List<string>();
 
-            if (obj.Numero_miembro <= 0)
+            if (obj.numero_miembro <= 0)
                 errores.Add("El número del miembro no puede ser 0 o menor.");
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.Apellidos_miembro))
+            if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.Correo_electronico))
+            if (string.IsNullOrWhiteSpace(obj.correo_electronico))
                 errores.Add("El correo del miembro no puede ser vacío.");
-            if (obj.Telefono_movil == null)
+            if (string.IsNullOrWhiteSpace(obj.telefono_movil))
                 errores.Add("El teléfono móvil del miembro no puede ser vacío.");
 
             // Si hay errores, enviarlos y no continuar
@@ -214,11 +214,11 @@ namespace CapaNegocio
         public int RegistrarMiembroVisitante(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
 
             var errores = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
 
             if (errores.Any())
@@ -233,10 +233,10 @@ namespace CapaNegocio
         public bool EditarMiembroVisitante(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
 
             var errores = new List<string>();
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
 
             // Si hay errores, enviarlos y no continuar
@@ -262,9 +262,9 @@ namespace CapaNegocio
         public bool EditarMiembroSimpatizante(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
             var errores = new List<string>();
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
             // Si hay errores, enviarlos y no continuar
             if (errores.Any())
@@ -287,9 +287,9 @@ namespace CapaNegocio
         public bool EditarMiembroProceso(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
-            obj.ID_sede = sedeID;
+            obj.id_sede = sedeID;
             var errores = new List<string>();
-            if (string.IsNullOrWhiteSpace(obj.Nombre_miembro))
+            if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
             // Si hay errores, enviarlos y no continuar
             if (errores.Any())

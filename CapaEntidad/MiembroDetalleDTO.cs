@@ -32,17 +32,16 @@ namespace CapaEntidad
         [Column("Edad")]
         public int? edad { get; set; }
         [Column("EsLider")]
-        public string esLider{get;set;} = string.Empty;
+        public string? esLider { get; set; }
 
-        public string responsable {get;set;} = string.Empty;
         [Column("Sexo")]
         public string? sexo { get; set; } = string.Empty;
 
         [Column("Telefono_fijo")]
-        public int? telefono_fijo { get; set; }
+        public string? telefono_fijo { get; set; }
 
         [Column("Telefono_movil")]
-        public int? telefono_movil { get; set; }
+        public string? telefono_movil { get; set; }
 
         [JsonPropertyName("correo_electronico")]
         public string? correo_electronico { get; set; }
@@ -51,7 +50,7 @@ namespace CapaEntidad
         public string? direccion { get; set; }
 
         [Column("CP")]
-        public int? codigo_Postal { get; set; }
+        public string? codigo_Postal { get; set; }
 
         [Column("idProvincia")]
         public int? idProvincia { get; set; }
@@ -72,7 +71,7 @@ namespace CapaEntidad
         public bool? combinar_diezmo { get; set; } = false;
 
         [Column("Notas")]
-        public string notas {get;set;} = string.Empty;
+        public string? notas { get; set; }
 
         [Column("Excluir_directorio")]
         public bool? excluir_directorio { get; set; }
@@ -108,8 +107,8 @@ namespace CapaEntidad
         [Column("Fallecido")]
         public bool? fallecido { get; set; } = false;
 
-        [Column("Persona_cargo")]
-        public string? persona_cargo { get; set; }
+        [Column("Responsable")]
+        public string? responsable { get; set; }
 
         [Column("Acepta_LOPD")]
         public bool? acepta_LOPD { get; set; } = false;
@@ -121,16 +120,16 @@ namespace CapaEntidad
         public int? id_role { get; set; }
 
         [Column("Estado")]
-        public string? Estado { get; set; }
+        public string? estado { get; set; }
         
         [Column("Numero_hijos")]
         public int? numero_hijos { get; set; }
 
         [Column("Grupo_familiar")]
-        public string grupo_familiar {get;set;} = string.Empty;
+        public string? grupo_familiar { get; set; }
 
         [Column("Relacion_con")]
-        public string relacion_con {get;set;} = string.Empty;
+        public string? relacion_con { get; set; }
         public string nombre_Provincia { get; set; } = string.Empty;
         public string nombre_Municipio { get; set; } = string.Empty;
         public string nombre_sede { get; set; } = string.Empty;

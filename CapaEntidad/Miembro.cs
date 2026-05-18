@@ -8,40 +8,42 @@ namespace CapaEntidad
     public class Miembro
     {
         [Key]
-        public int ID_miembro { get; set; }
+        public int id_miembro { get; set; }
 
-        public int? Diezmo_individual { get; set; }
-        public int? Diezmo_familiar { get; set; }
+        public int? diezmo_individual { get; set; }
+        public int? diezmo_familiar { get; set; }
 
         [Column("Numero_miembro")]
-        public int Numero_miembro { get; set; }
+        public int numero_miembro { get; set; }
 
         [Column("Nombre_miembro")]
-        public string? Nombre_miembro { get; set; }
+        public string? nombre_miembro { get; set; }
 
         [Column("Apellidos_miembro")]
-        public string? Apellidos_miembro { get; set; }
+        public string? apellidos_miembro { get; set; }
 
         [Column("Edad")]
-        public int? Edad { get; set; }
+        public int? edad { get; set; }
+        [Column("EsLider")]
+        public string? esLider { get; set; }
 
         [Column("Sexo")]
         public string? sexo { get; set; } = string.Empty;
 
         [Column("Telefono_fijo")]
-        public int? Telefono_fijo { get; set; }
+        public string? telefono_fijo { get; set; }
 
         [Column("Telefono_movil")]
-        public int? Telefono_movil { get; set; }
+        public string? telefono_movil { get; set; }
 
         [JsonPropertyName("correo_electronico")]
-        public string? Correo_electronico { get; set; }
+        public string? correo_electronico { get; set; }
 
         [Column("Direccion")]
-        public string? Direccion { get; set; }
+        public string? direccion { get; set; }
 
         [Column("CP")]
-        public int? codigo_Postal { get; set; }
+        public string? codigo_Postal { get; set; }
 
         [Column("idProvincia")]
         public int? idProvincia { get; set; }
@@ -50,13 +52,13 @@ namespace CapaEntidad
         public int? idMunicipio { get; set; }
 
         [Column("ID_sede")]
-        public int ID_sede { get; set; }
+        public int id_sede { get; set; }
 
         [Column("Pais_nacimiento")]
         public string? pais_nacimiento { get; set; } = string.Empty;
 
         [Column("Estado")]
-        public string? Estado { get; set; } = string.Empty;
+        public string? estado { get; set; } = string.Empty;
 
         [Column("Estado_Civil")]
         public string? estado_Civil { get; set; }
@@ -70,12 +72,12 @@ namespace CapaEntidad
         public DateTime? fecha_llegada_iglesia { get; set; }
 
         [Column("Bautizado")]
-        public bool? Bautizado { get; set; } = false;
+        public bool? bautizado { get; set; } = false;
 
         public DateTime? fecha_bautismo { get; set; }
 
         [Column("Lugar_bautismo")]
-        public string? Lugar_bautismo { get; set; } = string.Empty;
+        public string? lugar_bautismo { get; set; } = string.Empty;
 
         public DateTime? fecha_cumpleanios { get; set; }
 
@@ -84,7 +86,7 @@ namespace CapaEntidad
         public DateTime? fecha_baja { get; set; }
 
         [Column("Fecha_fallecido")]
-        public DateTime? Fecha_fallecido { get; set; }
+        public DateTime? fecha_fallecido { get; set; }
 
         [Column("Observaciones")]
         public string? observaciones { get; set; }
@@ -96,20 +98,25 @@ namespace CapaEntidad
         public bool? curso_acabado { get; set; } = false;
 
         [Column("Fallecido")]
-        public bool? Fallecido { get; set; } = false;
+        public bool? fallecido { get; set; } = false;
 
-        [Column("Persona_cargo")]
-        public string? persona_cargo { get; set; }
+        [Column("Responsable")]
+        public string? responsable { get; set; }
 
         [Column("Acepta_LOPD")]
         public bool? acepta_LOPD { get; set; } = false;
 
         [Column("ID_usuario")]
-        public int? ID_usuario { get; set; }
+        public int? id_usuario { get; set; }
 
         [Column("ID_role")]
-        public int? ID_role { get; set; }
+        public int? id_role { get; set; }
         [Column("Numero_hijos")]
-        public int? Numero_hijos { get; set; }
+        public int? numero_hijos { get; set; }
+        [Column("Grupo_familiar")]
+        public string? grupo_familiar { get; set; }
+
+        [Column("Relacion_con")]
+        public string? relacion_con { get; set; }
     }
 }

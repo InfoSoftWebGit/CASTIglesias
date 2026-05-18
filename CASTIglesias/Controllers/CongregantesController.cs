@@ -65,7 +65,7 @@ namespace CASTIglesias.Controllers
 
                 var data = oListaMiembros.Select(m =>
                 {
-                    m.nombre_sede = sedesMap.GetValueOrDefault(m.ID_sede, SedeDesconocida);
+                    m.nombre_sede = sedesMap.GetValueOrDefault(m.id_sede, SedeDesconocida);
                     return m;
                 });
                 return Json(new { data = data });
@@ -90,12 +90,12 @@ namespace CASTIglesias.Controllers
                     return Json(new { resultado = 0, mensaje = "Los datos del miembro son inválidos." });
 
                 // Asignamos sede desde backend
-                data.ID_sede = sedeID;
+                data.id_sede = sedeID;
 
                 string mensaje;
                 object resultado;
 
-                if (data.ID_miembro == 0)
+                if (data.id_miembro == 0)
                 {
                     // Crear nuevo miembro
                     resultado = _cnMiembros.RegistrarMiembro(data, sedeID, out mensaje);
@@ -323,7 +323,7 @@ namespace CASTIglesias.Controllers
 
                 var data = oListaMiembros.Select(m =>
                 {
-                    m.nombre_sede = sedesMap.GetValueOrDefault(m.ID_sede, SedeDesconocida);
+                    m.nombre_sede = sedesMap.GetValueOrDefault(m.id_sede, SedeDesconocida);
                     return m;
                 });
                 return Json(new { data = data });
@@ -349,12 +349,12 @@ namespace CASTIglesias.Controllers
                     return Json(new { resultado = 0, mensaje = "Los datos del miembro son inválidos." });
 
                 // Asignamos sede desde backend
-                data.ID_sede = sedeID;
+                data.id_sede = sedeID;
 
                 string mensaje;
                 object resultado;
 
-                if (data.ID_miembro == 0)
+                if (data.id_miembro == 0)
                 {
                     // Crear nuevo miembro
                     resultado = _cnMiembros.RegistrarMiembroVisitante(data, sedeID, out mensaje);
@@ -409,7 +409,7 @@ namespace CASTIglesias.Controllers
 
                 var data = oListaMiembros.Select(m =>
                 {
-                    m.nombre_sede = sedesMap.GetValueOrDefault(m.ID_sede, SedeDesconocida);
+                    m.nombre_sede = sedesMap.GetValueOrDefault(m.id_sede, SedeDesconocida);
                     return m;
                 });
                 return Json(new { data = data });
@@ -436,12 +436,12 @@ namespace CASTIglesias.Controllers
                     return Json(new { resultado = 0, mensaje = "Los datos del miembro son inválidos." });
 
                 // Asignamos sede desde backend
-                data.ID_sede = sedeID;
+                data.id_sede = sedeID;
 
                 string mensaje;
                 bool resultado = false;
 
-                if (data.ID_miembro > 0)
+                if (data.id_miembro > 0)
                 {
                     // ✅ Llamar al método de la capa de negocio
                     resultado = _cnMiembros.EditarMiembroSimpatizante(data, sedeID, out mensaje);
@@ -494,7 +494,7 @@ namespace CASTIglesias.Controllers
 
                 var data = oListaMiembros.Select(m =>
                 {
-                    m.nombre_sede = sedesMap.GetValueOrDefault(m.ID_sede, SedeDesconocida);
+                    m.nombre_sede = sedesMap.GetValueOrDefault(m.id_sede, SedeDesconocida);
                     return m;
                 });
                 return Json(new { data = data });
@@ -520,12 +520,12 @@ namespace CASTIglesias.Controllers
                     return Json(new { resultado = 0, mensaje = "Los datos del miembro son inválidos." });
 
                 // Asignamos sede desde backend
-                data.ID_sede = sedeID;
+                data.id_sede = sedeID;
 
                 string mensaje;
                 bool resultado = false;
 
-                if (data.ID_miembro > 0)
+                if (data.id_miembro > 0)
                 {
                     // ✅ Llamar al método de la capa de negocio
                     resultado = _cnMiembros.EditarMiembroProceso(data, sedeID, out mensaje);

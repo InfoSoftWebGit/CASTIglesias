@@ -28,10 +28,10 @@ namespace CapaDatos
             {
                 var consultaMiembros = _context.Miembros
                  .AsQueryable()
-                 .Where(m => m.Estado == "Miembro");
+                 .Where(m => m.estado == "Miembro");
                 if (sedeID != 1000)
                 {
-                    consultaMiembros = consultaMiembros.Where(m => m.ID_sede == sedeID);
+                    consultaMiembros = consultaMiembros.Where(m => m.id_sede == sedeID);
                 }
 
                     var miembrosConUbicacion = (
@@ -43,46 +43,49 @@ namespace CapaDatos
 
                             select new MiembroDetalleDTO
                             {
-                                ID_miembro = m.ID_miembro,
-                                Diezmo_individual = m.Diezmo_individual,
-                                Diezmo_familiar = m.Diezmo_familiar,
-                                Numero_miembro = m.Numero_miembro,
-                                Nombre_miembro = m.Nombre_miembro,
-                                Apellidos_miembro = m.Apellidos_miembro,
-                                Edad = m.Edad,
+                                id_miembro = m.id_miembro,
+                                diezmo_individual = m.diezmo_individual,
+                                diezmo_familiar = m.diezmo_familiar,
+                                numero_miembro = m.numero_miembro,
+                                nombre_miembro = m.nombre_miembro,
+                                apellidos_miembro = m.apellidos_miembro,
+                                edad = m.edad,
+                                esLider = m.esLider,
                                 sexo = m.sexo,
-                                Telefono_fijo = m.Telefono_fijo,
-                                Telefono_movil = m.Telefono_movil,
-                                Correo_electronico = m.Correo_electronico,
-                                Direccion = m.Direccion,
+                                telefono_fijo = m.telefono_fijo,
+                                telefono_movil = m.telefono_movil,
+                                correo_electronico = m.correo_electronico,
+                                direccion = m.direccion,
                                 codigo_Postal = m.codigo_Postal,
                                 idProvincia = m.idProvincia,
                                 idMunicipio = m.idMunicipio,
-                                ID_sede = m.ID_sede,
-                                Estado = m.Estado,
+                                id_sede = m.id_sede,
+                                estado = m.estado,
                                 pais_nacimiento = m.pais_nacimiento,
                                 estado_Civil = m.estado_Civil,
                                 combinar_diezmo = m.combinar_diezmo,
                                 excluir_directorio = m.excluir_directorio,
                                 fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                                 fecha_baja = m.fecha_baja,
-                                Bautizado = m.Bautizado,
+                                bautizado = m.bautizado,
                                 fecha_bautismo = m.fecha_bautismo,
-                                Lugar_bautismo = m.Lugar_bautismo,
+                                lugar_bautismo = m.lugar_bautismo,
                                 fecha_cumpleanios = m.fecha_cumpleanios,
-                                Fecha_fallecido = m.Fecha_fallecido,
+                                fecha_fallecido = m.fecha_fallecido,
                                 fecha_boda = m.fecha_boda,
                                 acepta_LOPD = m.acepta_LOPD,
                                 observaciones = m.observaciones,
-                                Numero_hijos = m.Numero_hijos,
+                                numero_hijos = m.numero_hijos,
                                 alumno_VyF = m.alumno_VyF,
                                 curso_acabado = m.curso_acabado,
-                                persona_cargo = m.persona_cargo,
-                                ID_role = m.ID_role,
-                                ID_usuario = m.ID_usuario,
+                                responsable = m.responsable,
+                                id_role = m.id_role,
+                                id_usuario = m.id_usuario,
+                                relacion_con = m.relacion_con,
+                                grupo_familiar = m.grupo_familiar,
 
-                                Nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
-                                Nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
+                                nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
+                                nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
 
                                 // Inicializar campo calculado (se rellena en el Controller)
                                 nombre_sede = string.Empty
@@ -109,7 +112,7 @@ namespace CapaDatos
 
                 if (sedeID != 1000)
                 {
-                    consultaBase = consultaBase.Where(m => m.ID_sede == sedeID);
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
                 }
 
                 return consultaBase.Count();
@@ -135,13 +138,13 @@ namespace CapaDatos
             try
             {
                 // Validaciones
-                if (_context.Miembros.Any(m => m.Correo_electronico == obj.Correo_electronico && m.ID_sede == obj.ID_sede))
+                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico && m.id_sede == obj.id_sede))
                 {
                     mensaje = "El correo ya existe en esta sede.";
                     return 0;
                 }
 
-                if (_context.Miembros.Any(m => m.Numero_miembro == obj.Numero_miembro && m.ID_sede == obj.ID_sede))
+                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro en esta sede.";
                     return 0;
@@ -149,48 +152,50 @@ namespace CapaDatos
 
                 Miembro nuevoMiembro;
 
-                if (obj.ID_miembro == 0)
+                if (obj.id_miembro == 0)
                 {
                     // Crear nuevo miembro
+
                     nuevoMiembro = new Miembro
                     {
-                        Numero_miembro = obj.Numero_miembro,
-                        Nombre_miembro = obj.Nombre_miembro,
-                        Apellidos_miembro = obj.Apellidos_miembro,
-                        Edad = obj.Edad,
+                        numero_miembro = obj.numero_miembro,
+                        nombre_miembro = obj.nombre_miembro,
+                        apellidos_miembro = obj.apellidos_miembro,
+                        edad = obj.edad,
+                        esLider = obj.esLider,
                         sexo = obj.sexo,
-                        Telefono_fijo = obj.Telefono_fijo,
-                        Telefono_movil = obj.Telefono_movil,
-                        Correo_electronico = obj.Correo_electronico,
-                        Direccion = obj.Direccion,
+                        telefono_fijo = obj.telefono_fijo,
+                        telefono_movil = obj.telefono_movil,
+                        correo_electronico = obj.correo_electronico,
+                        direccion = obj.direccion,
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
-                        ID_sede = obj.ID_sede,
+                        id_sede = obj.id_sede,
                         pais_nacimiento = obj.pais_nacimiento,
                         estado_Civil = obj.estado_Civil,
                         combinar_diezmo = obj.combinar_diezmo,
                         excluir_directorio = obj.excluir_directorio,
                         fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
-                        Bautizado = obj.Bautizado,
+                        bautizado = obj.bautizado,
                         fecha_bautismo = obj.fecha_bautismo,
-                        Lugar_bautismo = obj.Lugar_bautismo,
+                        lugar_bautismo = obj.lugar_bautismo,
                         fecha_cumpleanios = obj.fecha_cumpleanios,
                         fecha_boda = obj.fecha_boda,
                         fecha_baja = obj.fecha_baja,
-                        Fecha_fallecido = obj.Fecha_fallecido,
+                        fecha_fallecido = obj.fecha_fallecido,
                         observaciones = obj.observaciones,
-                        persona_cargo = obj.persona_cargo,
+                        responsable = obj.responsable,
                         alumno_VyF = obj.alumno_VyF,
                         curso_acabado = obj.curso_acabado,
                         acepta_LOPD = obj.acepta_LOPD,
-                        Estado = obj.Estado,
-                        Fallecido = obj.Fallecido,
-                        Diezmo_individual = obj.Diezmo_individual,
-                        Diezmo_familiar = obj.Diezmo_familiar,
-                        ID_usuario = obj.ID_usuario,
-                        ID_role = obj.ID_role,
-                        Numero_hijos = obj.Numero_hijos
+                        estado = obj.estado,
+                        fallecido = obj.fallecido,
+                        diezmo_individual = obj.diezmo_individual,
+                        diezmo_familiar = obj.diezmo_familiar,
+                        id_usuario = obj.id_usuario,
+                        id_role = obj.id_role,
+                        numero_hijos = obj.numero_hijos
                     };
 
 
@@ -200,28 +205,28 @@ namespace CapaDatos
                 else
                 {
                     // Editar miembro existente
-                    nuevoMiembro = _context.Miembros.First(m => m.ID_miembro == obj.ID_miembro);
+                    nuevoMiembro = _context.Miembros.First(m => m.id_miembro == obj.id_miembro);
 
-                   nuevoMiembro.Numero_miembro        = obj.Numero_miembro;
-                   nuevoMiembro.Nombre_miembro        = obj.Nombre_miembro;
-                   nuevoMiembro.Diezmo_individual     = obj.Diezmo_individual;
-                   nuevoMiembro.Diezmo_familiar       = obj.Diezmo_familiar;
-                   nuevoMiembro.Apellidos_miembro     = obj.Apellidos_miembro;
-                   nuevoMiembro.Correo_electronico    = obj.Correo_electronico;
-                   nuevoMiembro.Telefono_movil        = obj.Telefono_movil;
-                   nuevoMiembro.Telefono_fijo         = obj.Telefono_fijo;
-                   nuevoMiembro.Edad                  = obj.Edad;
+                   nuevoMiembro.numero_miembro        = obj.numero_miembro;
+                   nuevoMiembro.nombre_miembro        = obj.nombre_miembro;
+                   nuevoMiembro.diezmo_individual     = obj.diezmo_individual;
+                   nuevoMiembro.diezmo_familiar       = obj.diezmo_familiar;
+                   nuevoMiembro.apellidos_miembro     = obj.apellidos_miembro;
+                   nuevoMiembro.correo_electronico    = obj.correo_electronico;
+                   nuevoMiembro.telefono_movil        = obj.telefono_movil;
+                   nuevoMiembro.telefono_fijo         = obj.telefono_fijo;
+                   nuevoMiembro.edad                  = obj.edad;
                    nuevoMiembro.sexo                  = obj.sexo;
-                   nuevoMiembro.Direccion             = obj.Direccion;
+                   nuevoMiembro.direccion             = obj.direccion;
                    nuevoMiembro.codigo_Postal         = obj.codigo_Postal;
                    nuevoMiembro.idProvincia           = obj.idProvincia;
                    nuevoMiembro.idMunicipio           = obj.idMunicipio;
-                   nuevoMiembro.persona_cargo         = obj.persona_cargo;
+                   nuevoMiembro.responsable         = obj.responsable;
                    nuevoMiembro.observaciones         = obj.observaciones;
-                   nuevoMiembro.Bautizado             = obj.Bautizado;
-                   nuevoMiembro.Fecha_fallecido       = obj.Fecha_fallecido;
+                   nuevoMiembro.bautizado             = obj.bautizado;
+                   nuevoMiembro.fecha_fallecido       = obj.fecha_fallecido;
                    nuevoMiembro.fecha_bautismo        = obj.fecha_bautismo;
-                   nuevoMiembro.Lugar_bautismo        = obj.Lugar_bautismo;
+                   nuevoMiembro.lugar_bautismo        = obj.lugar_bautismo;
                    nuevoMiembro.fecha_cumpleanios     = obj.fecha_cumpleanios;
                    nuevoMiembro.fecha_boda            = obj.fecha_boda;
                    nuevoMiembro.fecha_baja            = obj.fecha_baja;
@@ -229,10 +234,10 @@ namespace CapaDatos
                    nuevoMiembro.excluir_directorio    = obj.excluir_directorio;
                    nuevoMiembro.pais_nacimiento       = obj.pais_nacimiento;
                    nuevoMiembro.estado_Civil          = obj.estado_Civil;
-                   nuevoMiembro.Estado                = obj.Estado;
-                   nuevoMiembro.Fallecido             = obj.Fallecido;
+                   nuevoMiembro.estado                = obj.estado;
+                   nuevoMiembro.fallecido             = obj.fallecido;
                    nuevoMiembro.alumno_VyF            = obj.alumno_VyF;
-                   nuevoMiembro.Numero_hijos          = obj.Numero_hijos;
+                   nuevoMiembro.numero_hijos          = obj.numero_hijos;
                    nuevoMiembro.curso_acabado         = obj.curso_acabado;
                    nuevoMiembro.acepta_LOPD           = obj.acepta_LOPD;
 
@@ -240,7 +245,7 @@ namespace CapaDatos
                 }
 
                 mensaje = "Miembro guardado correctamente.";
-                return nuevoMiembro.ID_miembro;
+                return nuevoMiembro.id_miembro;
             }
             catch (Exception ex)
             {
@@ -262,7 +267,7 @@ namespace CapaDatos
 
             try
             {
-                var miembro = _context.Miembros.FirstOrDefault(m => m.ID_miembro == obj.ID_miembro);
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == obj.id_miembro);
 
                 if (miembro == null)
                 {
@@ -270,50 +275,50 @@ namespace CapaDatos
                     return false;
                 }
 
-                if (sedeID != 1000 && miembro.ID_sede != sedeID)
+                if (sedeID != 1000 && miembro.id_sede != sedeID)
                 {
                     mensaje = "Acción denegada. El miembro no pertenece a tu sede.";
                     return false;
                 }
 
                 // Validaciones
-                if (_context.Miembros.Any(m => m.Correo_electronico == obj.Correo_electronico &&
-                                               m.ID_miembro != obj.ID_miembro &&
-                                               m.ID_sede == miembro.ID_sede))
+                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
                 {
                     mensaje = "El correo ya está en uso por otro miembro en esta sede.";
                     return false;
                 }
 
-                if (_context.Miembros.Any(m => m.Numero_miembro == obj.Numero_miembro &&
-                                               m.ID_miembro != obj.ID_miembro &&
-                                               m.ID_sede == miembro.ID_sede))
+                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro.";
                     return false;
                 }
 
                 // Mapeo
-                miembro.Numero_miembro = obj.Numero_miembro;
-                miembro.Nombre_miembro = obj.Nombre_miembro;
-                miembro.Diezmo_individual = obj.Diezmo_individual;
-                miembro.Diezmo_familiar = obj.Diezmo_familiar;
-                miembro.Apellidos_miembro = obj.Apellidos_miembro;
-                miembro.Correo_electronico = obj.Correo_electronico;
-                miembro.Telefono_movil = obj.Telefono_movil;
-                miembro.Telefono_fijo = obj.Telefono_fijo;
-                miembro.Edad = obj.Edad;
+                miembro.numero_miembro = obj.numero_miembro;
+                miembro.nombre_miembro = obj.nombre_miembro;
+                miembro.diezmo_individual = obj.diezmo_individual;
+                miembro.diezmo_familiar = obj.diezmo_familiar;
+                miembro.apellidos_miembro = obj.apellidos_miembro;
+                miembro.correo_electronico = obj.correo_electronico;
+                miembro.telefono_movil = obj.telefono_movil;
+                miembro.telefono_fijo = obj.telefono_fijo;
+                miembro.edad = obj.edad;
                 miembro.sexo = obj.sexo;
-                miembro.Direccion = obj.Direccion;
+                miembro.direccion = obj.direccion;
                 miembro.codigo_Postal = obj.codigo_Postal;
                 miembro.idProvincia = obj.idProvincia;
                 miembro.idMunicipio = obj.idMunicipio;
-                miembro.persona_cargo = obj.persona_cargo;
+                miembro.responsable = obj.responsable;
                 miembro.observaciones = obj.observaciones;
-                miembro.Bautizado = obj.Bautizado;
-                miembro.Fecha_fallecido = obj.Fecha_fallecido;
+                miembro.bautizado = obj.bautizado;
+                miembro.fecha_fallecido = obj.fecha_fallecido;
                 miembro.fecha_bautismo = obj.fecha_bautismo;
-                miembro.Lugar_bautismo = obj.Lugar_bautismo;
+                miembro.lugar_bautismo = obj.lugar_bautismo;
                 miembro.fecha_cumpleanios = obj.fecha_cumpleanios;
                 miembro.fecha_boda = obj.fecha_boda;
                 miembro.fecha_baja = obj.fecha_baja;
@@ -321,10 +326,10 @@ namespace CapaDatos
                 miembro.excluir_directorio = obj.excluir_directorio;
                 miembro.pais_nacimiento = obj.pais_nacimiento;
                 miembro.estado_Civil = obj.estado_Civil;
-                miembro.Estado = obj.Estado;
-                miembro.Fallecido = obj.Fallecido;
+                miembro.estado = obj.estado;
+                miembro.fallecido = obj.fallecido;
                 miembro.alumno_VyF = obj.alumno_VyF;
-                miembro.Numero_hijos = obj.Numero_hijos;
+                miembro.numero_hijos = obj.numero_hijos;
                 miembro.curso_acabado = obj.curso_acabado;
                 miembro.acepta_LOPD = obj.acepta_LOPD;
                
@@ -351,7 +356,7 @@ namespace CapaDatos
             mensaje = string.Empty;
             try
             {
-                var miembro = _context.Miembros.FirstOrDefault(m => m.ID_miembro == id);
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == id);
 
                 if (miembro == null)
                 {
@@ -360,7 +365,7 @@ namespace CapaDatos
                 }
 
                 // 🌟 CORRECCIÓN CLAVE: Usar 1000 para el Admin Global
-                if (sedeID != 1000 && miembro.ID_sede != sedeID)
+                if (sedeID != 1000 && miembro.id_sede != sedeID)
                 {
                     mensaje = "Acción denegada. El miembro no pertenece a tu sede.";
                     return false;
@@ -389,7 +394,7 @@ namespace CapaDatos
         public int ContadorMiembrosHombres(int ID_sede) {
             int totalMiembrosHombres;
             try { 
-                totalMiembrosHombres = _context.Miembros.Count(m => m.sexo == "Masculino" && m.ID_sede == ID_sede);
+                totalMiembrosHombres = _context.Miembros.Count(m => m.sexo == "Masculino" && m.id_sede == ID_sede);
             } catch (Exception ex)
             {
                 Console.WriteLine($"Error ContadorMiembrosHombres EF Core: {ex.Message}");
@@ -406,7 +411,7 @@ namespace CapaDatos
             int totalMiembrosMujeres;
             try
             {
-                totalMiembrosMujeres = _context.Miembros.Count(m => m.sexo == "Mujer" && m.ID_sede == ID_sede);
+                totalMiembrosMujeres = _context.Miembros.Count(m => m.sexo == "Mujer" && m.id_sede == ID_sede);
             }
             catch (Exception ex)
             {
@@ -450,7 +455,7 @@ namespace CapaDatos
             {
                 var miembro = _context.Miembros
                     // 🌟 CORRECCIÓN CLAVE: Usar 1000 para evitar el filtro
-                    .Where(m => m.Numero_miembro == numeroMiembro && (sedeID == 1000 || m.ID_sede == sedeID))
+                    .Where(m => m.numero_miembro == numeroMiembro && (sedeID == 1000 || m.id_sede == sedeID))
                     .FirstOrDefault();
 
                 return miembro != null ? new List<Miembro> { miembro } : new List<Miembro>();
@@ -472,9 +477,9 @@ namespace CapaDatos
                 string termino = busqueda.Trim().ToLower();
 
                 var miembros = _context.Miembros
-                    .Where(m => sedeID == 1000 || m.ID_sede == sedeID)
-                    .Where(m => m.Nombre_miembro.ToLower().Contains(termino) ||
-                                 m.Apellidos_miembro.ToLower().Contains(termino))
+                    .Where(m => sedeID == 1000 || m.id_sede == sedeID)
+                    .Where(m => m.nombre_miembro.ToLower().Contains(termino) ||
+                                 m.apellidos_miembro.ToLower().Contains(termino))
                     .Take(10)
                     .ToList();
 
@@ -495,7 +500,7 @@ namespace CapaDatos
         {
             try
             {
-                var miembro = _context.Miembros.FirstOrDefault(m => m.ID_miembro == id_miembro);
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == id_miembro);
                 return miembro;
             }
             catch (Exception ex)
@@ -664,11 +669,11 @@ namespace CapaDatos
             {
                 var consultaBase = _context.Miembros
                     .AsQueryable()
-                    .Where(m => m.Estado == "Visitante");
+                    .Where(m => m.estado == "Visitante");
 
                 if (sedeID != 1000)
                 {
-                    consultaBase = consultaBase.Where(m => m.ID_sede == sedeID);
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
                 }
 
                 var visitantesDetalle = (
@@ -680,22 +685,22 @@ namespace CapaDatos
 
                     select new MiembroDetalleDTO
                     {
-                        ID_miembro = m.ID_miembro,
-                        Nombre_miembro = m.Nombre_miembro,
-                        Apellidos_miembro = m.Apellidos_miembro,
-                        Correo_electronico = m.Correo_electronico,
-                        Telefono_movil = m.Telefono_movil,
-                        Edad = m.Edad,
+                        id_miembro = m.id_miembro,
+                        nombre_miembro = m.nombre_miembro,
+                        apellidos_miembro = m.apellidos_miembro,
+                        correo_electronico = m.correo_electronico,
+                        telefono_movil = m.telefono_movil,
+                        edad = m.edad,
                         sexo = m.sexo,
-                        Direccion = m.Direccion,
+                        direccion = m.direccion,
                         codigo_Postal = m.codigo_Postal,
                         idProvincia = m.idProvincia,
                         idMunicipio = m.idMunicipio,
                         fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                         acepta_LOPD = m.acepta_LOPD,
-                        ID_sede = m.ID_sede,
-                        Nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
-                        Nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
+                        id_sede = m.id_sede,
+                        nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
+                        nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
                         nombre_sede = string.Empty
                     }
                 ).ToList();
@@ -716,20 +721,20 @@ namespace CapaDatos
             {
 
                 Miembro nuevoVisitante;
-                if (obj.ID_miembro == 0)
+                if (obj.id_miembro == 0)
                 {
                     nuevoVisitante = new Miembro
                     {
-                        Numero_miembro = obj.Numero_miembro,
-                        Nombre_miembro = obj.Nombre_miembro,
-                        Apellidos_miembro = obj.Apellidos_miembro,
-                        ID_sede = obj.ID_sede,
-                        Estado = "Visitante",
-                        Edad = obj.Edad,
+                        numero_miembro = obj.numero_miembro,
+                        nombre_miembro = obj.nombre_miembro,
+                        apellidos_miembro = obj.apellidos_miembro,
+                        id_sede = obj.id_sede,
+                        estado = "Visitante",
+                        edad = obj.edad,
                         sexo = obj.sexo,
-                        Telefono_movil = obj.Telefono_movil,
-                        Correo_electronico = obj.Correo_electronico,
-                        Direccion = obj.Direccion,
+                        telefono_movil = obj.telefono_movil,
+                        correo_electronico = obj.correo_electronico,
+                        direccion = obj.direccion,
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
@@ -741,20 +746,20 @@ namespace CapaDatos
                 }
                 else
                 {
-                    nuevoVisitante = _context.Miembros.First(m => m.ID_miembro == obj.ID_miembro);
+                    nuevoVisitante = _context.Miembros.First(m => m.id_miembro == obj.id_miembro);
 
-                    nuevoVisitante.Numero_miembro = obj.Numero_miembro;
-                    nuevoVisitante.Nombre_miembro = obj.Nombre_miembro;
-                    nuevoVisitante.Apellidos_miembro = obj.Apellidos_miembro;
-                    nuevoVisitante.Edad = obj.Edad;
+                    nuevoVisitante.numero_miembro = obj.numero_miembro;
+                    nuevoVisitante.nombre_miembro = obj.nombre_miembro;
+                    nuevoVisitante.apellidos_miembro = obj.apellidos_miembro;
+                    nuevoVisitante.edad = obj.edad;
                     nuevoVisitante.sexo = obj.sexo;
-                    nuevoVisitante.Telefono_movil = obj.Telefono_movil;
+                    nuevoVisitante.telefono_movil = obj.telefono_movil;
 
                     _context.SaveChanges();
                 }
 
                 mensaje = "Visitante registrado correctamente.";
-                return nuevoVisitante.ID_miembro;
+                return nuevoVisitante.id_miembro;
             }
             catch (Exception ex)
             {
@@ -768,7 +773,7 @@ namespace CapaDatos
 
             try
             {
-                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.ID_miembro == obj.ID_miembro);
+                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.id_miembro == obj.id_miembro);
                 if (miembroExistente == null)
                 {
                     mensaje = "No se encontró el miembro especificado.";
@@ -776,17 +781,16 @@ namespace CapaDatos
                 }
 
                 // Actualizar propiedades
-                miembroExistente.Nombre_miembro = obj.Nombre_miembro;
-                miembroExistente.Apellidos_miembro = obj.Apellidos_miembro;
-                miembroExistente.ID_sede = sedeID;
-                miembroExistente.Edad = obj.Edad;
+                miembroExistente.nombre_miembro = obj.nombre_miembro;
+                miembroExistente.apellidos_miembro = obj.apellidos_miembro;
+                miembroExistente.id_sede = sedeID;
+                miembroExistente.edad = obj.edad;
                 miembroExistente.sexo = obj.sexo;
-                miembroExistente.Estado = "Visitante";
-                miembroExistente.Telefono_movil = obj.Telefono_movil;
-                miembroExistente.Correo_electronico = obj.Correo_electronico;
-                miembroExistente.Direccion = obj.Direccion;
+                miembroExistente.estado = "Visitante";
+                miembroExistente.telefono_movil = obj.telefono_movil;
+                miembroExistente.correo_electronico = obj.correo_electronico;
+                miembroExistente.direccion = obj.direccion;
                 miembroExistente.codigo_Postal = obj.codigo_Postal;
-                miembroExistente.idProvincia = obj.idProvincia;
                 miembroExistente.idMunicipio = obj.idMunicipio;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
 
@@ -814,11 +818,11 @@ namespace CapaDatos
             {
                 var consultaBase = _context.Miembros
                     .AsQueryable()
-                    .Where(m => m.Estado == "Simpatizante");
+                    .Where(m => m.estado == "Simpatizante");
 
                 if (sedeID != 1000)
                 {
-                    consultaBase = consultaBase.Where(m => m.ID_sede == sedeID);
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
                 }
 
                 var visitantesDetalle = (
@@ -830,15 +834,15 @@ namespace CapaDatos
 
                     select new MiembroDetalleDTO
                     {
-                        ID_miembro = m.ID_miembro,
-                        Nombre_miembro = m.Nombre_miembro,
-                        Apellidos_miembro = m.Apellidos_miembro,
-                        Correo_electronico = m.Correo_electronico,
-                        Telefono_movil = m.Telefono_movil,
-                        Telefono_fijo = m.Telefono_fijo,
-                        Edad = m.Edad,
+                        id_miembro = m.id_miembro,
+                        nombre_miembro = m.nombre_miembro,
+                        apellidos_miembro = m.apellidos_miembro,
+                        correo_electronico = m.correo_electronico,
+                        telefono_movil = m.telefono_movil,
+                        telefono_fijo = m.telefono_fijo,
+                        edad = m.edad,
                         sexo = m.sexo,
-                        Direccion = m.Direccion,
+                        direccion = m.direccion,
                         codigo_Postal = m.codigo_Postal,
                         idProvincia = m.idProvincia,
                         idMunicipio = m.idMunicipio,
@@ -846,15 +850,15 @@ namespace CapaDatos
                         fecha_cumpleanios = m.fecha_cumpleanios,
                         fecha_boda = m.fecha_boda,
                         fecha_bautismo = m.fecha_bautismo,
-                        Lugar_bautismo = m.Lugar_bautismo,
+                        lugar_bautismo = m.lugar_bautismo,
                         estado_Civil = m.estado_Civil,
                         pais_nacimiento = m.pais_nacimiento,
-                        Bautizado = m.Bautizado,
-                        Numero_hijos = m.Numero_hijos,
+                        bautizado = m.bautizado,
+                        numero_hijos = m.numero_hijos,
                         acepta_LOPD = m.acepta_LOPD,
-                        ID_sede = m.ID_sede,
-                        Nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
-                        Nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
+                        id_sede = m.id_sede,
+                        nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
+                        nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
                         nombre_sede = string.Empty
                     }
                 ).ToList();
@@ -875,30 +879,30 @@ namespace CapaDatos
             {
 
                 Miembro nuevoVisitante;
-                if (obj.ID_miembro == 0)
+                if (obj.id_miembro == 0)
                 {
                     nuevoVisitante = new Miembro
                     {
-                        Numero_miembro = obj.Numero_miembro,
-                        Nombre_miembro = obj.Nombre_miembro,
-                        Apellidos_miembro = obj.Apellidos_miembro,
-                        ID_sede = obj.ID_sede,
-                        Estado = "Simpatizante",
-                        Edad = obj.Edad,
+                        numero_miembro = obj.numero_miembro,
+                        nombre_miembro = obj.nombre_miembro,
+                        apellidos_miembro = obj.apellidos_miembro,
+                        id_sede = obj.id_sede,
+                        estado = "Simpatizante",
+                        edad = obj.edad,
                         sexo = obj.sexo,
-                        Telefono_movil = obj.Telefono_movil,
-                        Correo_electronico = obj.Correo_electronico,
-                        Direccion = obj.Direccion,
+                        telefono_movil = obj.telefono_movil,
+                        correo_electronico = obj.correo_electronico,
+                        direccion = obj.direccion,
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
                         pais_nacimiento = obj.pais_nacimiento,
                         estado_Civil = obj.estado_Civil,
-                        Bautizado = obj.Bautizado,
-                        Lugar_bautismo = obj.Lugar_bautismo,
+                        bautizado = obj.bautizado,
+                        lugar_bautismo = obj.lugar_bautismo,
                         fecha_bautismo = obj.fecha_bautismo,
-                        persona_cargo = obj.persona_cargo,
-                        Numero_hijos = obj.Numero_hijos,
+                        responsable = obj.responsable,
+                        numero_hijos = obj.numero_hijos,
                         acepta_LOPD = obj.acepta_LOPD,
                     };
 
@@ -907,26 +911,26 @@ namespace CapaDatos
                 }
                 else
                 {
-                    nuevoVisitante = _context.Miembros.First(m => m.ID_miembro == obj.ID_miembro);
+                    nuevoVisitante = _context.Miembros.First(m => m.id_miembro == obj.id_miembro);
 
-                    nuevoVisitante.Numero_miembro = obj.Numero_miembro;
-                    nuevoVisitante.Nombre_miembro = obj.Nombre_miembro;
-                    nuevoVisitante.Apellidos_miembro = obj.Apellidos_miembro;
-                    nuevoVisitante.Edad = obj.Edad;
+                    nuevoVisitante.numero_miembro = obj.numero_miembro;
+                    nuevoVisitante.nombre_miembro = obj.nombre_miembro;
+                    nuevoVisitante.apellidos_miembro = obj.apellidos_miembro;
+                    nuevoVisitante.edad = obj.edad;
                     nuevoVisitante.sexo = obj.sexo;
-                    nuevoVisitante.Telefono_movil = obj.Telefono_movil;
-                    nuevoVisitante.Correo_electronico = obj.Correo_electronico;
-                    nuevoVisitante.Direccion = obj.Direccion;
+                    nuevoVisitante.telefono_movil = obj.telefono_movil;
+                    nuevoVisitante.correo_electronico = obj.correo_electronico;
+                    nuevoVisitante.direccion = obj.direccion;
                     nuevoVisitante.codigo_Postal = obj.codigo_Postal;
                     nuevoVisitante.idProvincia = obj.idProvincia;
                     nuevoVisitante.idMunicipio = obj.idMunicipio;
                     nuevoVisitante.pais_nacimiento = obj.pais_nacimiento;
                     nuevoVisitante.estado_Civil = obj.estado_Civil;
-                    nuevoVisitante.Bautizado = obj.Bautizado;
-                    nuevoVisitante.Lugar_bautismo = obj.Lugar_bautismo;
+                    nuevoVisitante.bautizado = obj.bautizado;
+                    nuevoVisitante.lugar_bautismo = obj.lugar_bautismo;
                     nuevoVisitante.fecha_bautismo = obj.fecha_bautismo;
-                    nuevoVisitante.persona_cargo = obj.persona_cargo;
-                    nuevoVisitante.Numero_hijos = obj.Numero_hijos;
+                    nuevoVisitante.responsable = obj.responsable;
+                    nuevoVisitante.numero_hijos = obj.numero_hijos;
                     nuevoVisitante.acepta_LOPD = obj.acepta_LOPD;
 
 
@@ -934,7 +938,7 @@ namespace CapaDatos
                 }
 
                 mensaje = "Simpatizante registrado correctamente.";
-                return nuevoVisitante.ID_miembro;
+                return nuevoVisitante.id_miembro;
             }
             catch (Exception ex)
             {
@@ -949,7 +953,7 @@ namespace CapaDatos
 
             try
             {
-                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.ID_miembro == obj.ID_miembro);
+                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.id_miembro == obj.id_miembro);
                 if (miembroExistente == null)
                 {
                     mensaje = "No se encontró el miembro especificado.";
@@ -957,24 +961,24 @@ namespace CapaDatos
                 }
 
                 // Actualizar propiedades
-                miembroExistente.Numero_miembro = obj.Numero_miembro;
-                miembroExistente.Nombre_miembro = obj.Nombre_miembro;
-                miembroExistente.Apellidos_miembro = obj.Apellidos_miembro;
-                miembroExistente.Edad = obj.Edad;
+                miembroExistente.numero_miembro = obj.numero_miembro;
+                miembroExistente.nombre_miembro = obj.nombre_miembro;
+                miembroExistente.apellidos_miembro = obj.apellidos_miembro;
+                miembroExistente.edad = obj.edad;
                 miembroExistente.sexo = obj.sexo;
-                miembroExistente.Telefono_movil = obj.Telefono_movil;
-                miembroExistente.Correo_electronico = obj.Correo_electronico;
-                miembroExistente.Direccion = obj.Direccion;
+                miembroExistente.telefono_movil = obj.telefono_movil;
+                miembroExistente.correo_electronico = obj.correo_electronico;
+                miembroExistente.direccion = obj.direccion;
                 miembroExistente.codigo_Postal = obj.codigo_Postal;
                 miembroExistente.idProvincia = obj.idProvincia;
                 miembroExistente.idMunicipio = obj.idMunicipio;
                 miembroExistente.pais_nacimiento = obj.pais_nacimiento;
                 miembroExistente.estado_Civil = obj.estado_Civil;
-                miembroExistente.Bautizado = obj.Bautizado;
-                miembroExistente.Lugar_bautismo = obj.Lugar_bautismo;
+                miembroExistente.bautizado = obj.bautizado;
+                miembroExistente.lugar_bautismo = obj.lugar_bautismo;
                 miembroExistente.fecha_bautismo = obj.fecha_bautismo;
-                miembroExistente.persona_cargo = obj.persona_cargo;
-                miembroExistente.Numero_hijos = obj.Numero_hijos;
+                miembroExistente.responsable = obj.responsable;
+                miembroExistente.numero_hijos = obj.numero_hijos;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
 
                 // Forzar a EF que es una entidad modificada
@@ -1000,10 +1004,10 @@ namespace CapaDatos
             {
                 var consultaMiembros = _context.Miembros
                  .AsQueryable()
-                 .Where(m => m.Estado == "Proceso");
+                 .Where(m => m.estado == "Proceso");
                 if (sedeID != 1000)
                 {
-                    consultaMiembros = consultaMiembros.Where(m => m.ID_sede == sedeID);
+                    consultaMiembros = consultaMiembros.Where(m => m.id_sede == sedeID);
                 }
 
                 var miembrosConUbicacion = (
@@ -1015,46 +1019,46 @@ namespace CapaDatos
 
                         select new MiembroDetalleDTO
                         {
-                            ID_miembro = m.ID_miembro,
-                            Diezmo_individual = m.Diezmo_individual,
-                            Diezmo_familiar = m.Diezmo_familiar,
-                            Numero_miembro = m.Numero_miembro,
-                            Nombre_miembro = m.Nombre_miembro,
-                            Apellidos_miembro = m.Apellidos_miembro,
-                            Edad = m.Edad,
+                            id_miembro = m.id_miembro,
+                            diezmo_individual = m.diezmo_individual,
+                            diezmo_familiar = m.diezmo_familiar,
+                            numero_miembro = m.numero_miembro,
+                            nombre_miembro = m.nombre_miembro,
+                            apellidos_miembro = m.apellidos_miembro,
+                            edad = m.edad,
                             sexo = m.sexo,
-                            Telefono_fijo = m.Telefono_fijo,
-                            Telefono_movil = m.Telefono_movil,
-                            Correo_electronico = m.Correo_electronico,
-                            Direccion = m.Direccion,
+                            telefono_fijo = m.telefono_fijo,
+                            telefono_movil = m.telefono_movil,
+                            correo_electronico = m.correo_electronico,
+                            direccion = m.direccion,
                             codigo_Postal = m.codigo_Postal,
                             idProvincia = m.idProvincia,
                             idMunicipio = m.idMunicipio,
-                            ID_sede = m.ID_sede,
-                            Estado = m.Estado,
+                            id_sede = m.id_sede,
+                            estado = m.estado,
                             pais_nacimiento = m.pais_nacimiento,
                             estado_Civil = m.estado_Civil,
                             combinar_diezmo = m.combinar_diezmo,
                             excluir_directorio = m.excluir_directorio,
                             fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                             fecha_baja = m.fecha_baja,
-                            Bautizado = m.Bautizado,
+                            bautizado = m.bautizado,
                             fecha_bautismo = m.fecha_bautismo,
-                            Lugar_bautismo = m.Lugar_bautismo,
+                            lugar_bautismo = m.lugar_bautismo,
                             fecha_cumpleanios = m.fecha_cumpleanios,
-                            Fecha_fallecido = m.Fecha_fallecido,
+                            fecha_fallecido = m.fecha_fallecido,
                             fecha_boda = m.fecha_boda,
                             acepta_LOPD = m.acepta_LOPD,
                             observaciones = m.observaciones,
-                            Numero_hijos = m.Numero_hijos,
+                            numero_hijos = m.numero_hijos,
                             alumno_VyF = m.alumno_VyF,
                             curso_acabado = m.curso_acabado,
-                            persona_cargo = m.persona_cargo,
-                            ID_role = m.ID_role,
-                            ID_usuario = m.ID_usuario,
+                            responsable = m.responsable,
+                            id_role = m.id_role,
+                            id_usuario = m.id_usuario,
 
-                            Nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
-                            Nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
+                            nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
+                            nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
 
                             // Inicializar campo calculado (se rellena en el Controller)
                             nombre_sede = string.Empty
@@ -1078,20 +1082,20 @@ namespace CapaDatos
             {
 
                 Miembro nuevoVisitante;
-                if (obj.ID_miembro == 0)
+                if (obj.id_miembro == 0)
                 {
                     nuevoVisitante = new Miembro
                     {
-                        Numero_miembro = obj.Numero_miembro,
-                        Nombre_miembro = obj.Nombre_miembro,
-                        Apellidos_miembro = obj.Apellidos_miembro,
-                        ID_sede = obj.ID_sede,
-                        Estado = "Proceso",
-                        Edad = obj.Edad,
+                        numero_miembro = obj.numero_miembro,
+                        nombre_miembro = obj.nombre_miembro,
+                        apellidos_miembro = obj.apellidos_miembro,
+                        id_sede = obj.id_sede,
+                        estado = "Proceso",
+                        edad = obj.edad,
                         sexo = obj.sexo,
-                        Telefono_movil = obj.Telefono_movil,
-                        Correo_electronico = obj.Correo_electronico,
-                        Direccion = obj.Direccion,
+                        telefono_movil = obj.telefono_movil,
+                        correo_electronico = obj.correo_electronico,
+                        direccion = obj.direccion,
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
@@ -1103,21 +1107,21 @@ namespace CapaDatos
                 }
                 else
                 {
-                    nuevoVisitante = _context.Miembros.First(m => m.ID_miembro == obj.ID_miembro);
+                    nuevoVisitante = _context.Miembros.First(m => m.id_miembro == obj.id_miembro);
 
-                    nuevoVisitante.Numero_miembro = obj.Numero_miembro;
-                    nuevoVisitante.Nombre_miembro = obj.Nombre_miembro;
-                    nuevoVisitante.Apellidos_miembro = obj.Apellidos_miembro;
-                    nuevoVisitante.Edad = obj.Edad;
+                    nuevoVisitante.numero_miembro = obj.numero_miembro;
+                    nuevoVisitante.nombre_miembro = obj.nombre_miembro;
+                    nuevoVisitante.apellidos_miembro = obj.apellidos_miembro;
+                    nuevoVisitante.edad = obj.edad;
                     nuevoVisitante.sexo = obj.sexo;
-                    nuevoVisitante.Telefono_movil = obj.Telefono_movil;
+                    nuevoVisitante.telefono_movil = obj.telefono_movil;
 
 
                     _context.SaveChanges();
                 }
 
                 mensaje = "Miembro en proceso registrado correctamente.";
-                return nuevoVisitante.ID_miembro;
+                return nuevoVisitante.id_miembro;
             }
             catch (Exception ex)
             {
@@ -1132,7 +1136,7 @@ namespace CapaDatos
 
             try
             {
-                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.ID_miembro == obj.ID_miembro);
+                var miembroExistente = _context.Miembros.FirstOrDefault(m => m.id_miembro == obj.id_miembro);
                 if (miembroExistente == null)
                 {
                     mensaje = "No se encontró el miembro especificado.";
@@ -1140,15 +1144,15 @@ namespace CapaDatos
                 }
 
                 // Actualizar propiedades
-                miembroExistente.Nombre_miembro = obj.Nombre_miembro;
-                miembroExistente.Apellidos_miembro = obj.Apellidos_miembro;
-                miembroExistente.ID_sede = sedeID;
-                miembroExistente.Edad = obj.Edad;
+                miembroExistente.nombre_miembro = obj.nombre_miembro;
+                miembroExistente.apellidos_miembro = obj.apellidos_miembro;
+                miembroExistente.id_sede = sedeID;
+                miembroExistente.edad = obj.edad;
                 miembroExistente.sexo = obj.sexo;
-                miembroExistente.Estado = "Proceso";
-                miembroExistente.Telefono_movil = obj.Telefono_movil;
-                miembroExistente.Correo_electronico = obj.Correo_electronico;
-                miembroExistente.Direccion = obj.Direccion;
+                miembroExistente.estado = "Proceso";
+                miembroExistente.telefono_movil = obj.telefono_movil;
+                miembroExistente.correo_electronico = obj.correo_electronico;
+                miembroExistente.direccion = obj.direccion;
                 miembroExistente.codigo_Postal = obj.codigo_Postal;
                 miembroExistente.idProvincia = obj.idProvincia;
                 miembroExistente.idMunicipio = obj.idMunicipio;
@@ -1178,27 +1182,27 @@ namespace CapaDatos
             {
 
                 // Buscar miembro existente
-                var miembro = _context.Miembros.FirstOrDefault(m => m.ID_miembro == ID_miembro);
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == ID_miembro);
 
                 if (miembro == null)
                     return null;
 
-                if (ID_sede != 1000 && miembro.ID_sede != ID_sede)
+                if (ID_sede != 1000 && miembro.id_sede != ID_sede)
                     throw new UnauthorizedAccessException("No puedes modificar miembros de otra sede.");
 
                 // Avanzar estado según flujo Visitante → Simpatizante → Proceso → Miembro
-                switch (miembro.Estado)
+                switch (miembro.estado)
                 {
                     case "Visitante":
-                        miembro.Estado = "Simpatizante";
+                        miembro.estado = "Simpatizante";
                         break;
 
                     case "Simpatizante":
-                        miembro.Estado = "Proceso";
+                        miembro.estado = "Proceso";
                         break;
 
                     case "Proceso":
-                        miembro.Estado = "Miembro";
+                        miembro.estado = "Miembro";
                         break;
 
                     case "Miembro":
@@ -1221,27 +1225,27 @@ namespace CapaDatos
         {
             try
             {
-                var miembro = _context.Miembros.FirstOrDefault(m => m.ID_miembro == ID_miembro);
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == ID_miembro);
 
                 if (miembro == null)
                     return null;
 
                 // Validar sede
-                if (ID_sede != 1000 && miembro.ID_sede != ID_sede)
+                if (ID_sede != 1000 && miembro.id_sede != ID_sede)
                     throw new UnauthorizedAccessException("No puedes modificar miembros de otra sede.");
 
-                switch (miembro.Estado)
+                switch (miembro.estado)
                 {
                     case "Miembro":
-                        miembro.Estado = "Proceso";
+                        miembro.estado = "Proceso";
                         break;
 
                     case "Proceso":
-                        miembro.Estado = "Simpatizante";
+                        miembro.estado = "Simpatizante";
                         break;
 
                     case "Simpatizante":
-                        miembro.Estado = "Visitante";
+                        miembro.estado = "Visitante";
                         break;
 
                     case "Visitante":
@@ -1266,12 +1270,12 @@ namespace CapaDatos
             {
                 var consulta = _context.Miembros
                     .AsQueryable()
-                    .Where(m => m.ID_miembro == ID_miembro);
+                    .Where(m => m.id_miembro == ID_miembro);
 
                 // Filtrar por sede si no es superadmin
                 if (sedeID != 1000)
                 {
-                    consulta = consulta.Where(m => m.ID_sede == sedeID);
+                    consulta = consulta.Where(m => m.id_sede == sedeID);
                 }
 
                 var miembro = (
@@ -1284,46 +1288,46 @@ namespace CapaDatos
 
                     select new MiembroDetalleDTO
                     {
-                        ID_miembro = m.ID_miembro,
-                        Diezmo_individual = m.Diezmo_individual,
-                        Diezmo_familiar = m.Diezmo_familiar,
-                        Numero_miembro = m.Numero_miembro,
-                        Nombre_miembro = m.Nombre_miembro,
-                        Apellidos_miembro = m.Apellidos_miembro,
-                        Edad = m.Edad,
+                        id_miembro = m.id_miembro,
+                        diezmo_individual = m.diezmo_individual,
+                        diezmo_familiar = m.diezmo_familiar,
+                        numero_miembro = m.numero_miembro,
+                        nombre_miembro = m.nombre_miembro,
+                        apellidos_miembro = m.apellidos_miembro,
+                        edad = m.edad,
                         sexo = m.sexo,
-                        Telefono_fijo = m.Telefono_fijo,
-                        Telefono_movil = m.Telefono_movil,
-                        Correo_electronico = m.Correo_electronico,
-                        Direccion = m.Direccion,
+                        telefono_fijo = m.telefono_fijo,
+                        telefono_movil = m.telefono_movil,
+                        correo_electronico = m.correo_electronico,
+                        direccion = m.direccion,
                         codigo_Postal = m.codigo_Postal,
                         idProvincia = m.idProvincia,
                         idMunicipio = m.idMunicipio,
-                        ID_sede = m.ID_sede,
-                        Estado = m.Estado,
+                        id_sede = m.id_sede,
+                        estado = m.estado,
                         pais_nacimiento = m.pais_nacimiento,
                         estado_Civil = m.estado_Civil,
                         combinar_diezmo = m.combinar_diezmo,
                         excluir_directorio = m.excluir_directorio,
                         fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                         fecha_baja = m.fecha_baja,
-                        Bautizado = m.Bautizado,
+                        bautizado = m.bautizado,
                         fecha_bautismo = m.fecha_bautismo,
-                        Lugar_bautismo = m.Lugar_bautismo,
+                        lugar_bautismo = m.lugar_bautismo,
                         fecha_cumpleanios = m.fecha_cumpleanios,
-                        Fecha_fallecido = m.Fecha_fallecido,
+                        fecha_fallecido = m.fecha_fallecido,
                         fecha_boda = m.fecha_boda,
                         acepta_LOPD = m.acepta_LOPD,
                         observaciones = m.observaciones,
-                        Numero_hijos = m.Numero_hijos,
+                        numero_hijos = m.numero_hijos,
                         alumno_VyF = m.alumno_VyF,
                         curso_acabado = m.curso_acabado,
-                        persona_cargo = m.persona_cargo,
-                        ID_role = m.ID_role,
-                        ID_usuario = m.ID_usuario,
+                        responsable = m.responsable,
+                        id_role = m.id_role,
+                        id_usuario = m.id_usuario,
 
-                        Nombre_Provincia = p != null ? p.nombre_provincia : string.Empty,
-                        Nombre_Municipio = mun != null ? mun.nombre_municipio : string.Empty,
+                        nombre_Provincia = p != null ? p.nombre_provincia : string.Empty,
+                        nombre_Municipio = mun != null ? mun.nombre_municipio : string.Empty,
 
                         // Controlador rellena luego este campo
                         nombre_sede = string.Empty

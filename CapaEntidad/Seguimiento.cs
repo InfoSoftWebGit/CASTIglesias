@@ -13,7 +13,7 @@ namespace CapaEntidad
         public DateTime Fecha_visita { get; set; }
         public DateTime Fecha_llamada { get; set; }
         public DateTime Fecha_consejeria { get; set; }
-        public string Persona_cargo { get; set; } = string.Empty;
+        public string Responsable { get; set; } = string.Empty;
         public string? Observaciones { get; set; }
         public int ID_sede { get; set; }
     }

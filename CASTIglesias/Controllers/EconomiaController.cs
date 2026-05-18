@@ -134,7 +134,7 @@ namespace CASTIglesias.Controllers
 
                     if (miembro != null)
                     {
-                        objeto.numero_miembro = miembro.Numero_miembro;
+                        objeto.numero_miembro = miembro.numero_miembro;
                     }
                 }
 
@@ -233,10 +233,10 @@ namespace CASTIglesias.Controllers
                 // Mapear el resultado para el front-end
                 var data = oListaMiembros.Select(m => new
                 {
-                    id_miembro = m.ID_miembro,
-                    numero_miembro = m.Numero_miembro,
-                    nombre_miembro = m.Nombre_miembro,
-                    apellidos_miembro = m.Apellidos_miembro
+                    id_miembro = m.id_miembro,
+                    numero_miembro = m.numero_miembro,
+                    nombre_miembro = m.nombre_miembro,
+                    apellidos_miembro = m.apellidos_miembro
                 }).ToList();
 
                 return Json(new { data });

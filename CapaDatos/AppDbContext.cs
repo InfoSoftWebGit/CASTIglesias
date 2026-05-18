@@ -38,15 +38,6 @@ namespace CapaDatos
                 entity.HasOne<Usuario>()
                       .WithOne()
                       .HasForeignKey<Permisos>(p => p.ID_usuario);
-
-                modelBuilder.Entity<Miembro>(entity =>
-                {
-                    entity.Property(e => e.Estado)
-                        .HasConversion<string>();
-
-                    entity.Property(e => e.Estado)
-                        .IsRequired();
-                });
             });
 
             base.OnModelCreating(modelBuilder);
