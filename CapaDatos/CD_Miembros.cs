@@ -138,15 +138,29 @@ namespace CapaDatos
             try
             {
                 // Validaciones
-                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico && m.id_sede == obj.id_sede))
+                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El correo ya existe en esta sede.";
                     return 0;
                 }
 
-                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede))
+                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro en esta sede.";
+                    return 0;
+                }
+
+                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                {
+                    mensaje = "El número de diezmo individual ya está asignado a otro miembro en esta sede.";
+                    return 0;
+                }
+
+                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                {
+                    mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
                     return 0;
                 }
 
@@ -295,6 +309,24 @@ namespace CapaDatos
                                                m.id_sede == miembro.id_sede))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro.";
+                    return false;
+                }
+
+                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
+                {
+                    mensaje = "El número de diezmo individual ya está asignado a otro miembro en esta sede.";
+                    return false;
+                }
+
+                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
+                {
+                    mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
                     return false;
                 }
 
@@ -739,6 +771,8 @@ namespace CapaDatos
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
+                        fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
+                        pais_nacimiento = obj.pais_nacimiento,
                         acepta_LOPD = obj.acepta_LOPD,
                     };
 
@@ -755,6 +789,14 @@ namespace CapaDatos
                     nuevoVisitante.edad = obj.edad;
                     nuevoVisitante.sexo = obj.sexo;
                     nuevoVisitante.telefono_movil = obj.telefono_movil;
+                    nuevoVisitante.correo_electronico = obj.correo_electronico;
+                    nuevoVisitante.direccion = obj.direccion;
+                    nuevoVisitante.codigo_Postal = obj.codigo_Postal;
+                    nuevoVisitante.idProvincia = obj.idProvincia;
+                    nuevoVisitante.idMunicipio = obj.idMunicipio;
+                    nuevoVisitante.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
+                    nuevoVisitante.pais_nacimiento = obj.pais_nacimiento;
+                    nuevoVisitante.acepta_LOPD = obj.acepta_LOPD;
 
                     _context.SaveChanges();
                 }
@@ -897,6 +939,7 @@ namespace CapaDatos
                         edad = obj.edad,
                         sexo = obj.sexo,
                         telefono_movil = obj.telefono_movil,
+                        telefono_fijo = obj.telefono_fijo,
                         correo_electronico = obj.correo_electronico,
                         direccion = obj.direccion,
                         codigo_Postal = obj.codigo_Postal,
@@ -907,7 +950,11 @@ namespace CapaDatos
                         bautizado = obj.bautizado,
                         lugar_bautismo = obj.lugar_bautismo,
                         fecha_bautismo = obj.fecha_bautismo,
+                        fecha_cumpleanios = obj.fecha_cumpleanios,
+                        fecha_boda = obj.fecha_boda,
+                        fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
                         responsable = obj.responsable,
+                        observaciones = obj.observaciones,
                         numero_hijos = obj.numero_hijos,
                         acepta_LOPD = obj.acepta_LOPD,
                     };
@@ -925,6 +972,7 @@ namespace CapaDatos
                     nuevoVisitante.edad = obj.edad;
                     nuevoVisitante.sexo = obj.sexo;
                     nuevoVisitante.telefono_movil = obj.telefono_movil;
+                    nuevoVisitante.telefono_fijo = obj.telefono_fijo;
                     nuevoVisitante.correo_electronico = obj.correo_electronico;
                     nuevoVisitante.direccion = obj.direccion;
                     nuevoVisitante.codigo_Postal = obj.codigo_Postal;
@@ -935,10 +983,13 @@ namespace CapaDatos
                     nuevoVisitante.bautizado = obj.bautizado;
                     nuevoVisitante.lugar_bautismo = obj.lugar_bautismo;
                     nuevoVisitante.fecha_bautismo = obj.fecha_bautismo;
+                    nuevoVisitante.fecha_cumpleanios = obj.fecha_cumpleanios;
+                    nuevoVisitante.fecha_boda = obj.fecha_boda;
+                    nuevoVisitante.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
                     nuevoVisitante.responsable = obj.responsable;
+                    nuevoVisitante.observaciones = obj.observaciones;
                     nuevoVisitante.numero_hijos = obj.numero_hijos;
                     nuevoVisitante.acepta_LOPD = obj.acepta_LOPD;
-
 
                     _context.SaveChanges();
                 }
@@ -983,6 +1034,11 @@ namespace CapaDatos
                 miembroExistente.bautizado = obj.bautizado;
                 miembroExistente.lugar_bautismo = obj.lugar_bautismo;
                 miembroExistente.fecha_bautismo = obj.fecha_bautismo;
+                miembroExistente.fecha_cumpleanios = obj.fecha_cumpleanios;
+                miembroExistente.fecha_boda = obj.fecha_boda;
+                miembroExistente.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
+                miembroExistente.telefono_fijo = obj.telefono_fijo;
+                miembroExistente.observaciones = obj.observaciones;
                 miembroExistente.responsable = obj.responsable;
                 miembroExistente.numero_hijos = obj.numero_hijos;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
