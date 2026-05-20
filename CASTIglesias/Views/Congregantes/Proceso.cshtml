@@ -755,9 +755,9 @@
             idGrupo = idGrupo || 0;
             idMinisterio = idMinisterio || 0;
 
-            const zonaSelect = construirSelectZGM(opcionesZonas, 'ID_zona', 'nombre_zona', idZona, '— Sin zona —');
-            const grupoSelect = construirSelectZGM(opcionesGrupos, 'ID_grupo', 'Descripcion', idGrupo, '— Sin grupo —');
-            const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'ID', 'Descripcion', idMinisterio, '— Sin ministerio —');
+            const zonaSelect = construirSelectZGM(opcionesZonas, 'iD_zona', 'nombre_zona', idZona, '— Sin zona —');
+            const grupoSelect = construirSelectZGM(opcionesGrupos, 'iD_grupo', 'descripcion', idGrupo, '— Sin grupo —');
+            const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'id', 'descripcion', idMinisterio, '— Sin ministerio —');
 
             $('#bodyZGM').append(`
                 <tr>
