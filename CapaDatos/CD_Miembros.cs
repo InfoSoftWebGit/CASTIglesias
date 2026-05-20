@@ -739,6 +739,8 @@ namespace CapaDatos
                         codigo_Postal = obj.codigo_Postal,
                         idProvincia = obj.idProvincia,
                         idMunicipio = obj.idMunicipio,
+                        fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
+                        pais_nacimiento = obj.pais_nacimiento,
                         acepta_LOPD = obj.acepta_LOPD,
                     };
 
