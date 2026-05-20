@@ -300,71 +300,34 @@
     </div>
 </div>
 <div class="modal fade" id="modalZonagrupoministerioMiembro" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Asignar Células / Grupos / Ministerios</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">Asignar Zonas / Grupos / Ministerios</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body">
-
                 <input type="hidden" id="idMiembroZGM">
-                <input id="txtid" type="hidden" />
-
-                <!-- ZONAS -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Zonas</label>
-
-                    <div id="zonaSeleccionadas" class="mb-2 d-flex flex-wrap gap-2"></div>
-
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="txtBuscarZona" placeholder="Buscar zona...">
-                        <button class="btn btn-outline-primary" type="button" onclick="agregarZonaManual()">Añadir</button>
-                    </div>
-
-                    <div id="listaZonas" class="list-group position-absolute w-50 shadow" style="z-index:999;"></div>
-                </div>
-
-                <!-- CONTENEDOR ÚNICO -->
-                <div id="contenedorZonasGruposMinisterios" class="mb-3"></div>
-
-                <!-- GRUPOS -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Grupos</label>
-
-                    <div id="gruposSeleccionados" class="mb-2 d-flex flex-wrap gap-2"></div>
-
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="txtBuscarGrupo" placeholder="Buscar grupo...">
-                        <button class="btn btn-outline-primary" type="button" onclick="agregarGrupoManual()">Añadir</button>
-                    </div>
-
-                    <div id="listaGrupos" class="list-group position-absolute w-50 shadow" style="z-index:999;"></div>
-                </div>
-
-                <!-- MINISTERIOS -->
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Ministerios</label>
-
-                    <div id="ministeriosSeleccionados" class="mb-2 d-flex flex-wrap gap-2"></div>
-
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="txtBuscarMinisterio" placeholder="Buscar ministerio...">
-                        <button class="btn btn-outline-primary" type="button" onclick="agregarMinisterioManual()">Añadir</button>
-                    </div>
-
-                    <div id="listaMinisterios" class="list-group position-absolute w-50 shadow" style="z-index:999;"></div>
-                </div>
-
+                <p class="text-muted small mb-3">Cada fila es un registro independiente. Un miembro puede tener varias filas con distintas combinaciones de zona, grupo y ministerio.</p>
+                <table class="table table-bordered table-sm align-middle" id="tablaZGM">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Zona</th>
+                            <th>Grupo</th>
+                            <th>Ministerio</th>
+                            <th style="width:50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyZGM"></tbody>
+                </table>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="agregarFilaZGM()">
+                    <i class="fas fa-plus"></i> Añadir fila
+                </button>
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button" class="btn btn-success" id="btnGuardarZGM">Guardar</button>
             </div>
-
         </div>
     </div>
 </div>
@@ -771,362 +734,127 @@
             });
         }
 
+        // =============================================
+        // ZGM: ZONAS, GRUPOS Y MINISTERIOS
+        // =============================================
+        let opcionesZonas = [];
+        let opcionesGrupos = [];
+        let opcionesMinisterios = [];
+
+        function construirSelectZGM(opciones, campoId, campoNombre, valorSeleccionado, placeholder) {
+            let html = `<select class="form-select form-select-sm"><option value="0">${placeholder}</option>`;
+            opciones.forEach(function (o) {
+                const sel = o[campoId] == valorSeleccionado ? 'selected' : '';
+                const nombre = $('<div>').text(o[campoNombre]).html();
+                html += `<option value="${o[campoId]}" ${sel}>${nombre}</option>`;
+            });
+            html += '</select>';
+            return html;
+        }
+
+        function agregarFilaZGM(idZona, idGrupo, idMinisterio) {
+            idZona = idZona || 0;
+            idGrupo = idGrupo || 0;
+            idMinisterio = idMinisterio || 0;
+
+            const zonaSelect = construirSelectZGM(opcionesZonas, 'ID_zona', 'nombre_zona', idZona, '— Sin zona —');
+            const grupoSelect = construirSelectZGM(opcionesGrupos, 'ID_grupo', 'Descripcion', idGrupo, '— Sin grupo —');
+            const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'ID', 'Descripcion', idMinisterio, '— Sin ministerio —');
+
+            $('#bodyZGM').append(`
+                <tr>
+                    <td>${zonaSelect}</td>
+                    <td>${grupoSelect}</td>
+                    <td>${ministerioSelect}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="$(this).closest('tr').remove()">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+        }
+
         function abrirModalZonasGruposMinisterios(data) {
+            const idMiembro = data.id_miembro;
+            $('#idMiembroZGM').val(idMiembro);
+            $('#bodyZGM').empty();
 
-            $("#txtid").val(data.id_miembro);
+            $.LoadingOverlay("show");
 
-            // limpiar selección
-            $("#zonaSeleccionadas").empty();
-            $("#gruposSeleccionados").empty();
-            $("#ministeriosSeleccionados").empty();
+            $.when(
+                $.ajax({ url: '/Mantenedor/ListarZonas', type: 'GET' }),
+                $.ajax({ url: '/Mantenedor/ListarGrupos', type: 'GET' }),
+                $.ajax({ url: '/Mantenedor/ListarMinisterios', type: 'GET' }),
+                $.ajax({ url: '/Congregantes/ObtenerMiembrosZonasGruposMinisterios', type: 'GET', data: { idMiembro: idMiembro } })
+            ).done(function (zonasResp, gruposResp, ministeriosResp, zgmResp) {
+                opcionesZonas = zonasResp[0].data || [];
+                opcionesGrupos = gruposResp[0].data || [];
+                opcionesMinisterios = ministeriosResp[0].data || [];
+                const items = zgmResp[0].zonas_grupos_ministerios || [];
 
-            $("#modalZonagrupoministerioMiembro").modal("show");
-            cargarZonasGruposMinisterios(data.id_miembro);
-        }
+                $.LoadingOverlay("hide");
 
-        /***************************************************************
-         ✅ CARGAR ZONAS, GRUPOS y MINISTERIOS DEL MIEMBRO
-        ***************************************************************/
-
-        function cargarZonasGruposMinisterios(iD_miembro) {
-            $.ajax({
-                url: '/Congregantes/ObtenerMiembrosZonasGruposMinisterios',
-                type: 'GET',
-                data: { idMiembro: iD_miembro },
-                success: function (resp) {
-                    $("#zonaSeleccionadas").empty();
-                    $("#gruposSeleccionados").empty();
-                    $("#ministeriosSeleccionados").empty();
-
-                    if (!resp.zonas_grupos_ministerios || resp.zonas_grupos_ministerios.length === 0) return;
-
-                    resp.zonas_grupos_ministerios.forEach(function (item) {
-
-                        if (item.iD_zona && item.iD_zona !== 0) {
-                            $("#zonaSeleccionadas").append(`
-                                <span class="badge bg-primary me-2" data-id="${item.iD_zona}">
-                                    ${item.nombre_zona || 'Zona ' + item.nombre_zona}
-                                    <button type="button" class="btn-close btn-close-white ms-2"
-                                            onclick="$(this).parent().remove()"></button>
-                                </span>
-                            `);
-                        }
-
-                        if (item.iD_grupo && item.iD_grupo !== 0) {
-                            $("#gruposSeleccionados").append(`
-                                <span class="badge bg-success me-2" data-id="${item.iD_grupo}">
-                                    ${item.descripcion_grupo || 'Grupo ' + item.descripcion_grupo}
-                                    <button type="button" class="btn-close btn-close-white ms-2"
-                                            onclick="$(this).parent().remove()"></button>
-                                </span>
-                            `);
-                        }
-
-                        if (item.id_ministerio && item.id_ministerio !== 0) {
-                            $("#ministeriosSeleccionados").append(`
-                                <span class="badge bg-warning text-dark me-2" data-id="${item.id_ministerio}">
-                                    ${item.descripcion_ministerio || 'Ministerio ' + item.descripcion_ministerio}
-                                    <button type="button" class="btn-close btn-close-white ms-2"
-                                            onclick="$(this).parent().remove()"></button>
-                                </span>
-                            `);
-                        }
-
+                if (items.length === 0) {
+                    agregarFilaZGM();
+                } else {
+                    items.forEach(function (item) {
+                        agregarFilaZGM(item.iD_zona, item.iD_grupo, item.id_ministerio);
                     });
-
-                    // Guardar el ID del miembro en el input hidden
-                    $("#txtid").val(iD_miembro);
-                },
-                error: function (err) {
-                    console.error("Error al cargar ZGM:", err);
                 }
+
+                $('#modalZonagrupoministerioMiembro').modal('show');
+            }).fail(function () {
+                $.LoadingOverlay("hide");
+                Swal.fire("Error", "No se pudo cargar las opciones de ZGM.", "error");
             });
         }
-        //BUSCAR ZONAS, GRUPOS Y MINISTERIOS
-        $("#txtBuscarZona").on("keyup", function () {
-            let filtro = $(this).val().trim();
-
-            if (filtro.length < 2) {
-                $("#listaZonas").empty();
-                return;
-            }
-
-            $.ajax({
-                url: '/Mantenedor/ListarZonasPorNombre',
-                type: 'GET',
-                data: { nombre: filtro },  // <-- ENVIAMOS EL TEXTO
-                success: function (resp) {
-
-                    if (resp.error) {
-                        console.error(resp.mensaje);
-                        return;
-                    }
-
-                    $("#listaZonas").empty();
-
-                    resp.forEach(z => {
-                        $("#listaZonas").append(`
-                            <button class="list-group-item list-group-item-action"
-                                onclick="asignarZona(${z.id}, '${z.nombre}')">
-                                ${z.nombre}
-                            </button>
-                        `);
-                    });
-                }
-            });
-        });
-
-        $("#txtBuscarGrupo").on("keyup", function () {
-            let filtro = $(this).val().trim();
-
-            if (filtro.length < 2) {
-                $("#listaGrupos").empty();
-                return;
-            }
-
-            $.ajax({
-                url: '/Mantenedor/ListarGruposPorNombre',
-                type: 'GET',
-                data: { nombre: filtro }, // <-- enviamos el texto al backend
-                success: function (resp) {
-
-                    if (resp.error) {
-                        console.error(resp.mensaje);
-                        return;
-                    }
-
-                    $("#listaGrupos").empty();
-
-                    resp.forEach(g => {
-                        $("#listaGrupos").append(`
-                            <button class="list-group-item list-group-item-action"
-                                onclick="asignarGrupo(${g.id}, '${g.nombre}')">
-                                ${g.nombre}
-                            </button>
-                        `);
-                    });
-                }
-            });
-        });
-        $("#txtBuscarMinisterio").on("keyup", function () {
-            let filtro = $(this).val().trim();
-
-            if (filtro.length < 2) {
-                $("#listaMinisterios").empty();
-                return;
-            }
-
-            $.ajax({
-                url: '/Mantenedor/ListarMinisteriosPorNombre',
-                type: 'GET',
-                data: { nombre: filtro },  // enviamos el texto al backend
-                success: function (resp) {
-
-                    if (resp.error) {
-                        console.error(resp.mensaje);
-                        return;
-                    }
-
-                    $("#listaMinisterios").empty();
-
-                    resp.forEach(m => {
-                        $("#listaMinisterios").append(`
-                            <button class="list-group-item list-group-item-action"
-                                onclick="asignarMinisterio(${m.id}, '${m.nombre}')">
-                                ${m.nombre}
-                            </button>
-                        `);
-                    });
-                }
-            });
-        });
-
-        // FIN BUSCAR ZONAS, GRUPOS Y MINISTERIOS
-        $("#zonaSeleccionadas span").each(function () {
-            const idZona = parseInt($(this).attr("data-id")) || 0;
-            if (idZona > 0) {
-                listaZGM.push({
-                    ID_miembro: idMiembro,
-                    ID_zona: idZona,
-                    ID_grupo: 0,
-                    ID_ministerio: 0,
-                    ID_sede: loggedInSedeID
-                });
-            }
-        });
-
-            // GRUPOS
-        $("#gruposSeleccionados span").each(function () {
-            const idGrupo = parseInt($(this).attr("data-id")) || 0;
-            if (idGrupo > 0) {
-                listaZGM.push({
-                    ID_miembro: idMiembro,
-                    ID_zona: 0,
-                    ID_grupo: idGrupo,
-                    ID_ministerio: 0,
-                    ID_sede: loggedInSedeID
-                });
-            }
-        });
-
-            // MINISTERIOS
-        $("#ministeriosSeleccionados span").each(function () {
-            const idMinisterio = parseInt($(this).attr("data-id")) || 0;
-            if (idMinisterio > 0) {
-                listaZGM.push({
-                    ID_miembro: idMiembro,
-                    ID_zona: 0,
-                    ID_grupo: 0,
-                    ID_ministerio: idMinisterio,
-                    ID_sede: loggedInSedeID
-                });
-            }
-        });
 
         $("#btnGuardarZGM").click(function () {
-            const idMiembro = $("#txtid").val();
-            let idZona = 0, idGrupo = 0, idMinisterio = 0;
-            const listaZGM = [];
+            const idMiembro = parseInt($('#idMiembroZGM').val());
+            const lista = [];
 
-            // Suponiendo que solo seleccionas uno de cada tipo por miembro
-            idZona = parseInt($("#zonaSeleccionadas span").attr("data-id")) || 0;
-            idGrupo = parseInt($("#gruposSeleccionados span").attr("data-id")) || 0;
-            idMinisterio = parseInt($("#ministeriosSeleccionados span").attr("data-id")) || 0;
+            $('#bodyZGM tr').each(function () {
+                const selects = $(this).find('select');
+                lista.push({
+                    ID_miembro: idMiembro,
+                    ID_zona: parseInt($(selects[0]).val()) || 0,
+                    ID_grupo: parseInt($(selects[1]).val()) || 0,
+                    ID_ministerio: parseInt($(selects[2]).val()) || 0,
+                    ID_sede: loggedInSedeID
+                });
+            });
 
-            if (idZona === 0 && idGrupo === 0 && idMinisterio === 0) {
-                Swal.fire("Atención", "No hay zonas, grupos ni ministerios seleccionados.", "warning");
+            const hayFilaVacia = lista.some(function (r) {
+                return r.ID_zona === 0 && r.ID_grupo === 0 && r.ID_ministerio === 0;
+            });
+
+            if (hayFilaVacia) {
+                Swal.fire("Atención", "Hay filas sin ninguna zona, grupo ni ministerio. Elimínalas o completa la selección.", "warning");
                 return;
             }
 
-            listaZGM.push({
-                ID_miembro: idMiembro,
-                ID_zona: idZona,
-                ID_grupo: idGrupo,
-                ID_ministerio: idMinisterio,
-                ID_sede: loggedInSedeID
-            });
-
-            console.log("JSON que se enviará:", JSON.stringify(listaZGM));
-
             $.ajax({
-                url: "/Congregantes/GuardarZGM",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(listaZGM),
+                url: '/Congregantes/GuardarZGM',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(lista),
+                beforeSend: function () { $.LoadingOverlay("show"); },
                 success: function (resp) {
+                    $.LoadingOverlay("hide");
                     if (resp.resultado) {
-                        Swal.fire("Guardado", "Cambios aplicados correctamente", "success");
-                        $("#zonaSeleccionadas, #gruposSeleccionados, #ministeriosSeleccionados").empty();
+                        Swal.fire("Guardado", "Asignaciones guardadas correctamente.", "success");
+                        $('#modalZonagrupoministerioMiembro').modal('hide');
                     } else {
                         Swal.fire("Error", resp.mensaje, "error");
                     }
                 },
                 error: function () {
+                    $.LoadingOverlay("hide");
                     Swal.fire("Error", "No se pudo guardar la información.", "error");
                 }
             });
         });
-
-        function configurarAutocomplete({
-            inputSelector,
-            listaSelector,
-            contenedorSeleccionadas,
-            urlBackend,
-            claseBadge,
-            asignarFuncion
-        }) {
-            $(inputSelector).on("keyup", function () {
-                let filtro = $(this).val().trim();
-
-                if (filtro.length < 2) {
-                    $(listaSelector).empty();
-                    return;
-                }
-
-                $.ajax({
-                    url: urlBackend,
-                    type: "GET",
-                    data: { nombre: filtro },
-                    success: function (resp) {
-                        if (resp.error) {
-                            console.error(resp.mensaje);
-                            return;
-                        }
-
-                        $(listaSelector).empty();
-
-                        resp.forEach(item => {
-                            const nombreSeguro = $('<div>').text(item.nombre).html();
-                            $(listaSelector).append(`
-                                <button class="list-group-item list-group-item-action"
-                                    onclick="${asignarFuncion}(${item.id}, '${nombreSeguro}')">
-                                    ${nombreSeguro}
-                                </button>
-                            `);
-                        });
-
-                    }
-                });
-            });
-        }
-
-        // Función general para agregar un item evitando duplicados
-        function agregarElementoSeleccionado(id, nombre, contenedor, claseBadge) {
-            if (!id) return; // ignorar valores falsy
-            if ($(`${contenedor} span[data-id="${id}"]`).length > 0) return;
-
-            const nombreSeguro = $('<div>').text(nombre).html(); // evita problemas con comillas o caracteres especiales
-
-            $(contenedor).append(`
-                <span class="badge ${claseBadge} me-2" data-id="${id}">
-                    ${nombreSeguro}
-                    <button type="button" class="btn-close btn-close-white ms-2" onclick="$(this).parent().remove()"></button>
-                </span>
-            `);
-
-            // Limpiar input y lista de sugerencias
-            $(contenedor).siblings('input').val('');
-            $(contenedor).siblings('.list-group').empty();
-        }
-
-        // Configuración para Zonas
-        configurarAutocomplete({
-            inputSelector: "#txtBuscarZona",
-            listaSelector: "#listaZonas",
-            contenedorSeleccionadas: "#zonaSeleccionadas",
-            urlBackend: "/Mantenedor/ListarZonasPorNombre",
-            claseBadge: "bg-primary",
-            asignarFuncion: "asignarZona"
-        });
-        function asignarZona(id, nombre) {
-            agregarElementoSeleccionado(id, nombre, "#zonaSeleccionadas", "bg-primary");
-        }
-
-        // Configuración para Grupos
-        configurarAutocomplete({
-            inputSelector: "#txtBuscarGrupo",
-            listaSelector: "#listaGrupos",
-            contenedorSeleccionadas: "#gruposSeleccionados",
-            urlBackend: "/Mantenedor/ListarGruposPorNombre",
-            claseBadge: "bg-success",
-            asignarFuncion: "asignarGrupo"
-        });
-        function asignarGrupo(id, nombre) {
-            agregarElementoSeleccionado(id, nombre, "#gruposSeleccionados", "bg-success");
-        }
-
-        // Configuración para Ministerios
-        configurarAutocomplete({
-            inputSelector: "#txtBuscarMinisterio",
-            listaSelector: "#listaMinisterios",
-            contenedorSeleccionadas: "#ministeriosSeleccionados",
-            urlBackend: "/Mantenedor/ListarMinisteriosPorNombre",
-            claseBadge: "bg-warning text-dark",
-            asignarFuncion: "asignarMinisterio"
-        });
-        function asignarMinisterio(id, nombre) {
-            agregarElementoSeleccionado(id, nombre, "#ministeriosSeleccionados", "bg-warning text-dark");
-        }
                     // ======================
         // BOTONES DE ESTADO
         // ======================

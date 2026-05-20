@@ -580,40 +580,30 @@ namespace CapaDatos
         /// <param name="lista"></param>
         /// <param name="mensaje"></param>
         /// <returns></returns>
-        public int GuardarZGMLista(List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
+        public bool SincronizarZGM(int idMiembro, int idSede, List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
         {
             mensaje = string.Empty;
-
             try
             {
+                var existentes = _context.Miembros_Zona_Grupo_Ministerio
+                    .Where(x => x.ID_miembro == idMiembro).ToList();
+                _context.Miembros_Zona_Grupo_Ministerio.RemoveRange(existentes);
+
                 foreach (var item in lista)
                 {
-                    // evitar nulls si llegan
-                    item.ID_zona = item.ID_zona == 0 ? 0 : item.ID_zona;
-                    item.ID_grupo = item.ID_grupo == 0 ? 0 : item.ID_grupo;
-                    item.ID_ministerio = item.ID_ministerio == 0 ? 0 : item.ID_ministerio;
-
-                    bool existe = _context.Miembros_Zona_Grupo_Ministerio.Any(x =>
-                        x.ID_miembro == item.ID_miembro &&
-                        x.ID_zona == item.ID_zona &&
-                        x.ID_grupo == item.ID_grupo &&
-                        x.ID_ministerio == item.ID_ministerio
-                    );
-
-                    if (!existe)
-                    {
-                        _context.Miembros_Zona_Grupo_Ministerio.Add(item);
-                    }
+                    item.ID_miembro = idMiembro;
+                    item.ID_sede = idSede;
+                    _context.Miembros_Zona_Grupo_Ministerio.Add(item);
                 }
 
                 _context.SaveChanges();
-                mensaje = "Registros guardados correctamente.";
-                return 1;
+                mensaje = "ZGM sincronizado correctamente.";
+                return true;
             }
             catch (Exception ex)
             {
                 mensaje = ex.Message;
-                return 0;
+                return false;
             }
         }
 
