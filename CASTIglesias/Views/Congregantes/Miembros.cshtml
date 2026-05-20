@@ -233,8 +233,8 @@
                         </div>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtPersonaCargo" class="form-label">Persona a cargo</label>
-                        <input type="text" class="form-control" id="txtPersonaCargo">
+                        <label for="txtResponsable" class="form-label">Responsable</label>
+                        <input type="text" class="form-control" id="txtResponsable">
                     </div>
                     <div class="col-sm-6 mb-3">
                         <label for="txtObservaciones" class="form-label">Observaciones</label>
@@ -564,7 +564,7 @@
                 $("#chechFallecido").prop("checked", false);
                 $("#checkBautizado").prop("checked", false);
                 $("#txtLugarBautismo").val("");
-                $("#txtPersonaCargo").val("");
+                $("#txtResponsable").val("");
                 $("#txtObservaciones").val("");
                 $("#txtNumeroHijos").val(0);
                 $("#chkAceptaLOPD").prop("checked", false);
@@ -623,7 +623,7 @@
                 $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
         // FIN CHECK BOXES
                 $("#txtLugarBautismo").val(data.lugar_bautismo || "");
-                $("#txtPersonaCargo").val(data.persona_cargo || "");
+                $("#txtResponsable").val(data.responsable || "");
                 $("#txtObservaciones").val(data.observaciones || "");
                 $("#txtNumeroHijos").val(data.numero_hijos || 0);
                 $("#zonaSeleccionadas").empty();
@@ -655,14 +655,14 @@
 
                 iD_sede: parseInt($("#txtID_sede").val() || 0),
 
-                telefono_movil: parseInt($("#txtTelefonoMovil").val() || 0),
-                telefono_fijo: parseInt($("#txtTelefonoFijo").val() || 0),
+                telefono_movil: $("#txtTelefonoMovil").val() || "",
+                telefono_fijo: $("#txtTelefonoFijo").val() || "",
 
                 sexo: $("#cboSexo").val() || "",   // <--- STRING, NO BOOLEAN
 
                 direccion: $("#txtDireccion").val() || "",
 
-                codigo_Postal: parseInt($("#txtCP").val() || 0),
+                codigo_Postal: $("#txtCP").val() || "",
                 idProvincia: parseInt($("#cboProvincia").val() || 0),
                 idMunicipio: parseInt($("#cboMunicipio").val() || 0),
 
@@ -672,7 +672,7 @@
                 estado_Civil: $("#cboEstadoCivil").val() || "",
                 estado: $("#cboEstado").val() || "",
 
-                persona_cargo: $("#txtPersonaCargo").val() || "",
+                responsable: $("#txtResponsable").val() || "",
 
                 observaciones: $("#txtObservaciones").val() || "",
 

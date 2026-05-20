@@ -175,7 +175,7 @@ namespace CapaDatos
                 if (!esAnonimo)
                 {
                     bool existeMiembro = _context.Miembros
-                        .Any(m => m.Nombre_miembro == obj.nombre_miembro && m.ID_sede == obj.ID_sede);
+                        .Any(m => m.nombre_miembro == obj.nombre_miembro && m.id_sede == obj.ID_sede);
 
                     if (!existeMiembro)
                     {

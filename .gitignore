@@ -9,7 +9,8 @@ appsettings*.json
 # data ignore
 *.csv
 *.xlsx
-
+*.txt
+*.ps1
 
 # User-specific files
 *.rsuser
