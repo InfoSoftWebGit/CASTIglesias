@@ -532,7 +532,7 @@
                 fecha_fallecido: $("#txtFechaFallecimiento").val() || null,
             };
             $.ajax({
-                url: '@Url.Action("RegistrarMiembroVisitante", "Congregantes")',
+                url: '@Url.Action("EditarMiembroSimpatizante", "Congregantes")',
                 type: "POST",
                 data: JSON.stringify(miembroDTO),
                 dataType: "json",
