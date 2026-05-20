@@ -856,6 +856,8 @@ namespace CapaDatos
                         bautizado = m.bautizado,
                         numero_hijos = m.numero_hijos,
                         acepta_LOPD = m.acepta_LOPD,
+                        responsable = m.responsable,
+                        observaciones = m.observaciones,
                         id_sede = m.id_sede,
                         nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
                         nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
