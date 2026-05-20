@@ -147,17 +147,10 @@ namespace CapaNegocio
         // ---------------------------------------------------------
         // ✅ ASIGNAR ZONA Y GRUPO A MIEMBRO
         // ---------------------------------------------------------
-        public int GuardarZGMLista(List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
+        public bool SincronizarZGM(int idMiembro, int idSede, List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
         {
             mensaje = string.Empty;
-
-            if (lista == null || lista.Count == 0)
-            {
-                mensaje = "La lista está vacía.";
-                return 0;
-            }
-
-            return _capaDatos.GuardarZGMLista(lista, out mensaje);
+            return _capaDatos.SincronizarZGM(idMiembro, idSede, lista, out mensaje);
         }
 
 

@@ -224,14 +224,14 @@ namespace CASTIglesias.Controllers
         [HttpPost]
         public IActionResult GuardarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
-            string mensaje;
-            int resultado = _cnMiembros.GuardarZGMLista(lista, out mensaje);
+            if (lista == null || lista.Count == 0)
+                return Json(new { resultado = false, mensaje = "La lista está vacía." });
 
-            return Json(new
-            {
-                resultado = resultado == 1,
-                mensaje = mensaje
-            });
+            string mensaje;
+            int sedeID = ObtenerIdSedeUsuario();
+            int idMiembro = lista[0].ID_miembro;
+            bool resultado = _cnMiembros.SincronizarZGM(idMiembro, sedeID, lista, out mensaje);
+            return Json(new { resultado, mensaje });
         }
 
 
