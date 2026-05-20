@@ -300,7 +300,7 @@
                         $.ajax({
                             url: '@Url.Action("EliminarMiembro", "Congregantes")',
                             type: "POST",
-                            data: { id: data.iD_miembro },
+                            data: { id: data.id_miembro },
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
@@ -362,7 +362,7 @@
             }
                else {
                 // IDENTIFICADORES
-                $("#txtid").val(data.iD_miembro || 0);
+                $("#txtid").val(data.id_miembro || 0);
                 //FIN IDENTIFICADORES
                 //DATOS BÁSICOS
                 $("#txtNombres").val(data.nombre_miembro || "");
@@ -371,7 +371,7 @@
                 $("#txtTelefonoMovil").val(data.telefono_movil || "");
                 $("#txtEdad").val(data.edad || "");
                 $("#cboSexo").val(data.sexo || "")
-                $("#txtID_sede").val(data.ID_sede || loggedInSedeID);
+                $("#txtID_sede").val(data.id_sede || loggedInSedeID);
                 $("#txtSede").val(data.nombre_sede || loggedInSedeNombre);
                 //FIN DATOS BÁSICOS
 
