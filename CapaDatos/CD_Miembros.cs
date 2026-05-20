@@ -138,15 +138,29 @@ namespace CapaDatos
             try
             {
                 // Validaciones
-                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico && m.id_sede == obj.id_sede))
+                if (_context.Miembros.Any(m => m.correo_electronico == obj.correo_electronico && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El correo ya existe en esta sede.";
                     return 0;
                 }
 
-                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede))
+                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro en esta sede.";
+                    return 0;
+                }
+
+                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                {
+                    mensaje = "El número de diezmo individual ya está asignado a otro miembro en esta sede.";
+                    return 0;
+                }
+
+                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                {
+                    mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
                     return 0;
                 }
 
@@ -295,6 +309,24 @@ namespace CapaDatos
                                                m.id_sede == miembro.id_sede))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro.";
+                    return false;
+                }
+
+                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
+                {
+                    mensaje = "El número de diezmo individual ya está asignado a otro miembro en esta sede.";
+                    return false;
+                }
+
+                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar &&
+                                               m.id_miembro != obj.id_miembro &&
+                                               m.id_sede == miembro.id_sede))
+                {
+                    mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
                     return false;
                 }
 
