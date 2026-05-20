@@ -145,7 +145,15 @@
                 <hr />
                 @*--------------FIN APARTADO DE FECHAS-------------------*@
                 @*--------------APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
-
+                <h5>Información Adicional</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboPaisNacimiento" class="form-label">País de nacimiento</label>
+                        <select id="cboPaisNacimiento" class="form-select">
+                            <option value="">Selecciona un país</option>
+                        </select>
+                    </div>
+                </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
                 @*--------------APARTADO DE PRIVACIDAD-------------------*@
                 <h5>Privacidad</h5>
@@ -246,7 +254,7 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            return valor
+                            return valor === "Hombre"
                                 ? '<span class="badge bg-primary">Hombre</span>'
                                 : '<span class="badge bg-warning text-dark">Mujer</span>';
                         }
@@ -308,6 +316,8 @@
                     }
                 });
             });
+
+            cargarPaises();
 
             $("#cboProvincia").change(function() {
                 var provinciaSeleccionadaId = $(this).val();
@@ -378,7 +388,7 @@
                 $("#txtFechaCumpleanos").val(formatearFecha(data.fecha_cumpleanios) || "");
                 // FIN FECHAS
                 // INFORMACIÓN ADICIONAL
-                $("#txtPais_nacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
+                $("#cboPaisNacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
                 $("#cboEstado").val(data.estado || ""); // Añadido este campo faltante
                 //CHECK BOXES
@@ -425,7 +435,7 @@
                 idProvincia: parseInt($("#cboProvincia").val() || 0),
                 idMunicipio: parseInt($("#cboMunicipio").val() || 0),
 
-                pais_nacimiento: $("#txtPais_nacimiento").val() || "",
+                pais_nacimiento: $("#cboPaisNacimiento").val() || "",
                 lugar_bautismo: $("#txtLugarBautismo").val() || "",
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
@@ -479,6 +489,25 @@
                 }
             });
             };
+        // ✅ CARGAR PAÍSES
+        function cargarPaises() {
+            $.ajax({
+                url: '@Url.Action("ListarPaises", "Mantenedor")',
+                type: "GET",
+                success: function (res) {
+                    var select = $("#cboPaisNacimiento");
+                    var valorActual = select.val();
+                    select.empty().append('<option value="">Selecciona un país</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(p => {
+                            select.append(`<option value="${p.nombre}">${p.nombre}</option>`);
+                        });
+                    }
+                    if (valorActual) select.val(valorActual);
+                }
+            });
+        }
+
         // ✅ CARGAR MUNICIPIOS
         function cargarMunicipios(idProvincia, idMunicipioSeleccionado) {
             $("#cboMunicipio").prop('disabled', true).html('<option>Cargando...</option>');

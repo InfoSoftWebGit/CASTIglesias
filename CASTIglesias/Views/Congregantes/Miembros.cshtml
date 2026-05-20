@@ -187,8 +187,10 @@
                 <h5>Información Adicional</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="txtPais" class="form-label">País de nacimiento</label>
-                        <input type="text" class="form-control" id="txtPais_nacimiento">
+                        <label for="cboPaisNacimiento" class="form-label">País de nacimiento</label>
+                        <select id="cboPaisNacimiento" class="form-select">
+                            <option value="">Selecciona un país</option>
+                        </select>
                     </div>
                     <div class="col-sm-4 mb-3">
                         <label for="cboEstadoCivil" class="form-label">Estado civil</label>
@@ -433,7 +435,7 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            return valor
+                            return valor === "Hombre"
                                 ? '<span class="badge bg-primary">Hombre</span>'
                                 : '<span class="badge bg-warning text-dark">Mujer</span>';
                         }
@@ -509,6 +511,8 @@
                 });
             });
 
+            cargarPaises();
+
             $("#cboProvincia").change(function() {
                 var provinciaSeleccionadaId = $(this).val();
                 if (provinciaSeleccionadaId !== "0" && provinciaSeleccionadaId !== null) {
@@ -555,7 +559,7 @@
                 $("#txtFechaFallecimiento").val("");
                 //FIN FECHAS
                 //INFORMACIÓN ADICIONAL
-                $("#txtPais_nacimiento").val("");
+                $("#cboPaisNacimiento").val("");
                 $("#cboEstadoCivil").val("");
                 $("#cboEstado").val("");
                 $("#checkAlumno_vyf").prop("checked", false);
@@ -611,7 +615,7 @@
                 // FIN FECHAS
 
                 // INFORMACIÓN ADICIONAL
-                $("#txtPais_nacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
+                $("#cboPaisNacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
                 $("#cboEstado").val(data.estado || ""); // Añadido este campo faltante
                 //CHECK BOXES
@@ -625,7 +629,7 @@
                 $("#txtLugarBautismo").val(data.lugar_bautismo || "");
                 $("#txtResponsable").val(data.responsable || "");
                 $("#txtObservaciones").val(data.observaciones || "");
-                $("#txtNumeroHijos").val(data.numero_hijos || 0);
+                $("#txtNumeroHijos").val(Math.max(0, parseInt(data.numero_hijos || 0)));
                 $("#zonaSeleccionadas").empty();
                 $("#gruposSeleccionados").empty();
                 // FIN INFORMACIÓN ADICIONAL
@@ -666,7 +670,7 @@
                 idProvincia: parseInt($("#cboProvincia").val() || 0),
                 idMunicipio: parseInt($("#cboMunicipio").val() || 0),
 
-                pais_nacimiento: $("#txtPais_nacimiento").val() || "",
+                pais_nacimiento: $("#cboPaisNacimiento").val() || "",
                 lugar_bautismo: $("#txtLugarBautismo").val() || "",
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
@@ -722,6 +726,25 @@
             };
 
 
+
+        // ✅ CARGAR PAÍSES
+        function cargarPaises() {
+            $.ajax({
+                url: '@Url.Action("ListarPaises", "Mantenedor")',
+                type: "GET",
+                success: function (res) {
+                    var select = $("#cboPaisNacimiento");
+                    var valorActual = select.val();
+                    select.empty().append('<option value="">Selecciona un país</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(p => {
+                            select.append(`<option value="${p.nombre}">${p.nombre}</option>`);
+                        });
+                    }
+                    if (valorActual) select.val(valorActual);
+                }
+            });
+        }
 
         // ✅ CARGAR MUNICIPIOS
         function cargarMunicipios(idProvincia, idMunicipioSeleccionado) {
