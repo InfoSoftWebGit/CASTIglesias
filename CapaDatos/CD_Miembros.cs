@@ -697,6 +697,7 @@ namespace CapaDatos
                         idProvincia = m.idProvincia,
                         idMunicipio = m.idMunicipio,
                         fecha_llegada_iglesia = m.fecha_llegada_iglesia,
+                        pais_nacimiento = m.pais_nacimiento,
                         acepta_LOPD = m.acepta_LOPD,
                         id_sede = m.id_sede,
                         nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
@@ -791,7 +792,10 @@ namespace CapaDatos
                 miembroExistente.correo_electronico = obj.correo_electronico;
                 miembroExistente.direccion = obj.direccion;
                 miembroExistente.codigo_Postal = obj.codigo_Postal;
+                miembroExistente.idProvincia = obj.idProvincia;
                 miembroExistente.idMunicipio = obj.idMunicipio;
+                miembroExistente.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
+                miembroExistente.pais_nacimiento = obj.pais_nacimiento;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
 
                 // Forzar a EF que es una entidad modificada
@@ -1153,11 +1157,30 @@ namespace CapaDatos
                 miembroExistente.sexo = obj.sexo;
                 miembroExistente.estado = "Proceso";
                 miembroExistente.telefono_movil = obj.telefono_movil;
+                miembroExistente.telefono_fijo = obj.telefono_fijo;
                 miembroExistente.correo_electronico = obj.correo_electronico;
                 miembroExistente.direccion = obj.direccion;
                 miembroExistente.codigo_Postal = obj.codigo_Postal;
                 miembroExistente.idProvincia = obj.idProvincia;
                 miembroExistente.idMunicipio = obj.idMunicipio;
+                miembroExistente.pais_nacimiento = obj.pais_nacimiento;
+                miembroExistente.estado_Civil = obj.estado_Civil;
+                miembroExistente.bautizado = obj.bautizado;
+                miembroExistente.fecha_bautismo = obj.fecha_bautismo;
+                miembroExistente.lugar_bautismo = obj.lugar_bautismo;
+                miembroExistente.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
+                miembroExistente.fecha_cumpleanios = obj.fecha_cumpleanios;
+                miembroExistente.fecha_boda = obj.fecha_boda;
+                miembroExistente.fecha_baja = obj.fecha_baja;
+                miembroExistente.fecha_fallecido = obj.fecha_fallecido;
+                miembroExistente.responsable = obj.responsable;
+                miembroExistente.observaciones = obj.observaciones;
+                miembroExistente.numero_hijos = obj.numero_hijos;
+                miembroExistente.alumno_VyF = obj.alumno_VyF;
+                miembroExistente.curso_acabado = obj.curso_acabado;
+                miembroExistente.excluir_directorio = obj.excluir_directorio;
+                miembroExistente.diezmo_individual = obj.diezmo_individual;
+                miembroExistente.diezmo_familiar = obj.diezmo_familiar;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
 
                 // Forzar a EF que es una entidad modificada
