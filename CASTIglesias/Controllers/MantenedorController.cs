@@ -26,6 +26,7 @@ namespace CapaPresentaciónAdmin.Controllers
         private readonly CN_Municipio _cnMunicipios;
         private readonly CN_Grupos _cnGrupos;
         private readonly CN_Ministerio _cnMinisterio;
+        private readonly CN_Paises _cnPaises;
 
         // Constructor con inyección de dependencias
         public MantenedorController(CN_Miembros negocioMiembros,
@@ -38,6 +39,7 @@ namespace CapaPresentaciónAdmin.Controllers
             CN_Provincia cnProvincia,
             CN_Municipio cnMunicipio,
             CN_Ministerio cnMinisterio,
+            CN_Paises cnPaises,
             CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos) // Llamada al constructor de la clase base
         {
             _cnDiezmo = negocioDiezmo;
@@ -49,6 +51,7 @@ namespace CapaPresentaciónAdmin.Controllers
             _cnProvincias = cnProvincia;
             _cnMunicipios = cnMunicipio;
             _cnMinisterio = cnMinisterio;
+            _cnPaises = cnPaises;
         }
         // ------------------------------------------------------------------------------------------------
         #endregion
@@ -599,6 +602,24 @@ namespace CapaPresentaciónAdmin.Controllers
             catch (Exception ex)
             {
                 return Json(new { data = new object[0], error = true, mensaje = "Error al filtrar municipios: " + ex.Message });
+            }
+        }
+        #endregion
+        // ------------------------------------------------------------------------------------------------
+        ///////////////////////////// APARTADO DE PAÍSES //////////////////////////////
+        #region Paises
+        [HttpGet]
+        public IActionResult ListarPaises()
+        {
+            try
+            {
+                var listaPaises = _cnPaises.ListarPaises();
+                var data = listaPaises.Select(p => new { nombre = p.nombre }).ToList();
+                return Json(new { data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = "Error al listar países: " + ex.Message });
             }
         }
         #endregion
