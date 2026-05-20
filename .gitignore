@@ -6,6 +6,8 @@
 ## Ignore appsettings
 appsettings*.json
 
+**/launchsettings.json
+
 # data ignore
 *.csv
 *.xlsx
