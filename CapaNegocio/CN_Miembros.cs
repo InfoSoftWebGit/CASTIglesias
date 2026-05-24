@@ -27,6 +27,11 @@ namespace CapaNegocio
             return _capaDatos.ContadorMiembros(sedeID);
         }
 
+        public int ContadorPorEstado(int sedeID, string estado)
+        {
+            return _capaDatos.ContadorPorEstado(sedeID, estado);
+        }
+
         //---------------------------------------------------------
         // MÉTODO REGISTRAR MIEMBRO
         //---------------------------------------------------------

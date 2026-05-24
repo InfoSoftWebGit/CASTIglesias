@@ -10,6 +10,51 @@
 
 <div class="row">
     <div class="col-xl-3 col-md-6">
+        <div class="card bg-secondary text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Total de Visitantes</h6>
+                        <h6 id="totalvisitantes"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-info text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Total de Simpatizantes</h6>
+                        <h6 id="totalsimpatizantes"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-tag fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Total En Proceso</h6>
+                        <h6 id="totalenproceso"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-cog fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
         <div class="card bg-primary text-white mb-4">
             <div class="card-body">
                 <div class="row">
@@ -173,12 +218,21 @@
 
 
         $(document).ready(function () {
-                    $.get('@Url.Action("ContadorMiembros", "Congregantes")', function (data) {
-            const total = data.resultado ?? 0;
-            $("#totalmiembros").text(total);
-        }).fail(function() {
-            $("#totalmiembros").text('Error');
-        });
+            $.get('@Url.Action("ContadorMiembros", "Congregantes")', function (data) {
+                $("#totalmiembros").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalmiembros").text('Error'); });
+
+            $.get('@Url.Action("ContadorVisitantes", "Congregantes")', function (data) {
+                $("#totalvisitantes").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalvisitantes").text('Error'); });
+
+            $.get('@Url.Action("ContadorSimpatizantes", "Congregantes")', function (data) {
+                $("#totalsimpatizantes").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalsimpatizantes").text('Error'); });
+
+            $.get('@Url.Action("ContadorEnProceso", "Congregantes")', function (data) {
+                $("#totalenproceso").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalenproceso").text('Error'); });
 
             // Llamar a la función para generar las tarjetas de zonas
             cargarTarjetasZonas();

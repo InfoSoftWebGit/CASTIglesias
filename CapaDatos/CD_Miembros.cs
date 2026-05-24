@@ -124,6 +124,22 @@ namespace CapaDatos
             }
         }
 
+        public int ContadorPorEstado(int sedeID, string estado)
+        {
+            try
+            {
+                var consultaBase = _context.Miembros.Where(m => m.estado == estado);
+                if (sedeID != 1000)
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
+                return consultaBase.Count();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ContadorPorEstado({estado}) EF Core: {ex.Message}");
+                return 0;
+            }
+        }
+
         /// <summary>
         /// REGISTRAR MIEMBROS CON ZONAS, GRUPOS Y MINISTERIOS
         /// </summary>
