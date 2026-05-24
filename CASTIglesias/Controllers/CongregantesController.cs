@@ -204,6 +204,29 @@ namespace CASTIglesias.Controllers
                 return Json(new { resultado = 0, error = true, mensaje = ex.Message });
             }
         }
+        [HttpGet]
+        public JsonResult ContadorVisitantes()
+        {
+            try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Visitante") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ex.Message }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorSimpatizantes()
+        {
+            try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Simpatizante") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ex.Message }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorEnProceso()
+        {
+            try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Proceso") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ex.Message }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
         #endregion CONTADORES
 
         #region MIEMBROS CON ZONAS, GRUPOS Y MINISTERIOS
