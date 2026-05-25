@@ -74,6 +74,122 @@ namespace CASTIglesias.Controllers
             }
         }
 
+        #region GRÁFICO DE ASISTENCIA
+        [HttpGet]
+        public JsonResult ObtenerGraficoAsistencia(string modo = "anual", int? anio = null, int? mes = null, int? dia = null, string turno = "todos")
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                int anioFiltro = anio ?? DateTime.Today.Year;
+
+                var query = _context.Asistencia_Culto.AsQueryable();
+                if (sedeID != 1000)
+                    query = query.Where(a => a.ID_sede == sedeID);
+
+                if (turno == "mañana" || turno == "tarde")
+                    query = query.Where(a => a.turno_culto == turno);
+
+                query = query.Where(a => a.fecha_asistencia_culto.Year == anioFiltro);
+
+                if (modo == "anual")
+                {
+                    var agrupado = query
+                        .GroupBy(a => a.fecha_asistencia_culto.Month)
+                        .Select(g => new
+                        {
+                            Mes = g.Key,
+                            Adultos = g.Sum(a => a.adulto_asistencia_culto),
+                            Ninos = g.Sum(a => (int?)a.niños_asistencia_culto) ?? 0,
+                            Invitados = g.Sum(a => a.invi_visit_asistencia_culto)
+                        })
+                        .OrderBy(x => x.Mes)
+                        .ToList();
+
+                    return Json(agrupado.Select(x => new
+                    {
+                        Etiqueta = new DateTime(anioFiltro, x.Mes, 1).ToString("MMM yyyy", new CultureInfo("es-ES")),
+                        x.Adultos,
+                        x.Ninos,
+                        x.Invitados
+                    }));
+                }
+                else if (modo == "mensual")
+                {
+                    int mesFiltro = mes ?? DateTime.Today.Month;
+                    query = query.Where(a => a.fecha_asistencia_culto.Month == mesFiltro);
+
+                    var agrupado = query
+                        .GroupBy(a => new
+                        {
+                            a.fecha_asistencia_culto.Year,
+                            a.fecha_asistencia_culto.Month,
+                            a.fecha_asistencia_culto.Day
+                        })
+                        .Select(g => new
+                        {
+                            g.Key.Year,
+                            g.Key.Month,
+                            g.Key.Day,
+                            Adultos = g.Sum(a => a.adulto_asistencia_culto),
+                            Ninos = g.Sum(a => (int?)a.niños_asistencia_culto) ?? 0,
+                            Invitados = g.Sum(a => a.invi_visit_asistencia_culto)
+                        })
+                        .OrderBy(x => x.Year).ThenBy(x => x.Month).ThenBy(x => x.Day)
+                        .ToList();
+
+                    return Json(agrupado.Select(x => new
+                    {
+                        Etiqueta = new DateTime(x.Year, x.Month, x.Day).ToString("dd/MM/yyyy"),
+                        x.Adultos,
+                        x.Ninos,
+                        x.Invitados
+                    }));
+                }
+                else // diario
+                {
+                    int mesFiltro = mes ?? DateTime.Today.Month;
+                    int diaFiltro = dia ?? DateTime.Today.Day;
+
+                    var totales = query
+                        .Where(a => a.fecha_asistencia_culto.Month == mesFiltro
+                                 && a.fecha_asistencia_culto.Day == diaFiltro)
+                        .GroupBy(a => 1)
+                        .Select(g => new
+                        {
+                            Adultos = g.Sum(a => a.adulto_asistencia_culto),
+                            Ninos = g.Sum(a => (int?)a.niños_asistencia_culto) ?? 0,
+                            Invitados = g.Sum(a => a.invi_visit_asistencia_culto)
+                        })
+                        .FirstOrDefault();
+
+                    if (totales == null)
+                        return Json(new object[0]);
+
+                    return Json(new[]
+                    {
+                        new
+                        {
+                            Etiqueta = new DateTime(anioFiltro, mesFiltro, diaFiltro).ToString("dd/MM/yyyy"),
+                            totales.Adultos,
+                            totales.Ninos,
+                            totales.Invitados
+                        }
+                    });
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoAsistencia: {ex.Message}");
+                return Json(new object[0]);
+            }
+        }
+        #endregion GRÁFICO DE ASISTENCIA
+
         #region MÉTODOS PARA LAS TARJETAS DEL DASHBOARD
         [HttpGet]
         public IActionResult ObtenerZonasConMiembros()
