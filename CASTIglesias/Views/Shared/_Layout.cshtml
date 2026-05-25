@@ -238,6 +238,13 @@
                                             Usuarios
                                         </a>
                                     }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
+                                            Diezmos
+                                        </a>
+                                    }
                                 </nav>
                             </div>
                         }

@@ -309,9 +309,9 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            return valor === "Hombre"
-                                ? '<span class="badge bg-primary">Hombre</span>'
-                                : '<span class="badge bg-warning text-dark">Mujer</span>';
+                            if (valor === "Hombre") return '<span class="badge bg-primary">Hombre</span>';
+                            if (valor === "Mujer")  return '<span class="badge bg-warning text-dark">Mujer</span>';
+                            return '<span class="badge bg-secondary">N/M</span>';
                         }
                     },
                     { data: "nombre_sede" },
@@ -457,7 +457,6 @@
                 $("#txtLugarBautismo").val(data.lugar_bautismo || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
                 $("#cboPaisNacimiento").val(data.pais_nacimiento || "");
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
-                $("#cboEstado").val(data.estado || ""); // Añadido este campo faltante
                 //CHECK BOXES
                 $("#checkBautizado").prop("checked", data.bautizado === true);
                 $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
@@ -481,8 +480,8 @@
                 iD_miembro: parseInt($("#txtid").val() || 0),
                 numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
 
-                diezmo_individual: parseInt($("#txtDiezmoIndividual").val() || 0),
-                diezmo_familiar: parseInt($("#txtDiezmoFamiliar").val() || 0),
+                diezmo_individual: $("#txtDiezmoIndividual").val() || null,
+                diezmo_familiar: $("#txtDiezmoFamiliar").val() || null,
 
                 nombre_miembro: $("#txtNombres").val() || "",
                 apellidos_miembro: $("#txtApellido").val() || "",
@@ -507,7 +506,6 @@
                 lugar_bautismo: $("#txtLugarBautismo").val() || "",
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
-                estado: $("#cboEstado").val() || "",
 
                 responsable: $("#txtResponsable").val() || "",
 

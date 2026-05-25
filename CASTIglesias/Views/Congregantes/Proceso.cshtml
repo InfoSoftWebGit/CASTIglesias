@@ -63,9 +63,9 @@
                 <label for="txtNumeroMiembro" class="form-label">Número de Miembro</label>
                 <input id="txtNumeroMiembro" type="number" class="form-control mb-2" placeholder="Número de miembro" />
                 <label for="txtDiezmoIndividual" class="form-label">Diezmo individual</label>
-                <input id="txtDiezmoIndividual" type="number" class="form-control mb-2" />
+                <input id="txtDiezmoIndividual" type="text" class="form-control mb-2" />
                 <label for="txtDiezmoFamiliar" class="form-label">Diezmo familiar</label>
-                <input id="txtDiezmoFamiliar" type="number" class="form-control mb-2" placeholder="Diezmo familiar" />
+                <input id="txtDiezmoFamiliar" type="text" class="form-control mb-2" placeholder="Diezmo familiar" />
 
                 <h5>Información principal</h5>
                 <div class="row">
@@ -202,17 +202,6 @@
                             <option value="Divorciado/a">Divorciado/a</option>
                             <option value="Separado/a">Separado/a</option>
                             <option value="Unión de hecho/a">Unión de hecho/a</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-4 mb-3">
-                        <label for="cboEstado" class="form-label">Estado</label>
-                        <select id="cboEstado" class="form-select">
-                            <option value="" disabled selected>Selecciona un valor</option>
-                            <option value="Visitante">Visitante</option>
-                            <option value="Simpatizante">Simpatizante</option>
-                            <option value="Proceso">Proceso</option>
-                            <option value="Miembro">Miembro</option>
-                            <option value="Baja">Baja</option>
                         </select>
                     </div>
                     <div class="col-sm-4 mb-2">
@@ -399,9 +388,9 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            return valor === "Hombre"
-                                ? '<span class="badge bg-primary">Hombre</span>'
-                                : '<span class="badge bg-warning text-dark">Mujer</span>';
+                            if (valor === "Hombre") return '<span class="badge bg-primary">Hombre</span>';
+                            if (valor === "Mujer")  return '<span class="badge bg-warning text-dark">Mujer</span>';
+                            return '<span class="badge bg-secondary">N/M</span>';
                         }
                     },
                     { data: "nombre_sede" },
@@ -525,7 +514,6 @@
                 //INFORMACIÓN ADICIONAL
                 $("#cboPaisNacimiento").val("");
                 $("#cboEstadoCivil").val("");
-                $("#cboEstado").val("");
                 $("#checkAlumno_vyf").prop("checked", false);
                 $("#checkCurso_acabado").prop("checked", false);
                 $("#checkExcluir_directorio").prop("checked", false);
@@ -544,8 +532,8 @@
                 // IDENTIFICADORES
                 $("#txtid").val(data.id_miembro || 0);
                 $("#txtNumeroMiembro").val(data.numero_miembro || 0); // Asumiendo que 0 es el defecto
-                $("#txtDiezmoIndividual").val(data.diezmo_individual || 0);
-                $("#txtDiezmoFamiliar").val(data.diezmo_familiar || 0);
+                $("#txtDiezmoIndividual").val(data.diezmo_individual || "");
+                $("#txtDiezmoFamiliar").val(data.diezmo_familiar || "");
                 //FIN IDENTIFICADORES
                 //DATOS BÁSICOS
                 $("#txtNombres").val(data.nombre_miembro || "");
@@ -581,7 +569,6 @@
                 // INFORMACIÓN ADICIONAL
                 $("#cboPaisNacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
-                $("#cboEstado").val(data.estado || ""); // Añadido este campo faltante
                 //CHECK BOXES
                 $("#checkAlumno_vyf").prop("checked", data.alumno_VyF === true);
                 $("#checkCurso_acabado").prop("checked", data.curso_acabado === true);
@@ -612,8 +599,8 @@
                 iD_miembro: parseInt($("#txtid").val() || 0),
                 numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
 
-                diezmo_individual: parseInt($("#txtDiezmoIndividual").val() || 0),
-                diezmo_familiar: parseInt($("#txtDiezmoFamiliar").val() || 0),
+                diezmo_individual: $("#txtDiezmoIndividual").val() || null,
+                diezmo_familiar: $("#txtDiezmoFamiliar").val() || null,
 
                 nombre_miembro: $("#txtNombres").val() || "",
                 apellidos_miembro: $("#txtApellido").val() || "",
@@ -638,7 +625,6 @@
                 lugar_bautismo: $("#txtLugarBautismo").val() || "",
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
-                estado: $("#cboEstado").val() || "",
 
                 responsable: $("#txtResponsable").val() || "",
 

@@ -10,8 +10,8 @@ namespace CapaEntidad
         [Key]
         public int id_miembro { get; set; }
 
-        public int? diezmo_individual { get; set; }
-        public int? diezmo_familiar { get; set; }
+        public string? diezmo_individual { get; set; }
+        public string? diezmo_familiar { get; set; }
 
         [Column("Numero_miembro")]
         public int numero_miembro { get; set; }
