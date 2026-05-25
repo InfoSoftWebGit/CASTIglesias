@@ -76,6 +76,71 @@
 
 <hr class="my-4" />
 
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-bar me-1"></i>
+        Asistencia al Culto
+    </div>
+    <div class="card-body">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-sm-3 col-md-2">
+                <label class="form-label fw-semibold">Vista</label>
+                <select class="form-select form-select-sm" id="modoGrafico">
+                    <option value="anual">Año completo</option>
+                    <option value="mensual">Mes completo</option>
+                    <option value="diario">Día específico</option>
+                </select>
+            </div>
+            <div class="col-sm-3 col-md-2">
+                <label class="form-label fw-semibold">Turno</label>
+                <select class="form-select form-select-sm" id="turnoGrafico">
+                    <option value="todos">Todos</option>
+                    <option value="mañana">Mañana</option>
+                    <option value="tarde">Tarde</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <label class="form-label fw-semibold">Año</label>
+                <input type="number" class="form-control form-control-sm" id="anioGrafico" min="2000" max="2099" />
+            </div>
+            <div class="col-sm-3 col-md-2" id="colMesGrafico" style="display:none">
+                <label class="form-label fw-semibold">Mes</label>
+                <select class="form-select form-select-sm" id="mesGrafico">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1" id="colDiaGrafico" style="display:none">
+                <label class="form-label fw-semibold">Día</label>
+                <input type="number" class="form-control form-control-sm" id="diaGrafico" min="1" max="31" />
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <button class="btn btn-primary btn-sm w-100" id="btnActualizarGrafico">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+        </div>
+        <div style="position:relative; height:350px;">
+            <canvas id="graficoAsistencia"></canvas>
+        </div>
+        <p class="text-muted text-center mt-2 mb-0" id="graficoSinDatos" style="display:none">
+            <i class="fas fa-info-circle"></i> No hay registros de asistencia para el período seleccionado.
+        </p>
+    </div>
+</div>
+
+<hr class="my-4" />
+
 <div class="col-xl-3 col-md-6">
     <div class="card bg-success text-white mb-4">
         <div class="card-body">
@@ -143,6 +208,7 @@
 
 @section scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
@@ -327,5 +393,118 @@
             });
 
         }); // Fin de $(document).ready
+    </script>
+
+    <script>
+        // ── Gráfico de Asistencia al Culto ──────────────────────────────
+        let graficoAsistenciaInstance = null;
+
+        const hoy = new Date();
+        $('#anioGrafico').val(hoy.getFullYear());
+        $('#mesGrafico').val(hoy.getMonth() + 1);
+        $('#diaGrafico').val(hoy.getDate());
+
+        function actualizarVisibilidadFiltros() {
+            const modo = $('#modoGrafico').val();
+            $('#colMesGrafico').toggle(modo === 'mensual' || modo === 'diario');
+            $('#colDiaGrafico').toggle(modo === 'diario');
+        }
+
+        function cargarGraficoAsistencia() {
+            const modo = $('#modoGrafico').val();
+            const anio = $('#anioGrafico').val();
+            const mes  = $('#mesGrafico').val();
+            const dia  = $('#diaGrafico').val();
+
+            const turno = $('#turnoGrafico').val();
+            const params = { modo, anio, turno };
+            if (modo === 'mensual' || modo === 'diario') params.mes = mes;
+            if (modo === 'diario') params.dia = dia;
+
+            $.get('@Url.Action("ObtenerGraficoAsistencia", "Home")', params, function (data) {
+                $('#graficoSinDatos').toggle(!data || data.length === 0);
+
+                const labels    = data.map(d => d.etiqueta);
+                const adultos   = data.map(d => d.adultos);
+                const ninos     = data.map(d => d.ninos);
+                const invitados = data.map(d => d.invitados);
+
+                if (graficoAsistenciaInstance) {
+                    graficoAsistenciaInstance.destroy();
+                    graficoAsistenciaInstance = null;
+                }
+
+                if (!data || data.length === 0) return;
+
+                graficoAsistenciaInstance = new Chart(
+                    document.getElementById('graficoAsistencia'),
+                    {
+                        type: 'bar',
+                        data: {
+                            labels,
+                            datasets: [
+                                {
+                                    label: 'Adultos',
+                                    data: adultos,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.75)',
+                                    borderColor:     'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Niños',
+                                    data: ninos,
+                                    backgroundColor: 'rgba(75, 192, 192, 0.75)',
+                                    borderColor:     'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Invitados / Visitantes',
+                                    data: invitados,
+                                    backgroundColor: 'rgba(255, 159, 64, 0.75)',
+                                    borderColor:     'rgba(255, 159, 64, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'top' },
+                                tooltip: {
+                                    callbacks: {
+                                        footer: function (items) {
+                                            const total = items.reduce((s, i) => s + i.parsed.y, 0);
+                                            return 'Total: ' + total;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { stacked: false },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { stepSize: 1, precision: 0 }
+                                }
+                            }
+                        }
+                    }
+                );
+            }).fail(function () {
+                $('#graficoSinDatos').show();
+            });
+        }
+
+        $('#modoGrafico').on('change', function () {
+            actualizarVisibilidadFiltros();
+        });
+
+        $('#btnActualizarGrafico').on('click', cargarGraficoAsistencia);
+
+        // Carga inicial al arrancar la página
+        $(document).ready(function () {
+            actualizarVisibilidadFiltros();
+            cargarGraficoAsistencia();
+        });
     </script>
 }
