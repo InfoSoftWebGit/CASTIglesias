@@ -42,7 +42,7 @@
 </div>
 
 <div class="modal fade" id="FormModalUsuarios" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-dark text-white">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del usuario</h1>
@@ -52,9 +52,10 @@
                 <input id="txtid" type="hidden" value="0" />
                 <input id="txtID_sede" type="hidden" value="0" /> @* 🔑 Campo oculto para ID de Sede *@
                 <div class="row g-2">
-                    <div class="col-sm-6 mb-2">
+                    <div class="col-sm-6 mb-2 position-relative">
                         <label for="txtNombres" class="form-label">Nombres</label>
-                        <input type="text" class="form-control" id="txtNombres" autocomplete="off">
+                        <input type="text" class="form-control" id="txtNombres" autocomplete="off" placeholder="Buscar miembro…">
+                        <ul id="autocompleteNombres" class="list-group position-absolute w-100" style="z-index:9999;display:none;max-height:200px;overflow-y:auto;"></ul>
                     </div>
                     <div class="col-sm-6 mb-2">
                         <label for="txtApellido" class="form-label">Apellido</label>
@@ -86,49 +87,99 @@
                     </div>
                     <div class="row mt-3" id="contenedorPermisos" style="display: none;">
                         <div class="col-12">
-                            <h5>Permisos Específicos (Solo para Rol Miembro)</h5>
+                            <h5>Permisos Específicos <small class="text-muted fs-6">(Solo para Rol Miembro)</small></h5>
                             <hr class="mt-0" />
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkMiembros">
-                                <label class="form-check-label" for="checkMiembros">Gestión de Miembros</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkFamilias">
-                                <label class="form-check-label" for="checkFamilias">Gestión de Familias</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkGrupos">
-                                <label class="form-check-label" for="checkGrupos">Gestión de Grupos</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkZonas">
-                                <label class="form-check-label" for="checkZonas">Gestión de Zonas</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkDiezmos">
-                                <label class="form-check-label" for="checkDiezmos">Gestión de Diezmos</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkConceptos">
-                                <label class="form-check-label" for="checkConceptos">Gestión de Conceptos</label>
-                            </div>
-                        </div>
-                        <div class="col-sm-4 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input check-permiso" type="checkbox" id="checkAsistencias">
-                                <label class="form-check-label" for="checkConceptos">Gestión de Asistencias</label>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Módulo</th>
+                                            <th class="text-center">Ver</th>
+                                            <th class="text-center">Crear y Editar</th>
+                                            <th class="text-center">Eliminar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Usuarios</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkUsuarios" data-modulo="Usuarios"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkUsuariosCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkUsuariosEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Miembros</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMiembros" data-modulo="Miembros"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMiembrosCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMiembrosEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Visitantes</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkVisitantes" data-modulo="Visitantes"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkVisitantesCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkVisitantesEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Simpatizantes</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkSimpatizantes" data-modulo="Simpatizantes"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkSimpatizantesCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkSimpatizantesEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Proceso</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkProceso" data-modulo="Proceso"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkProcesoCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkProcesoEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Familias</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkFamilias" data-modulo="Familias"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkFamiliasCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkFamiliasEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Grupos</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkGrupos" data-modulo="Grupos"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkGruposCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkGruposEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Zonas</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkZonas" data-modulo="Zonas"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkZonasCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkZonasEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ministerio</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMinisterio" data-modulo="Ministerio"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMinisterioCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMinisterioEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Diezmos</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkDiezmos" data-modulo="Diezmos"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkDiezmosCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkDiezmosEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Conceptos</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkConceptos" data-modulo="Conceptos"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkConceptosCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkConceptosEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Asistencia</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkAsistencia" data-modulo="Asistencia"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkAsistenciaCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkAsistenciaEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Ajustes</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkAjustes" data-modulo="Ajustes"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkAjustesCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkAjustesEliminar" disabled></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -201,37 +252,108 @@
             return { tr: tr, data: data };
         }
 
+        // Módulos y sus IDs de checkbox. Orden: [ver, crearEditar, eliminar]
+        const MODULOS_PERMISOS = [
+            ['Usuarios',      'chkUsuarios',      'chkUsuariosCrearEditar',      'chkUsuariosEliminar'],
+            ['Miembros',      'chkMiembros',      'chkMiembrosCrearEditar',      'chkMiembrosEliminar'],
+            ['Visitantes',    'chkVisitantes',    'chkVisitantesCrearEditar',    'chkVisitantesEliminar'],
+            ['Simpatizantes', 'chkSimpatizantes', 'chkSimpatizantesCrearEditar', 'chkSimpatizantesEliminar'],
+            ['Proceso',       'chkProceso',       'chkProcesoCrearEditar',       'chkProcesoEliminar'],
+            ['Familias',      'chkFamilias',      'chkFamiliasCrearEditar',      'chkFamiliasEliminar'],
+            ['Grupos',        'chkGrupos',        'chkGruposCrearEditar',        'chkGruposEliminar'],
+            ['Zonas',         'chkZonas',         'chkZonasCrearEditar',         'chkZonasEliminar'],
+            ['Ministerio',    'chkMinisterio',    'chkMinisterioCrearEditar',    'chkMinisterioEliminar'],
+            ['Diezmos',       'chkDiezmos',       'chkDiezmosCrearEditar',       'chkDiezmosEliminar'],
+            ['Conceptos',     'chkConceptos',     'chkConceptosCrearEditar',     'chkConceptosEliminar'],
+            ['Asistencia',    'chkAsistencia',    'chkAsistenciaCrearEditar',    'chkAsistenciaEliminar'],
+            ['Ajustes',       'chkAjustes',       'chkAjustesCrearEditar',       'chkAjustesEliminar'],
+        ];
+
         function actualizarVisibilidadPermisos() {
-            // El rol "Miembro" tiene el valor 4
             const rolSeleccionado = $("#cboRol").val();
             if (rolSeleccionado === "4") {
                 $("#contenedorPermisos").show();
             } else {
                 $("#contenedorPermisos").hide();
-                // Desmarcar todos los checks al ocultar para evitar enviar basura
-                $(".check-permiso").prop('checked', false);
+                MODULOS_PERMISOS.forEach(([, idVer, idCrear, idElim]) => {
+                    $(`#${idVer}, #${idCrear}, #${idElim}`).prop('checked', false);
+                    $(`#${idCrear}, #${idElim}`).prop('disabled', true);
+                });
             }
         }
 
-        function cargarPermisosEnModal(permisos) {
-            // Limpiar todos los checks primero
-            $(".check-permiso").prop('checked', false);
+        // Cuando "Ver" cambia, habilita/deshabilita los otros dos del módulo
+        $(document).on('change', '.check-ver', function () {
+            const modulo = $(this).data('modulo');
+            const fila = MODULOS_PERMISOS.find(m => m[0] === modulo);
+            if (!fila) return;
+            const habilitado = $(this).is(':checked');
+            $(`#${fila[2]}, #${fila[3]}`).prop('disabled', !habilitado);
+            if (!habilitado) $(`#${fila[2]}, #${fila[3]}`).prop('checked', false);
+        });
 
-            if (permisos) {
-                // Se asume que 'permisos' es un objeto con propiedades booleanas
-                if (permisos.usuarios === true) $("#checkUsuarios").prop('checked', true);
-                if (permisos.miembros === true) $("#checkMiembros").prop('checked', true);
-                if (permisos.familias === true) $("#checkFamilias").prop('checked', true);
-                if (permisos.grupos === true) $("#checkGrupos").prop('checked', true);
-                if (permisos.zonas === true) $("#checkZonas").prop('checked', true);
-                if (permisos.diezmos === true) $("#checkDiezmos").prop('checked', true);
-                if (permisos.conceptos === true) $("#checkConceptos").prop('checked', true);
-                if (permisos.asistencia === true) $("#checkAsistencias").prop('checked', true);
-            }
+        function limpiarPermisos() {
+            MODULOS_PERMISOS.forEach(([, idVer, idCrear, idElim]) => {
+                $(`#${idVer}, #${idCrear}, #${idElim}`).prop('checked', false);
+                $(`#${idCrear}, #${idElim}`).prop('disabled', true);
+            });
+        }
+
+        function cargarPermisosEnModal(permisos) {
+            limpiarPermisos();
+            if (!permisos) return;
+
+            // Normalize keys to lowercase for safe access
+            const p = {};
+            Object.keys(permisos).forEach(k => p[k.toLowerCase()] = permisos[k]);
+
+            MODULOS_PERMISOS.forEach(([modulo, idVer, idCrear, idElim]) => {
+                const m = modulo.toLowerCase();
+                const ver = p[m] === true;
+                $(`#${idVer}`).prop('checked', ver);
+                $(`#${idCrear}`).prop('disabled', !ver).prop('checked', ver && p[m + 'crearEditar'] === true);
+                $(`#${idElim}`).prop('disabled', !ver).prop('checked', ver && p[m + 'eliminar'] === true);
+            });
         }
 
         $(document).ready(function () {
             $("#cboRol").on('change', actualizarVisibilidadPermisos);
+
+            // Autocomplete de miembros en campo Nombres
+            let autocompleteTimer;
+            $("#txtNombres").on('input', function () {
+                clearTimeout(autocompleteTimer);
+                const term = $(this).val().trim();
+                if (term.length < 2) { $("#autocompleteNombres").hide().empty(); return; }
+                autocompleteTimer = setTimeout(function () {
+                    $.ajax({
+                        url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                        data: { term },
+                        success: function (res) {
+                            const ul = $("#autocompleteNombres").empty();
+                            if (!res.data || res.data.length === 0) { ul.hide(); return; }
+                            res.data.forEach(function (m) {
+                                $('<li class="list-group-item list-group-item-action py-1 px-2" style="cursor:pointer;font-size:.9rem;">')
+                                    .text(`${m.nombre_miembro} ${m.apellidos_miembro}`)
+                                    .on('click', function () {
+                                        $("#txtNombres").val(m.nombre_miembro);
+                                        $("#txtApellido").val(m.apellidos_miembro);
+                                        $("#txtCorreo_electronico").val(m.correo_electronico || '');
+                                        ul.hide().empty();
+                                    })
+                                    .appendTo(ul);
+                            });
+                            ul.show();
+                        }
+                    });
+                }, 300);
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#txtNombres, #autocompleteNombres').length) {
+                    $("#autocompleteNombres").hide();
+                }
+            });
 
             // Inicializar DataTable
             tabladata = $("#tablaUsuarios").DataTable({
@@ -332,9 +454,8 @@
                 function abrirModalUsuarios(usuario) {
             $("#mensajeError").hide().text("");
             $("#txtContrasenia").val("");
-            // Se limpia el estado de los checkboxes al abrir el modal,
-            // y luego se cargarán si se cumplen las condiciones de edición y rol.
-            $(".check-permiso").prop('checked', false);
+            $("#autocompleteNombres").hide().empty();
+            limpiarPermisos();
 
             $("#cboRol option").prop('hidden', false).prop('disabled', false);
 
@@ -371,7 +492,7 @@
                     $("#cboRol option[value='1'], #cboRol option[value='2']").prop('hidden', true).prop('disabled', true);
 
                     if (loggedInUserRoleID === 3) {
-                        rolUsuarioPorDefecto = 3;de
+                        rolUsuarioPorDefecto = 3;
                     } else {
                         rolUsuarioPorDefecto = 4;
                     }
@@ -441,16 +562,12 @@
 
             var permisos = null;
             if (rolID === 4) {
-                permisos = {
-                    Usuarios: $("#checkUsuarios").is(':checked'),
-                    Miembros: $("#checkMiembros").is(':checked'),
-                    Familias: $("#checkFamilias").is(':checked'),
-                    Grupos: $("#checkGrupos").is(':checked'),
-                    Zonas: $("#checkZonas").is(':checked'),
-                    Diezmos: $("#checkDiezmos").is(':checked'),
-                    Conceptos: $("#checkConceptos").is(':checked'),
-                    Asistencia: $("#checkAsistencias").is(':checked')
-                };
+                permisos = {};
+                MODULOS_PERMISOS.forEach(([modulo, idVer, idCrear, idElim]) => {
+                    permisos[modulo]                    = $(`#${idVer}`).is(':checked');
+                    permisos[modulo + 'CrearEditar']    = $(`#${idCrear}`).is(':checked');
+                    permisos[modulo + 'Eliminar']       = $(`#${idElim}`).is(':checked');
+                });
             }
 
             var Usuario = {
