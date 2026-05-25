@@ -557,6 +557,22 @@ namespace CapaDatos
                 return null;
             }
         }
+
+        public int ObtenerMaxNumeroMiembro(int sedeID)
+        {
+            try
+            {
+                var query = _context.Miembros.AsQueryable();
+                if (sedeID != 1000)
+                    query = query.Where(m => m.id_sede == sedeID);
+                return query.Max(m => (int?)m.numero_miembro) ?? 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ObtenerMaxNumeroMiembro: {ex.Message}");
+                return 0;
+            }
+        }
         #endregion
 
         #region ZONAS, GRUPOS Y MINISTERIOS

@@ -315,6 +315,11 @@ namespace CapaNegocio
             return _capaDatos.ObtenerMiembroPorID(ID_sede, ID_miembro);
         }
 
+        public int ObtenerMaxNumeroMiembro(int sedeID)
+        {
+            return _capaDatos.ObtenerMaxNumeroMiembro(sedeID);
+        }
+
         #endregion CambiarEstados
     }
 }

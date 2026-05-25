@@ -15,6 +15,7 @@ namespace CASTIglesias.Controllers
         CN_Provincia cnProvincia,
         CN_Ministerio cnMinisterio,
         CN_Municipio cnMunicipio,
+        CN_ConfigDiezmo cnConfigDiezmo,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -26,6 +27,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Familias _cnFamilias = cnFamilias;
         private readonly CN_Zonas _cnZonas = cnZonas;
         private readonly CN_Sedes _cnSedes = cnSedes;
+        private readonly CN_ConfigDiezmo _cnConfigDiezmo = cnConfigDiezmo;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -529,6 +531,27 @@ namespace CASTIglesias.Controllers
             catch (Exception ex)
             {
                 return Json(new { data = new object[0], error = true, mensaje = "Error interno al listar miembros: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerSiguienteNumeroMiembro()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                int maxNumero = _cnMiembros.ObtenerMaxNumeroMiembro(sedeID);
+                int siguiente = maxNumero + 1;
+
+                var config = _cnConfigDiezmo.ObtenerConfig(sedeID);
+                string prefijo = config?.prefijo_individual ?? "";
+                string formateado = prefijo + siguiente.ToString("D4");
+
+                return Json(new { success = true, numero = siguiente, formateado });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
             }
         }
 
