@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "Configuración de Diezmos";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Configuración de Diezmos</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
+        <li class="breadcrumb-item">Ajustes</li>
+        <li class="breadcrumb-item active">Diezmos</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-hashtag me-1"></i>
+                    Numeración de Diezmos
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Define el prefijo que se añadirá antes del número al generar identificadores de diezmo.
+                        Por ejemplo, con prefijo <strong>M</strong> el número quedará como <strong>M0001</strong>.
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="txtPrefijoIndividual" class="form-label">Prefijo Diezmo Individual</label>
+                        <div class="input-group">
+                            <input id="txtPrefijoIndividual" type="text" class="form-control" maxlength="10"
+                                   placeholder="Ej: M, IND, VFF..." />
+                            <span class="input-group-text text-muted" id="previewIndividual"></span>
+                        </div>
+                        <div class="form-text">Máximo 10 caracteres.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="txtPrefijoFamiliar" class="form-label">Prefijo Diezmo Familiar</label>
+                        <div class="input-group">
+                            <input id="txtPrefijoFamiliar" type="text" class="form-control" maxlength="10"
+                                   placeholder="Ej: F, FAM, VFF..." />
+                            <span class="input-group-text text-muted" id="previewFamiliar"></span>
+                        </div>
+                        <div class="form-text">Máximo 10 caracteres.</div>
+                    </div>
+
+                    <button id="btnGuardar" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const urlObtener = '@Url.Action("ObtenerConfigDiezmo", "Ajustes")';
+    const urlGuardar = '@Url.Action("GuardarConfigDiezmo", "Ajustes")';
+
+    function actualizarPreview(inputId, previewId) {
+        const prefijo = $(inputId).val().trim().toUpperCase();
+        $(previewId).text(prefijo ? prefijo + '0001' : '');
+        $(inputId).val(prefijo);
+    }
+
+    $(document).ready(function () {
+        $.get(urlObtener, function (res) {
+            if (res.success && res.data) {
+                $('#txtPrefijoIndividual').val(res.data.prefijo_individual || '');
+                $('#txtPrefijoFamiliar').val(res.data.prefijo_familiar || '');
+                actualizarPreview('#txtPrefijoIndividual', '#previewIndividual');
+                actualizarPreview('#txtPrefijoFamiliar', '#previewFamiliar');
+            }
+        });
+
+        $('#txtPrefijoIndividual').on('input', function () {
+            actualizarPreview('#txtPrefijoIndividual', '#previewIndividual');
+        });
+
+        $('#txtPrefijoFamiliar').on('input', function () {
+            actualizarPreview('#txtPrefijoFamiliar', '#previewFamiliar');
+        });
+
+        $('#btnGuardar').on('click', function () {
+            const prefijo_individual = $('#txtPrefijoIndividual').val().trim();
+            const prefijo_familiar = $('#txtPrefijoFamiliar').val().trim();
+
+            $.ajax({
+                url: urlGuardar,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ prefijo_individual, prefijo_familiar }),
+                success: function (res) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: res.success ? 'success' : 'error',
+                        title: res.mensaje,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                },
+                error: function () {
+                    Swal.fire('Error', 'No se pudo guardar la configuración.', 'error');
+                }
+            });
+        });
+    });
+</script>
+}

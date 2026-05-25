@@ -63,11 +63,11 @@
                 <h5>Información principal</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="txtNombres" class="form-label">Nombres</label>
+                        <label for="txtNombres" class="form-label">Nombres <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtNombres" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtApellido" class="form-label">Apellido</label>
+                        <label for="txtApellido" class="form-label">Apellido <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtApellido" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
@@ -162,7 +162,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="chkAceptaLOPD">
                             <label class="form-check-label" for="chkAceptaLOPD">
-                                **Acepta la Ley Orgánica de Protección de Datos (LOPD)**
+                                Acepta la Ley Orgánica de Protección de Datos (LOPD) <span class="text-danger">*</span>
                             </label>
                         </div>
                     </div>
@@ -254,9 +254,9 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            return valor === "Hombre"
-                                ? '<span class="badge bg-primary">Hombre</span>'
-                                : '<span class="badge bg-warning text-dark">Mujer</span>';
+                            if (valor === "Hombre") return '<span class="badge bg-primary">Hombre</span>';
+                            if (valor === "Mujer")  return '<span class="badge bg-warning text-dark">Mujer</span>';
+                            return '<span class="badge bg-secondary">N/M</span>';
                         }
                     },
                     { data: "nombre_sede" },
@@ -409,12 +409,25 @@
 
         // ✅ GUARDAR MIEMBRO
         function GuardarMiembro() {
+            const nombre = $("#txtNombres").val().trim();
+            const apellido = $("#txtApellido").val().trim();
+            const lopd = $("#chkAceptaLOPD").prop("checked");
+
+            $("#txtNombres").toggleClass("is-invalid", !nombre);
+            $("#txtApellido").toggleClass("is-invalid", !apellido);
+            $("#chkAceptaLOPD").toggleClass("is-invalid", !lopd);
+
+            if (!nombre || !apellido || !lopd) {
+                Swal.fire("Campos obligatorios", "Nombre, apellido y aceptación de LOPD son obligatorios.", "warning");
+                return;
+            }
+
             let miembroDTO = {
                 iD_miembro: parseInt($("#txtid").val() || 0),
                 numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
 
-                diezmo_individual: parseInt($("#txtDiezmoIndividual").val() || 0),
-                diezmo_familiar: parseInt($("#txtDiezmoFamiliar").val() || 0),
+                diezmo_individual: $("#txtDiezmoIndividual").val() || null,
+                diezmo_familiar: $("#txtDiezmoFamiliar").val() || null,
 
                 nombre_miembro: $("#txtNombres").val() || "",
                 apellidos_miembro: $("#txtApellido").val() || "",
@@ -427,7 +440,7 @@
                 telefono_movil: $("#txtTelefonoMovil").val() || "",
                 telefono_fijo: $("#txtTelefonoFijo").val() || "",
 
-                sexo: $("#cboSexo").val() || "",   // <--- STRING, NO BOOLEAN
+                sexo: $("#cboSexo").val() || null,
 
                 direccion: $("#txtDireccion").val() || "",
 

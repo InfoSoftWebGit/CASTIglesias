@@ -166,14 +166,14 @@ namespace CapaDatos
                     return 0;
                 }
 
-                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                if (!string.IsNullOrEmpty(obj.diezmo_individual) &&
                     _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El número de diezmo individual ya está asignado a otro miembro en esta sede.";
                     return 0;
                 }
 
-                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                if (!string.IsNullOrEmpty(obj.diezmo_familiar) &&
                     _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
@@ -328,7 +328,7 @@ namespace CapaDatos
                     return false;
                 }
 
-                if (obj.diezmo_individual.HasValue && obj.diezmo_individual > 0 &&
+                if (!string.IsNullOrEmpty(obj.diezmo_individual) &&
                     _context.Miembros.Any(m => m.diezmo_individual == obj.diezmo_individual &&
                                                m.id_miembro != obj.id_miembro &&
                                                m.id_sede == miembro.id_sede))
@@ -337,7 +337,7 @@ namespace CapaDatos
                     return false;
                 }
 
-                if (obj.diezmo_familiar.HasValue && obj.diezmo_familiar > 0 &&
+                if (!string.IsNullOrEmpty(obj.diezmo_familiar) &&
                     _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar &&
                                                m.id_miembro != obj.id_miembro &&
                                                m.id_sede == miembro.id_sede))
@@ -374,7 +374,7 @@ namespace CapaDatos
                 miembro.excluir_directorio = obj.excluir_directorio;
                 miembro.pais_nacimiento = obj.pais_nacimiento;
                 miembro.estado_Civil = obj.estado_Civil;
-                miembro.estado = obj.estado;
+                // estado solo se modifica via AvanzarEstado / RetrocederEstado
                 miembro.fallecido = obj.fallecido;
                 miembro.alumno_VyF = obj.alumno_VyF;
                 miembro.numero_hijos = obj.numero_hijos;

@@ -49,6 +49,9 @@ builder.Services.AddScoped<CN_Ministerio>();
 builder.Services.AddScoped<CD_Paises>();
 builder.Services.AddScoped<CN_Paises>();
 
+builder.Services.AddScoped<CD_ConfigDiezmo>();
+builder.Services.AddScoped<CN_ConfigDiezmo>();
+
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
