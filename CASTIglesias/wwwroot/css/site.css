@@ -419,6 +419,18 @@ h2, h3 {
 }
 
 /* =============================
+    DATATABLES — ESPACIADO CONTROLES
+============================= */
+.dataTables_wrapper {
+    margin-top: 0.75rem;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 0.6rem;
+}
+
+/* =============================
     PAGINACIÓN
 ============================= */
 .dataTables_wrapper .dataTables_paginate .paginate_button {

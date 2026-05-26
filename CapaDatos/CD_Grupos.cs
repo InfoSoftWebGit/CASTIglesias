@@ -128,6 +128,8 @@ namespace CapaDatos
 
                 // Actualizar los campos
                 grupoExistente.Descripcion = obj.Descripcion;
+                grupoExistente.Encargados = obj.Encargados;
+                grupoExistente.ID_zona = obj.ID_zona;
                 // grupoExistente.ID_sede no se toca.
 
                 _context.SaveChanges();
