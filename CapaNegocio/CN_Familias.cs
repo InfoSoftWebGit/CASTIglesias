@@ -36,17 +36,13 @@ namespace CapaNegocio
             obj.ID_sede = sedeID;
 
             if (string.IsNullOrWhiteSpace(obj.Nombre_familia))
-                mensaje = "El nombre de la familia no puede ser vacío";
-
-            if (string.IsNullOrWhiteSpace(obj.Municipio))
-                mensaje += (mensaje.Length > 0 ? "\n" : "") + "La ciudad de la familia no puede ser vacía";
-
-            if (string.IsNullOrEmpty(mensaje))
             {
-                mensaje = "Se ha creado la familia correctamente.";
-                // obj ya lleva el ID_sede asignado.
-                return _capaDatos.RegistrarFamilia(obj, out mensaje);
+                mensaje = "El nombre de la familia no puede ser vacío";
+                return 0;
             }
+
+            mensaje = "Se ha creado la familia correctamente.";
+            return _capaDatos.RegistrarFamilia(obj, out mensaje);
 
             return 0;
         }
@@ -64,18 +60,12 @@ namespace CapaNegocio
             obj.ID_sede = sedeID;
 
             if (string.IsNullOrWhiteSpace(obj.Nombre_familia))
-                mensaje = "El nombre de la familia no puede ser vacío";
-
-            if (string.IsNullOrWhiteSpace(obj.Municipio))
-                mensaje += (mensaje.Length > 0 ? "\n" : "") + "La ciudad de la familia no puede ser vacía";
-
-            if (string.IsNullOrEmpty(mensaje))
             {
-                // obj ya lleva el ID_sede asignado.
-                return _capaDatos.EditarFamilia(obj, out mensaje);
+                mensaje = "El nombre de la familia no puede ser vacío";
+                return false;
             }
 
-            return false;
+            return _capaDatos.EditarFamilia(obj, out mensaje);
         }
         /////////////////////////// FIN EDITAR FAMILIA ////////////////////////////
 

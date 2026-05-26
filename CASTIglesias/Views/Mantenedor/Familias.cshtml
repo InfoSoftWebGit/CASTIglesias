@@ -59,12 +59,23 @@
                         <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Municipio</label>
-                        <input type="text" class="form-control" id="txtMunicipio" placeholder="Municipio" autocomplete="off" />
+                        <label class="form-label">Provincia</label>
+                        <select id="cboProvincia" class="form-select">
+                            <option value="0" disabled selected>Selecciona una provincia</option>
+                            @if (ViewBag.ListaProvincias != null)
+                            {
+                                foreach (var p in ViewBag.ListaProvincias)
+                                {
+                                    <option value="@p.idProvincia">@p.nombre_provincia</option>
+                                }
+                            }
+                        </select>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Provincia</label>
-                        <input type="text" class="form-control" id="txtProvincia" placeholder="Provincia" autocomplete="off" />
+                        <label class="form-label">Municipio</label>
+                        <select id="cboMunicipio" class="form-select" disabled>
+                            <option disabled selected>Selecciona un municipio</option>
+                        </select>
                     </div>
                     <div class="col-sm-4">
                         <label class="form-label">CP</label>
@@ -216,11 +227,18 @@
             $("#txtNombres").val(json?.nombre_familia || "");
             $("#txtTelefono").val(json?.telefono_familia || "");
             $("#txtDireccion").val(json?.direccion || "");
-            $("#txtMunicipio").val(json?.municipio || "");
-            $("#txtProvincia").val(json?.provincia || "");
+
             $("#txtCP").val(json?.cP || "");
             $("#txtIntegrantes").val(json?.integrantes ?? "");
             $("#mensajeError").addClass("d-none").text("");
+
+            if (json) {
+                var provId = encontrarProvinciaIdPorNombre(json.provincia || "");
+                $("#cboProvincia").val(provId);
+                cargarMunicipiosFamilia(provId, json.municipio || "");
+            } else {
+                resetearSelects();
+            }
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalFamilias"));
             modal.show();
@@ -235,10 +253,12 @@
                 nombre_familia: $("#txtNombres").val().trim(),
                 telefono_familia: parseInt($("#txtTelefono").val()) || 0,
                 direccion: $("#txtDireccion").val().trim(),
-                municipio: $("#txtMunicipio").val().trim(),
-                provincia: $("#txtProvincia").val().trim(),
+
                 cP: parseInt($("#txtCP").val()) || null,
-                integrantes: parseInt($("#txtIntegrantes").val()) || null
+                integrantes: parseInt($("#txtIntegrantes").val()) || null,
+                provincia: ($("#cboProvincia").val() && $("#cboProvincia").val() !== "0")
+                    ? $("#cboProvincia option:selected").text() : null,
+                municipio: $("#cboMunicipio").val() || null
             };
 
             console.log("Objeto familia:", Familia);
@@ -280,6 +300,55 @@
                     $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
                 }
             })
+        }
+        // Cascado Provincia → Municipio
+        $("#cboProvincia").on("change", function () {
+            cargarMunicipiosFamilia($(this).val(), "");
+        });
+
+        function resetearSelects() {
+            $("#cboProvincia").val("0");
+            $("#cboMunicipio").empty()
+                .append('<option disabled selected>Selecciona un municipio</option>')
+                .prop("disabled", true);
+        }
+
+        function encontrarProvinciaIdPorNombre(nombre) {
+            if (!nombre) return "0";
+            var found = "0";
+            $("#cboProvincia option").each(function () {
+                if ($(this).text().trim() === nombre.trim()) {
+                    found = $(this).val();
+                }
+            });
+            return found;
+        }
+
+        function cargarMunicipiosFamilia(idProvincia, nombreMunicipio) {
+            if (!idProvincia || idProvincia === "0") {
+                resetearSelects();
+                return;
+            }
+            $("#cboMunicipio").prop("disabled", true).html("<option>Cargando...</option>");
+            $.ajax({
+                url: '@Url.Action("ListarMunicipiosPorProvincia", "Mantenedor")',
+                type: "GET",
+                data: { idProvincia: idProvincia },
+                success: function (res) {
+                    $("#cboMunicipio").empty().prop("disabled", false)
+                        .append('<option disabled selected>Selecciona un municipio</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (m) {
+                            $("#cboMunicipio").append(
+                                $("<option>").val(m.nombre_municipio).text(m.nombre_municipio)
+                            );
+                        });
+                    }
+                    if (nombreMunicipio) {
+                        $("#cboMunicipio").val(nombreMunicipio);
+                    }
+                }
+            });
         }
     </script>
 }

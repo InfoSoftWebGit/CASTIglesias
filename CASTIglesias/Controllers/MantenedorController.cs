@@ -57,7 +57,12 @@ namespace CapaPresentaciónAdmin.Controllers
         #endregion
         ///////////////////////////// APARTADO DE FAMILIAS //////////////////////////////
         #region Familias
-        public IActionResult Familias() => View();
+        public IActionResult Familias()
+        {
+            try { ViewBag.ListaProvincias = _cnProvincias.ListarProvincias(); }
+            catch { ViewBag.ListaProvincias = new List<object>(); }
+            return View();
+        }
 
         [HttpGet]
         public JsonResult ListarFamilias()
