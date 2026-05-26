@@ -312,6 +312,20 @@ namespace CASTIglesias.Controllers
                 zonasGrupos = zonasGrupos
             });
         }
+        [HttpGet]
+        public JsonResult ListarFamiliasCongregantes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var familias = _cnFamilias.ListarFamilias(sedeID);
+                return Json(new { data = familias });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
         #endregion OTROS MÉTODOS MIEMBROS
 
         #region Visitantes

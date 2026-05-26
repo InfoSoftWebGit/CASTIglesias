@@ -225,7 +225,9 @@ namespace CapaDatos
                         diezmo_familiar = obj.diezmo_familiar,
                         id_usuario = obj.id_usuario,
                         id_role = obj.id_role,
-                        numero_hijos = obj.numero_hijos
+                        numero_hijos = obj.numero_hijos,
+                        grupo_familiar = obj.grupo_familiar,
+                        relacion_con = obj.relacion_con
                     };
 
 
@@ -251,7 +253,7 @@ namespace CapaDatos
                    nuevoMiembro.codigo_Postal         = obj.codigo_Postal;
                    nuevoMiembro.idProvincia           = obj.idProvincia;
                    nuevoMiembro.idMunicipio           = obj.idMunicipio;
-                   nuevoMiembro.responsable         = obj.responsable;
+                   nuevoMiembro.responsable           = obj.responsable;
                    nuevoMiembro.observaciones         = obj.observaciones;
                    nuevoMiembro.bautizado             = obj.bautizado;
                    nuevoMiembro.fecha_fallecido       = obj.fecha_fallecido;
@@ -270,6 +272,8 @@ namespace CapaDatos
                    nuevoMiembro.numero_hijos          = obj.numero_hijos;
                    nuevoMiembro.curso_acabado         = obj.curso_acabado;
                    nuevoMiembro.acepta_LOPD           = obj.acepta_LOPD;
+                   nuevoMiembro.grupo_familiar        = obj.grupo_familiar;
+                   nuevoMiembro.relacion_con          = obj.relacion_con;
 
                     _context.SaveChanges();
                 }
@@ -380,7 +384,8 @@ namespace CapaDatos
                 miembro.numero_hijos = obj.numero_hijos;
                 miembro.curso_acabado = obj.curso_acabado;
                 miembro.acepta_LOPD = obj.acepta_LOPD;
-               
+                miembro.grupo_familiar = obj.grupo_familiar;
+                miembro.relacion_con = obj.relacion_con;
 
                 _context.SaveChanges();
 

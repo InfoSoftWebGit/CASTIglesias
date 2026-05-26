@@ -60,6 +60,7 @@
             <div class="modal-body g-3">
                 <input id="txtid" type="hidden" value="0" />
                 <input id="txtID_sede" type="hidden" value="0" />
+                <input id="txtEstadoMiembro" type="hidden" value="" />
                 <label for="txtNumeroMiembro" class="form-label">Número de Miembro</label>
                 <input id="txtNumeroMiembro" type="number" class="form-control mb-2" placeholder="Número de miembro" />
                 <label for="txtDiezmoIndividual" class="form-label">Diezmo individual</label>
@@ -248,6 +249,35 @@
 
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
+                @*--------------APARTADO DE FAMILIA-------------------*@
+                <hr />
+                <h5>Familia</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboGrupoFamiliar" class="form-label">Grupo familiar</label>
+                        <select id="cboGrupoFamiliar" class="form-select">
+                            <option value="">— Sin asignar —</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3" id="divInfoFamilia" style="display:none;">
+                        <label class="form-label">Datos de la familia</label>
+                        <div class="border rounded p-2 bg-light small">
+                            <div><strong>Dirección:</strong> <span id="lblFamiliaDireccion">—</span></div>
+                            <div><strong>Municipio:</strong> <span id="lblFamiliaMunicipio">—</span></div>
+                            <div><strong>Provincia:</strong> <span id="lblFamiliaProvincia">—</span></div>
+                            <div><strong>CP:</strong> <span id="lblFamiliaCP">—</span></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="txtRelacionCon" class="form-label">Relación con</label>
+                        <div id="divRelacionCon" class="position-relative">
+                            <input type="text" class="form-control" id="txtRelacionCon" autocomplete="off" placeholder="Escribe un nombre para buscar...">
+                            <div id="dropdownRelacionCon" class="list-group position-absolute w-100 shadow" style="display:none; z-index:9999; max-height:200px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE FAMILIA-------------------*@
+
                 @*--------------APARTADO DE PRIVACIDAD-------------------*@
                 <h5>Privacidad</h5>
                 <div class="row">
@@ -526,6 +556,11 @@
                 $("#zonaSeleccionadas").empty();
                 $("#gruposSeleccionados").empty();
                 //FIN INFORMACIÓN ADICIONAL
+                // FAMILIA
+                $("#txtEstadoMiembro").val("Miembro");
+                $("#txtRelacionCon").val("");
+                cargarFamilias("");
+                //FIN FAMILIA
             }
                else {
                 // IDENTIFICADORES
@@ -583,6 +618,11 @@
                 $("#zonaSeleccionadas").empty();
                 $("#gruposSeleccionados").empty();
                 // FIN INFORMACIÓN ADICIONAL
+                // FAMILIA
+                $("#txtEstadoMiembro").val(data.estado || "");
+                $("#txtRelacionCon").val(data.relacion_con || "");
+                cargarFamilias(data.grupo_familiar || "");
+                // FIN FAMILIA
                 if (provinciaId > 0) {
                     cargarMunicipios(provinciaId, municipioId);
                 }
@@ -646,6 +686,9 @@
                 fecha_boda: $("#txtFechaBoda").val() || null,
                 fecha_baja: $("#txtFechaBaja").val() || null,
                 fecha_fallecido: $("#txtFechaFallecimiento").val() || null,
+
+                grupo_familiar: $("#cboGrupoFamiliar").val() || null,
+                relacion_con: $("#txtRelacionCon").val() || null,
             };
             $.ajax({
                 url: '@Url.Action("RegistrarMiembro", "Congregantes")',
@@ -844,6 +887,100 @@
                     // ======================
         // BOTONES DE ESTADO
         // ======================
+        // =============================================
+        // FAMILIA: CARGAR FAMILIAS Y AUTOCOMPLETE RELACION_CON
+        // =============================================
+
+        function cargarFamilias(valorSeleccionado) {
+            $.ajax({
+                url: '@Url.Action("ListarFamiliasCongregantes", "Congregantes")',
+                type: 'GET',
+                success: function (res) {
+                    var select = $('#cboGrupoFamiliar');
+                    select.empty().append('<option value="">— Sin asignar —</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (f) {
+                            var opt = $('<option>')
+                                .val(f.nombre_familia)
+                                .text(f.nombre_familia)
+                                .attr('data-direccion', f.direccion || '')
+                                .attr('data-municipio', f.municipio || '')
+                                .attr('data-provincia', f.provincia || '')
+                                .attr('data-cp', f.cP || f.cp || '');
+                            select.append(opt);
+                        });
+                    }
+                    if (valorSeleccionado) {
+                        select.val(valorSeleccionado);
+                        mostrarInfoFamiliaSeleccionada();
+                    }
+                }
+            });
+        }
+
+        function mostrarInfoFamiliaSeleccionada() {
+            var opt = $('#cboGrupoFamiliar option:selected');
+            var nombre = opt.val();
+            if (!nombre) { ocultarInfoFamilia(); return; }
+            $('#lblFamiliaDireccion').text(opt.data('direccion') || '—');
+            $('#lblFamiliaMunicipio').text(opt.data('municipio') || '—');
+            $('#lblFamiliaProvincia').text(opt.data('provincia') || '—');
+            $('#lblFamiliaCP').text(opt.data('cp') || '—');
+            $('#divInfoFamilia').show();
+        }
+
+        function ocultarInfoFamilia() {
+            $('#divInfoFamilia').hide();
+            $('#lblFamiliaDireccion, #lblFamiliaMunicipio, #lblFamiliaProvincia, #lblFamiliaCP').text('—');
+        }
+
+        $('#cboGrupoFamiliar').on('change', function () {
+            mostrarInfoFamiliaSeleccionada();
+        });
+
+        // Autocomplete Relacion_con
+        var timerRelacionCon;
+        $('#txtRelacionCon').on('input', function () {
+            var term = $(this).val().trim();
+            clearTimeout(timerRelacionCon);
+            if (term.length < 2) { $('#dropdownRelacionCon').hide().empty(); return; }
+            timerRelacionCon = setTimeout(function () {
+                $.ajax({
+                    url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                    type: 'GET',
+                    data: { term: term },
+                    success: function (res) {
+                        var dropdown = $('#dropdownRelacionCon');
+                        dropdown.empty();
+                        if (res.data && res.data.length > 0) {
+                            res.data.forEach(function (m) {
+                                var nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                                $('<button type="button">')
+                                    .addClass('list-group-item list-group-item-action')
+                                    .text(nombre)
+                                    .on('click', function () {
+                                        $('#txtRelacionCon').val(nombre);
+                                        dropdown.hide().empty();
+                                    })
+                                    .appendTo(dropdown);
+                            });
+                            dropdown.show();
+                        } else {
+                            dropdown.hide();
+                        }
+                    }
+                });
+            }, 300);
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#divRelacionCon').length) {
+                $('#dropdownRelacionCon').hide();
+            }
+        });
+
+        cargarFamilias();
+
         $("#btnRetrocederEstado").click(function () {
             RetrocederEstadoMiembro();
         });
