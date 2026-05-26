@@ -26,9 +26,8 @@
                 <tr>
                     <th>Nombre Familia</th>
                     <th>Teléfono</th>
-                    <th>Correo</th>
                     <th>Dirección</th>
-                    <th>Ciudad</th>
+                    <th>Municipio</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -55,17 +54,25 @@
                         <label class="form-label">Teléfono</label>
                         <input type="text" class="form-control" id="txtTelefono" placeholder="999555444" autocomplete="off" />
                     </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Correo</label>
-                        <input type="email" class="form-control" id="txtCorreo_familia" placeholder="correo@ejemplo.com" autocomplete="off" />
-                    </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-12">
                         <label class="form-label">Dirección</label>
                         <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Ciudad</label>
-                        <input type="text" class="form-control" id="txtCiudad" placeholder="Ciudad" autocomplete="off" />
+                        <label class="form-label">Municipio</label>
+                        <input type="text" class="form-control" id="txtMunicipio" placeholder="Municipio" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Provincia</label>
+                        <input type="text" class="form-control" id="txtProvincia" placeholder="Provincia" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">CP</label>
+                        <input type="number" class="form-control" id="txtCP" placeholder="28001" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Cantidad de integrantes</label>
+                        <input type="number" class="form-control" id="txtIntegrantes" placeholder="0" min="0" autocomplete="off" />
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -121,17 +128,16 @@
                 responsive: true,
                 ordering: false,
                 ajax: {
-                    // Esta URL debe devolver familias filtradas por el sedeID de la sesión
                     url: '@Url.Action("ListarFamilias", "Mantenedor")',
                     type: "GET",
-                    dataType: "json"
+                    dataType: "json",
+                    dataSrc: "data"
                 },
                 columns: [
                     { data: "nombre_familia" },
                     { data: "telefono_familia" },
-                    { data: "correo_electronico_familiar" },
-                    { data: "direccion1" },
-                    { data: "ciudad" },
+                    { data: "direccion", defaultContent: "" },
+                    { data: "municipio", defaultContent: "" },
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
@@ -206,20 +212,18 @@
 
         // Abrir modal
         function abrirModalFamilias(json = null) {
-            // Se asume 'iD_familia' como la propiedad del ID, basándonos en 'GuardarFamilia' y 'EliminarFamilia'.
             $("#txtid").val(json?.iD_familia || 0);
             $("#txtNombres").val(json?.nombre_familia || "");
             $("#txtTelefono").val(json?.telefono_familia || "");
-            $("#txtCorreo_familia").val(json?.correo_electronico_familiar || "");
-            $("#txtDireccion").val(json?.direccion1 || "");
-            $("#txtCiudad").val(json?.ciudad || "");
+            $("#txtDireccion").val(json?.direccion || "");
+            $("#txtMunicipio").val(json?.municipio || "");
+            $("#txtProvincia").val(json?.provincia || "");
+            $("#txtCP").val(json?.cP || "");
+            $("#txtIntegrantes").val(json?.integrantes ?? "");
             $("#mensajeError").addClass("d-none").text("");
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalFamilias"));
             modal.show();
-
-            console.log("Objeto que abre el modal:", json);
-            console.log("ID asignado al txtid:", $("#txtid").val());
         }
 
 
@@ -227,13 +231,14 @@
         // Guardar
         function GuardarFamilia() {
             const Familia = {
-                // Se usa iD_familia, el cual esperamos que esté en el modelo del controlador
                 iD_familia: parseInt($("#txtid").val()) || 0,
                 nombre_familia: $("#txtNombres").val().trim(),
                 telefono_familia: parseInt($("#txtTelefono").val()) || 0,
-                correo_electronico_familiar: $("#txtCorreo_familia").val().trim(),
-                direccion1: $("#txtDireccion").val().trim(),
-                ciudad: $("#txtCiudad").val().trim()
+                direccion: $("#txtDireccion").val().trim(),
+                municipio: $("#txtMunicipio").val().trim(),
+                provincia: $("#txtProvincia").val().trim(),
+                cP: parseInt($("#txtCP").val()) || null,
+                integrantes: parseInt($("#txtIntegrantes").val()) || null
             };
 
             console.log("Objeto familia:", Familia);

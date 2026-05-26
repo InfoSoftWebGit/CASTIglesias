@@ -47,7 +47,7 @@ namespace CapaDatos
         }
 
         // ----------------------------------------------------
-        // ✅ RegistrarFamilia (No requiere cambio en el ID_sede ya que valida contra obj.ID_sede, que es el ID real)
+        // ✅ RegistrarFamilia
         // ----------------------------------------------------
         /// <summary>
         /// Método de registrar familia.
@@ -57,17 +57,6 @@ namespace CapaDatos
             mensaje = string.Empty;
             try
             {
-                // 🌟 FILTRO CLAVE: Verificar la existencia del correo SOLO en la sede actual (obj.ID_sede).
-                // obj.ID_sede debe contener el ID real de la sede (NUNCA 1000/0).
-                bool existeCorreo = _context.Familia
-                    .Any(f => f.ID_sede == obj.ID_sede);
-
-                if (existeCorreo)
-                {
-                    mensaje = "El correo familiar ya existe en esta sede.";
-                    return 0;
-                }
-
                 _context.Familia.Add(obj);
                 _context.SaveChanges();
 
@@ -82,7 +71,7 @@ namespace CapaDatos
         }
 
         // ----------------------------------------------------
-        // ✅ EditarFamilia (No requiere cambio en el ID_sede ya que valida contra obj.ID_sede, que es el ID real)
+        // ✅ EditarFamilia
         // ----------------------------------------------------
         /// <summary>
         /// Método Editar Familia.
@@ -108,22 +97,14 @@ namespace CapaDatos
                     return false;
                 }
 
-                // 🌟 FILTRO CLAVE: Verificar que el nuevo correo no exista en otra familia DENTRO DE LA MISMA SEDE.
-                bool existeOtroCorreo = _context.Familia
-                    .Any(f => f.ID_familia != obj.ID_familia &&
-                              f.ID_sede == obj.ID_sede); // Aplicamos el filtro de sede
-
-                if (existeOtroCorreo)
-                {
-                    mensaje = "El correo ya está en uso por otra familia en esta sede.";
-                    return false;
-                }
-
                 // Actualizar los campos
                 familiaExistente.Nombre_familia = obj.Nombre_familia;
                 familiaExistente.Telefono_familia = obj.Telefono_familia;
                 familiaExistente.Direccion = obj.Direccion;
                 familiaExistente.Municipio = obj.Municipio;
+                familiaExistente.Provincia = obj.Provincia;
+                familiaExistente.CP = obj.CP;
+                familiaExistente.Integrantes = obj.Integrantes;
 
                 _context.SaveChanges();
 

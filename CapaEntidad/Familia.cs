@@ -22,6 +22,8 @@ namespace CapaEntidad
 
         public int? CP { get; set; }
 
+        public int? Integrantes { get; set; }
+
         public int ID_sede { get; set; }
     }
 }
