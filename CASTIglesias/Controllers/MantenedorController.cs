@@ -209,9 +209,21 @@ namespace CapaPresentaciónAdmin.Controllers
         {
             try
             {
-                int sedeID = ObtenerIdSedeUsuario(); // 👈 Obtener sedeID
-                var oListaGrupos = _cnGrupos.ListarGrupos(sedeID); // 👈 Pasar sedeID
-                return Json(new { data = oListaGrupos });
+                int sedeID = ObtenerIdSedeUsuario();
+                var oListaGrupos = _cnGrupos.ListarGrupos(sedeID);
+                var oListaZonas = _cnZonas.ListarZonas(sedeID);
+
+                var data = oListaGrupos.Select(g => new
+                {
+                    g.ID_grupo,
+                    g.Descripcion,
+                    g.Encargados,
+                    g.ID_zona,
+                    g.ID_sede,
+                    nombre_zona = oListaZonas.FirstOrDefault(z => z.ID_zona == g.ID_zona)?.nombre_zona ?? ""
+                });
+
+                return Json(new { data });
             }
             catch (UnauthorizedAccessException ex)
             {

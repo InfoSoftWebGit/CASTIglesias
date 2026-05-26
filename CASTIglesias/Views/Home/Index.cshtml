@@ -10,7 +10,7 @@
 
 <div class="row">
     <div class="col-xl-3 col-md-6">
-        <div class="card bg-secondary text-white mb-4">
+        <div class="card text-white mb-4" style="background-color: #6B7280;">
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
@@ -25,7 +25,7 @@
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card bg-info text-white mb-4">
+        <div class="card text-white mb-4" style="background-color: #00BFA5;">
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
@@ -40,7 +40,7 @@
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card bg-warning text-white mb-4">
+        <div class="card text-white mb-4" style="background-color: #1E3A8A;">
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
@@ -55,7 +55,7 @@
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card bg-primary text-white mb-4">
+        <div class="card text-white mb-4" style="background-color: #0D1B3D;">
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
@@ -141,124 +141,69 @@
 
 <hr class="my-4" />
 
-<div class="col-xl-3 col-md-6">
-    <div class="card bg-success text-white mb-4">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm-9">
-                    <h6>Diezmos totales</h6>
-                    <h6 id="totalDiezmo"></h6>
-                </div>
-                <div class="col-sm-3">
-                    <i class="fas fa-hand-holding-heart fa-2x"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <div class="card mb-4">
     <div class="card-header">
-        <i class="fas fa-tags me-1"></i>
-        Historial de Diezmos
+        <i class="fas fa-hand-holding-usd me-1"></i>
+        Diezmos por Concepto
     </div>
-    @* NOTA: Se ha quitado el atributo asp-action/asp-controller del form, ya que la exportación se maneja con JS. *@
-    <form method="post">
-        <div class="card-body">
-            <div class="row align-items-end">
-                <div class="col-sm-2">
-                    <label class="form-label">Fecha de inicio</label>
-                    <input class="form-control" type="text" id="txtFechaInicio" name="fechainicio" />
-                </div>
-                <div class="col-sm-2">
-                    <label class="form-label">Fecha de fin</label>
-                    <input class="form-control" type="text" id="txtFechaFin" name="fechafin" />
-                </div>
-                <div class="col-sm-2 d-grid">
-                    <button class="btn btn-primary" id="btnbuscar" type="button">
-                        <i class="fas fa-search"></i> Buscar
-                    </button>
-                </div>
-                <div class="col-sm-2 d-grid">
-                    <button class="btn btn-success" type="button" id="btnExportar">
-                        @* Cambiado a type="button" para manejar el submit con JS *@
-                        <i class="fas fa-file-excel"></i> Exportar
-                    </button>
-                </div>
+    <div class="card-body">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-sm-3 col-md-2">
+                <label class="form-label fw-semibold">Vista</label>
+                <select class="form-select form-select-sm" id="modoDiezmo">
+                    <option value="anual">Año completo</option>
+                    <option value="mensual">Mes completo</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <label class="form-label fw-semibold">Año</label>
+                <input type="number" class="form-control form-control-sm" id="anioDiezmo" min="2000" max="2099" />
+            </div>
+            <div class="col-sm-3 col-md-2" id="colMesDiezmo" style="display:none">
+                <label class="form-label fw-semibold">Mes</label>
+                <select class="form-select form-select-sm" id="mesDiezmo">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <button class="btn btn-primary btn-sm w-100" id="btnActualizarDiezmo">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
             </div>
         </div>
-    </form>
-    <hr />
-
-    <div class="card-body">
-        <div class="table-wrapper">
-            <table id="tablaDashboard" class="table table-bordered table-striped border-top" style="width:100%">
-                <thead>
-                    <tr>
-                        <td>Fecha de Diezmo</td>
-                        <td>Miembro</td>
-                        <td>Concepto</td>
-                        <td>Cantidad</td>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+        <div style="position:relative; height:350px;">
+            <canvas id="graficoDiezmos"></canvas>
         </div>
+        <p class="text-muted text-center mt-2 mb-0" id="diezmoSinDatos" style="display:none">
+            <i class="fas fa-info-circle"></i> No hay registros de diezmos para el período seleccionado.
+        </p>
     </div>
 </div>
 
 @section scripts {
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 
     <script>
-        var tabladata;
-
-        // Función para convertir formato de fecha DD/MM/YYYY a YYYY-MM-DD
-        function convertirDDMMYYYYaYYYYMMDD(fecha) {
-            if (!fecha) return "";
-            const partes = fecha.split("/");
-            // Asegura el formato YYYY-MM-DD
-            return `${partes[2]}-${partes[1]}-${partes[0]}`;
-        }
-
-        // Función para cargar y actualizar el total de diezmos
-        function cargarTotalDiezmos() {
-            const fechaInicio = $("#txtFechaInicio").val();
-            const fechaFin = $("#txtFechaFin").val();
-
-            if (!fechaInicio || !fechaFin) {
-                $("#totalDiezmo").text('0.00 €');
-                return;
-            }
-
-            const fechaInicioFormatted = convertirDDMMYYYYaYYYYMMDD(fechaInicio);
-            const fechaFinFormatted = convertirDDMMYYYYaYYYYMMDD(fechaFin);
-
-            $.get('@Url.Action("SumaDiezmosTotales", "Home")', { fechainicio: fechaInicioFormatted, fechafin: fechaFinFormatted }, function (data) {
-                let total = data.total ?? 0;
-                $("#totalDiezmo").text(
-                    parseFloat(total).toLocaleString('es-ES', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 })
-                );
-            }).fail(function() {
-                $("#totalDiezmo").text('Error');
-            });
-        }
-
-        //Cargar y generar las tarjetas de zonas dinámicamente
-                function cargarTarjetasZonas() {
+        function cargarTarjetasZonas() {
             $.get('@Url.Action("ObtenerZonasConMiembros", "Home")', function (data) {
-                console.log("📦 Datos recibidos:", data);
                 const contenedorZonas = $('#contenedor-zonas');
                 contenedorZonas.empty();
-
                 if (Array.isArray(data) && data.length > 0) {
                     data.forEach(function (zona) {
                         const tarjetaHtml = `
                             <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
+                                <div class="card text-white mb-4" style="background-color: #1E3A8A;">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-9">
@@ -274,14 +219,9 @@
                             </div>`;
                         contenedorZonas.append(tarjetaHtml);
                     });
-                } else {
-                    console.warn("⚠️ No se encontraron zonas o data vacío.");
                 }
-            }).fail(function (xhr) {
-                console.error("❌ Error en la petición:", xhr.responseText);
             });
         }
-
 
         $(document).ready(function () {
             $.get('@Url.Action("ContadorMiembros", "Congregantes")', function (data) {
@@ -300,99 +240,8 @@
                 $("#totalenproceso").text(data.resultado ?? 0);
             }).fail(function () { $("#totalenproceso").text('Error'); });
 
-            // Llamar a la función para generar las tarjetas de zonas
             cargarTarjetasZonas();
-
-            // Lógica de inicialización de los datepickers
-            var fechaActual = new Date();
-            var primerDiaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 1);
-            $("#txtFechaInicio").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', primerDiaMes);
-            $("#txtFechaFin").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', fechaActual);
-
-            // Llamada inicial para cargar el total de diezmos
-            cargarTotalDiezmos();
-
-            // Lógica de URL para Datatable
-            function obtenerUrlHistorial() {
-                const fechaInicio = $("#txtFechaInicio").val();
-                const fechaFin = $("#txtFechaFin").val();
-                const fechaInicioFormatted = convertirDDMMYYYYaYYYYMMDD(fechaInicio);
-                const fechaFinFormatted = convertirDDMMYYYYaYYYYMMDD(fechaFin);
-                return `@Url.Action("ObtenerHistorialDiezmos", "Home")?fechainicio=${encodeURIComponent(fechaInicioFormatted)}&fechafin=${encodeURIComponent(fechaFinFormatted)}`;
-            }
-
-            // Lógica de DataTable
-            tabladata = $("#tablaDashboard").DataTable({
-                responsive: true,
-                ordering: false,
-                ajax: {
-                    url: obtenerUrlHistorial(),
-                    type: "GET",
-                    dataSrc: function (json) {
-                        return json;
-                    }
-                },
-                columns: [
-                    {
-                        data: "fecha_diezmo",
-                        render: function (data) {
-                            var date = new Date(data);
-                            return ("0" + date.getDate()).slice(-2) + "/" +
-                                ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
-                                date.getFullYear();
-                        }
-                    },
-                    { data: "nombre_miembro" },
-                    { data: "nombre_concepto" },
-                    {
-                        data: "cantidad_diezmo",
-                        render: function (data) {
-                            return parseFloat(data).toLocaleString('es-ES', {
-                                style: 'currency',
-                                currency: 'EUR',
-                                minimumFractionDigits: 2
-                            });
-                        }
-                    }
-                ],
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
-            });
-
-            // Evento para el botón Buscar y para los cambios de fecha
-            $('#btnbuscar, #txtFechaInicio, #txtFechaFin').on('click change', function () {
-                cargarTotalDiezmos();
-                tabladata.ajax.url(obtenerUrlHistorial()).load();
-            });
-
-            // Lógica para el botón Exportar
-            $('#btnExportar').click(function () {
-                const fechaInicio = $("#txtFechaInicio").val(); // Ej: "01/05/2025"
-                const fechaFin = $("#txtFechaFin").val();      // Ej: "26/09/2025"
-
-                // ⭐ CAMBIO CLAVE: Transformar las fechas de DD/MM/YYYY a YYYY-MM-DD
-                const fechaInicioExport = convertirDDMMYYYYaYYYYMMDD(fechaInicio);
-                const fechaFinExport = convertirDDMMYYYYaYYYYMMDD(fechaFin);
-
-                var form = $('<form></form>');
-                form.attr("method", "POST");
-                form.attr("action", '@Url.Action("ExportarHistorialDiezmo", "Home")');
-
-                var inputFechaInicio = $("<input></input>");
-                inputFechaInicio.attr("type", "hidden");
-                inputFechaInicio.attr("name", "fechainicio");
-                inputFechaInicio.attr("value", fechaInicioExport); // Usar fecha transformada
-                form.append(inputFechaInicio);
-
-                var inputFechaFin = $("<input></input>");
-                inputFechaFin.attr("type", "hidden");
-                inputFechaFin.attr("name", "fechafin");
-                inputFechaFin.attr("value", fechaFinExport); // Usar fecha transformada
-                form.append(inputFechaFin);
-
-                form.appendTo('body').submit().remove();
-            });
-
-        }); // Fin de $(document).ready
+        });
     </script>
 
     <script>
@@ -495,16 +344,112 @@
             });
         }
 
-        $('#modoGrafico').on('change', function () {
-            actualizarVisibilidadFiltros();
-        });
-
+        $('#modoGrafico').on('change', function () { actualizarVisibilidadFiltros(); });
         $('#btnActualizarGrafico').on('click', cargarGraficoAsistencia);
 
-        // Carga inicial al arrancar la página
         $(document).ready(function () {
             actualizarVisibilidadFiltros();
             cargarGraficoAsistencia();
+        });
+    </script>
+
+    <script>
+        // ── Gráfico de Diezmos por Concepto ──────────────────────────────
+        let graficoDiemosInstance = null;
+
+        const coloresDiezmo = [
+            { bg: 'rgba( 30,  58, 138, 0.8)', border: 'rgba( 30,  58, 138, 1)' },
+            { bg: 'rgba(  0, 191, 165, 0.8)', border: 'rgba(  0, 191, 165, 1)' },
+            { bg: 'rgba(245, 158,  11, 0.8)', border: 'rgba(245, 158,  11, 1)' },
+            { bg: 'rgba(239,  68,  68, 0.8)', border: 'rgba(239,  68,  68, 1)' },
+            { bg: 'rgba(139,  92, 246, 0.8)', border: 'rgba(139,  92, 246, 1)' },
+            { bg: 'rgba(236,  72, 153, 0.8)', border: 'rgba(236,  72, 153, 1)' },
+            { bg: 'rgba( 16, 185, 129, 0.8)', border: 'rgba( 16, 185, 129, 1)' },
+            { bg: 'rgba(251, 146,  60, 0.8)', border: 'rgba(251, 146,  60, 1)' },
+        ];
+
+        const hoyDiezmo = new Date();
+        $('#anioDiezmo').val(hoyDiezmo.getFullYear());
+        $('#mesDiezmo').val(hoyDiezmo.getMonth() + 1);
+
+        $('#modoDiezmo').on('change', function () {
+            $('#colMesDiezmo').toggle($(this).val() === 'mensual');
+        });
+
+        function cargarGraficoDiezmos() {
+            const modo = $('#modoDiezmo').val();
+            const anio = $('#anioDiezmo').val();
+            const mes  = $('#mesDiezmo').val();
+            const params = { modo, anio };
+            if (modo === 'mensual') params.mes = mes;
+
+            $.get('@Url.Action("ObtenerGraficoDiezmos", "Home")', params, function (res) {
+                const sinDatos = !res.series || res.series.length === 0 ||
+                                 res.series.every(s => s.datos.every(v => v === 0));
+                $('#diezmoSinDatos').toggle(sinDatos);
+
+                if (graficoDiemosInstance) {
+                    graficoDiemosInstance.destroy();
+                    graficoDiemosInstance = null;
+                }
+                if (sinDatos) return;
+
+                const datasets = res.series.map(function (s, i) {
+                    const c = coloresDiezmo[i % coloresDiezmo.length];
+                    return {
+                        label: s.concepto,
+                        data: s.datos,
+                        backgroundColor: c.bg,
+                        borderColor: c.border,
+                        borderWidth: 1
+                    };
+                });
+
+                graficoDiemosInstance = new Chart(document.getElementById('graficoDiezmos'), {
+                    type: 'bar',
+                    data: { labels: res.labels, datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (item) {
+                                        return ` ${item.dataset.label}: ${parseFloat(item.parsed.y).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}`;
+                                    },
+                                    footer: function (items) {
+                                        const total = items.reduce((s, i) => s + i.parsed.y, 0);
+                                        return 'Total: ' + parseFloat(total).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { stacked: false },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (val) {
+                                        return parseFloat(val).toLocaleString('es-ES', {
+                                            style: 'currency', currency: 'EUR',
+                                            minimumFractionDigits: 0, maximumFractionDigits: 0
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }).fail(function () {
+                $('#diezmoSinDatos').show();
+            });
+        }
+
+        $('#btnActualizarDiezmo').on('click', cargarGraficoDiezmos);
+
+        $(document).ready(function () {
+            cargarGraficoDiezmos();
         });
     </script>
 }

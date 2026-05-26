@@ -1,9 +1,7 @@
-﻿@{
+@{
     ViewBag.Title = "Grupos";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
-
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
@@ -24,8 +22,10 @@
         <table id="tablaGrupos" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
+                    <th>Zona</th>
                     <th>Descripción</th>
-                    <th>Acciones</th> @* Nueva columna para los botones de Editar y Eliminar *@
+                    <th>Encargados</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -36,7 +36,7 @@
 <div class="modal fade" id="FormModalGrupos" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
                 <h5 class="modal-title" id="exampleModalLabel">Datos del nuevo grupo</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
@@ -44,9 +44,18 @@
                 <input id="txtid" type="hidden" value="0" />
                 <div class="row g-2">
                     <div class="col-sm-12">
-                        @* Ajustado a 12 para que ocupe todo el ancho, ya que solo hay un campo *@
-                        <label class="form-label">Descripcion</label>
-                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripcion" autocomplete="off" />
+                        <label class="form-label">Zona</label>
+                        <select id="cboZona" class="form-select">
+                            <option value="0" disabled selected>Selecciona una zona</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripción del grupo" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form-label">Encargados</label>
+                        <input type="text" class="form-control" id="txtEncargados" placeholder="Nombres de los encargados" autocomplete="off" />
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -62,26 +71,8 @@
         </div>
     </div>
 </div>
-@* <style>
-    #tablaGrupos thead {
-        background-color: #1877F2 !important;
-    }
-
-    #tablaGrupos th {
-        color: white !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    #tablaGrupos tbody td {
-        color: black !important;
-    }
-</style> *@
-
 
 @section scripts {
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
@@ -91,7 +82,6 @@
         let filaSeleccionada;
 
         $(document).ready(function () {
-            // Destruir instancia previa si existe
             if ($.fn.DataTable.isDataTable("#tablaGrupos")) {
                 $("#tablaGrupos").DataTable().clear().destroy();
             }
@@ -99,15 +89,18 @@
             tabladata = $("#tablaGrupos").DataTable({
                 dom: 'Bfrtip',
                 responsive: true,
-                ordering: false,
+                order: [[0, 'asc']],
                 ajax: {
                     url: '@Url.Action("ListarGrupos", "Mantenedor")',
                     type: "GET",
-                    dataType: "json"
+                    dataType: "json",
+                    dataSrc: "data"
                 },
                 columns: [
-                    { data: "descripcion" }, // Columna 1: Descripción
-                    { // Columna 2: Acciones
+                    { data: "nombre_zona", defaultContent: "Sin zona" },
+                    { data: "descripcion", defaultContent: "" },
+                    { data: "encargados", defaultContent: "" },
+                    {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
                                 <button type="button" class="btn btn-primary btn-sm btn-editarGrupo">
@@ -123,29 +116,42 @@
                         width: "100px"
                     }
                 ],
+                drawCallback: function (settings) {
+                    var api = this.api();
+                    var rows = api.rows({ page: 'current' }).nodes();
+                    var lastZona = null;
+
+                    api.column(0, { page: 'current' }).data().each(function (zona, i) {
+                        if (lastZona !== zona) {
+                            $(rows).eq(i).before(
+                                '<tr style="background-color:#EEF2FB;">' +
+                                '<td colspan="4" style="color:#1E3A8A; font-weight:700; padding:8px 12px; border-bottom:2px solid #1E3A8A;">' +
+                                '<i class="fas fa-map-marker-alt me-2"></i>' + (zona || 'Sin zona') +
+                                '</td></tr>'
+                            );
+                            lastZona = zona;
+                        }
+                    });
+                },
                 language: {
                     url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
                 },
                 initComplete: function () {
                     $('#tablaGrupos thead').css({
-                        'background-color': '#1877F2',
+                        'background-color': '#1E3A8A',
                         'color': 'white',
                         'text-align': 'center'
                     });
                 }
             });
 
-            // Botón editar
             $("#tablaGrupos tbody").on("click", ".btn-editarGrupo", function () {
                 filaSeleccionada = $(this).closest("tr");
                 const data = tabladata.row(filaSeleccionada).data();
-                console.log("CLICK EDITAR - row data:", data);
                 abrirModalGrupos(data);
             });
 
-            // Botón eliminar
             $("#tablaGrupos tbody").on("click", ".btn-eliminarGrupo", function () {
-
                 const fila = $(this).closest("tr");
                 const data = tabladata.row(fila).data();
 
@@ -161,7 +167,7 @@
                         $.ajax({
                             url: '@Url.Action("EliminarGrupo", "Mantenedor")',
                             type: "POST",
-                            data: { id: data.iD_grupo }, // Se usa iD_grupo
+                            data: { id: data.iD_grupo },
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
@@ -173,66 +179,82 @@
                                 Swal.fire("Error", "No se pudo eliminar", "error");
                             }
                         });
-
-
                     }
                 });
             });
         });
 
-        // Abrir modal
+        function cargarZonas(idZonaSeleccionada) {
+            $.ajax({
+                url: '@Url.Action("ListarZonas", "Mantenedor")',
+                type: "GET",
+                success: function (res) {
+                    const cbo = $("#cboZona");
+                    cbo.empty().append('<option value="0" disabled selected>Selecciona una zona</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (z) {
+                            cbo.append($("<option>").val(z.iD_zona).text(z.nombre_zona));
+                        });
+                    }
+                    if (idZonaSeleccionada && idZonaSeleccionada !== 0) {
+                        cbo.val(idZonaSeleccionada);
+                    }
+                }
+            });
+        }
+
         function abrirModalGrupos(json = null) {
-            // Se asume 'iD_grupo' como la propiedad del ID.
             $("#txtid").val(json?.iD_grupo || 0);
             $("#txtDescripcion").val(json?.descripcion || "");
+            $("#txtEncargados").val(json?.encargados || "");
             $("#mensajeError").addClass("d-none").text("");
+
+            cargarZonas(json?.iD_zona || null);
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalGrupos"));
             modal.show();
         }
 
-        // Guardar
         function GuardarGrupo() {
             const descripcion = $("#txtDescripcion").val().trim();
 
             if (descripcion === "") {
                 $("#mensajeError").removeClass("d-none").text("La descripción del grupo no puede estar vacía.");
-                return; // detenemos ejecución
+                return;
             }
 
+            const idZona = parseInt($("#cboZona").val()) || 0;
+            const nombreZona = idZona > 0 ? $("#cboZona option:selected").text() : "Sin zona";
+
             const Grupo = {
-                // Usamos 'iD_grupo' en minúsculas, consistente con la lectura de DataTables y la función Eliminar.
                 iD_grupo: parseInt($("#txtid").val()) || 0,
                 descripcion: descripcion,
+                encargados: $("#txtEncargados").val().trim(),
+                iD_zona: idZona
             };
-
-            console.log(">> GuardarGrupo() - objeto enviado:", Grupo);
 
             $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
 
-            const url = '@Url.Action("GuardarGrupos", "Mantenedor")';
-
-            // Nota: Se ha omitido contentType y dataType JSON.stringify(Grupo) ya que en tu código original
-            // estabas enviando un objeto JavaScript plano, lo que C# interpreta como form-data.
-            // Si el controlador espera JSON, habría que volver a usar JSON.stringify y establecer 'contentType: "application/json"'.
             $.ajax({
-                url: url,
+                url: '@Url.Action("GuardarGrupos", "Mantenedor")',
                 type: "POST",
-                data: Grupo, // Envía como form-data
+                data: Grupo,
                 success: function (data) {
                     $(".modal-body").LoadingOverlay("hide");
 
+                    const grupoDisplay = { ...Grupo, nombre_zona: nombreZona };
+
                     if (Grupo.iD_grupo === 0) {
                         if (data.resultado !== 0) {
-                            Grupo.iD_grupo = data.resultado;
-                            tabladata.row.add(Grupo).draw(false);
+                            grupoDisplay.iD_grupo = data.resultado;
+                            tabladata.row.add(grupoDisplay).draw(false);
                             bootstrap.Modal.getInstance(document.getElementById("FormModalGrupos")).hide();
                         } else {
                             $("#mensajeError").removeClass("d-none").text(data.mensaje);
                         }
                     } else {
                         if (data.resultado) {
-                            tabladata.row(filaSeleccionada).data(Grupo).draw(false);
+                            tabladata.row(filaSeleccionada).data(grupoDisplay).draw(false);
                             filaSeleccionada = null;
                             bootstrap.Modal.getInstance(document.getElementById("FormModalGrupos")).hide();
                         } else {
@@ -246,7 +268,5 @@
                 }
             });
         }
-
-
     </script>
 }

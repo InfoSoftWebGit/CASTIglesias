@@ -51,7 +51,7 @@
 <div class="modal fade" id="FormModalMiembros" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del nuevo miembro</h1>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
@@ -62,11 +62,26 @@
                 <input id="txtID_sede" type="hidden" value="0" />
                 <input id="txtEstadoMiembro" type="hidden" value="" />
                 <label for="txtNumeroMiembro" class="form-label">Número de Miembro</label>
-                <input id="txtNumeroMiembro" type="number" class="form-control mb-2" placeholder="Número de miembro" />
+                <div class="input-group mb-2">
+                    <input id="txtNumeroMiembro" type="number" class="form-control" placeholder="Número de miembro" />
+                    <button type="button" class="btn btn-outline-secondary" onclick="asignarNumeroMiembro()">
+                        <i class="fas fa-hashtag"></i> Asignar Nº Miembro
+                    </button>
+                </div>
                 <label for="txtDiezmoIndividual" class="form-label">Diezmo individual</label>
-                <input id="txtDiezmoIndividual" type="text" class="form-control mb-2" />
+                <div class="input-group mb-2">
+                    <input id="txtDiezmoIndividual" type="text" class="form-control" />
+                    <button type="button" class="btn btn-outline-secondary" onclick="agregarDiezmoIndividual()">
+                        <i class="fas fa-user"></i> Agregar Diezmo Individual
+                    </button>
+                </div>
                 <label for="txtDiezmoFamiliar" class="form-label">Diezmo familiar</label>
-                <input id="txtDiezmoFamiliar" type="text" class="form-control mb-2" placeholder="Diezmo familiar" />
+                <div class="input-group mb-2">
+                    <input id="txtDiezmoFamiliar" type="text" class="form-control" placeholder="Diezmo familiar" />
+                    <button type="button" class="btn btn-outline-secondary" onclick="agregarDiezmoFamiliar()">
+                        <i class="fas fa-users"></i> Agregar Diezmo Familiar
+                    </button>
+                </div>
 
                 <h5>Información principal</h5>
                 <div class="row">
@@ -321,7 +336,7 @@
 <div class="modal fade" id="modalZonagrupoministerioMiembro" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
                 <h5 class="modal-title">Asignar Zonas / Grupos / Ministerios</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -352,8 +367,6 @@
 </div>
 
 @section scripts {
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -787,7 +800,11 @@
             idMinisterio = idMinisterio || 0;
 
             const zonaSelect = construirSelectZGM(opcionesZonas, 'iD_zona', 'nombre_zona', idZona, '— Sin zona —');
-            const grupoSelect = construirSelectZGM(opcionesGrupos, 'iD_grupo', 'descripcion', idGrupo, '— Sin grupo —');
+            const gruposMapeados = opcionesGrupos.map(g => ({
+                ...g,
+                labelGrupo: g.encargados ? `${g.descripcion} (${g.encargados})` : g.descripcion
+            }));
+            const grupoSelect = construirSelectZGM(gruposMapeados, 'iD_grupo', 'labelGrupo', idGrupo, '— Sin grupo —');
             const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'id', 'descripcion', idMinisterio, '— Sin ministerio —');
 
             $('#bodyZGM').append(`
@@ -984,6 +1001,65 @@
         $("#btnRetrocederEstado").click(function () {
             RetrocederEstadoMiembro();
         });
+
+        // ======================
+        // NUMERACIÓN Y DIEZMOS
+        // ======================
+        let configDiezmo = { prefijo_individual: '', prefijo_familiar: '' };
+
+        $.ajax({
+            url: '@Url.Action("ObtenerConfigDiezmo", "Ajustes")',
+            type: "GET",
+            success: function (res) {
+                if (res.success && res.data) {
+                    configDiezmo.prefijo_individual = res.data.prefijo_individual || '';
+                    configDiezmo.prefijo_familiar = res.data.prefijo_familiar || '';
+                }
+            }
+        });
+
+        function asignarNumeroMiembro() {
+            $.ajax({
+                url: '@Url.Action("ObtenerSiguienteNumeroMiembro", "Congregantes")',
+                type: "GET",
+                beforeSend: function () { $.LoadingOverlay("show"); },
+                success: function (res) {
+                    $.LoadingOverlay("hide");
+                    if (res.success) {
+                        $("#txtNumeroMiembro").val(res.numero);
+                        Swal.fire({
+                            toast: true, position: 'top-end', icon: 'success',
+                            title: `Nº asignado: ${res.formateado}`,
+                            showConfirmButton: false, timer: 2500, timerProgressBar: true
+                        });
+                    } else {
+                        Swal.fire("Error", res.mensaje, "error");
+                    }
+                },
+                error: function () {
+                    $.LoadingOverlay("hide");
+                    Swal.fire("Error", "No se pudo obtener el siguiente número.", "error");
+                }
+            });
+        }
+
+        function agregarDiezmoIndividual() {
+            const num = parseInt($("#txtNumeroMiembro").val()) || 0;
+            if (!num) {
+                Swal.fire("Aviso", "Primero asigna un número de miembro.", "warning");
+                return;
+            }
+            $("#txtDiezmoIndividual").val(configDiezmo.prefijo_individual + String(num).padStart(4, '0'));
+        }
+
+        function agregarDiezmoFamiliar() {
+            const num = parseInt($("#txtNumeroMiembro").val()) || 0;
+            if (!num) {
+                Swal.fire("Aviso", "Primero asigna un número de miembro.", "warning");
+                return;
+            }
+            $("#txtDiezmoFamiliar").val(configDiezmo.prefijo_familiar + String(num).padStart(4, '0'));
+        }
 
         // ======================
         // FUNCIONES
