@@ -73,7 +73,6 @@
 
                 <h6 class="mb-3">Información del miembro</h6>
                 <div class="row g-3">
-                    <!-- Nombre del miembro con autocomplete -->
                     <div class="col-sm-6">
                         <label class="form-label">Nombre del miembro <span class="text-danger">*</span></label>
                         <div class="autocomplete-wrapper">
@@ -82,7 +81,6 @@
                             <div id="dropdownNombreMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
-                    <!-- Apellidos del miembro (se rellena automáticamente) -->
                     <div class="col-sm-6">
                         <label class="form-label">Apellidos del miembro</label>
                         <input type="text" class="form-control" id="txtApellidosMiembro"
@@ -93,7 +91,6 @@
                 <hr />
                 <h6 class="mb-3">Datos del seguimiento</h6>
                 <div class="row g-3">
-                    <!-- Persona a cargo con autocomplete (solo líderes) -->
                     <div class="col-sm-6">
                         <label class="form-label">Persona a cargo <span class="text-danger">*</span></label>
                         <div class="autocomplete-wrapper">
@@ -135,26 +132,6 @@
     </div>
 </div>
 
-<!-- MODAL CONFIRMACIÓN ELIMINAR -->
-<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-header text-white bg-danger">
-                <h5 class="modal-title">Eliminar</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Deseas eliminar este seguimiento?</p>
-                <input type="hidden" id="hiddenIDEliminar" value="0" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" onclick="confirmarEliminar()">Eliminar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -173,21 +150,20 @@
                 {
                     data: null,
                     render: function (data) {
-                        return (data.nombre_Miembro || data.nombre_miembro || '') + ' ' +
-                               (data.apellidos_Miembro || data.apellidos_miembro || '');
+                        return (data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || '');
                     }
                 },
-                { data: 'persona_Cargo', defaultContent: '' },
+                { data: 'persona_cargo', defaultContent: '' },
                 {
-                    data: 'fecha_Visita',
+                    data: 'fecha_visita',
                     render: function (val) { return val ? val.substring(0, 10) : '—'; }
                 },
                 {
-                    data: 'fecha_Llamada',
+                    data: 'fecha_llamada',
                     render: function (val) { return val ? val.substring(0, 10) : '—'; }
                 },
                 {
-                    data: 'fecha_Consejeria',
+                    data: 'fecha_consejeria',
                     render: function (val) { return val ? val.substring(0, 10) : '—'; }
                 },
                 { data: 'observaciones', defaultContent: '' },
@@ -197,7 +173,7 @@
                     render: function (data) {
                         return '<button class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
-                               '<button class="btn btn-sm btn-danger" onclick="abrirModalEliminar(' + data.iD + ')">' +
+                               '<button class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.iD + ')">' +
                                '<i class="fas fa-trash"></i></button>';
                     }
                 }
@@ -216,12 +192,12 @@
             $('#modalTitulo').text('Editar seguimiento');
             $('#hiddenID').val(data.iD);
             $('#hiddenIdMiembro').val(data.iD_miembro);
-            $('#txtNombreMiembro').val(data.nombre_Miembro || data.nombre_miembro || '');
-            $('#txtApellidosMiembro').val(data.apellidos_Miembro || data.apellidos_miembro || '');
-            $('#txtPersonaCargo').val(data.persona_Cargo || '');
-            if (data.fecha_Visita) $('#txtFechaVisita').val(data.fecha_Visita.substring(0, 10));
-            if (data.fecha_Llamada) $('#txtFechaLlamada').val(data.fecha_Llamada.substring(0, 10));
-            if (data.fecha_Consejeria) $('#txtFechaConsejeria').val(data.fecha_Consejeria.substring(0, 10));
+            $('#txtNombreMiembro').val(data.nombre_miembro || '');
+            $('#txtApellidosMiembro').val(data.apellidos_miembro || '');
+            $('#txtPersonaCargo').val(data.persona_cargo || '');
+            if (data.fecha_visita) $('#txtFechaVisita').val(data.fecha_visita.substring(0, 10));
+            if (data.fecha_llamada) $('#txtFechaLlamada').val(data.fecha_llamada.substring(0, 10));
+            if (data.fecha_consejeria) $('#txtFechaConsejeria').val(data.fecha_consejeria.substring(0, 10));
             $('#txtObservaciones').val(data.observaciones || '');
         } else {
             $('#modalTitulo').text('Nuevo seguimiento');
@@ -259,62 +235,78 @@
             return;
         }
 
-        var payload = {
-            ID: parseInt($('#hiddenID').val()),
-            ID_miembro: idMiembro,
-            Nombre_miembro: nombre,
-            Apellidos_miembro: apellidos,
-            Persona_cargo: personaCargo,
-            Fecha_visita: $('#txtFechaVisita').val() || null,
-            Fecha_llamada: $('#txtFechaLlamada').val() || null,
-            Fecha_consejeria: $('#txtFechaConsejeria').val() || null,
-            Observaciones: $('#txtObservaciones').val().trim() || null
-        };
+        var esEdicion = parseInt($('#hiddenID').val()) > 0;
+        Swal.fire({
+            title: '¿Confirmar?',
+            text: esEdicion ? '¿Deseas guardar los cambios?' : '¿Deseas registrar este seguimiento?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
 
-        $.ajax({
-            url: '@Url.Action("RegistrarSeguimiento", "Congregantes")',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (res) {
-                if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
-                    Swal.fire('Éxito', res.mensaje, 'success');
-                    $('#modalSeguimiento').modal('hide');
-                    tablaSeguimiento.ajax.reload();
-                } else {
-                    Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
+            var payload = {
+                ID: parseInt($('#hiddenID').val()),
+                ID_miembro: idMiembro,
+                Nombre_miembro: nombre,
+                Apellidos_miembro: apellidos,
+                Persona_cargo: personaCargo,
+                Fecha_visita: $('#txtFechaVisita').val() || null,
+                Fecha_llamada: $('#txtFechaLlamada').val() || null,
+                Fecha_consejeria: $('#txtFechaConsejeria').val() || null,
+                Observaciones: $('#txtObservaciones').val().trim() || null
+            };
+
+            $.ajax({
+                url: '@Url.Action("RegistrarSeguimiento", "Congregantes")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
+                        Swal.fire('Éxito', res.mensaje, 'success');
+                        $('#modalSeguimiento').modal('hide');
+                        tablaSeguimiento.ajax.reload();
+                    } else {
+                        Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Error de conexión.', 'error');
                 }
-            },
-            error: function () {
-                Swal.fire('Error', 'Error de conexión.', 'error');
-            }
+            });
         });
     }
 
     // ─── ELIMINAR ─────────────────────────────────────────────────
-    function abrirModalEliminar(id) {
-        $('#hiddenIDEliminar').val(id);
-        $('#modalEliminar').modal('show');
-    }
-
-    function confirmarEliminar() {
-        var id = $('#hiddenIDEliminar').val();
-        $.ajax({
-            url: '@Url.Action("EliminarSeguimiento", "Congregantes")',
-            type: 'POST',
-            data: { id: id },
-            success: function (res) {
-                if (res.resultado) {
-                    Swal.fire('Eliminado', res.mensaje, 'success');
-                    $('#modalEliminar').modal('hide');
-                    tablaSeguimiento.ajax.reload();
-                } else {
-                    Swal.fire('Error', res.mensaje, 'error');
+    function eliminarSeguimiento(id) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: '¿Deseas eliminar este seguimiento?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33'
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+            $.ajax({
+                url: '@Url.Action("EliminarSeguimiento", "Congregantes")',
+                type: 'POST',
+                data: { id: id },
+                success: function (res) {
+                    if (res.resultado) {
+                        Swal.fire('Eliminado', res.mensaje, 'success');
+                        tablaSeguimiento.ajax.reload();
+                    } else {
+                        Swal.fire('Error', res.mensaje, 'error');
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Error de conexión.', 'error');
                 }
-            },
-            error: function () {
-                Swal.fire('Error', 'Error de conexión.', 'error');
-            }
+            });
         });
     }
 
@@ -336,10 +328,10 @@
                     dd.empty();
                     if (res.data && res.data.length > 0) {
                         res.data.forEach(function (m) {
-                            var nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                            var nombreCompleto = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
                             $('<button type="button">')
                                 .addClass('list-group-item list-group-item-action')
-                                .text(nombre)
+                                .text(nombreCompleto)
                                 .on('click', function () {
                                     $('#hiddenIdMiembro').val(m.id_miembro);
                                     $('#txtNombreMiembro').val(m.nombre_miembro || '');
@@ -373,7 +365,7 @@
                     dd.empty();
                     if (res.data && res.data.length > 0) {
                         res.data.forEach(function (m) {
-                            var nombreCompleto = (m.nombre + ' ' + m.apellidos).trim();
+                            var nombreCompleto = ((m.nombre || '') + ' ' + (m.apellidos || '')).trim();
                             $('<button type="button">')
                                 .addClass('list-group-item list-group-item-action')
                                 .text(nombreCompleto)
