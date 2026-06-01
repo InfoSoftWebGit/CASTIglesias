@@ -1,0 +1,402 @@
+@{
+    ViewBag.Title = "Seguimiento";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var loggedInSedeID = ViewBag.sedeID ?? 0;
+    var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
+}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+    .autocomplete-dropdown {
+        position: absolute;
+        z-index: 1055;
+        width: 100%;
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 .375rem .375rem;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    .autocomplete-wrapper { position: relative; }
+</style>
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="#">Resumen</a></li>
+    <li class="breadcrumb-item active">Seguimiento de congregantes</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-clipboard-list me-1"></i> Seguimiento de congregantes
+    </div>
+
+    <div class="table-responsive p-3">
+        <div class="row mb-2">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModal(null)">
+                    <i class="fas fa-plus me-1"></i> Nuevo seguimiento
+                </button>
+            </div>
+        </div>
+        <hr />
+        <table id="tablaSeguimiento" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Miembro</th>
+                    <th>Persona a cargo</th>
+                    <th>Fecha visita</th>
+                    <th>Fecha llamada</th>
+                    <th>Fecha consejería</th>
+                    <th>Observaciones</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL SEGUIMIENTO -->
+<div class="modal fade" id="modalSeguimiento" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="modalTitulo">Nuevo seguimiento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hiddenID" value="0" />
+                <input type="hidden" id="hiddenIdMiembro" value="0" />
+
+                <h6 class="mb-3">Información del miembro</h6>
+                <div class="row g-3">
+                    <!-- Nombre del miembro con autocomplete -->
+                    <div class="col-sm-6">
+                        <label class="form-label">Nombre del miembro <span class="text-danger">*</span></label>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control" id="txtNombreMiembro"
+                                   autocomplete="off" placeholder="Buscar por nombre...">
+                            <div id="dropdownNombreMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                        </div>
+                    </div>
+                    <!-- Apellidos del miembro (se rellena automáticamente) -->
+                    <div class="col-sm-6">
+                        <label class="form-label">Apellidos del miembro</label>
+                        <input type="text" class="form-control" id="txtApellidosMiembro"
+                               autocomplete="off" placeholder="Se rellena al seleccionar..." readonly>
+                    </div>
+                </div>
+
+                <hr />
+                <h6 class="mb-3">Datos del seguimiento</h6>
+                <div class="row g-3">
+                    <!-- Persona a cargo con autocomplete (solo líderes) -->
+                    <div class="col-sm-6">
+                        <label class="form-label">Persona a cargo <span class="text-danger">*</span></label>
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control" id="txtPersonaCargo"
+                                   autocomplete="off" placeholder="Buscar líder...">
+                            <div id="dropdownPersonaCargo" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Fecha de visita</label>
+                        <input type="date" class="form-control" id="txtFechaVisita">
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Fecha de llamada</label>
+                        <input type="date" class="form-control" id="txtFechaLlamada">
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label class="form-label">Fecha de consejería</label>
+                        <input type="date" class="form-control" id="txtFechaConsejeria">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="txtObservaciones" rows="3"
+                                  maxlength="100" placeholder="Máx. 100 caracteres..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarSeguimiento()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN ELIMINAR -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header text-white bg-danger">
+                <h5 class="modal-title">Eliminar</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Deseas eliminar este seguimiento?</p>
+                <input type="hidden" id="hiddenIDEliminar" value="0" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    var tablaSeguimiento;
+
+    $(document).ready(function () {
+        tablaSeguimiento = $('#tablaSeguimiento').DataTable({
+            ajax: {
+                url: '@Url.Action("ListarSeguimientos", "Congregantes")',
+                type: 'GET',
+                dataSrc: 'data'
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data) {
+                        return (data.nombre_Miembro || data.nombre_miembro || '') + ' ' +
+                               (data.apellidos_Miembro || data.apellidos_miembro || '');
+                    }
+                },
+                { data: 'persona_Cargo', defaultContent: '' },
+                {
+                    data: 'fecha_Visita',
+                    render: function (val) { return val ? val.substring(0, 10) : '—'; }
+                },
+                {
+                    data: 'fecha_Llamada',
+                    render: function (val) { return val ? val.substring(0, 10) : '—'; }
+                },
+                {
+                    data: 'fecha_Consejeria',
+                    render: function (val) { return val ? val.substring(0, 10) : '—'; }
+                },
+                { data: 'observaciones', defaultContent: '' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (data) {
+                        return '<button class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
+                               '<i class="fas fa-edit"></i></button>' +
+                               '<button class="btn btn-sm btn-danger" onclick="abrirModalEliminar(' + data.iD + ')">' +
+                               '<i class="fas fa-trash"></i></button>';
+                    }
+                }
+            ],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            },
+            responsive: true
+        });
+    });
+
+    // ─── MODAL ABRIR ──────────────────────────────────────────────
+    function abrirModal(data) {
+        limpiarModal();
+        if (data) {
+            $('#modalTitulo').text('Editar seguimiento');
+            $('#hiddenID').val(data.iD);
+            $('#hiddenIdMiembro').val(data.iD_miembro);
+            $('#txtNombreMiembro').val(data.nombre_Miembro || data.nombre_miembro || '');
+            $('#txtApellidosMiembro').val(data.apellidos_Miembro || data.apellidos_miembro || '');
+            $('#txtPersonaCargo').val(data.persona_Cargo || '');
+            if (data.fecha_Visita) $('#txtFechaVisita').val(data.fecha_Visita.substring(0, 10));
+            if (data.fecha_Llamada) $('#txtFechaLlamada').val(data.fecha_Llamada.substring(0, 10));
+            if (data.fecha_Consejeria) $('#txtFechaConsejeria').val(data.fecha_Consejeria.substring(0, 10));
+            $('#txtObservaciones').val(data.observaciones || '');
+        } else {
+            $('#modalTitulo').text('Nuevo seguimiento');
+        }
+        $('#modalSeguimiento').modal('show');
+    }
+
+    function limpiarModal() {
+        $('#hiddenID').val(0);
+        $('#hiddenIdMiembro').val(0);
+        $('#txtNombreMiembro').val('');
+        $('#txtApellidosMiembro').val('');
+        $('#txtPersonaCargo').val('');
+        $('#txtFechaVisita').val('');
+        $('#txtFechaLlamada').val('');
+        $('#txtFechaConsejeria').val('');
+        $('#txtObservaciones').val('');
+        $('#dropdownNombreMiembro').hide().empty();
+        $('#dropdownPersonaCargo').hide().empty();
+    }
+
+    // ─── GUARDAR ──────────────────────────────────────────────────
+    function guardarSeguimiento() {
+        var idMiembro = parseInt($('#hiddenIdMiembro').val());
+        var nombre = $('#txtNombreMiembro').val().trim();
+        var apellidos = $('#txtApellidosMiembro').val().trim();
+        var personaCargo = $('#txtPersonaCargo').val().trim();
+
+        if (idMiembro <= 0 || nombre === '') {
+            Swal.fire('Atención', 'Debes seleccionar un miembro de la lista.', 'warning');
+            return;
+        }
+        if (personaCargo === '') {
+            Swal.fire('Atención', 'La persona a cargo es obligatoria.', 'warning');
+            return;
+        }
+
+        var payload = {
+            ID: parseInt($('#hiddenID').val()),
+            ID_miembro: idMiembro,
+            Nombre_miembro: nombre,
+            Apellidos_miembro: apellidos,
+            Persona_cargo: personaCargo,
+            Fecha_visita: $('#txtFechaVisita').val() || null,
+            Fecha_llamada: $('#txtFechaLlamada').val() || null,
+            Fecha_consejeria: $('#txtFechaConsejeria').val() || null,
+            Observaciones: $('#txtObservaciones').val().trim() || null
+        };
+
+        $.ajax({
+            url: '@Url.Action("RegistrarSeguimiento", "Congregantes")',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (res) {
+                if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
+                    Swal.fire('Éxito', res.mensaje, 'success');
+                    $('#modalSeguimiento').modal('hide');
+                    tablaSeguimiento.ajax.reload();
+                } else {
+                    Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Error de conexión.', 'error');
+            }
+        });
+    }
+
+    // ─── ELIMINAR ─────────────────────────────────────────────────
+    function abrirModalEliminar(id) {
+        $('#hiddenIDEliminar').val(id);
+        $('#modalEliminar').modal('show');
+    }
+
+    function confirmarEliminar() {
+        var id = $('#hiddenIDEliminar').val();
+        $.ajax({
+            url: '@Url.Action("EliminarSeguimiento", "Congregantes")',
+            type: 'POST',
+            data: { id: id },
+            success: function (res) {
+                if (res.resultado) {
+                    Swal.fire('Eliminado', res.mensaje, 'success');
+                    $('#modalEliminar').modal('hide');
+                    tablaSeguimiento.ajax.reload();
+                } else {
+                    Swal.fire('Error', res.mensaje, 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Error de conexión.', 'error');
+            }
+        });
+    }
+
+    // ─── AUTOCOMPLETE: NOMBRE DEL MIEMBRO ─────────────────────────
+    var timerMiembro;
+    $('#txtNombreMiembro').on('input', function () {
+        var term = $(this).val().trim();
+        $('#hiddenIdMiembro').val(0);
+        $('#txtApellidosMiembro').val('');
+        clearTimeout(timerMiembro);
+        if (term.length < 2) { $('#dropdownNombreMiembro').hide().empty(); return; }
+        timerMiembro = setTimeout(function () {
+            $.ajax({
+                url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                type: 'GET',
+                data: { term: term },
+                success: function (res) {
+                    var dd = $('#dropdownNombreMiembro');
+                    dd.empty();
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (m) {
+                            var nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                            $('<button type="button">')
+                                .addClass('list-group-item list-group-item-action')
+                                .text(nombre)
+                                .on('click', function () {
+                                    $('#hiddenIdMiembro').val(m.id_miembro);
+                                    $('#txtNombreMiembro').val(m.nombre_miembro || '');
+                                    $('#txtApellidosMiembro').val(m.apellidos_miembro || '');
+                                    dd.hide().empty();
+                                })
+                                .appendTo(dd);
+                        });
+                        dd.show();
+                    } else {
+                        dd.hide();
+                    }
+                }
+            });
+        }, 300);
+    });
+
+    // ─── AUTOCOMPLETE: PERSONA A CARGO (solo líderes) ─────────────
+    var timerLider;
+    $('#txtPersonaCargo').on('input', function () {
+        var term = $(this).val().trim();
+        clearTimeout(timerLider);
+        if (term.length < 2) { $('#dropdownPersonaCargo').hide().empty(); return; }
+        timerLider = setTimeout(function () {
+            $.ajax({
+                url: '@Url.Action("BuscarLideres", "Congregantes")',
+                type: 'GET',
+                data: { term: term },
+                success: function (res) {
+                    var dd = $('#dropdownPersonaCargo');
+                    dd.empty();
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (m) {
+                            var nombreCompleto = (m.nombre + ' ' + m.apellidos).trim();
+                            $('<button type="button">')
+                                .addClass('list-group-item list-group-item-action')
+                                .text(nombreCompleto)
+                                .on('click', function () {
+                                    $('#txtPersonaCargo').val(nombreCompleto);
+                                    dd.hide().empty();
+                                })
+                                .appendTo(dd);
+                        });
+                        dd.show();
+                    } else {
+                        dd.hide();
+                    }
+                }
+            });
+        }, 300);
+    });
+
+    // Cerrar dropdowns al hacer clic fuera
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.autocomplete-wrapper').length) {
+            $('.autocomplete-dropdown').hide().empty();
+        }
+    });
+</script>
+}

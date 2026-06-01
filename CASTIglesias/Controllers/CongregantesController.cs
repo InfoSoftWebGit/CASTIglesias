@@ -16,6 +16,7 @@ namespace CASTIglesias.Controllers
         CN_Ministerio cnMinisterio,
         CN_Municipio cnMunicipio,
         CN_ConfigDiezmo cnConfigDiezmo,
+        CN_Seguimiento cnSeguimiento,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -28,6 +29,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Zonas _cnZonas = cnZonas;
         private readonly CN_Sedes _cnSedes = cnSedes;
         private readonly CN_ConfigDiezmo _cnConfigDiezmo = cnConfigDiezmo;
+        private readonly CN_Seguimiento _cnSeguimiento = cnSeguimiento;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -739,6 +741,93 @@ namespace CASTIglesias.Controllers
                 return Json(new { error = true, mensaje = ex.Message });
             }
         }
+
+        #region Seguimiento
+        public IActionResult Seguimiento()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                ViewBag.sedeID = sedeID;
+                ViewBag.nombre_sede = _cnSedes.ObtenerNombreSede(sedeID);
+            }
+            catch (Exception)
+            {
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarSeguimientos()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnSeguimiento.ListarSeguimientos(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RegistrarSeguimiento([FromBody] CapaEntidad.Seguimiento data)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                if (data == null)
+                    return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
+
+                string mensaje;
+                object resultado;
+
+                if (data.ID == 0)
+                    resultado = _cnSeguimiento.RegistrarSeguimiento(data, sedeID, out mensaje);
+                else
+                    resultado = _cnSeguimiento.EditarSeguimiento(data, sedeID, out mensaje);
+
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = $"Error interno: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarSeguimiento(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnSeguimiento.EliminarSeguimiento(id, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult BuscarLideres(string term)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnSeguimiento.BuscarLideres(sedeID, term);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+        #endregion Seguimiento
 
 
     }
