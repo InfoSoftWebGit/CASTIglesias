@@ -17,6 +17,7 @@ namespace CASTIglesias.Controllers
         CN_Municipio cnMunicipio,
         CN_ConfigDiezmo cnConfigDiezmo,
         CN_Seguimiento cnSeguimiento,
+        CN_DetalleSeguimiento cnDetalleSeguimiento,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -30,6 +31,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Sedes _cnSedes = cnSedes;
         private readonly CN_ConfigDiezmo _cnConfigDiezmo = cnConfigDiezmo;
         private readonly CN_Seguimiento _cnSeguimiento = cnSeguimiento;
+        private readonly CN_DetalleSeguimiento _cnDetalleSeguimiento = cnDetalleSeguimiento;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -828,6 +830,77 @@ namespace CASTIglesias.Controllers
             }
         }
         #endregion Seguimiento
+
+        #region DetallesSeguimiento
+        public IActionResult DetallesSeguimiento()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                ViewBag.sedeID = sedeID;
+            }
+            catch (Exception) { }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarDetallesSeguimiento(int idMiembro, string? tipo, string? fechaDesde, string? fechaHasta)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                DateTime? desde = string.IsNullOrEmpty(fechaDesde) ? null : DateTime.Parse(fechaDesde);
+                DateTime? hasta = string.IsNullOrEmpty(fechaHasta) ? null : DateTime.Parse(fechaHasta);
+                var lista = _cnDetalleSeguimiento.ListarDetalles(idMiembro, tipo, desde, hasta, sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RegistrarDetalleSeguimiento([FromBody] CapaEntidad.DetalleSeguimiento data)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                if (data == null)
+                    return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
+
+                string mensaje;
+                object resultado;
+
+                if (data.ID == 0)
+                    resultado = _cnDetalleSeguimiento.RegistrarDetalle(data, sedeID, out mensaje);
+                else
+                    resultado = _cnDetalleSeguimiento.EditarDetalle(data, sedeID, out mensaje);
+
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = $"Error interno: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarDetalleSeguimiento(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnDetalleSeguimiento.EliminarDetalle(id, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+        #endregion DetallesSeguimiento
 
 
     }

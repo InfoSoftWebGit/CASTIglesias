@@ -21,6 +21,12 @@
         box-shadow: 0 4px 12px rgba(0,0,0,.1);
     }
     .autocomplete-wrapper { position: relative; }
+    .col-obs {
+        max-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -118,7 +124,7 @@
                     <div class="col-12">
                         <label class="form-label">Observaciones</label>
                         <textarea class="form-control" id="txtObservaciones" rows="3"
-                                  maxlength="100" placeholder="Máx. 100 caracteres..."></textarea>
+                                  maxlength="255" placeholder="Máx. 255 caracteres..."></textarea>
                     </div>
                 </div>
             </div>
@@ -166,14 +172,22 @@
                     data: 'fecha_consejeria',
                     render: function (val) { return val ? val.substring(0, 10) : '—'; }
                 },
-                { data: 'observaciones', defaultContent: '' },
+                {
+                    data: 'observaciones',
+                    defaultContent: '',
+                    createdCell: function (td) { $(td).addClass('col-obs'); },
+                    render: function (val) {
+                        if (!val) return '';
+                        return '<span title="' + val.replace(/"/g, '&quot;') + '">' + val + '</span>';
+                    }
+                },
                 {
                     data: null,
                     orderable: false,
                     render: function (data) {
                         return '<button class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
-                               '<button class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.iD + ')">' +
+                               '<button class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
                                '<i class="fas fa-trash"></i></button>';
                     }
                 }
@@ -190,7 +204,7 @@
         limpiarModal();
         if (data) {
             $('#modalTitulo').text('Editar seguimiento');
-            $('#hiddenID').val(data.iD);
+            $('#hiddenID').val(data.id);
             $('#hiddenIdMiembro').val(data.iD_miembro);
             $('#txtNombreMiembro').val(data.nombre_miembro || '');
             $('#txtApellidosMiembro').val(data.apellidos_miembro || '');

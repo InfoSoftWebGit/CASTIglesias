@@ -27,6 +27,7 @@ namespace CapaDatos
         public DbSet<Miembro_zona_grupo_ministerio> Miembros_Zona_Grupo_Ministerio { get; set; }
         public DbSet<Pais> Paises { get; set; }
         public DbSet<Seguimiento> Seguimientos { get; set; }
+        public DbSet<DetalleSeguimiento> DetallesSeguimiento { get; set; }
         public DbSet<VistaUsuariosPermisos> VistaPermisosUsuarios { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

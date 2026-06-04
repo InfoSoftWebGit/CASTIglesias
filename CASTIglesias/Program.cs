@@ -55,6 +55,9 @@ builder.Services.AddScoped<CN_ConfigDiezmo>();
 builder.Services.AddScoped<CD_Seguimiento>();
 builder.Services.AddScoped<CN_Seguimiento>();
 
+builder.Services.AddScoped<CD_DetalleSeguimiento>();
+builder.Services.AddScoped<CN_DetalleSeguimiento>();
+
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
