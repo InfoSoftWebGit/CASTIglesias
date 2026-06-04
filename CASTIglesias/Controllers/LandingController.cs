@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using CapaNegocio;
 
 namespace CASTIglesias.Controllers
 {
@@ -12,9 +13,23 @@ namespace CASTIglesias.Controllers
             if (model == null || string.IsNullOrWhiteSpace(model.Email))
                 return Json(new { ok = false, mensaje = "Datos inválidos." });
 
-            // TODO: añadir correo de soporte y configurar envío por SMTP/SendGrid
-            System.Diagnostics.Debug.WriteLine(
-                $"[Contacto] {model.Nombre} {model.Apellidos} | {model.Email} | {model.Iglesia} | {model.Pais}, {model.Ciudad}");
+            string asunto = $"Nuevo contacto desde Congrega CRM – {model.Nombre} {model.Apellidos}";
+            string cuerpo = $@"
+                <h3>Nuevo mensaje de contacto</h3>
+                <p><strong>Nombre:</strong> {model.Nombre} {model.Apellidos}</p>
+                <p><strong>Correo:</strong> {model.Email}</p>
+                <p><strong>Teléfono:</strong> {model.Telefono ?? "—"}</p>
+                <p><strong>País:</strong> {model.Pais}</p>
+                <p><strong>Ciudad:</strong> {model.Ciudad}</p>
+                <p><strong>Iglesia:</strong> {model.Iglesia}</p>
+                <hr/>
+                <p><strong>Mensaje:</strong></p>
+                <p>{model.Mensaje}</p>";
+
+            bool enviado = CN_Recursos.EnviarCorreo("soporte@congrega.es", asunto, cuerpo);
+
+            if (!enviado)
+                return Json(new { ok = false, mensaje = "No se pudo enviar el mensaje. Inténtalo de nuevo más tarde." });
 
             return Json(new { ok = true });
         }
