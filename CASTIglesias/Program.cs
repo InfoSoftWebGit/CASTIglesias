@@ -71,8 +71,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Acceso/Index";   // Página de login
-        options.LogoutPath = "/Acceso/Index";  // Redirigir al login al cerrar sesión
+        options.LoginPath  = "/Login";
+        options.LogoutPath = "/Login";
     });
 
 var app = builder.Build();
@@ -93,9 +93,15 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ✅ Ruta por defecto: inicia en Acceso/Index
+// Ruta explícita: /Login → Acceso/Login
+app.MapControllerRoute(
+    name: "login",
+    pattern: "Login",
+    defaults: new { controller = "Acceso", action = "Login" });
+
+// Ruta por defecto: raíz → Landing/Index
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Acceso}/{action=Index}/{id?}");
+    pattern: "{controller=Landing}/{action=Index}/{id?}");
 
 app.Run();

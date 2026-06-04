@@ -8,6 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Iniciar sesión - Congrega</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <style>
@@ -137,7 +138,7 @@
                 <div class="login-subtitle">Gestión para tu congregación</div>
             </div>
             <div class="login-card-body">
-                <form asp-controller="Acceso" asp-action="Index" method="post">
+                <form asp-controller="Acceso" asp-action="Login" method="post">
                     <div class="form-floating mb-3">
                         <input class="form-control" id="inputEmail" name="correo" type="email" placeholder=" " required />
                         <label for="inputEmail">Correo electrónico</label>

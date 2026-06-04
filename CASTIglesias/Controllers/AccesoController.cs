@@ -21,10 +21,10 @@ namespace CASTIglesias.Controllers
             _negocioPermisos = negocioPermisos;
         }
 
-        public IActionResult Index() => View();
+        public IActionResult Login() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Index(string correo, string clave)
+        public async Task<IActionResult> Login(string correo, string clave)
         {
             // Buscar usuario
             var oUsuario = _negocioUsuarios.ListarTodosLosUsuariosParaLogin()
@@ -98,7 +98,7 @@ namespace CASTIglesias.Controllers
             bool respuesta = _negocioUsuarios.ReestablecerClave(oUsuario.ID_usuario, correo, oUsuario.ID_sede);
 
             if (respuesta)
-                return RedirectToAction("Index");
+                return RedirectToAction("Login");
 
             ViewBag.Error = "No se pudo reestablecer la contraseña.";
             return View();
@@ -111,7 +111,7 @@ namespace CASTIglesias.Controllers
             if (idUsuario == null)
             {
                 ViewBag.Error = "No se pudo identificar al usuario.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Login");
             }
             ViewBag.ID_usuario = idUsuario.ToString();
             TempData["ID_usuario"] = idUsuario; // Mantener por POST
@@ -169,7 +169,7 @@ namespace CASTIglesias.Controllers
         public async Task<IActionResult> CerrarSesion()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index");
+            return RedirectToAction("Login");
         }
     }
 }
