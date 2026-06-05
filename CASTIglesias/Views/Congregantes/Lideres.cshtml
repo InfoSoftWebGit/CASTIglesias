@@ -1,5 +1,5 @@
 @{
-    ViewBag.Title = "Seguimiento";
+    ViewBag.Title = "Líderes";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var loggedInSedeID = ViewBag.sedeID ?? 0;
@@ -22,43 +22,42 @@
     }
     .autocomplete-wrapper { position: relative; }
     .col-obs {
-        max-width: 160px;
+        max-width: 150px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    .badge-visita     { background-color: #0d6efd; }
-    .badge-llamada    { background-color: #198754; }
-    .badge-consejeria { background-color: #fd7e14; }
+    .badge-acceso    { background-color: #198754; }
+    .badge-sinacceso { background-color: #6c757d; }
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a href="#">Resumen</a></li>
-    <li class="breadcrumb-item active">Seguimiento de congregantes</li>
+    <li class="breadcrumb-item active">Líderes</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-clipboard-list me-1"></i> Seguimiento de congregantes
+        <i class="fas fa-user-tie me-1"></i> Gestión de líderes
     </div>
 
     <div class="table-responsive p-3">
         <div class="row mb-2">
             <div class="col-12">
                 <button type="button" class="btn btn-success" onclick="abrirModal(null)">
-                    <i class="fas fa-plus me-1"></i> Nuevo seguimiento
+                    <i class="fas fa-plus me-1"></i> Nuevo líder
                 </button>
             </div>
         </div>
         <hr />
-        <table id="tablaSeguimiento" class="table table-bordered table-striped border-top" style="width:100%">
+        <table id="tablaLideres" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
                     <th>Miembro</th>
-                    <th>Tipo</th>
-                    <th>Fecha</th>
-                    <th>Persona a cargo</th>
-                    <th>Observaciones</th>
+                    <th>Zona</th>
+                    <th>Grupo</th>
+                    <th>Ministerio</th>
+                    <th>Acceso app</th>
                     <th></th>
                 </tr>
             </thead>
@@ -67,19 +66,19 @@
     </div>
 </div>
 
-<!-- MODAL SEGUIMIENTO -->
-<div class="modal fade" id="modalSeguimiento" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+<!-- MODAL LÍDER -->
+<div class="modal fade" id="modalLider" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="modalTitulo">Nuevo seguimiento</h5>
+                <h5 class="modal-title" id="modalTitulo">Nuevo líder</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hiddenID" value="0" />
                 <input type="hidden" id="hiddenIdMiembro" value="0" />
-                <input type="hidden" id="hiddenIdPersonaCargo" value="0" />
 
+                <!-- MIEMBRO -->
                 <h6 class="mb-3">Información del miembro</h6>
                 <div class="row g-3">
                     <div class="col-sm-6">
@@ -91,49 +90,64 @@
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Apellidos del miembro</label>
+                        <label class="form-label">Apellidos</label>
                         <input type="text" class="form-control" id="txtApellidosMiembro"
                                autocomplete="off" placeholder="Se rellena al seleccionar..." readonly>
                     </div>
                 </div>
 
                 <hr />
-                <h6 class="mb-3">Datos del seguimiento</h6>
+                <!-- ZONA / GRUPO / MINISTERIO -->
+                <h6 class="mb-3">Asignación pastoral</h6>
                 <div class="row g-3">
-                    <div class="col-sm-6">
-                        <label class="form-label">Tipo de seguimiento <span class="text-danger">*</span></label>
-                        <select class="form-select" id="selectTipoSeguimiento">
-                            <option value="">-- Selecciona un tipo --</option>
-                            <option value="Llamada">Llamada</option>
-                            <option value="Consejeria">Consejería</option>
-                            <option value="Visita">Visita</option>
-                        </select>
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label class="form-label">Fecha del seguimiento <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="txtFechaSeguimiento">
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label class="form-label">Persona a cargo <span class="text-danger">*</span></label>
+                    <!-- ZONA -->
+                    <div class="col-sm-4">
+                        <label class="form-label">Zona</label>
+                        <input type="hidden" id="hiddenIdZona" value="0" />
                         <div class="autocomplete-wrapper">
-                            <input type="text" class="form-control" id="txtPersonaCargo"
-                                   autocomplete="off" placeholder="Buscar líder...">
-                            <div id="dropdownPersonaCargo" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                            <input type="text" class="form-control" id="txtZona"
+                                   autocomplete="off" placeholder="Buscar zona...">
+                            <div id="dropdownZona" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
 
+                    <!-- GRUPO -->
+                    <div class="col-sm-4">
+                        <label class="form-label">Grupo</label>
+                        <input type="hidden" id="hiddenIdGrupo" value="0" />
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control" id="txtGrupo"
+                                   autocomplete="off" placeholder="Buscar grupo...">
+                            <div id="dropdownGrupo" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- MINISTERIO -->
+                    <div class="col-sm-4">
+                        <label class="form-label">Ministerio</label>
+                        <input type="hidden" id="hiddenIdMinisterio" value="0" />
+                        <div class="autocomplete-wrapper">
+                            <input type="text" class="form-control" id="txtMinisterio"
+                                   autocomplete="off" placeholder="Buscar ministerio...">
+                            <div id="dropdownMinisterio" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- TIENE USUARIO -->
                     <div class="col-12">
-                        <label class="form-label">Observaciones</label>
-                        <textarea class="form-control" id="txtObservaciones" rows="3"
-                                  maxlength="255" placeholder="Máx. 255 caracteres..."></textarea>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" id="chkTieneUsuario" role="switch">
+                            <label class="form-check-label" for="chkTieneUsuario">
+                                Tiene usuario en la aplicación
+                            </label>
+                        </div>
+                        <small class="text-muted">Indica si este líder dispone de acceso al sistema.</small>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="guardarSeguimiento()">
+                <button type="button" class="btn btn-primary" onclick="guardarLider()">
                     <i class="fas fa-save me-1"></i> Guardar
                 </button>
             </div>
@@ -146,12 +160,12 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
-    var tablaSeguimiento;
+    var tablaLideres;
 
     $(document).ready(function () {
-        tablaSeguimiento = $('#tablaSeguimiento').DataTable({
+        tablaLideres = $('#tablaLideres').DataTable({
             ajax: {
-                url: '@Url.Action("ListarSeguimientos", "Congregantes")',
+                url: '@Url.Action("ListarLideres", "Congregantes")',
                 type: 'GET',
                 dataSrc: 'data'
             },
@@ -162,28 +176,15 @@
                         return (data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || '');
                     }
                 },
+                { data: 'nombre_zona', defaultContent: '—' },
+                { data: 'descripcion_grupo', defaultContent: '—' },
+                { data: 'descripcion_ministerio', defaultContent: '—' },
                 {
-                    data: 'tipo_seguimiento',
+                    data: 'tiene_usuario',
                     render: function (val) {
-                        var cls   = val === 'Visita'    ? 'badge-visita'
-                                  : val === 'Llamada'   ? 'badge-llamada'
-                                  : 'badge-consejeria';
-                        var label = val === 'Consejeria' ? 'Consejería' : (val || '');
-                        return '<span class="badge ' + cls + '">' + label + '</span>';
-                    }
-                },
-                {
-                    data: 'fecha_seguimiento',
-                    render: function (val) { return val ? val.substring(0, 10) : '—'; }
-                },
-                { data: 'persona_cargo', defaultContent: '' },
-                {
-                    data: 'observaciones',
-                    defaultContent: '',
-                    createdCell: function (td) { $(td).addClass('col-obs'); },
-                    render: function (val) {
-                        if (!val) return '';
-                        return '<span title="' + val.replace(/"/g, '&quot;') + '">' + val + '</span>';
+                        return val
+                            ? '<span class="badge badge-acceso">Con acceso</span>'
+                            : '<span class="badge badge-sinacceso">Sin acceso</span>';
                     }
                 },
                 {
@@ -192,7 +193,7 @@
                     render: function (data) {
                         return '<button class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
-                               '<button class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
+                               '<button class="btn btn-sm btn-danger" onclick="eliminarLider(' + data.id + ')">' +
                                '<i class="fas fa-trash"></i></button>';
                     }
                 }
@@ -208,20 +209,26 @@
     function abrirModal(data) {
         limpiarModal();
         if (data) {
-            $('#modalTitulo').text('Editar seguimiento');
+            $('#modalTitulo').text('Editar líder');
             $('#hiddenID').val(data.id);
-            $('#hiddenIdMiembro').val(data.iD_miembro);
+            $('#hiddenIdMiembro').val(data.id_miembro);
             $('#txtNombreMiembro').val(data.nombre_miembro || '');
             $('#txtApellidosMiembro').val(data.apellidos_miembro || '');
-            $('#selectTipoSeguimiento').val(data.tipo_seguimiento || '');
-            if (data.fecha_seguimiento) $('#txtFechaSeguimiento').val(data.fecha_seguimiento.substring(0, 10));
-            $('#txtPersonaCargo').val(data.persona_cargo || '');
-            $('#hiddenIdPersonaCargo').val(-1); // cargado desde BD, válido
-            $('#txtObservaciones').val(data.observaciones || '');
+            // Zona
+            $('#hiddenIdZona').val(data.id_zona || 0);
+            $('#txtZona').val(data.nombre_zona !== '—' ? data.nombre_zona : '');
+            // Grupo
+            $('#hiddenIdGrupo').val(data.id_grupo || 0);
+            $('#txtGrupo').val(data.descripcion_grupo !== '—' ? data.descripcion_grupo : '');
+            // Ministerio
+            $('#hiddenIdMinisterio').val(data.id_ministerio || 0);
+            $('#txtMinisterio').val(data.descripcion_ministerio !== '—' ? data.descripcion_ministerio : '');
+            // Tiene usuario
+            $('#chkTieneUsuario').prop('checked', data.tiene_usuario === true);
         } else {
-            $('#modalTitulo').text('Nuevo seguimiento');
+            $('#modalTitulo').text('Nuevo líder');
         }
-        $('#modalSeguimiento').modal('show');
+        $('#modalLider').modal('show');
     }
 
     function limpiarModal() {
@@ -229,50 +236,31 @@
         $('#hiddenIdMiembro').val(0);
         $('#txtNombreMiembro').val('');
         $('#txtApellidosMiembro').val('');
-        $('#selectTipoSeguimiento').val('');
-        $('#txtFechaSeguimiento').val('');
-        $('#txtPersonaCargo').val('');
-        $('#hiddenIdPersonaCargo').val(0);
-        $('#txtObservaciones').val('');
-        $('#dropdownNombreMiembro').hide().empty();
-        $('#dropdownPersonaCargo').hide().empty();
+        $('#hiddenIdZona').val(0);
+        $('#txtZona').val('');
+        $('#hiddenIdGrupo').val(0);
+        $('#txtGrupo').val('');
+        $('#hiddenIdMinisterio').val(0);
+        $('#txtMinisterio').val('');
+        $('#chkTieneUsuario').prop('checked', false);
+        $('.autocomplete-dropdown').hide().empty();
     }
 
     // ─── GUARDAR ──────────────────────────────────────────────────
-    function guardarSeguimiento() {
+    function guardarLider() {
         var idMiembro = parseInt($('#hiddenIdMiembro').val());
         var nombre = $('#txtNombreMiembro').val().trim();
         var apellidos = $('#txtApellidosMiembro').val().trim();
-        var tipo = $('#selectTipoSeguimiento').val();
-        var fecha = $('#txtFechaSeguimiento').val();
-        var personaCargo = $('#txtPersonaCargo').val().trim();
 
         if (idMiembro <= 0 || nombre === '') {
             Swal.fire('Atención', 'Debes seleccionar un miembro de la lista.', 'warning');
-            return;
-        }
-        if (!tipo) {
-            Swal.fire('Atención', 'El tipo de seguimiento es obligatorio.', 'warning');
-            return;
-        }
-        if (!fecha) {
-            Swal.fire('Atención', 'La fecha del seguimiento es obligatoria.', 'warning');
-            return;
-        }
-        if (personaCargo === '') {
-            Swal.fire('Atención', 'La persona a cargo es obligatoria.', 'warning');
-            return;
-        }
-        if (parseInt($('#hiddenIdPersonaCargo').val()) === 0) {
-            Swal.fire('Atención', 'La persona a cargo debe seleccionarse de la lista.', 'warning');
-            $('#txtPersonaCargo').focus();
             return;
         }
 
         var esEdicion = parseInt($('#hiddenID').val()) > 0;
         Swal.fire({
             title: '¿Confirmar?',
-            text: esEdicion ? '¿Deseas guardar los cambios?' : '¿Deseas registrar este seguimiento?',
+            text: esEdicion ? '¿Deseas guardar los cambios?' : '¿Deseas registrar este líder?',
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, guardar',
@@ -285,22 +273,22 @@
                 ID_miembro: idMiembro,
                 Nombre_miembro: nombre,
                 Apellidos_miembro: apellidos,
-                Tipo_seguimiento: tipo,
-                Fecha_seguimiento: fecha,
-                Persona_cargo: personaCargo,
-                Observaciones: $('#txtObservaciones').val().trim() || null
+                ID_zona: parseInt($('#hiddenIdZona').val()) || 0,
+                ID_grupo: parseInt($('#hiddenIdGrupo').val()) || 0,
+                ID_ministerio: parseInt($('#hiddenIdMinisterio').val()) || 0,
+                Tiene_usuario: $('#chkTieneUsuario').is(':checked')
             };
 
             $.ajax({
-                url: '@Url.Action("RegistrarSeguimiento", "Congregantes")',
+                url: '@Url.Action("RegistrarLider", "Congregantes")',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(payload),
                 success: function (res) {
                     if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
                         Swal.fire('Éxito', res.mensaje, 'success');
-                        $('#modalSeguimiento').modal('hide');
-                        tablaSeguimiento.ajax.reload();
+                        $('#modalLider').modal('hide');
+                        tablaLideres.ajax.reload();
                     } else {
                         Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
                     }
@@ -313,10 +301,10 @@
     }
 
     // ─── ELIMINAR ─────────────────────────────────────────────────
-    function eliminarSeguimiento(id) {
+    function eliminarLider(id) {
         Swal.fire({
             title: '¿Estás seguro?',
-            text: '¿Deseas eliminar este seguimiento?',
+            text: '¿Deseas eliminar este líder?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
@@ -325,13 +313,13 @@
         }).then(function (result) {
             if (!result.isConfirmed) return;
             $.ajax({
-                url: '@Url.Action("EliminarSeguimiento", "Congregantes")',
+                url: '@Url.Action("EliminarLider", "Congregantes")',
                 type: 'POST',
                 data: { id: id },
                 success: function (res) {
                     if (res.resultado) {
                         Swal.fire('Eliminado', res.mensaje, 'success');
-                        tablaSeguimiento.ajax.reload();
+                        tablaLideres.ajax.reload();
                     } else {
                         Swal.fire('Error', res.mensaje, 'error');
                     }
@@ -343,7 +331,7 @@
         });
     }
 
-    // ─── AUTOCOMPLETE: NOMBRE DEL MIEMBRO ─────────────────────────
+    // ─── AUTOCOMPLETE: MIEMBRO ────────────────────────────────────
     var timerMiembro;
     $('#txtNombreMiembro').on('input', function () {
         var term = $(this).val().trim();
@@ -382,30 +370,30 @@
         }, 300);
     });
 
-    // ─── AUTOCOMPLETE: PERSONA A CARGO (solo líderes) ─────────────
-    var timerLider;
-    $('#txtPersonaCargo').on('input', function () {
+    // ─── AUTOCOMPLETE: ZONA ───────────────────────────────────────
+    var timerZona;
+    $('#txtZona').on('input', function () {
         var term = $(this).val().trim();
-        $('#hiddenIdPersonaCargo').val(0); // invalidar selección previa si el usuario escribe
-        clearTimeout(timerLider);
-        if (term.length < 2) { $('#dropdownPersonaCargo').hide().empty(); return; }
-        timerLider = setTimeout(function () {
+        $('#hiddenIdZona').val(0);
+        clearTimeout(timerZona);
+        if (term.length < 2) { $('#dropdownZona').hide().empty(); return; }
+        timerZona = setTimeout(function () {
             $.ajax({
-                url: '@Url.Action("BuscarLideres", "Congregantes")',
+                url: '@Url.Action("ListarZonasPorNombre", "Congregantes")',
                 type: 'GET',
-                data: { term: term },
+                data: { nombre: term },
                 success: function (res) {
-                    var dd = $('#dropdownPersonaCargo');
+                    var dd = $('#dropdownZona');
                     dd.empty();
-                    if (res.data && res.data.length > 0) {
-                        res.data.forEach(function (m) {
-                            var nombreCompleto = ((m.nombre || '') + ' ' + (m.apellidos || '')).trim();
+                    var lista = Array.isArray(res) ? res : (res.data || []);
+                    if (lista.length > 0) {
+                        lista.forEach(function (z) {
                             $('<button type="button">')
                                 .addClass('list-group-item list-group-item-action')
-                                .text(nombreCompleto)
+                                .text(z.nombre || '')
                                 .on('click', function () {
-                                    $('#txtPersonaCargo').val(nombreCompleto);
-                                    $('#hiddenIdPersonaCargo').val(m.id);
+                                    $('#hiddenIdZona').val(z.id);
+                                    $('#txtZona').val(z.nombre || '');
                                     dd.hide().empty();
                                 })
                                 .appendTo(dd);
@@ -417,6 +405,93 @@
                 }
             });
         }, 300);
+    });
+
+    // Borrar zona al limpiar campo
+    $('#txtZona').on('change', function () {
+        if ($(this).val().trim() === '') $('#hiddenIdZona').val(0);
+    });
+
+    // ─── AUTOCOMPLETE: GRUPO ──────────────────────────────────────
+    var timerGrupo;
+    $('#txtGrupo').on('input', function () {
+        var term = $(this).val().trim();
+        $('#hiddenIdGrupo').val(0);
+        clearTimeout(timerGrupo);
+        if (term.length < 2) { $('#dropdownGrupo').hide().empty(); return; }
+        timerGrupo = setTimeout(function () {
+            $.ajax({
+                url: '@Url.Action("ListarGruposPorNombre", "Congregantes")',
+                type: 'GET',
+                data: { nombre: term },
+                success: function (res) {
+                    var dd = $('#dropdownGrupo');
+                    dd.empty();
+                    var lista = Array.isArray(res) ? res : (res.data || []);
+                    if (lista.length > 0) {
+                        lista.forEach(function (g) {
+                            $('<button type="button">')
+                                .addClass('list-group-item list-group-item-action')
+                                .text(g.nombre || '')
+                                .on('click', function () {
+                                    $('#hiddenIdGrupo').val(g.id);
+                                    $('#txtGrupo').val(g.nombre || '');
+                                    dd.hide().empty();
+                                })
+                                .appendTo(dd);
+                        });
+                        dd.show();
+                    } else {
+                        dd.hide();
+                    }
+                }
+            });
+        }, 300);
+    });
+
+    $('#txtGrupo').on('change', function () {
+        if ($(this).val().trim() === '') $('#hiddenIdGrupo').val(0);
+    });
+
+    // ─── AUTOCOMPLETE: MINISTERIO ─────────────────────────────────
+    var timerMinisterio;
+    $('#txtMinisterio').on('input', function () {
+        var term = $(this).val().trim();
+        $('#hiddenIdMinisterio').val(0);
+        clearTimeout(timerMinisterio);
+        if (term.length < 2) { $('#dropdownMinisterio').hide().empty(); return; }
+        timerMinisterio = setTimeout(function () {
+            $.ajax({
+                url: '@Url.Action("ListarMinisteriosPorNombre", "Congregantes")',
+                type: 'GET',
+                data: { nombre: term },
+                success: function (res) {
+                    var dd = $('#dropdownMinisterio');
+                    dd.empty();
+                    var lista = Array.isArray(res) ? res : (res.data || []);
+                    if (lista.length > 0) {
+                        lista.forEach(function (m) {
+                            $('<button type="button">')
+                                .addClass('list-group-item list-group-item-action')
+                                .text(m.nombre || '')
+                                .on('click', function () {
+                                    $('#hiddenIdMinisterio').val(m.id);
+                                    $('#txtMinisterio').val(m.nombre || '');
+                                    dd.hide().empty();
+                                })
+                                .appendTo(dd);
+                        });
+                        dd.show();
+                    } else {
+                        dd.hide();
+                    }
+                }
+            });
+        }, 300);
+    });
+
+    $('#txtMinisterio').on('change', function () {
+        if ($(this).val().trim() === '') $('#hiddenIdMinisterio').val(0);
     });
 
     // Cerrar dropdowns al hacer clic fuera

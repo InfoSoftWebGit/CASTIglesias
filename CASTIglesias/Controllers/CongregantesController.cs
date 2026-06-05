@@ -18,6 +18,7 @@ namespace CASTIglesias.Controllers
         CN_ConfigDiezmo cnConfigDiezmo,
         CN_Seguimiento cnSeguimiento,
         CN_DetalleSeguimiento cnDetalleSeguimiento,
+        CN_Lideres cnLideres,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -32,6 +33,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_ConfigDiezmo _cnConfigDiezmo = cnConfigDiezmo;
         private readonly CN_Seguimiento _cnSeguimiento = cnSeguimiento;
         private readonly CN_DetalleSeguimiento _cnDetalleSeguimiento = cnDetalleSeguimiento;
+        private readonly CN_Lideres _cnLideres = cnLideres;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -901,6 +903,76 @@ namespace CASTIglesias.Controllers
             }
         }
         #endregion DetallesSeguimiento
+
+        #region Lideres
+        public IActionResult Lideres()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                ViewBag.sedeID = sedeID;
+                ViewBag.nombre_sede = _cnSedes.ObtenerNombreSede(sedeID);
+            }
+            catch (Exception) { }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarLideres()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnLideres.ListarLideres(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RegistrarLider([FromBody] CapaEntidad.Lider data)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                if (data == null)
+                    return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
+
+                string mensaje;
+                object resultado;
+
+                if (data.ID == 0)
+                    resultado = _cnLideres.RegistrarLider(data, sedeID, out mensaje);
+                else
+                    resultado = _cnLideres.EditarLider(data, sedeID, out mensaje);
+
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = $"Error interno: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarLider(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnLideres.EliminarLider(id, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+        #endregion Lideres
 
 
     }

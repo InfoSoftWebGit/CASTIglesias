@@ -18,68 +18,35 @@ namespace CapaDatos
         {
             try
             {
-                var seguimientos = _context.Seguimientos
+                var consulta = _context.Seguimientos
                     .Where(s => s.ID_miembro == idMiembro)
                     .Where(s => sedeID == 1000 || s.ID_sede == sedeID)
-                    .ToList();
-
-                var resultado = new List<DetalleSeguimiento>();
-
-                foreach (var s in seguimientos)
-                {
-                    if (s.Fecha_visita.HasValue)
-                        resultado.Add(new DetalleSeguimiento
-                        {
-                            ID = s.ID * 10 + 1,
-                            ID_miembro = s.ID_miembro,
-                            Nombre_miembro = s.Nombre_miembro,
-                            Apellidos_miembro = s.Apellidos_miembro,
-                            Tipo_seguimiento = "Visita",
-                            Fecha = s.Fecha_visita.Value,
-                            Persona_cargo = s.Persona_cargo,
-                            Observaciones = s.Observaciones,
-                            ID_sede = s.ID_sede
-                        });
-
-                    if (s.Fecha_llamada.HasValue)
-                        resultado.Add(new DetalleSeguimiento
-                        {
-                            ID = s.ID * 10 + 2,
-                            ID_miembro = s.ID_miembro,
-                            Nombre_miembro = s.Nombre_miembro,
-                            Apellidos_miembro = s.Apellidos_miembro,
-                            Tipo_seguimiento = "Llamada",
-                            Fecha = s.Fecha_llamada.Value,
-                            Persona_cargo = s.Persona_cargo,
-                            Observaciones = s.Observaciones,
-                            ID_sede = s.ID_sede
-                        });
-
-                    if (s.Fecha_consejeria.HasValue)
-                        resultado.Add(new DetalleSeguimiento
-                        {
-                            ID = s.ID * 10 + 3,
-                            ID_miembro = s.ID_miembro,
-                            Nombre_miembro = s.Nombre_miembro,
-                            Apellidos_miembro = s.Apellidos_miembro,
-                            Tipo_seguimiento = "Consejeria",
-                            Fecha = s.Fecha_consejeria.Value,
-                            Persona_cargo = s.Persona_cargo,
-                            Observaciones = s.Observaciones,
-                            ID_sede = s.ID_sede
-                        });
-                }
+                    .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(tipo))
-                    resultado = resultado.Where(d => d.Tipo_seguimiento == tipo).ToList();
+                    consulta = consulta.Where(s => s.Tipo_seguimiento == tipo);
 
                 if (fechaDesde.HasValue)
-                    resultado = resultado.Where(d => d.Fecha >= fechaDesde.Value).ToList();
+                    consulta = consulta.Where(s => s.Fecha_seguimiento >= fechaDesde.Value);
 
                 if (fechaHasta.HasValue)
-                    resultado = resultado.Where(d => d.Fecha <= fechaHasta.Value).ToList();
+                    consulta = consulta.Where(s => s.Fecha_seguimiento <= fechaHasta.Value);
 
-                return resultado.OrderByDescending(d => d.Fecha).ToList();
+                return consulta
+                    .OrderByDescending(s => s.Fecha_seguimiento)
+                    .Select(s => new DetalleSeguimiento
+                    {
+                        ID = s.ID,
+                        ID_miembro = s.ID_miembro,
+                        Nombre_miembro = s.Nombre_miembro,
+                        Apellidos_miembro = s.Apellidos_miembro,
+                        Tipo_seguimiento = s.Tipo_seguimiento,
+                        Fecha = s.Fecha_seguimiento,
+                        Persona_cargo = s.Persona_cargo,
+                        Observaciones = s.Observaciones,
+                        ID_sede = s.ID_sede
+                    })
+                    .ToList();
             }
             catch (Exception ex)
             {

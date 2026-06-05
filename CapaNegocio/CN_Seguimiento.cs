@@ -28,6 +28,16 @@ namespace CapaNegocio
                 mensaje = "Debe seleccionar un miembro válido.";
                 return 0;
             }
+            if (string.IsNullOrWhiteSpace(obj.Tipo_seguimiento))
+            {
+                mensaje = "El tipo de seguimiento es obligatorio.";
+                return 0;
+            }
+            if (obj.Fecha_seguimiento == default)
+            {
+                mensaje = "La fecha del seguimiento es obligatoria.";
+                return 0;
+            }
             if (string.IsNullOrWhiteSpace(obj.Persona_cargo))
             {
                 mensaje = "La persona a cargo no puede estar vacía.";
@@ -49,6 +59,16 @@ namespace CapaNegocio
             if (obj.ID_miembro <= 0)
             {
                 mensaje = "Debe seleccionar un miembro válido.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(obj.Tipo_seguimiento))
+            {
+                mensaje = "El tipo de seguimiento es obligatorio.";
+                return false;
+            }
+            if (obj.Fecha_seguimiento == default)
+            {
+                mensaje = "La fecha del seguimiento es obligatoria.";
                 return false;
             }
             if (string.IsNullOrWhiteSpace(obj.Persona_cargo))

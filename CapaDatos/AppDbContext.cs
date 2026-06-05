@@ -28,6 +28,7 @@ namespace CapaDatos
         public DbSet<Pais> Paises { get; set; }
         public DbSet<Seguimiento> Seguimientos { get; set; }
         public DbSet<DetalleSeguimiento> DetallesSeguimiento { get; set; }
+        public DbSet<Lider> Lideres { get; set; }
         public DbSet<VistaUsuariosPermisos> VistaPermisosUsuarios { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

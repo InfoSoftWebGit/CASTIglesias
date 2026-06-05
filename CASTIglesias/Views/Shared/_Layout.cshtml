@@ -131,6 +131,10 @@
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)
                                     {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Lideres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
+                                            Líderes
+                                        </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Seguimiento", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
                                             Seguimiento

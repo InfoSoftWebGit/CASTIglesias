@@ -67,9 +67,8 @@ namespace CapaDatos
                 existing.ID_miembro = obj.ID_miembro;
                 existing.Nombre_miembro = obj.Nombre_miembro;
                 existing.Apellidos_miembro = obj.Apellidos_miembro;
-                existing.Fecha_visita = obj.Fecha_visita;
-                existing.Fecha_llamada = obj.Fecha_llamada;
-                existing.Fecha_consejeria = obj.Fecha_consejeria;
+                existing.Tipo_seguimiento = obj.Tipo_seguimiento;
+                existing.Fecha_seguimiento = obj.Fecha_seguimiento;
                 existing.Persona_cargo = obj.Persona_cargo;
                 existing.Observaciones = obj.Observaciones;
                 _context.SaveChanges();

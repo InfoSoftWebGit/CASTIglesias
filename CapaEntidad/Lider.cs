@@ -1,21 +1,20 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CapaEntidad
 {
-    [Table("seguimiento")]
-    public class Seguimiento
+    [Table("Lideres")]
+    public class Lider
     {
         [Key]
         public int ID { get; set; }
         public int ID_miembro { get; set; }
-        public string Tipo_seguimiento { get; set; } = string.Empty;
-        public DateTime Fecha_seguimiento { get; set; }
-        public string Persona_cargo { get; set; } = string.Empty;
-        public string? Observaciones { get; set; }
-        public int ID_sede { get; set; }
         public string Nombre_miembro { get; set; } = string.Empty;
         public string Apellidos_miembro { get; set; } = string.Empty;
+        public int ID_zona { get; set; } = 0;
+        public int ID_grupo { get; set; } = 0;
+        public int ID_ministerio { get; set; } = 0;
+        public bool Tiene_usuario { get; set; } = false;
+        public int ID_sede { get; set; }
     }
 }
