@@ -78,11 +78,12 @@ namespace CapaDatos
                                 numero_hijos = m.numero_hijos,
                                 alumno_VyF = m.alumno_VyF,
                                 curso_acabado = m.curso_acabado,
-                                responsable = m.responsable,
+                                id_responsable = m.id_responsable,
                                 id_role = m.id_role,
                                 id_usuario = m.id_usuario,
                                 relacion_con = m.relacion_con,
                                 grupo_familiar = m.grupo_familiar,
+                                miembro_activo = m.miembro_activo,
 
                                 nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
                                 nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
@@ -215,7 +216,7 @@ namespace CapaDatos
                         fecha_baja = obj.fecha_baja,
                         fecha_fallecido = obj.fecha_fallecido,
                         observaciones = obj.observaciones,
-                        responsable = obj.responsable,
+                        id_responsable = obj.id_responsable,
                         alumno_VyF = obj.alumno_VyF,
                         curso_acabado = obj.curso_acabado,
                         acepta_LOPD = obj.acepta_LOPD,
@@ -227,7 +228,8 @@ namespace CapaDatos
                         id_role = obj.id_role,
                         numero_hijos = obj.numero_hijos,
                         grupo_familiar = obj.grupo_familiar,
-                        relacion_con = obj.relacion_con
+                        relacion_con = obj.relacion_con,
+                        miembro_activo = obj.miembro_activo ?? "Si"
                     };
 
 
@@ -253,7 +255,7 @@ namespace CapaDatos
                    nuevoMiembro.codigo_Postal         = obj.codigo_Postal;
                    nuevoMiembro.idProvincia           = obj.idProvincia;
                    nuevoMiembro.idMunicipio           = obj.idMunicipio;
-                   nuevoMiembro.responsable           = obj.responsable;
+                   nuevoMiembro.id_responsable        = obj.id_responsable;
                    nuevoMiembro.observaciones         = obj.observaciones;
                    nuevoMiembro.bautizado             = obj.bautizado;
                    nuevoMiembro.fecha_fallecido       = obj.fecha_fallecido;
@@ -274,6 +276,7 @@ namespace CapaDatos
                    nuevoMiembro.acepta_LOPD           = obj.acepta_LOPD;
                    nuevoMiembro.grupo_familiar        = obj.grupo_familiar;
                    nuevoMiembro.relacion_con          = obj.relacion_con;
+                   nuevoMiembro.miembro_activo        = obj.miembro_activo ?? "Si";
 
                     _context.SaveChanges();
                 }
@@ -365,7 +368,7 @@ namespace CapaDatos
                 miembro.codigo_Postal = obj.codigo_Postal;
                 miembro.idProvincia = obj.idProvincia;
                 miembro.idMunicipio = obj.idMunicipio;
-                miembro.responsable = obj.responsable;
+                miembro.id_responsable = obj.id_responsable;
                 miembro.observaciones = obj.observaciones;
                 miembro.bautizado = obj.bautizado;
                 miembro.fecha_fallecido = obj.fecha_fallecido;
@@ -386,6 +389,7 @@ namespace CapaDatos
                 miembro.acepta_LOPD = obj.acepta_LOPD;
                 miembro.grupo_familiar = obj.grupo_familiar;
                 miembro.relacion_con = obj.relacion_con;
+                miembro.miembro_activo = obj.miembro_activo ?? "Si";
 
                 _context.SaveChanges();
 
@@ -929,7 +933,7 @@ namespace CapaDatos
                         bautizado = m.bautizado,
                         numero_hijos = m.numero_hijos,
                         acepta_LOPD = m.acepta_LOPD,
-                        responsable = m.responsable,
+                        id_responsable = m.id_responsable,
                         observaciones = m.observaciones,
                         id_sede = m.id_sede,
                         nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
@@ -980,7 +984,7 @@ namespace CapaDatos
                         fecha_cumpleanios = obj.fecha_cumpleanios,
                         fecha_boda = obj.fecha_boda,
                         fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
-                        responsable = obj.responsable,
+                        id_responsable = obj.id_responsable,
                         observaciones = obj.observaciones,
                         numero_hijos = obj.numero_hijos,
                         acepta_LOPD = obj.acepta_LOPD,
@@ -1013,7 +1017,7 @@ namespace CapaDatos
                     nuevoVisitante.fecha_cumpleanios = obj.fecha_cumpleanios;
                     nuevoVisitante.fecha_boda = obj.fecha_boda;
                     nuevoVisitante.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
-                    nuevoVisitante.responsable = obj.responsable;
+                    nuevoVisitante.id_responsable = obj.id_responsable;
                     nuevoVisitante.observaciones = obj.observaciones;
                     nuevoVisitante.numero_hijos = obj.numero_hijos;
                     nuevoVisitante.acepta_LOPD = obj.acepta_LOPD;
@@ -1066,7 +1070,7 @@ namespace CapaDatos
                 miembroExistente.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
                 miembroExistente.telefono_fijo = obj.telefono_fijo;
                 miembroExistente.observaciones = obj.observaciones;
-                miembroExistente.responsable = obj.responsable;
+                miembroExistente.id_responsable = obj.id_responsable;
                 miembroExistente.numero_hijos = obj.numero_hijos;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
 
@@ -1142,7 +1146,7 @@ namespace CapaDatos
                             numero_hijos = m.numero_hijos,
                             alumno_VyF = m.alumno_VyF,
                             curso_acabado = m.curso_acabado,
-                            responsable = m.responsable,
+                            id_responsable = m.id_responsable,
                             id_role = m.id_role,
                             id_usuario = m.id_usuario,
 
@@ -1256,7 +1260,7 @@ namespace CapaDatos
                 miembroExistente.fecha_boda = obj.fecha_boda;
                 miembroExistente.fecha_baja = obj.fecha_baja;
                 miembroExistente.fecha_fallecido = obj.fecha_fallecido;
-                miembroExistente.responsable = obj.responsable;
+                miembroExistente.id_responsable = obj.id_responsable;
                 miembroExistente.observaciones = obj.observaciones;
                 miembroExistente.numero_hijos = obj.numero_hijos;
                 miembroExistente.alumno_VyF = obj.alumno_VyF;
@@ -1430,7 +1434,7 @@ namespace CapaDatos
                         numero_hijos = m.numero_hijos,
                         alumno_VyF = m.alumno_VyF,
                         curso_acabado = m.curso_acabado,
-                        responsable = m.responsable,
+                        id_responsable = m.id_responsable,
                         id_role = m.id_role,
                         id_usuario = m.id_usuario,
 

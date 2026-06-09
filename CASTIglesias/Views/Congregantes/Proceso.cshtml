@@ -167,21 +167,6 @@
                         <label for="txtFechaLlegada" class="form-label">Fecha de Llegada a la Iglesia</label>
                         <input type="date" class="form-control" id="txtFechaLlegada">
                     </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkBautizado">
-                            <label class="form-check-label" for="checkBautizado">¿Bautizado?</label>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 mb-3">
-                        <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
-                        <input type="date" class="form-control" id="txtFechaBautismo">
-                    </div>
-
-                    <div class="col-sm-6 mb-3">
-                        <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
-                        <input type="text" class="form-control" id="txtLugarBautismo">
-                    </div>
                     <div class="col-sm-4 mb-3">
                         <label for="txtFechaCumpleanos" class="form-label">Fecha de Cumpleaños</label>
                         <input type="date" class="form-control" id="txtFechaCumpleanos">
@@ -190,9 +175,23 @@
                         <label for="txtFechaBoda" class="form-label">Fecha de Boda</label>
                         <input type="date" class="form-control" id="txtFechaBoda">
                     </div>
-                    <div class="col-sm-4 mb-3">
-                        <label for="txtFechaBaja" class="form-label">Fecha de Baja (Retiro)</label>
-                        <input type="date" class="form-control" id="txtFechaBaja">
+                    <div class="col-12 mt-1">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#e3f2fd;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkBautizado">
+                            <label class="form-check-label fw-semibold text-primary" for="checkBautizado">Bautizado</label>
+                        </div>
+                    </div>
+                    <div id="divBautismoFields" class="col-12" style="display:none;">
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-3">
+                                <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
+                                <input type="date" class="form-control" id="txtFechaBautismo">
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
+                                <input type="text" class="form-control" id="txtLugarBautismo">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <hr />
@@ -219,60 +218,77 @@
                             <option value="Unión de hecho/a">Unión de hecho/a</option>
                         </select>
                     </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkAlumno_vyf">
-                            <label class="form-check-label" for="checkAlumno_vyf">¿Alumno de VyF?</label>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkCurso_acabado">
-                            <label class="form-check-label" for="checkCurso_acabado">¿Curso acabado?</label>
-                        </div>
-                    </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkExcluir_directorio">
-                            <label class="form-check-label" for="checkExcluir_directorio">¿Excluir del directorio?</label>
-                        </div>
-                    </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtResponsable" class="form-label">Responsable</label>
-                        <input type="text" class="form-control" id="txtResponsable">
+                        <label for="cboResponsable" class="form-label">Responsable</label>
+                        <select class="form-select" id="cboResponsable">
+                            <option value="">-- Sin responsable --</option>
+                        </select>
                     </div>
                     <div class="col-sm-6 mb-3">
                         <label for="txtObservaciones" class="form-label">Observaciones</label>
                         <textarea class="form-control" id="txtObservaciones" rows="3" maxlength="200"></textarea>
                     </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkFallecido">
-                            <label class="form-check-label" for="checkFallecido">¿Falleció?</label>
-                        </div>
-                    </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtFechaFallecimiento" class="form-label">Fecha de fallecimiento</label>
-                        <input type="date" class="form-control" id="txtFechaFallecimiento">
+                        <label for="txtNumeroHijos" class="form-label">Número de hijos</label>
+                        <input id="txtNumeroHijos" type="number" class="form-control" placeholder="Número de hijos" />
                     </div>
-                    <label for="txtNumeroHijos" class="form-label">Número de hijos </label>
-                    <input id="txtNumeroHijos" type="number" class="form-control mb-2" placeholder="Número de hijos" />
-
-
-
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
-                @*--------------APARTADO DE PRIVACIDAD-------------------*@
-                <h5>Privacidad</h5>
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chkAceptaLOPD">
-                            <label class="form-check-label" for="chkAceptaLOPD">
-                                **Acepta la Ley Orgánica de Protección de Datos (LOPD)**
-                            </label>
+
+                @*--------------APARTADO DE ESTADO Y CONFIGURACIÓN-------------------*@
+                <hr />
+                <h5><i class="fas fa-sliders-h me-1"></i> Estado y configuración</h5>
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-4">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#e8f5e9;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkMiembroActivo">
+                            <label class="form-check-label fw-semibold text-success" for="checkMiembroActivo">Miembro activo</label>
                         </div>
+                    </div>
+                    <div class="col-sm-8" id="divFechaBaja" style="display:none;">
+                        <label for="txtFechaBaja" class="form-label text-muted small mb-1">Fecha de Baja (Retiro)</label>
+                        <input type="date" class="form-control form-control-sm" id="txtFechaBaja">
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#e3f2fd;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkAlumno_vyf">
+                            <label class="form-check-label fw-semibold text-primary" for="checkAlumno_vyf">Alumno VyF</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#fff3e0;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkCurso_acabado">
+                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkCurso_acabado">Curso acabado</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#fff3e0;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkExcluir_directorio">
+                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkExcluir_directorio">Excluir directorio</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#ffebee;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkFallecido">
+                            <label class="form-check-label fw-semibold text-danger" for="checkFallecido">Fallecido</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-8" id="divFechaFallecimiento" style="display:none;">
+                        <label for="txtFechaFallecimiento" class="form-label text-muted small mb-1">Fecha de fallecimiento</label>
+                        <input type="date" class="form-control form-control-sm" id="txtFechaFallecimiento">
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE ESTADO Y CONFIGURACIÓN-------------------*@
+
+                @*--------------APARTADO DE PRIVACIDAD-------------------*@
+                <hr />
+                <h5><i class="fas fa-shield-alt me-1"></i> Privacidad</h5>
+                <div class="p-3 rounded mb-3" style="background:#f3e5f5; border-left:4px solid #7b1fa2;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chkAceptaLOPD">
+                        <label class="form-check-label fw-semibold" style="color:#6a1b9a;" for="chkAceptaLOPD">
+                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD)
+                        </label>
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE PRIVACIDAD-------------------*@
@@ -478,6 +494,7 @@
             });
 
             cargarPaises();
+            cargarLideresEnSelect();
 
             $("#cboProvincia").change(function() {
                 var provinciaSeleccionadaId = $(this).val();
@@ -527,13 +544,17 @@
                 //INFORMACIÓN ADICIONAL
                 $("#cboPaisNacimiento").val("");
                 $("#cboEstadoCivil").val("");
+                $("#checkMiembroActivo").prop("checked", true);
+                $("#checkBautizado").prop("checked", false);
                 $("#checkAlumno_vyf").prop("checked", false);
                 $("#checkCurso_acabado").prop("checked", false);
                 $("#checkExcluir_directorio").prop("checked", false);
-                $("#chechFallecido").prop("checked", false);
-                $("#checkBautizado").prop("checked", false);
+                $("#checkFallecido").prop("checked", false);
+                toggleBautismoFields();
+                toggleFechaBaja();
+                toggleFechaFallecimiento();
                 $("#txtLugarBautismo").val("");
-                $("#txtResponsable").val("");
+                $("#cboResponsable").val("");
                 $("#txtObservaciones").val("");
                 $("#txtNumeroHijos").val(0);
                 $("#chkAceptaLOPD").prop("checked", false);
@@ -583,15 +604,19 @@
                 $("#cboPaisNacimiento").val(data.pais_nacimiento || ""); // Corregido: tu IF usa pais_nacimiento, tu ELSE usa pais_origen
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
                 //CHECK BOXES
+                $("#checkMiembroActivo").prop("checked", (data.miembro_activo || "Si") === "Si");
+                $("#checkBautizado").prop("checked", data.bautizado === true);
                 $("#checkAlumno_vyf").prop("checked", data.alumno_VyF === true);
                 $("#checkCurso_acabado").prop("checked", data.curso_acabado === true);
                 $("#checkExcluir_directorio").prop("checked", data.excluir_directorio === true);
-                $("#chechFallecido").prop("checked", data.fallecido === true);
-                $("#checkBautizado").prop("checked", data.bautizado === true);
+                $("#checkFallecido").prop("checked", data.fallecido === true);
                 $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
         // FIN CHECK BOXES
+                toggleBautismoFields();
+                toggleFechaBaja();
+                toggleFechaFallecimiento();
                 $("#txtLugarBautismo").val(data.lugar_bautismo || "");
-                $("#txtResponsable").val(data.responsable || "");
+                $("#cboResponsable").val(data.id_responsable || "");
                 $("#txtObservaciones").val(data.observaciones || "");
                 $("#txtNumeroHijos").val(Math.max(0, parseInt(data.numero_hijos || 0)));
                 $("#zonaSeleccionadas").empty();
@@ -639,18 +664,19 @@
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
 
-                responsable: $("#txtResponsable").val() || "",
+                id_responsable: parseInt($("#cboResponsable").val()) || null,
 
                 observaciones: $("#txtObservaciones").val() || "",
 
                 numero_hijos: parseInt($("#txtNumeroHijos").val() || 0),
 
+                miembro_activo: $("#checkMiembroActivo").prop("checked") ? "Si" : "No",
+                bautizado: $("#checkBautizado").prop("checked"),
                 alumno_VyF: $("#checkAlumno_vyf").prop("checked"),
                 curso_acabado: $("#checkCurso_acabado").prop("checked"),
-                acepta_LOPD: $("#chkAceptaLOPD").prop("checked"),
-                fallecido: $("#checkFallecido").prop("checked"),
                 excluir_directorio: $("#checkExcluir_directorio").prop("checked"),
-                bautizado: $("#checkBautizado").prop("checked"),
+                fallecido: $("#checkFallecido").prop("checked"),
+                acepta_LOPD: $("#chkAceptaLOPD").prop("checked"),
 
 
 
@@ -689,6 +715,18 @@
             };
 
 
+
+        function cargarLideresEnSelect() {
+            $.get('@Url.Action("ListarLideres", "Congregantes")', function (res) {
+                var select = $('#cboResponsable');
+                select.find('option:not(:first)').remove();
+                if (res.data) {
+                    $.each(res.data, function (i, l) {
+                        select.append($('<option>', { value: l.id, text: (l.nombre_miembro + ' ' + l.apellidos_miembro).trim() }));
+                    });
+                }
+            });
+        }
 
         // ✅ CARGAR PAÍSES
         function cargarPaises() {
@@ -871,6 +909,22 @@
         // ======================
         // FUNCIONES
         // ======================
+        // ======================
+        // VISIBILIDAD CONDICIONAL
+        // ======================
+        function toggleBautismoFields() {
+            $("#divBautismoFields").toggle($("#checkBautizado").prop("checked"));
+        }
+        function toggleFechaBaja() {
+            $("#divFechaBaja").toggle(!$("#checkMiembroActivo").prop("checked"));
+        }
+        function toggleFechaFallecimiento() {
+            $("#divFechaFallecimiento").toggle($("#checkFallecido").prop("checked"));
+        }
+        $("#checkBautizado").on("change", toggleBautismoFields);
+        $("#checkMiembroActivo").on("change", toggleFechaBaja);
+        $("#checkFallecido").on("change", toggleFechaFallecimiento);
+
         function AvanzarEstadoMiembro() {
             const idMiembro = parseInt($("#txtid").val());
 

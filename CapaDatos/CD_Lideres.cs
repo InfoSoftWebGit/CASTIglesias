@@ -65,6 +65,11 @@ namespace CapaDatos
                 }
 
                 _context.Lideres.Add(obj);
+
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == obj.ID_miembro);
+                if (miembro != null)
+                    miembro.esLider = "Si";
+
                 _context.SaveChanges();
                 mensaje = "Líder registrado correctamente.";
                 return obj.ID;
@@ -137,7 +142,17 @@ namespace CapaDatos
                     return false;
                 }
 
+                int idMiembro = obj.ID_miembro;
                 _context.Lideres.Remove(obj);
+
+                bool tieneOtroRegistro = _context.Lideres.Any(l => l.ID_miembro == idMiembro && l.ID != id);
+                if (!tieneOtroRegistro)
+                {
+                    var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == idMiembro);
+                    if (miembro != null)
+                        miembro.esLider = null;
+                }
+
                 _context.SaveChanges();
                 mensaje = "Líder eliminado correctamente.";
                 return true;

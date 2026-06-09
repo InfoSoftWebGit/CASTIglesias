@@ -114,21 +114,20 @@ namespace CapaDatos
 
         public List<object> BuscarLideres(int sedeID, string term)
         {
-            var consulta = _context.Miembros.AsQueryable();
+            var consulta = _context.Lideres.AsQueryable();
             if (sedeID != 1000)
-                consulta = consulta.Where(m => m.id_sede == sedeID);
-            consulta = consulta.Where(m => m.esLider == "Si");
+                consulta = consulta.Where(l => l.ID_sede == sedeID);
             if (!string.IsNullOrWhiteSpace(term))
-                consulta = consulta.Where(m =>
-                    (m.nombre_miembro != null && m.nombre_miembro.ToLower().Contains(term.ToLower())) ||
-                    (m.apellidos_miembro != null && m.apellidos_miembro.ToLower().Contains(term.ToLower())));
+                consulta = consulta.Where(l =>
+                    (l.Nombre_miembro != null && l.Nombre_miembro.ToLower().Contains(term.ToLower())) ||
+                    (l.Apellidos_miembro != null && l.Apellidos_miembro.ToLower().Contains(term.ToLower())));
 
             return consulta.Take(10)
-                .Select(m => (object)new
+                .Select(l => (object)new
                 {
-                    id = m.id_miembro,
-                    nombre = m.nombre_miembro ?? "",
-                    apellidos = m.apellidos_miembro ?? ""
+                    id = l.ID_miembro,
+                    nombre = l.Nombre_miembro ?? "",
+                    apellidos = l.Apellidos_miembro ?? ""
                 })
                 .ToList();
         }

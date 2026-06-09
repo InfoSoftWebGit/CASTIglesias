@@ -153,18 +153,23 @@
                             <option value="">Selecciona un país</option>
                         </select>
                     </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboResponsable" class="form-label">Responsable</label>
+                        <select class="form-select" id="cboResponsable">
+                            <option value="">-- Sin responsable --</option>
+                        </select>
+                    </div>
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
                 @*--------------APARTADO DE PRIVACIDAD-------------------*@
-                <h5>Privacidad</h5>
-                <div class="row">
-                    <div class="col-12 mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chkAceptaLOPD">
-                            <label class="form-check-label" for="chkAceptaLOPD">
-                                Acepta la Ley Orgánica de Protección de Datos (LOPD) <span class="text-danger">*</span>
-                            </label>
-                        </div>
+                <hr />
+                <h5><i class="fas fa-shield-alt me-1"></i> Privacidad</h5>
+                <div class="p-3 rounded mb-3" style="background:#f3e5f5; border-left:4px solid #7b1fa2;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chkAceptaLOPD">
+                        <label class="form-check-label fw-semibold" style="color:#6a1b9a;" for="chkAceptaLOPD">
+                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD) <span class="text-danger">*</span>
+                        </label>
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE PRIVACIDAD-------------------*@
@@ -316,6 +321,7 @@
             });
 
             cargarPaises();
+            cargarLideresEnSelect();
 
             $("#cboProvincia").change(function() {
                 var provinciaSeleccionadaId = $(this).val();
@@ -392,7 +398,7 @@
                 //CHECK BOXES
                 $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
                 // FIN CHECK BOXES
-                $("#txtResponsable").val(data.responsable || "");
+                $("#cboResponsable").val(data.id_responsable || "");
                 $("#txtObservaciones").val(data.observaciones || "");
                 $("#txtNumeroHijos").val(data.numero_hijos || 0);
                 // FIN INFORMACIÓN ADICIONAL
@@ -452,7 +458,7 @@
                 estado_Civil: $("#cboEstadoCivil").val() || "",
                 estado: $("#cboEstado").val() || "",
 
-                responsable: $("#txtResponsable").val() || "",
+                id_responsable: parseInt($("#cboResponsable").val()) || null,
 
                 observaciones: $("#txtObservaciones").val() || "",
 
@@ -500,6 +506,18 @@
                 }
             });
             };
+        function cargarLideresEnSelect() {
+            $.get('@Url.Action("ListarLideres", "Congregantes")', function (res) {
+                var select = $('#cboResponsable');
+                select.find('option:not(:first)').remove();
+                if (res.data) {
+                    $.each(res.data, function (i, l) {
+                        select.append($('<option>', { value: l.id, text: (l.nombre_miembro + ' ' + l.apellidos_miembro).trim() }));
+                    });
+                }
+            });
+        }
+
         // ✅ CARGAR PAÍSES
         function cargarPaises() {
             $.ajax({

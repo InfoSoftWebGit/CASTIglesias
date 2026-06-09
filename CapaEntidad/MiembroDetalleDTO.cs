@@ -107,8 +107,8 @@ namespace CapaEntidad
         [Column("Fallecido")]
         public bool? fallecido { get; set; } = false;
 
-        [Column("Responsable")]
-        public string? responsable { get; set; }
+        [Column("ID_responsable")]
+        public int? id_responsable { get; set; }
 
         [Column("Acepta_LOPD")]
         public bool? acepta_LOPD { get; set; } = false;
@@ -130,6 +130,10 @@ namespace CapaEntidad
 
         [Column("Relacion_con")]
         public string? relacion_con { get; set; }
+
+        [Column("Miembro_activo")]
+        public string? miembro_activo { get; set; } = "Si";
+
         public string nombre_Provincia { get; set; } = string.Empty;
         public string nombre_Municipio { get; set; } = string.Empty;
         public string nombre_sede { get; set; } = string.Empty;

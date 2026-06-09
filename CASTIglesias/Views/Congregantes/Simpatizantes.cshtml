@@ -145,73 +145,83 @@
                         <label for="txtFechaLlegada" class="form-label">Fecha de Llegada a la Iglesia</label>
                         <input type="date" class="form-control" id="txtFechaLlegada">
                     </div>
-                </div>
-                <div class="col-sm-4 mb-3">
-                    <label for="txtFechaCumpleanos" class="form-label">Fecha de Cumpleaños</label>
-                    <input type="date" class="form-control" id="txtFechaCumpleanos">
-                </div>
-                <div class="col-sm-4 mb-3">
-                    <label for="txtFechaBoda" class="form-label">Fecha de Boda</label>
-                    <input type="date" class="form-control" id="txtFechaBoda">
-                </div>
-                <div class="col-sm-4 mb-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="checkBautizado">
-                        <label class="form-check-label" for="checkBautizado">¿Bautizado?</label>
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtFechaCumpleanos" class="form-label">Fecha de Cumpleaños</label>
+                        <input type="date" class="form-control" id="txtFechaCumpleanos">
                     </div>
-                </div>
-                <div class="col-sm-6 mb-3">
-                    <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
-                    <input type="date" class="form-control" id="txtFechaBautismo">
-                </div>
-                <div class="col-sm-6 mb-3">
-                    <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
-                    <input type="text" class="form-control" id="txtLugarBautismo">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtFechaBoda" class="form-label">Fecha de Boda</label>
+                        <input type="date" class="form-control" id="txtFechaBoda">
+                    </div>
+                    <div class="col-12 mt-1">
+                        <div class="form-check form-switch py-2 px-3 rounded" style="background:#e3f2fd;">
+                            <input class="form-check-input" type="checkbox" role="switch" id="checkBautizado">
+                            <label class="form-check-label fw-semibold text-primary" for="checkBautizado">Bautizado</label>
+                        </div>
+                    </div>
+                    <div id="divBautismoFields" class="col-12" style="display:none;">
+                        <div class="row mt-2">
+                            <div class="col-sm-6 mb-3">
+                                <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
+                                <input type="date" class="form-control" id="txtFechaBautismo">
+                            </div>
+                            <div class="col-sm-6 mb-3">
+                                <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
+                                <input type="text" class="form-control" id="txtLugarBautismo">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <hr />
                 @*--------------FIN APARTADO DE FECHAS-------------------*@
                 @*--------------APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
-                <div class="col-sm-6 mb-3">
-                    <label for="cboPaisNacimiento" class="form-label">País de nacimiento</label>
-                    <select id="cboPaisNacimiento" class="form-select">
-                        <option value="">Selecciona un país</option>
-                    </select>
-                </div>
-                <div class="col-sm-4 mb-3">
-                    <label for="cboEstadoCivil" class="form-label">Estado civil</label>
-                    <select id="cboEstadoCivil" class="form-select">
-                        <option value="" disabled selected>Selecciona un valor</option>
-                        <option value="Soltero/a">Soltero/a</option>
-                        <option value="Casado/a">Casado/a</option>
-                        <option value="Viudo/a">Viudo/a</option>
-                        <option value="Divorciado/a">Divorciado/a</option>
-                        <option value="Separado/a">Separado/a</option>
-                        <option value="Unión de hecho/a">Unión de hecho/a</option>
-                    </select>
-                </div>
-
-                <div class="col-sm-6 mb-3">
-                    <label for="txtResponsable" class="form-label">Responsable</label>
-                    <input type="text" class="form-control" id="txtResponsable">
-                </div>
-
-                <div class="col-sm-6 mb-3">
-                    <label for="txtObservaciones" class="form-label">Observaciones</label>
-                    <textarea class="form-control" id="txtObservaciones" rows="3" maxlength="200"></textarea>
-                </div>
-                <label for="txtNumeroHijos" class="form-label">Número de hijos </label>
-                <input id="txtNumeroHijos" type="number" class="form-control mb-2" placeholder="Número de hijos" />
-                @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
-                @*--------------APARTADO DE PRIVACIDAD-------------------*@
-                <h5>Privacidad</h5>
+                <h5>Información Adicional</h5>
                 <div class="row">
-                    <div class="col-12 mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chkAceptaLOPD">
-                            <label class="form-check-label" for="chkAceptaLOPD">
-                                **Acepta la Ley Orgánica de Protección de Datos (LOPD)**
-                            </label>
-                        </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboPaisNacimiento" class="form-label">País de nacimiento</label>
+                        <select id="cboPaisNacimiento" class="form-select">
+                            <option value="">Selecciona un país</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboEstadoCivil" class="form-label">Estado civil</label>
+                        <select id="cboEstadoCivil" class="form-select">
+                            <option value="" disabled selected>Selecciona un valor</option>
+                            <option value="Soltero/a">Soltero/a</option>
+                            <option value="Casado/a">Casado/a</option>
+                            <option value="Viudo/a">Viudo/a</option>
+                            <option value="Divorciado/a">Divorciado/a</option>
+                            <option value="Separado/a">Separado/a</option>
+                            <option value="Unión de hecho/a">Unión de hecho/a</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboResponsable" class="form-label">Responsable</label>
+                        <select class="form-select" id="cboResponsable">
+                            <option value="">-- Sin responsable --</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtObservaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="txtObservaciones" rows="3" maxlength="200"></textarea>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtNumeroHijos" class="form-label">Número de hijos</label>
+                        <input id="txtNumeroHijos" type="number" class="form-control" placeholder="Número de hijos" />
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
+
+
+                @*--------------APARTADO DE PRIVACIDAD-------------------*@
+                <hr />
+                <h5><i class="fas fa-shield-alt me-1"></i> Privacidad</h5>
+                <div class="p-3 rounded mb-3" style="background:#f3e5f5; border-left:4px solid #7b1fa2;">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="chkAceptaLOPD">
+                        <label class="form-check-label fw-semibold" style="color:#6a1b9a;" for="chkAceptaLOPD">
+                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD)
+                        </label>
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE PRIVACIDAD-------------------*@
@@ -370,6 +380,7 @@
             });
 
             cargarPaises();
+            cargarLideresEnSelect();
 
             $("#cboProvincia").change(function() {
                 var provinciaSeleccionadaId = $(this).val();
@@ -417,6 +428,7 @@
                 $("#cboEstadoCivil").val("");
                 $("#cboPaisNacimiento").val("");
                 $("#checkBautizado").prop("checked", false);
+                toggleBautismoFields();
                 $("#txtNumeroHijos").val(0);
                 $("#chkAceptaLOPD").prop("checked", false);
                 //FIN INFORMACIÓN ADICIONAL
@@ -457,9 +469,10 @@
                 $("#cboEstadoCivil").val(data.estado_Civil || "");
                 //CHECK BOXES
                 $("#checkBautizado").prop("checked", data.bautizado === true);
+                toggleBautismoFields();
                 $("#chkAceptaLOPD").prop("checked", data.acepta_LOPD === true);
                 // FIN CHECK BOXES
-                $("#txtResponsable").val(data.responsable || "");
+                $("#cboResponsable").val(data.id_responsable || "");
                 $("#txtObservaciones").val(data.observaciones || "");
                 $("#txtNumeroHijos").val(Math.max(0, parseInt(data.numero_hijos || 0)));
                 // FIN INFORMACIÓN ADICIONAL
@@ -505,7 +518,7 @@
 
                 estado_Civil: $("#cboEstadoCivil").val() || "",
 
-                responsable: $("#txtResponsable").val() || "",
+                id_responsable: parseInt($("#cboResponsable").val()) || null,
 
                 observaciones: $("#txtObservaciones").val() || "",
 
@@ -553,6 +566,18 @@
                 }
             });
             };
+        function cargarLideresEnSelect() {
+            $.get('@Url.Action("ListarLideres", "Congregantes")', function (res) {
+                var select = $('#cboResponsable');
+                select.find('option:not(:first)').remove();
+                if (res.data) {
+                    $.each(res.data, function (i, l) {
+                        select.append($('<option>', { value: l.id, text: (l.nombre_miembro + ' ' + l.apellidos_miembro).trim() }));
+                    });
+                }
+            });
+        }
+
         // ✅ CARGAR PAÍSES
         function cargarPaises() {
             $.ajax({
@@ -596,6 +621,14 @@
                 }
             });
         }
+
+        // ======================
+        // VISIBILIDAD CONDICIONAL
+        // ======================
+        function toggleBautismoFields() {
+            $("#divBautismoFields").toggle($("#checkBautizado").prop("checked"));
+        }
+        $("#checkBautizado").on("change", toggleBautismoFields);
 
         function configurarAutocomplete({
             inputSelector,
