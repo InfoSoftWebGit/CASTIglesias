@@ -1,8 +1,8 @@
-﻿@{
+@{
     ViewBag.Title = "Familias";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -37,7 +37,7 @@
 </div>
 
 <div class="modal fade" id="FormModalFamilias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
                 <h5 class="modal-title" id="exampleModalLabel">Datos de la nueva familia</h5>
@@ -45,80 +45,158 @@
             </div>
             <div class="modal-body">
                 <input id="txtid" type="hidden" value="0" />
-                <div class="row g-2">
-                    <div class="col-sm-6">
-                        <label class="form-label">Nombre familiar</label>
-                        <input type="text" class="form-control" id="txtNombres" placeholder="Nombre Familia" autocomplete="off" />
+
+                <ul class="nav nav-tabs mb-3" id="familiasTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-datos-btn" data-bs-toggle="tab" data-bs-target="#panelDatos" type="button" role="tab">
+                            <i class="fas fa-home me-1"></i> Datos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation" id="liTabMiembros" style="display:none;">
+                        <button class="nav-link" id="tab-miembros-btn" data-bs-toggle="tab" data-bs-target="#panelMiembros" type="button" role="tab">
+                            <i class="fas fa-users me-1"></i> Miembros
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Tab Datos -->
+                    <div class="tab-pane fade show active" id="panelDatos" role="tabpanel">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <label class="form-label">Nombre familiar</label>
+                                <input type="text" class="form-control" id="txtNombres" placeholder="Nombre Familia" autocomplete="off" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" id="txtTelefono" placeholder="999555444" autocomplete="off" />
+                            </div>
+                            <div class="col-sm-12">
+                                <label class="form-label">Dirección</label>
+                                <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Provincia</label>
+                                <select id="cboProvincia" class="form-select">
+                                    <option value="0" disabled selected>Selecciona una provincia</option>
+                                    @if (ViewBag.ListaProvincias != null)
+                                    {
+                                        foreach (var p in ViewBag.ListaProvincias)
+                                        {
+                                            <option value="@p.idProvincia">@p.nombre_provincia</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">Municipio</label>
+                                <select id="cboMunicipio" class="form-select" disabled>
+                                    <option disabled selected>Selecciona un municipio</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">CP</label>
+                                <input type="number" class="form-control" id="txtCP" placeholder="28001" autocomplete="off" />
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="form-label">Cantidad de integrantes</label>
+                                <input type="number" class="form-control" id="txtIntegrantes" placeholder="0" min="0" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div id="mensajeError" class="alert alert-danger d-none"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" id="txtTelefono" placeholder="999555444" autocomplete="off" />
-                    </div>
-                    <div class="col-sm-12">
-                        <label class="form-label">Dirección</label>
-                        <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Provincia</label>
-                        <select id="cboProvincia" class="form-select">
-                            <option value="0" disabled selected>Selecciona una provincia</option>
-                            @if (ViewBag.ListaProvincias != null)
-                            {
-                                foreach (var p in ViewBag.ListaProvincias)
-                                {
-                                    <option value="@p.idProvincia">@p.nombre_provincia</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Municipio</label>
-                        <select id="cboMunicipio" class="form-select" disabled>
-                            <option disabled selected>Selecciona un municipio</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-4">
-                        <label class="form-label">CP</label>
-                        <input type="number" class="form-control" id="txtCP" placeholder="28001" autocomplete="off" />
-                    </div>
-                    <div class="col-sm-4">
-                        <label class="form-label">Cantidad de integrantes</label>
-                        <input type="number" class="form-control" id="txtIntegrantes" placeholder="0" min="0" autocomplete="off" />
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+
+                    <!-- Tab Miembros -->
+                    <div class="tab-pane fade" id="panelMiembros" role="tabpanel">
+                        <div id="divSinGuardar" class="alert alert-info d-none">
+                            Guarda la familia primero para poder gestionar los miembros.
+                        </div>
+
+                        <div id="divMiembros">
+                            <table class="table table-sm table-bordered align-middle mb-3">
+                                <thead style="background-color:#1E3A8A; color:white; text-align:center;">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Apellidos</th>
+                                        <th>Rol en familia</th>
+                                        <th>Activo</th>
+                                        <th>Fallecido</th>
+                                        <th style="width:60px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyMiembrosFamilia">
+                                    <tr id="trSinMiembros">
+                                        <td colspan="6" class="text-center text-muted">No hay miembros asignados a esta familia.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <hr />
+                            <h6 class="mb-2">Añadir miembro a esta familia</h6>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-sm-5 position-relative">
+                                    <label class="form-label">Buscar miembro</label>
+                                    <input type="text" class="form-control" id="txtBuscarMiembro"
+                                           placeholder="Escribe nombre o apellidos..." autocomplete="off" />
+                                    <div id="dropdownMiembros" class="list-group position-absolute shadow"
+                                         style="z-index:9999; display:none; max-height:180px; overflow-y:auto; left:12px; right:12px; top:100%;"></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label">Tipo de relación</label>
+                                    <select id="cboTipoRelacion" class="form-select">
+                                        <option value="">— Selecciona —</option>
+                                        <optgroup label="1er grado">
+                                            <option value="Padre">Padre</option>
+                                            <option value="Madre">Madre</option>
+                                            <option value="Hijo">Hijo</option>
+                                            <option value="Hija">Hija</option>
+                                            <option value="Hermano">Hermano</option>
+                                            <option value="Hermana">Hermana</option>
+                                            <option value="Conyuge">Cónyuge</option>
+                                        </optgroup>
+                                        <optgroup label="2do grado">
+                                            <option value="Abuelo">Abuelo</option>
+                                            <option value="Abuela">Abuela</option>
+                                            <option value="Nieto">Nieto</option>
+                                            <option value="Nieta">Nieta</option>
+                                            <option value="Tio">Tío</option>
+                                            <option value="Tia">Tía</option>
+                                            <option value="Sobrino">Sobrino</option>
+                                            <option value="Sobrina">Sobrina</option>
+                                            <option value="Medio_hermano">Medio hermano</option>
+                                            <option value="Medio_hermana">Medio hermana</option>
+                                        </optgroup>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="asignarMiembroAFamilia()">
+                                        <i class="fas fa-plus me-1"></i> Añadir
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="hidIdMiembroSeleccionado" value="" />
+                            <div id="lblMiembroSeleccionado" class="mt-1 text-muted small"></div>
+                            <div id="mensajeErrorMiembro" class="alert alert-danger mt-2 d-none"></div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarFamilia()">Guardar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarFamilia" onclick="GuardarFamilia()">Guardar</button>
             </div>
         </div>
     </div>
-</div>@* 
-<style>
-    #tablaFamilias thead {
-        background-color: #1877F2 !important;
-    }
+</div>
 
-    #tablaFamilias th {
-        color: white !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    #tablaFamilias tbody td {
-        color: black !important;
-    }
-</style> *@
-
-
----
 @section scripts {
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
@@ -127,13 +205,11 @@
         let filaSeleccionada;
 
         $(document).ready(function () {
-            // Destruir instancia previa si existe
             if ($.fn.DataTable.isDataTable("#tablaFamilias")) {
                 $("#tablaFamilias").DataTable().clear().destroy();
             }
 
             tabladata = $("#tablaFamilias").DataTable({
-                dom: 'Bfrtip',
                 responsive: true,
                 ordering: false,
                 ajax: {
@@ -167,9 +243,8 @@
                     url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
                 },
                 initComplete: function () {
-                    // Color cabecera azul tipo Facebook
                     $('#tablaFamilias thead').css({
-                        'background-color': '#1877F2',
+                        'background-color': '#1E3A8A',
                         'color': 'white',
                         'text-align': 'center'
                     });
@@ -185,7 +260,6 @@
 
             // Botón eliminar
             $("#tablaFamilias tbody").on("click", ".btn-eliminarFamilia", function () {
-
                 const fila = $(this).closest("tr");
                 const data = tabladata.row(fila).data();
 
@@ -201,7 +275,7 @@
                         $.ajax({
                             url: '@Url.Action("EliminarFamilia", "Mantenedor")',
                             type: "POST",
-                            data: { id: data.iD_familia }, // <-- Se usa el ID correcto para la eliminación
+                            data: { id: data.iD_familia },
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
@@ -213,7 +287,6 @@
                                 Swal.fire("Error", "No se pudo eliminar", "error");
                             }
                         });
-
                     }
                 });
             });
@@ -221,37 +294,64 @@
 
         // Abrir modal
         function abrirModalFamilias(json = null) {
-            $("#txtid").val(json?.iD_familia || 0);
-            $("#txtNombres").val(json?.nombre_familia || "");
-            $("#txtTelefono").val(json?.telefono_familia || "");
-            $("#txtDireccion").val(json?.direccion || "");
-
-            $("#txtCP").val(json?.cP || "");
-            $("#txtIntegrantes").val(json?.integrantes ?? "");
+            // Resetear estado del modal
             $("#mensajeError").addClass("d-none").text("");
+            $("#mensajeErrorMiembro").addClass("d-none").text("");
+            $("#hidIdMiembroSeleccionado").val("");
+            $("#lblMiembroSeleccionado").text("");
+            $("#txtBuscarMiembro").val("");
+            $("#cboTipoRelacion").val("");
+            $("#dropdownMiembros").hide().empty();
+
+            // Ir siempre a la pestaña Datos al abrir
+            const tabDatos = bootstrap.Tab.getOrCreateInstance(document.getElementById('tab-datos-btn'));
+            tabDatos.show();
 
             if (json) {
+                // Modo edición
+                $("#txtid").val(json.iD_familia);
+                $("#txtNombres").val(json.nombre_familia || "");
+                $("#txtTelefono").val(json.telefono_familia || "");
+                $("#txtDireccion").val(json.direccion || "");
+                $("#txtCP").val(json.cP || "");
+                $("#txtIntegrantes").val(json.integrantes ?? "");
+                $("#exampleModalLabel").text("Editar familia: " + (json.nombre_familia || ""));
+
                 var provId = encontrarProvinciaIdPorNombre(json.provincia || "");
                 $("#cboProvincia").val(provId);
                 cargarMunicipiosFamilia(provId, json.municipio || "");
+
+                // Mostrar pestaña miembros y cargarla
+                $("#liTabMiembros").show();
+                cargarMiembrosDeFamilia(json.iD_familia);
             } else {
+                // Modo nuevo registro
+                $("#txtid").val(0);
+                $("#txtNombres").val("");
+                $("#txtTelefono").val("");
+                $("#txtDireccion").val("");
+                $("#txtCP").val("");
+                $("#txtIntegrantes").val("");
+                $("#exampleModalLabel").text("Datos de la nueva familia");
                 resetearSelects();
+
+                // Ocultar pestaña miembros (guardar primero)
+                $("#liTabMiembros").hide();
             }
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalFamilias"));
             modal.show();
         }
 
-
-
-        // Guardar
+        // -------------------------------------------------------
+        // Guardar familia
+        // -------------------------------------------------------
         function GuardarFamilia() {
             const Familia = {
                 iD_familia: parseInt($("#txtid").val()) || 0,
                 nombre_familia: $("#txtNombres").val().trim(),
                 telefono_familia: parseInt($("#txtTelefono").val()) || 0,
                 direccion: $("#txtDireccion").val().trim(),
-
                 cP: parseInt($("#txtCP").val()) || null,
                 integrantes: parseInt($("#txtIntegrantes").val()) || null,
                 provincia: ($("#cboProvincia").val() && $("#cboProvincia").val() !== "0")
@@ -259,15 +359,10 @@
                 municipio: $("#cboMunicipio").val() || null
             };
 
-            console.log("Objeto familia:", Familia);
-
-            $(".modal-body").LoadingOverlay("show", { text: "Cargando..." });
-
-            const url = '@Url.Action("GuardarFamilia", "Mantenedor")';
-
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
 
             $.ajax({
-                url: url,
+                url: '@Url.Action("GuardarFamilia", "Mantenedor")',
                 type: "POST",
                 data: JSON.stringify(Familia),
                 contentType: "application/json",
@@ -279,7 +374,11 @@
                         if (data.resultado !== 0) {
                             Familia.iD_familia = data.resultado;
                             tabladata.row.add(Familia).draw(false);
-                            bootstrap.Modal.getInstance(document.getElementById("FormModalFamilias")).hide();
+                            // Tras crear, activar pestaña miembros
+                            $("#txtid").val(Familia.iD_familia);
+                            $("#liTabMiembros").show();
+                            cargarMiembrosDeFamilia(Familia.iD_familia);
+                            $("#exampleModalLabel").text("Editar familia: " + (Familia.nombre_familia || ""));
                         } else {
                             $("#mensajeError").removeClass("d-none").text(data.mensaje);
                         }
@@ -297,9 +396,200 @@
                     $(".modal-body").LoadingOverlay("hide");
                     $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
                 }
-            })
+            });
         }
+
+        // -------------------------------------------------------
+        // Gestión de miembros de la familia
+        // -------------------------------------------------------
+        function cargarMiembrosDeFamilia(idFamilia) {
+            $("#bodyMiembrosFamilia").html('<tr><td colspan="6" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>');
+
+            $.ajax({
+                url: '@Url.Action("ListarMiembrosPorFamilia", "Mantenedor")',
+                type: "GET",
+                data: { idFamilia: idFamilia },
+                success: function (res) {
+                    renderizarMiembrosFamilia(res.data || []);
+                },
+                error: function () {
+                    $("#bodyMiembrosFamilia").html('<tr><td colspan="6" class="text-center text-danger">Error al cargar miembros.</td></tr>');
+                }
+            });
+        }
+
+        function renderizarMiembrosFamilia(lista) {
+            const tbody = $("#bodyMiembrosFamilia");
+            tbody.empty();
+
+            if (!lista || lista.length === 0) {
+                tbody.html('<tr id="trSinMiembros"><td colspan="6" class="text-center text-muted">No hay miembros asignados a esta familia.</td></tr>');
+                return;
+            }
+
+            lista.forEach(function (m) {
+                const activo = (m.miembro_activo || "Si") === "Si"
+                    ? '<span class="badge bg-success">Activo</span>'
+                    : '<span class="badge bg-secondary">Inactivo</span>';
+                const fallecido = m.fallecido
+                    ? '<span class="badge bg-dark">Fallecido</span>'
+                    : '<span class="badge bg-light text-dark border">No</span>';
+                const relacion = m.tipo_relacion_familiar
+                    ? m.tipo_relacion_familiar.replace(/_/g, ' ')
+                    : '<span class="text-muted">—</span>';
+
+                tbody.append(`
+                    <tr data-id="${m.id_miembro}">
+                        <td>${m.nombre_miembro || ''}</td>
+                        <td>${m.apellidos_miembro || ''}</td>
+                        <td>${relacion}</td>
+                        <td class="text-center">${activo}</td>
+                        <td class="text-center">${fallecido}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-danger btn-sm btn-quitarMiembro"
+                                    data-id="${m.id_miembro}"
+                                    title="Quitar de la familia">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>`);
+            });
+
+            // Evento para quitar miembro
+            $(".btn-quitarMiembro").off("click").on("click", function () {
+                const idMiembro = $(this).data("id");
+                const fila = $(this).closest("tr");
+                const nombre = fila.find("td:first").text() + " " + fila.find("td:eq(1)").text();
+
+                Swal.fire({
+                    title: "¿Quitar miembro?",
+                    text: `¿Desea desvincular a "${nombre.trim()}" de esta familia?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, quitar",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("QuitarMiembroFamilia", "Mantenedor")',
+                            type: "POST",
+                            data: { idMiembro: idMiembro },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    fila.remove();
+                                    if ($("#bodyMiembrosFamilia tr").length === 0) {
+                                        $("#bodyMiembrosFamilia").html('<tr id="trSinMiembros"><td colspan="6" class="text-center text-muted">No hay miembros asignados a esta familia.</td></tr>');
+                                    }
+                                    Swal.fire("Listo", res.mensaje, "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo quitar el miembro.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // Autocomplete para buscar miembros
+        var timerBuscarMiembro;
+        $("#txtBuscarMiembro").on("input", function () {
+            var term = $(this).val().trim();
+            clearTimeout(timerBuscarMiembro);
+            $("#hidIdMiembroSeleccionado").val("");
+            $("#lblMiembroSeleccionado").text("");
+
+            if (term.length < 2) {
+                $("#dropdownMiembros").hide().empty();
+                return;
+            }
+
+            timerBuscarMiembro = setTimeout(function () {
+                $.ajax({
+                    url: '@Url.Action("BuscarMiembrosParaFamilia", "Mantenedor")',
+                    type: "GET",
+                    data: { query: term },
+                    success: function (res) {
+                        var dropdown = $("#dropdownMiembros");
+                        dropdown.empty();
+
+                        if (res.data && res.data.length > 0) {
+                            res.data.forEach(function (m) {
+                                var nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                                var yaTiene = m.tipo_relacion_familiar ? ' <small class="text-muted">(ya en familia)</small>' : '';
+                                $('<button type="button">')
+                                    .addClass('list-group-item list-group-item-action py-1')
+                                    .html(nombre + yaTiene)
+                                    .on('click', function () {
+                                        $("#hidIdMiembroSeleccionado").val(m.id_miembro);
+                                        $("#txtBuscarMiembro").val(nombre);
+                                        $("#lblMiembroSeleccionado").html('<i class="fas fa-check-circle text-success me-1"></i>' + nombre);
+                                        dropdown.hide().empty();
+                                    })
+                                    .appendTo(dropdown);
+                            });
+                            dropdown.show();
+                        } else {
+                            dropdown.hide();
+                        }
+                    }
+                });
+            }, 300);
+        });
+
+        $(document).on("click", function (e) {
+            if (!$(e.target).closest('#txtBuscarMiembro, #dropdownMiembros').length) {
+                $("#dropdownMiembros").hide();
+            }
+        });
+
+        function asignarMiembroAFamilia() {
+            const idFamilia = parseInt($("#txtid").val()) || 0;
+            const idMiembro = parseInt($("#hidIdMiembroSeleccionado").val()) || 0;
+            const tipoRelacion = $("#cboTipoRelacion").val();
+
+            $("#mensajeErrorMiembro").addClass("d-none").text("");
+
+            if (idFamilia === 0) {
+                $("#mensajeErrorMiembro").removeClass("d-none").text("Guarda la familia antes de añadir miembros.");
+                return;
+            }
+            if (idMiembro === 0) {
+                $("#mensajeErrorMiembro").removeClass("d-none").text("Selecciona un miembro de la lista.");
+                return;
+            }
+            if (!tipoRelacion) {
+                $("#mensajeErrorMiembro").removeClass("d-none").text("Selecciona el tipo de relación familiar.");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AsignarMiembroAFamilia", "Mantenedor")',
+                type: "POST",
+                data: { idMiembro: idMiembro, idFamilia: idFamilia, tipoRelacion: tipoRelacion },
+                success: function (res) {
+                    if (res.resultado) {
+                        $("#txtBuscarMiembro").val("");
+                        $("#hidIdMiembroSeleccionado").val("");
+                        $("#lblMiembroSeleccionado").text("");
+                        $("#cboTipoRelacion").val("");
+                        cargarMiembrosDeFamilia(idFamilia);
+                    } else {
+                        $("#mensajeErrorMiembro").removeClass("d-none").text(res.mensaje);
+                    }
+                },
+                error: function () {
+                    $("#mensajeErrorMiembro").removeClass("d-none").text("Error al asignar el miembro.");
+                }
+            });
+        }
+
+        // -------------------------------------------------------
         // Cascado Provincia → Municipio
+        // -------------------------------------------------------
         $("#cboProvincia").on("change", function () {
             cargarMunicipiosFamilia($(this).val(), "");
         });

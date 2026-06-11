@@ -88,5 +88,19 @@ namespace CapaNegocio
             }
         }
         //////////////////////// FIN MÉTODO DE ELIMINAR FAMILIA /////////////////////////////
+
+        // ---- Gestión de miembros dentro de una familia ----
+
+        public List<MiembroFamiliaDTO> ListarMiembrosDeFamilia(int idFamilia, int sedeID)
+            => _capaDatos.ListarMiembrosDeFamilia(idFamilia, sedeID);
+
+        public List<MiembroFamiliaDTO> BuscarMiembrosParaAsignar(string query, int sedeID)
+            => _capaDatos.BuscarMiembrosParaAsignar(query, sedeID);
+
+        public bool AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion, int sedeID, out string mensaje)
+            => _capaDatos.AsignarMiembroAFamilia(idMiembro, idFamilia, tipoRelacion, sedeID, out mensaje);
+
+        public bool QuitarMiembroFamilia(int idMiembro, int sedeID, out string mensaje)
+            => _capaDatos.QuitarMiembroFamilia(idMiembro, sedeID, out mensaje);
     }
 }

@@ -294,12 +294,40 @@
                             <div><strong>CP:</strong> <span id="lblFamiliaCP">—</span></div>
                         </div>
                     </div>
-                    <div class="col-sm-8 mb-3">
+                    <div class="col-sm-6 mb-3">
                         <label for="txtRelacionCon" class="form-label">Relación con</label>
                         <div id="divRelacionCon" class="position-relative">
                             <input type="text" class="form-control" id="txtRelacionCon" autocomplete="off" placeholder="Escribe un nombre para buscar...">
                             <div id="dropdownRelacionCon" class="list-group position-absolute w-100 shadow" style="display:none; z-index:9999; max-height:200px; overflow-y:auto;"></div>
                         </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboTipoRelacionFamiliar" class="form-label">Rol en la familia</label>
+                        <select id="cboTipoRelacionFamiliar" class="form-select">
+                            <option value="">— Sin especificar —</option>
+                            <optgroup label="1er grado">
+                                <option value="Padre">Padre</option>
+                                <option value="Madre">Madre</option>
+                                <option value="Hijo">Hijo</option>
+                                <option value="Hija">Hija</option>
+                                <option value="Hermano">Hermano</option>
+                                <option value="Hermana">Hermana</option>
+                                <option value="Conyuge">Cónyuge</option>
+                            </optgroup>
+                            <optgroup label="2do grado">
+                                <option value="Abuelo">Abuelo</option>
+                                <option value="Abuela">Abuela</option>
+                                <option value="Nieto">Nieto</option>
+                                <option value="Nieta">Nieta</option>
+                                <option value="Tio">Tío</option>
+                                <option value="Tia">Tía</option>
+                                <option value="Sobrino">Sobrino</option>
+                                <option value="Sobrina">Sobrina</option>
+                                <option value="Medio_hermano">Medio hermano</option>
+                                <option value="Medio_hermana">Medio hermana</option>
+                            </optgroup>
+                            <option value="Otro">Otro</option>
+                        </select>
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE FAMILIA-------------------*@
@@ -587,6 +615,7 @@
                 // FAMILIA
                 $("#txtEstadoMiembro").val("Miembro");
                 $("#txtRelacionCon").val("");
+                $("#cboTipoRelacionFamiliar").val("");
                 cargarFamilias("");
                 //FIN FAMILIA
             }
@@ -653,6 +682,7 @@
                 // FAMILIA
                 $("#txtEstadoMiembro").val(data.estado || "");
                 $("#txtRelacionCon").val(data.relacion_con || "");
+                $("#cboTipoRelacionFamiliar").val(data.tipo_relacion_familiar || "");
                 cargarFamilias(data.grupo_familiar || "");
                 // FIN FAMILIA
                 if (provinciaId > 0) {
@@ -721,7 +751,9 @@
                 fecha_fallecido: $("#txtFechaFallecimiento").val() || null,
 
                 grupo_familiar: $("#cboGrupoFamiliar").val() || null,
+                id_familia: parseInt($("#cboGrupoFamiliar option:selected").data("id-familia")) || null,
                 relacion_con: $("#txtRelacionCon").val() || null,
+                tipo_relacion_familiar: $("#cboTipoRelacionFamiliar").val() || null,
             };
             $.ajax({
                 url: '@Url.Action("RegistrarMiembro", "Congregantes")',
@@ -946,12 +978,13 @@
                 type: 'GET',
                 success: function (res) {
                     var select = $('#cboGrupoFamiliar');
-                    select.empty().append('<option value="">— Sin asignar —</option>');
+                    select.empty().append('<option value="" data-id-familia="">— Sin asignar —</option>');
                     if (res.data && res.data.length > 0) {
                         res.data.forEach(function (f) {
                             var opt = $('<option>')
                                 .val(f.nombre_familia)
                                 .text(f.nombre_familia)
+                                .attr('data-id-familia', f.iD_familia || 0)
                                 .attr('data-direccion', f.direccion || '')
                                 .attr('data-municipio', f.municipio || '')
                                 .attr('data-provincia', f.provincia || '')

@@ -84,6 +84,8 @@ namespace CapaDatos
                                 relacion_con = m.relacion_con,
                                 grupo_familiar = m.grupo_familiar,
                                 miembro_activo = m.miembro_activo,
+                                id_familia = m.id_familia,
+                                tipo_relacion_familiar = m.tipo_relacion_familiar,
 
                                 nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
                                 nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
@@ -181,6 +183,20 @@ namespace CapaDatos
                     return 0;
                 }
 
+                // --- Auto-sync ID_familia ↔ grupo_familiar ---
+                if (obj.id_familia > 0 && string.IsNullOrWhiteSpace(obj.grupo_familiar))
+                {
+                    var fam = _context.Familia.FirstOrDefault(f => f.ID_familia == obj.id_familia);
+                    if (fam != null) obj.grupo_familiar = fam.Nombre_familia;
+                }
+                else if ((obj.id_familia == null || obj.id_familia == 0) && !string.IsNullOrWhiteSpace(obj.grupo_familiar))
+                {
+                    var fam = _context.Familia.FirstOrDefault(f =>
+                        f.Nombre_familia == obj.grupo_familiar &&
+                        (obj.id_sede == 1000 || f.ID_sede == obj.id_sede));
+                    if (fam != null) obj.id_familia = fam.ID_familia;
+                }
+
                 Miembro nuevoMiembro;
 
                 if (obj.id_miembro == 0)
@@ -229,7 +245,9 @@ namespace CapaDatos
                         numero_hijos = obj.numero_hijos,
                         grupo_familiar = obj.grupo_familiar,
                         relacion_con = obj.relacion_con,
-                        miembro_activo = obj.miembro_activo ?? "Si"
+                        miembro_activo = obj.miembro_activo ?? "Si",
+                        id_familia = obj.id_familia,
+                        tipo_relacion_familiar = obj.tipo_relacion_familiar
                     };
 
 
@@ -277,6 +295,8 @@ namespace CapaDatos
                    nuevoMiembro.grupo_familiar        = obj.grupo_familiar;
                    nuevoMiembro.relacion_con          = obj.relacion_con;
                    nuevoMiembro.miembro_activo        = obj.miembro_activo ?? "Si";
+                   nuevoMiembro.id_familia            = obj.id_familia;
+                   nuevoMiembro.tipo_relacion_familiar = obj.tipo_relacion_familiar;
 
                     _context.SaveChanges();
                 }
@@ -353,6 +373,20 @@ namespace CapaDatos
                     return false;
                 }
 
+                // Auto-sync ID_familia ↔ grupo_familiar
+                if (obj.id_familia > 0 && string.IsNullOrWhiteSpace(obj.grupo_familiar))
+                {
+                    var fam = _context.Familia.FirstOrDefault(f => f.ID_familia == obj.id_familia);
+                    if (fam != null) obj.grupo_familiar = fam.Nombre_familia;
+                }
+                else if ((obj.id_familia == null || obj.id_familia == 0) && !string.IsNullOrWhiteSpace(obj.grupo_familiar))
+                {
+                    var fam = _context.Familia.FirstOrDefault(f =>
+                        f.Nombre_familia == obj.grupo_familiar &&
+                        (sedeID == 1000 || f.ID_sede == sedeID));
+                    if (fam != null) obj.id_familia = fam.ID_familia;
+                }
+
                 // Mapeo
                 miembro.numero_miembro = obj.numero_miembro;
                 miembro.nombre_miembro = obj.nombre_miembro;
@@ -387,9 +421,11 @@ namespace CapaDatos
                 miembro.numero_hijos = obj.numero_hijos;
                 miembro.curso_acabado = obj.curso_acabado;
                 miembro.acepta_LOPD = obj.acepta_LOPD;
-                miembro.grupo_familiar = obj.grupo_familiar;
-                miembro.relacion_con = obj.relacion_con;
-                miembro.miembro_activo = obj.miembro_activo ?? "Si";
+                miembro.grupo_familiar          = obj.grupo_familiar;
+                miembro.relacion_con            = obj.relacion_con;
+                miembro.miembro_activo          = obj.miembro_activo ?? "Si";
+                miembro.id_familia              = obj.id_familia;
+                miembro.tipo_relacion_familiar  = obj.tipo_relacion_familiar;
 
                 _context.SaveChanges();
 

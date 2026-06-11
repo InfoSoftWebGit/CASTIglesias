@@ -117,6 +117,66 @@ namespace CapaPresentaciónAdmin.Controllers
                 return Json(new { resultado = false, mensaje = ex.Message, error = true });
             }
         }
+
+        [HttpGet]
+        public JsonResult ListarMiembrosPorFamilia(int idFamilia)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var miembros = _cnFamilias.ListarMiembrosDeFamilia(idFamilia, sedeID);
+                return Json(new { data = miembros });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult BuscarMiembrosParaFamilia(string query = "")
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var miembros = _cnFamilias.BuscarMiembrosParaAsignar(query, sedeID);
+                return Json(new { data = miembros });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var ok = _cnFamilias.AsignarMiembroAFamilia(idMiembro, idFamilia, tipoRelacion, sedeID, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult QuitarMiembroFamilia(int idMiembro)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var ok = _cnFamilias.QuitarMiembroFamilia(idMiembro, sedeID, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
         #endregion
         // ------------------------------------------------------------------------------------------------
         //////////////////////////////// MIEMBROS //////////////////////////////

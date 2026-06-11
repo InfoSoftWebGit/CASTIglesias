@@ -134,6 +134,12 @@ namespace CapaEntidad
         [Column("Miembro_activo")]
         public string? miembro_activo { get; set; } = "Si";
 
+        [Column("ID_familia")]
+        public int? id_familia { get; set; }
+
+        [Column("Tipo_relacion_familiar")]
+        public string? tipo_relacion_familiar { get; set; }
+
         public string nombre_Provincia { get; set; } = string.Empty;
         public string nombre_Municipio { get; set; } = string.Empty;
         public string nombre_sede { get; set; } = string.Empty;

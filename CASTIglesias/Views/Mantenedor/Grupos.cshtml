@@ -2,6 +2,7 @@
     ViewBag.Title = "Grupos";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
@@ -74,6 +75,7 @@
 
 @section scripts {
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
@@ -87,7 +89,6 @@
             }
 
             tabladata = $("#tablaGrupos").DataTable({
-                dom: 'Bfrtip',
                 responsive: true,
                 order: [[0, 'asc']],
                 ajax: {

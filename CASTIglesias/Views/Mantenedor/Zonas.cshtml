@@ -2,7 +2,7 @@
     ViewBag.Title = "Zonas";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -72,24 +72,9 @@
     </div>
 </div>
 
-@* <style>
-    #tablaZonas thead {
-        background-color: #1877F2 !important;
-    }
-
-    #tablaZonas th {
-        color: white !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    #tablaZonas tbody td {
-        color: black !important;
-    }
-</style> *@
-
 @section scripts {
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
@@ -142,6 +127,13 @@
                 ],
                 language: {
                     url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    $('#tablaZonas thead').css({
+                        'background-color': '#1E3A8A',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
                 }
             });
 

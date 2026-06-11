@@ -162,5 +162,138 @@ namespace CapaDatos
                 return false;
             }
         }
+
+        // ----------------------------------------------------
+        // ListarMiembrosDeFamilia
+        // ----------------------------------------------------
+        public List<MiembroFamiliaDTO> ListarMiembrosDeFamilia(int idFamilia, int sedeID)
+        {
+            try
+            {
+                var q = _context.Miembros.Where(m => m.id_familia == idFamilia);
+                if (sedeID != 1000)
+                    q = q.Where(m => m.id_sede == sedeID);
+
+                return q.Select(m => new MiembroFamiliaDTO
+                {
+                    id_miembro           = m.id_miembro,
+                    nombre_miembro       = m.nombre_miembro,
+                    apellidos_miembro    = m.apellidos_miembro,
+                    miembro_activo       = m.miembro_activo,
+                    fallecido            = m.fallecido,
+                    tipo_relacion_familiar = m.tipo_relacion_familiar
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ListarMiembrosDeFamilia: {ex.Message}");
+                return new List<MiembroFamiliaDTO>();
+            }
+        }
+
+        // ----------------------------------------------------
+        // BuscarMiembrosParaAsignar
+        // ----------------------------------------------------
+        public List<MiembroFamiliaDTO> BuscarMiembrosParaAsignar(string query, int sedeID)
+        {
+            try
+            {
+                var q = _context.Miembros.AsQueryable();
+                if (sedeID != 1000)
+                    q = q.Where(m => m.id_sede == sedeID);
+
+                if (!string.IsNullOrWhiteSpace(query))
+                {
+                    var lower = query.ToLower();
+                    q = q.Where(m =>
+                        (m.nombre_miembro != null && m.nombre_miembro.ToLower().Contains(lower)) ||
+                        (m.apellidos_miembro != null && m.apellidos_miembro.ToLower().Contains(lower)));
+                }
+
+                return q.OrderBy(m => m.apellidos_miembro)
+                        .Take(30)
+                        .Select(m => new MiembroFamiliaDTO
+                        {
+                            id_miembro             = m.id_miembro,
+                            nombre_miembro         = m.nombre_miembro,
+                            apellidos_miembro      = m.apellidos_miembro,
+                            miembro_activo         = m.miembro_activo,
+                            fallecido              = m.fallecido,
+                            tipo_relacion_familiar = m.tipo_relacion_familiar
+                        }).ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error BuscarMiembrosParaAsignar: {ex.Message}");
+                return new List<MiembroFamiliaDTO>();
+            }
+        }
+
+        // ----------------------------------------------------
+        // AsignarMiembroAFamilia
+        // ----------------------------------------------------
+        public bool AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion, int sedeID, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == idMiembro);
+                if (miembro == null)  { mensaje = "Miembro no encontrado."; return false; }
+                if (sedeID != 1000 && miembro.id_sede != sedeID) { mensaje = "Sin permiso sobre este miembro."; return false; }
+
+                var familia = _context.Familia.FirstOrDefault(f => f.ID_familia == idFamilia);
+                if (familia == null)  { mensaje = "Familia no encontrada."; return false; }
+                if (sedeID != 1000 && familia.ID_sede != sedeID) { mensaje = "Sin permiso sobre esta familia."; return false; }
+
+                if (string.IsNullOrWhiteSpace(tipoRelacion))
+                {
+                    mensaje = "Debe seleccionar un tipo de relación familiar.";
+                    return false;
+                }
+
+                miembro.id_familia             = idFamilia;
+                miembro.tipo_relacion_familiar = tipoRelacion;
+
+                // Auto-sync: si grupo_familiar estaba vacío, lo rellenamos con el nombre de la familia
+                if (string.IsNullOrWhiteSpace(miembro.grupo_familiar))
+                    miembro.grupo_familiar = familia.Nombre_familia;
+
+                _context.SaveChanges();
+                mensaje = "Miembro asignado a la familia correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al asignar miembro: " + ex.Message;
+                return false;
+            }
+        }
+
+        // ----------------------------------------------------
+        // QuitarMiembroFamilia
+        // ----------------------------------------------------
+        public bool QuitarMiembroFamilia(int idMiembro, int sedeID, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == idMiembro);
+                if (miembro == null)  { mensaje = "Miembro no encontrado."; return false; }
+                if (sedeID != 1000 && miembro.id_sede != sedeID) { mensaje = "Sin permiso sobre este miembro."; return false; }
+
+                miembro.id_familia             = null;
+                miembro.tipo_relacion_familiar = null;
+                miembro.grupo_familiar         = null;
+
+                _context.SaveChanges();
+                mensaje = "Miembro desvinculado de la familia correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = "Error al quitar miembro de la familia: " + ex.Message;
+                return false;
+            }
+        }
     }
 }

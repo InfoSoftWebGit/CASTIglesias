@@ -161,6 +161,62 @@
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
+                @*--------------APARTADO DE FAMILIA-------------------*@
+                <hr />
+                <h5>Familia</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboGrupoFamiliar" class="form-label">Grupo familiar</label>
+                        <select id="cboGrupoFamiliar" class="form-select">
+                            <option value="">— Sin asignar —</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3" id="divInfoFamilia" style="display:none;">
+                        <label class="form-label">Datos de la familia</label>
+                        <div class="border rounded p-2 bg-light small">
+                            <div><strong>Dirección:</strong> <span id="lblFamiliaDireccion">—</span></div>
+                            <div><strong>Municipio:</strong> <span id="lblFamiliaMunicipio">—</span></div>
+                            <div><strong>Provincia:</strong> <span id="lblFamiliaProvincia">—</span></div>
+                            <div><strong>CP:</strong> <span id="lblFamiliaCP">—</span></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtRelacionCon" class="form-label">Relación con</label>
+                        <div id="divRelacionCon" class="position-relative">
+                            <input type="text" class="form-control" id="txtRelacionCon" autocomplete="off" placeholder="Escribe un nombre para buscar...">
+                            <div id="dropdownRelacionCon" class="list-group position-absolute w-100 shadow" style="display:none; z-index:9999; max-height:200px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboTipoRelacionFamiliar" class="form-label">Rol en la familia</label>
+                        <select id="cboTipoRelacionFamiliar" class="form-select">
+                            <option value="">— Sin especificar —</option>
+                            <optgroup label="1er grado">
+                                <option value="Padre">Padre</option>
+                                <option value="Madre">Madre</option>
+                                <option value="Hijo">Hijo</option>
+                                <option value="Hija">Hija</option>
+                                <option value="Hermano">Hermano</option>
+                                <option value="Hermana">Hermana</option>
+                                <option value="Conyuge">Cónyuge</option>
+                            </optgroup>
+                            <optgroup label="2do grado">
+                                <option value="Abuelo">Abuelo</option>
+                                <option value="Abuela">Abuela</option>
+                                <option value="Nieto">Nieto</option>
+                                <option value="Nieta">Nieta</option>
+                                <option value="Tio">Tío</option>
+                                <option value="Tia">Tía</option>
+                                <option value="Sobrino">Sobrino</option>
+                                <option value="Sobrina">Sobrina</option>
+                                <option value="Medio_hermano">Medio hermano</option>
+                                <option value="Medio_hermana">Medio hermana</option>
+                            </optgroup>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                @*--------------FIN APARTADO DE FAMILIA-------------------*@
                 @*--------------APARTADO DE PRIVACIDAD-------------------*@
                 <hr />
                 <h5><i class="fas fa-shield-alt me-1"></i> Privacidad</h5>
@@ -363,6 +419,11 @@
                 //INFORMACIÓN ADICIONAL
                 $("#chkAceptaLOPD").prop("checked", false);
                 //FIN INFORMACIÓN ADICIONAL
+                // FAMILIA
+                $("#txtRelacionCon").val("");
+                $("#cboTipoRelacionFamiliar").val("");
+                cargarFamilias("");
+                // FIN FAMILIA
             }
                else {
                 // IDENTIFICADORES
@@ -402,6 +463,11 @@
                 $("#txtObservaciones").val(data.observaciones || "");
                 $("#txtNumeroHijos").val(data.numero_hijos || 0);
                 // FIN INFORMACIÓN ADICIONAL
+                // FAMILIA
+                $("#txtRelacionCon").val(data.relacion_con || "");
+                $("#cboTipoRelacionFamiliar").val(data.tipo_relacion_familiar || "");
+                cargarFamilias(data.grupo_familiar || "");
+                // FIN FAMILIA
                 if (provinciaId > 0) {
                     cargarMunicipios(provinciaId, municipioId);
                 }
@@ -479,6 +545,11 @@
                 fecha_boda: $("#txtFechaBoda").val() || null,
                 fecha_baja: $("#txtFechaBaja").val() || null,
                 fecha_fallecido: $("#txtFechaFallecimiento").val() || null,
+
+                grupo_familiar: $("#cboGrupoFamiliar").val() || null,
+                id_familia: parseInt($("#cboGrupoFamiliar option:selected").data("id-familia")) || null,
+                relacion_con: $("#txtRelacionCon").val() || null,
+                tipo_relacion_familiar: $("#cboTipoRelacionFamiliar").val() || null,
             };
             $.ajax({
                 url: '@Url.Action("RegistrarMiembroVisitante", "Congregantes")',
@@ -660,6 +731,96 @@
             AvanzarEstadoMiembro();
         });
 
+        // --- Familia ---
+        function cargarFamilias(valorSeleccionado) {
+            $.ajax({
+                url: '@Url.Action("ListarFamiliasCongregantes", "Congregantes")',
+                type: 'GET',
+                success: function (res) {
+                    var select = $('#cboGrupoFamiliar');
+                    select.empty().append('<option value="" data-id-familia="">— Sin asignar —</option>');
+                    if (res.data && res.data.length > 0) {
+                        res.data.forEach(function (f) {
+                            var opt = $('<option>')
+                                .val(f.nombre_familia)
+                                .text(f.nombre_familia)
+                                .attr('data-id-familia', f.iD_familia || 0)
+                                .attr('data-direccion', f.direccion || '')
+                                .attr('data-municipio', f.municipio || '')
+                                .attr('data-provincia', f.provincia || '')
+                                .attr('data-cp', f.cP || f.cp || '');
+                            select.append(opt);
+                        });
+                    }
+                    if (valorSeleccionado) {
+                        select.val(valorSeleccionado);
+                        mostrarInfoFamiliaSeleccionada();
+                    }
+                }
+            });
+        }
+
+        function mostrarInfoFamiliaSeleccionada() {
+            var opt = $('#cboGrupoFamiliar option:selected');
+            var nombre = opt.val();
+            if (!nombre) { ocultarInfoFamilia(); return; }
+            $('#lblFamiliaDireccion').text(opt.data('direccion') || '—');
+            $('#lblFamiliaMunicipio').text(opt.data('municipio') || '—');
+            $('#lblFamiliaProvincia').text(opt.data('provincia') || '—');
+            $('#lblFamiliaCP').text(opt.data('cp') || '—');
+            $('#divInfoFamilia').show();
+        }
+
+        function ocultarInfoFamilia() {
+            $('#divInfoFamilia').hide();
+            $('#lblFamiliaDireccion, #lblFamiliaMunicipio, #lblFamiliaProvincia, #lblFamiliaCP').text('—');
+        }
+
+        $('#cboGrupoFamiliar').on('change', function () {
+            mostrarInfoFamiliaSeleccionada();
+        });
+
+        var timerRelacionCon;
+        $('#txtRelacionCon').on('input', function () {
+            var term = $(this).val().trim();
+            clearTimeout(timerRelacionCon);
+            if (term.length < 2) { $('#dropdownRelacionCon').hide().empty(); return; }
+            timerRelacionCon = setTimeout(function () {
+                $.ajax({
+                    url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                    type: 'GET',
+                    data: { term: term },
+                    success: function (res) {
+                        var dropdown = $('#dropdownRelacionCon');
+                        dropdown.empty();
+                        if (res.data && res.data.length > 0) {
+                            res.data.forEach(function (m) {
+                                var nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                                $('<button type="button">')
+                                    .addClass('list-group-item list-group-item-action')
+                                    .text(nombre)
+                                    .on('click', function () {
+                                        $('#txtRelacionCon').val(nombre);
+                                        dropdown.hide().empty();
+                                    })
+                                    .appendTo(dropdown);
+                            });
+                            dropdown.show();
+                        } else {
+                            dropdown.hide();
+                        }
+                    }
+                });
+            }, 300);
+        });
+
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#divRelacionCon').length) {
+                $('#dropdownRelacionCon').hide();
+            }
+        });
+
+        cargarFamilias();
 
     </script>
 }
