@@ -204,7 +204,7 @@
                         }
 
                         <!-- BLOQUE ECONOMÍA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos)
+                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos || permisosMiembro.Gastos || permisosMiembro.GastosMiembros)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseEconomia" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
@@ -225,6 +225,20 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Conceptos", "Economia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
                                             Conceptos
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Gastos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                            Gastos
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.GastosMiembros)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("GastosMiembros", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+                                            Gastos de Miembros
                                         </a>
                                     }
                                 </nav>

@@ -1,0 +1,281 @@
+@using CapaEntidad
+@{
+    ViewData["Title"] = "Gastos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var zonas = ViewBag.Zonas as List<Zona> ?? new List<Zona>();
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item">Finanzas</li>
+    <li class="breadcrumb-item active">Gastos</li>
+</ol>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-file-invoice-dollar me-1"></i> Registro de Gastos</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModal()">
+            <i class="fas fa-plus me-1"></i> Añadir gasto
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaGastos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Miembro</th>
+                    <th>Razón</th>
+                    <th>Zona</th>
+                    <th>Cantidad</th>
+                    <th>Tipo cuenta</th>
+                    <th>Devuelto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="FormModalGasto" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModal">Añadir gasto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdGasto" value="0" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Miembro que registra <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarMiembro" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <input type="hidden" id="hdnIdMiembro" value="0" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fecha del gasto <span class="text-danger">*</span></label>
+                        <input type="date" id="txtFechaGasto" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Cantidad (€) <span class="text-danger">*</span></label>
+                        <input type="number" id="txtCantidad" class="form-control" min="0.01" step="0.01" placeholder="0.00" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label">Zona destinada</label>
+                        <select id="cboZona" class="form-select">
+                            <option value="0">— Sin zona —</option>
+                            @foreach (var z in zonas)
+                            {
+                                <option value="@z.ID_zona">@z.nombre_zona</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Razón / Descripción <span class="text-danger">*</span></label>
+                        <textarea id="txtRazon" class="form-control" rows="2" placeholder="Ej: Factura de luz de noviembre…"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo de cuenta <span class="text-danger">*</span></label>
+                        <select id="cboTipoCuenta" class="form-select" onchange="toggleDevuelto()">
+                            <option value="Cuenta Congregacional">Cuenta Congregacional</option>
+                            <option value="Cuenta Propia">Cuenta Propia</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" id="divDevuelto" style="display:none">
+                        <label class="form-label">¿Devuelto al miembro?</label>
+                        <select id="cboDevuelto" class="form-select">
+                            <option value="No">No</option>
+                            <option value="Si">Sí</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div id="mensajeError" class="alert alert-danger d-none"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarGasto()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
+
+    <script>
+        const urlListar  = '@Url.Action("ListarGastos", "Economia")';
+        const urlGuardar = '@Url.Action("GuardarGasto", "Economia")';
+        const urlEliminar = '@Url.Action("EliminarGasto", "Economia")';
+        const urlBuscar  = '@Url.Action("BuscarMiembros", "Economia")';
+
+        let tablaGastos;
+
+        $(document).ready(function () {
+            tablaGastos = $("#tablaGastos").DataTable({
+                responsive: true,
+                ordering: false,
+                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+                ajax: { url: urlListar, type: "GET", dataType: "json", dataSrc: "data" },
+                initComplete: function () {
+                    $(this.api().table().header()).css({ 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' });
+                },
+                columns: [
+                    { data: "fechaFormateada", defaultContent: "" },
+                    { data: "nombre_miembro_completo", defaultContent: "" },
+                    { data: "razon", defaultContent: "" },
+                    { data: "nombre_zona", defaultContent: '<span class="text-muted">—</span>' },
+                    {
+                        data: "cantidad",
+                        render: function (d) { return parseFloat(d).toFixed(2) + ' €'; }
+                    },
+                    {
+                        data: "tipo_cuenta",
+                        render: function (d) {
+                            return d === 'Cuenta Propia'
+                                ? '<span class="badge bg-warning text-dark">Cuenta Propia</span>'
+                                : '<span class="badge bg-primary">Cuenta Congregacional</span>';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (row) {
+                            if (row.tipo_cuenta === 'Cuenta Propia') {
+                                return row.devuelto === 'Si'
+                                    ? '<span class="badge bg-success">Sí</span>'
+                                    : '<span class="badge bg-danger">No</span>';
+                            }
+                            return '<span class="text-muted">—</span>';
+                        }
+                    },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button class="btn btn-warning btn-sm btn-editar" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm btn-eliminar" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            </div>`,
+                        orderable: false, searchable: false, width: "100px"
+                    }
+                ]
+            });
+
+            $("#tablaGastos tbody").on("click", ".btn-editar", function () {
+                const d = tablaGastos.row($(this).closest("tr")).data();
+                abrirModal(d);
+            });
+
+            $("#tablaGastos tbody").on("click", ".btn-eliminar", function () {
+                const d = tablaGastos.row($(this).closest("tr")).data();
+                Swal.fire({
+                    title: "¿Eliminar gasto?",
+                    text: `Se eliminará el gasto de ${parseFloat(d.cantidad).toFixed(2)} € registrado por ${d.nombre_miembro_completo}.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, eliminar",
+                    cancelButtonText: "Cancelar"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.post(urlEliminar, { id: d.id_gasto }, function (res) {
+                            if (res.resultado) {
+                                tablaGastos.ajax.reload();
+                                Swal.fire("Eliminado", res.mensaje, "success");
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $("#txtBuscarMiembro").autocomplete({
+                source: function (req, resp) {
+                    $.get(urlBuscar, { busqueda: req.term, tipoBusqueda: 'nombre' }, function (res) {
+                        const items = (res.data || []).map(m => ({
+                            label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            id: m.id_miembro
+                        }));
+                        resp(items);
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#hdnIdMiembro").val(ui.item.id);
+                }
+            });
+        });
+
+        function toggleDevuelto() {
+            const tipo = $("#cboTipoCuenta").val();
+            $("#divDevuelto").toggle(tipo === 'Cuenta Propia');
+            if (tipo !== 'Cuenta Propia') $("#cboDevuelto").val('No');
+        }
+
+        function abrirModal(data) {
+            $("#hdnIdGasto").val(data ? data.id_gasto : 0);
+            $("#hdnIdMiembro").val(data ? data.id_miembro : 0);
+            $("#txtBuscarMiembro").val(data ? data.nombre_miembro_completo : '');
+            $("#txtFechaGasto").val(data ? data.fechaFormateada : '');
+            $("#txtCantidad").val(data ? parseFloat(data.cantidad).toFixed(2) : '');
+            $("#cboZona").val(data && data.id_zona ? data.id_zona : 0);
+            $("#txtRazon").val(data ? data.razon : '');
+            $("#cboTipoCuenta").val(data ? data.tipo_cuenta : 'Cuenta Congregacional');
+            $("#cboDevuelto").val(data ? data.devuelto : 'No');
+            toggleDevuelto();
+            $("#mensajeError").addClass("d-none").text('');
+            $("#tituloModal").text(data ? 'Editar gasto' : 'Añadir gasto');
+            new bootstrap.Modal(document.getElementById("FormModalGasto")).show();
+        }
+
+        function guardarGasto() {
+            const idMiembro = parseInt($("#hdnIdMiembro").val()) || 0;
+            const cantidad  = parseFloat($("#txtCantidad").val()) || 0;
+            const razon     = $("#txtRazon").val().trim();
+            const fecha     = $("#txtFechaGasto").val();
+
+            if (idMiembro === 0) { mostrarError("Selecciona el miembro que registra el gasto."); return; }
+            if (cantidad <= 0)   { mostrarError("La cantidad debe ser mayor que cero."); return; }
+            if (!razon)          { mostrarError("La razón del gasto no puede estar vacía."); return; }
+            if (!fecha)          { mostrarError("La fecha del gasto es obligatoria."); return; }
+
+            const payload = {
+                id_gasto:    parseInt($("#hdnIdGasto").val()) || 0,
+                id_miembro:  idMiembro,
+                cantidad:    cantidad,
+                id_zona:     parseInt($("#cboZona").val()) || null,
+                razon:       razon,
+                tipo_cuenta: $("#cboTipoCuenta").val(),
+                devuelto:    $("#cboDevuelto").val(),
+                fecha_gasto: fecha
+            };
+
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+            $.post(urlGuardar, payload, function (res) {
+                $(".modal-body").LoadingOverlay("hide");
+                if (res.resultado && res.resultado !== 0) {
+                    bootstrap.Modal.getInstance(document.getElementById("FormModalGasto")).hide();
+                    tablaGastos.ajax.reload();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                } else {
+                    mostrarError(res.mensaje);
+                }
+            }).fail(function () {
+                $(".modal-body").LoadingOverlay("hide");
+                mostrarError("Error en la solicitud.");
+            });
+        }
+
+        function mostrarError(msg) {
+            $("#mensajeError").removeClass("d-none").text(msg);
+        }
+    </script>
+}

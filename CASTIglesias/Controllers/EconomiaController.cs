@@ -21,6 +21,9 @@ namespace CASTIglesias.Controllers
         private readonly CN_Concepto _negocioConcepto;
         private readonly CN_Miembros _negocioMiembros;
         private readonly CN_Usuarios _cnUsuario;
+        private readonly CN_Gasto _cnGasto;
+        private readonly CN_GastoMiembro _cnGastoMiembro;
+        private readonly CN_Zonas _cnZonas;
 
         public EconomiaController(
             CN_Diezmo negocioDiezmo,
@@ -28,13 +31,19 @@ namespace CASTIglesias.Controllers
             CN_Miembros negocioMiembro,
             CN_Sedes negocioSedes,
             CN_Usuarios negocioUsuarios,
-            CN_Permisos negocioPermisos
+            CN_Permisos negocioPermisos,
+            CN_Gasto cnGasto,
+            CN_GastoMiembro cnGastoMiembro,
+            CN_Zonas cnZonas
         ) : base(negocioSedes,negocioPermisos)
         {
             _negocioDiezmo = negocioDiezmo;
             _negocioConcepto = negocioConcepto;
             _negocioMiembros = negocioMiembro;
             _cnUsuario = negocioUsuarios;
+            _cnGasto = cnGasto;
+            _cnGastoMiembro = cnGastoMiembro;
+            _cnZonas = cnZonas;
         }
 
         // ------------------------------------------------------------------------------------------------
@@ -448,6 +457,162 @@ namespace CASTIglesias.Controllers
                 return Json(new { data = new object[0], error = ex.Message });
             }
         }
+        #endregion
+
+        // ------------------------------------------------------------------------------------------------
+        #region Gastos
+
+        public IActionResult Gastos()
+        {
+            var permisos = ViewBag.PermisosMiembro as Permisos;
+            bool tieneAccesoTotal = HttpContext.User.IsInRole("AdminGlobal")
+                || HttpContext.User.IsInRole("PastorGeneral")
+                || HttpContext.User.IsInRole("PastorSede");
+
+            if (!tieneAccesoTotal && (permisos == null || !permisos.Gastos))
+                return RedirectToAction("NoAutorizado", "Home");
+
+            int sedeID = ObtenerIdSedeUsuario();
+            ViewBag.Zonas = _cnZonas.ListarZonas(sedeID);
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarGastos()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var data = _cnGasto.ListarGastos(sedeID);
+                return Json(new { data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarGasto(Gasto obj)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                if (sedeID == 1000)
+                    throw new UnauthorizedAccessException("El Administrador Global debe seleccionar una sede específica.");
+
+                string mensaje;
+                int resultado;
+                if (obj.id_gasto == 0)
+                    resultado = _cnGasto.IngresarGasto(obj, sedeID, out mensaje);
+                else
+                    resultado = _cnGasto.EditarGasto(obj, sedeID, out mensaje) ? obj.id_gasto : 0;
+
+                return Json(new { resultado, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = 0, mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = 0, mensaje = "Error interno: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarGasto(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                bool resultado = _cnGasto.EliminarGasto(id, sedeID, out string mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        #endregion
+
+        // ------------------------------------------------------------------------------------------------
+        #region GastosMiembros
+
+        public IActionResult GastosMiembros()
+        {
+            var permisos = ViewBag.PermisosMiembro as Permisos;
+            bool tieneAccesoTotal = HttpContext.User.IsInRole("AdminGlobal")
+                || HttpContext.User.IsInRole("PastorGeneral")
+                || HttpContext.User.IsInRole("PastorSede");
+
+            if (!tieneAccesoTotal && (permisos == null || !permisos.GastosMiembros))
+                return RedirectToAction("NoAutorizado", "Home");
+
+            int sedeID = ObtenerIdSedeUsuario();
+            ViewBag.Zonas = _cnZonas.ListarZonas(sedeID);
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarGastosMiembros()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var data = _cnGastoMiembro.ListarGastos(sedeID);
+                return Json(new { data });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarGastoMiembro(GastoMiembro obj)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                if (sedeID == 1000)
+                    throw new UnauthorizedAccessException("El Administrador Global debe seleccionar una sede específica.");
+
+                string mensaje;
+                int resultado;
+                if (obj.id_gasto == 0)
+                    resultado = _cnGastoMiembro.IngresarGasto(obj, sedeID, out mensaje);
+                else
+                    resultado = _cnGastoMiembro.EditarGasto(obj, sedeID, out mensaje) ? obj.id_gasto : 0;
+
+                return Json(new { resultado, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = 0, mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = 0, mensaje = "Error interno: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarGastoMiembro(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                bool resultado = _cnGastoMiembro.EliminarGasto(id, sedeID, out string mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
         #endregion
     }
 }
