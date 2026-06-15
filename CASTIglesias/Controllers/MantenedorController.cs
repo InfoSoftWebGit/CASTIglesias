@@ -19,10 +19,8 @@ namespace CapaPresentaciónAdmin.Controllers
         
         private readonly CN_Diezmo _cnDiezmo;
         private readonly CN_Usuarios _cnUsuarios;
-        private readonly CN_Familias _cnFamilias;
         private readonly CN_Zonas _cnZonas;
         private readonly CN_Sedes _cnSedes;
-        private readonly CN_Provincia _cnProvincias;
         private readonly CN_Municipio _cnMunicipios;
         private readonly CN_Grupos _cnGrupos;
         private readonly CN_Ministerio _cnMinisterio;
@@ -32,155 +30,25 @@ namespace CapaPresentaciónAdmin.Controllers
         public MantenedorController(CN_Miembros negocioMiembros,
             CN_Diezmo negocioDiezmo,
             CN_Usuarios negocioUsuarios,
-            CN_Familias cnFamilias,
             CN_Zonas cnZonas,
             CN_Grupos cnGrupos,
             CN_Sedes cnSedes,
-            CN_Provincia cnProvincia,
             CN_Municipio cnMunicipio,
             CN_Ministerio cnMinisterio,
             CN_Paises cnPaises,
-            CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos) // Llamada al constructor de la clase base
+            CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos)
         {
             _cnDiezmo = negocioDiezmo;
             _cnUsuarios = negocioUsuarios;
-            _cnFamilias = cnFamilias;
             _cnZonas = cnZonas;
             _cnGrupos = cnGrupos;
             _cnSedes = cnSedes;
-            _cnProvincias = cnProvincia;
             _cnMunicipios = cnMunicipio;
             _cnMinisterio = cnMinisterio;
             _cnPaises = cnPaises;
         }
         // ------------------------------------------------------------------------------------------------
         #endregion
-        ///////////////////////////// APARTADO DE FAMILIAS //////////////////////////////
-        #region Familias
-        public IActionResult Familias()
-        {
-            try { ViewBag.ListaProvincias = _cnProvincias.ListarProvincias(); }
-            catch { ViewBag.ListaProvincias = new List<object>(); }
-            return View();
-        }
-
-        [HttpGet]
-        public JsonResult ListarFamilias()
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario(); // 👈 Obtener sedeID
-                var oListaFamilias = _cnFamilias.ListarFamilias(sedeID); // 👈 Pasar sedeID
-                return Json(new { data = oListaFamilias });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult GuardarFamilia([FromBody] Familia objeto)
-        {
-            object resultado;
-            string mensaje = string.Empty;
-
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario(); // 👈 Obtener sedeID
-                objeto.ID_sede = sedeID; // 👈 Asignar ID_sede al objeto
-
-                if (objeto.ID_familia == 0)
-                    resultado = _cnFamilias.RegistrarFamilia(objeto, sedeID, out mensaje); // 👈 Pasar sedeID
-                else
-                    resultado = _cnFamilias.EditarFamilia(objeto, sedeID, out mensaje); // 👈 Pasar sedeID
-
-                return Json(new { resultado, mensaje });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult EliminarFamilia(int id)
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario(); // 👈 Obtener sedeID
-                var respuesta = _cnFamilias.EliminarFamilia(id, sedeID, out string mensaje); // 👈 Pasar sedeID
-                return Json(new { resultado = respuesta, mensaje });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
-            }
-        }
-
-        [HttpGet]
-        public JsonResult ListarMiembrosPorFamilia(int idFamilia)
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario();
-                var miembros = _cnFamilias.ListarMiembrosDeFamilia(idFamilia, sedeID);
-                return Json(new { data = miembros });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public JsonResult BuscarMiembrosParaFamilia(string query = "")
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario();
-                var miembros = _cnFamilias.BuscarMiembrosParaAsignar(query, sedeID);
-                return Json(new { data = miembros });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion)
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario();
-                var ok = _cnFamilias.AsignarMiembroAFamilia(idMiembro, idFamilia, tipoRelacion, sedeID, out string mensaje);
-                return Json(new { resultado = ok, mensaje });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { resultado = false, mensaje = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        public JsonResult QuitarMiembroFamilia(int idMiembro)
-        {
-            try
-            {
-                int sedeID = ObtenerIdSedeUsuario();
-                var ok = _cnFamilias.QuitarMiembroFamilia(idMiembro, sedeID, out string mensaje);
-                return Json(new { resultado = ok, mensaje });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { resultado = false, mensaje = ex.Message });
-            }
-        }
-        #endregion
-        // ------------------------------------------------------------------------------------------------
-        //////////////////////////////// MIEMBROS //////////////////////////////
-       
         // ------------------------------------------------------------------------------------------------
         ///////////////////////////// APARTADO DE ZONAS //////////////////////////////
         #region Zonas

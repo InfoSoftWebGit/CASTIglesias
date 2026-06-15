@@ -1,0 +1,260 @@
+@{
+    ViewBag.Title = "Matrimonios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Matrimonios</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-ring me-1"></i> Lista de Matrimonios
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">Añadir matrimonio</button>
+            </div>
+        </div>
+
+        <table id="tablaMatrimonios" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombres</th>
+                    <th>Líderes</th>
+                    <th>Seguidor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal fade" id="FormModalMatrimonios" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalMatrimonios">Nuevo matrimonio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtIdMatrimonio" type="hidden" value="0" />
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombresMatrimonio"
+                               placeholder="Ej: Rubén y Sady" autocomplete="off" />
+                        <div class="form-text">Escribe el nombre de ambos cónyuges.</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Líderes</label>
+                        <select id="cboLideres" class="form-select">
+                            <option value="No">No</option>
+                            <option value="Si">Sí</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Seguidor</label>
+                        <select id="cboSeguidor" class="form-select">
+                            <option value="">— Sin seguidor —</option>
+                        </select>
+                        <div class="form-text">Pareja que les hace seguimiento.</div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeErrorMatrimonio" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarMatrimonio()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        let tablaMatrimonios;
+        let filaSeleccionada;
+        let listaMatrimonios = [];
+
+        $(document).ready(function () {
+            tablaMatrimonios = $("#tablaMatrimonios").DataTable({
+                responsive: true,
+                ordering: false,
+                ajax: {
+                    url: '@Url.Action("ListarMatrimonios", "Congregantes")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: function (json) {
+                        listaMatrimonios = json.data || [];
+                        return listaMatrimonios;
+                    }
+                },
+                columns: [
+                    { data: "nombres", defaultContent: "" },
+                    {
+                        data: "lideres",
+                        render: function (data) {
+                            return data === "Si"
+                                ? '<span class="badge bg-success">Sí</span>'
+                                : '<span class="badge bg-secondary">No</span>';
+                        }
+                    },
+                    {
+                        data: "nombres_seguidor",
+                        defaultContent: '<span class="text-muted">—</span>'
+                    },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarMatrimonio">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMatrimonio">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    $('#tablaMatrimonios thead').css({
+                        'background-color': '#1E3A8A',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
+                }
+            });
+
+            $("#tablaMatrimonios tbody").on("click", ".btn-editarMatrimonio", function () {
+                filaSeleccionada = $(this).closest("tr");
+                const data = tablaMatrimonios.row(filaSeleccionada).data();
+                abrirModalMatrimonios(data);
+            });
+
+            $("#tablaMatrimonios tbody").on("click", ".btn-eliminarMatrimonio", function () {
+                const fila = $(this).closest("tr");
+                const data = tablaMatrimonios.row(fila).data();
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `¿Desea eliminar el matrimonio "${data.nombres}"?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarMatrimonio", "Congregantes")',
+                            type: "POST",
+                            data: { id: data.iD_matrimonio },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tablaMatrimonios.ajax.reload();
+                                    Swal.fire("Eliminado", res.mensaje, "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "No se pudo eliminar.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        function poblarSelectSeguidor(idExcluir) {
+            const select = $("#cboSeguidor");
+            select.empty().append('<option value="">— Sin seguidor —</option>');
+            listaMatrimonios.forEach(function (m) {
+                if (m.iD_matrimonio !== idExcluir) {
+                    select.append($("<option>").val(m.iD_matrimonio).text(m.nombres));
+                }
+            });
+        }
+
+        function abrirModalMatrimonios(json = null) {
+            $("#mensajeErrorMatrimonio").addClass("d-none").text("");
+
+            if (json) {
+                $("#txtIdMatrimonio").val(json.iD_matrimonio);
+                $("#txtNombresMatrimonio").val(json.nombres || "");
+                $("#cboLideres").val(json.lideres || "No");
+                poblarSelectSeguidor(json.iD_matrimonio);
+                $("#cboSeguidor").val(json.iD_pareja_seguidor || "");
+                $("#tituloModalMatrimonios").text("Editar matrimonio: " + (json.nombres || ""));
+            } else {
+                $("#txtIdMatrimonio").val(0);
+                $("#txtNombresMatrimonio").val("");
+                $("#cboLideres").val("No");
+                poblarSelectSeguidor(0);
+                $("#cboSeguidor").val("");
+                $("#tituloModalMatrimonios").text("Nuevo matrimonio");
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalMatrimonios"));
+            modal.show();
+        }
+
+        function guardarMatrimonio() {
+            const obj = {
+                iD_matrimonio: parseInt($("#txtIdMatrimonio").val()) || 0,
+                nombres: $("#txtNombresMatrimonio").val().trim(),
+                lideres: $("#cboLideres").val(),
+                iD_pareja_seguidor: parseInt($("#cboSeguidor").val()) || null
+            };
+
+            if (!obj.nombres) {
+                $("#mensajeErrorMatrimonio").removeClass("d-none").text("El campo Nombres es obligatorio.");
+                return;
+            }
+
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+
+            $.ajax({
+                url: '@Url.Action("GuardarMatrimonio", "Congregantes")',
+                type: "POST",
+                data: JSON.stringify(obj),
+                contentType: "application/json",
+                dataType: "json",
+                success: function (res) {
+                    $(".modal-body").LoadingOverlay("hide");
+
+                    if (res.resultado !== 0 && res.resultado !== false) {
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalMatrimonios")).hide();
+                        tablaMatrimonios.ajax.reload();
+                        Swal.fire("Guardado", res.mensaje, "success");
+                    } else {
+                        $("#mensajeErrorMatrimonio").removeClass("d-none").text(res.mensaje);
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeErrorMatrimonio").removeClass("d-none").text("Error en la solicitud.");
+                }
+            });
+        }
+    </script>
+}

@@ -92,7 +92,7 @@
                             var permisosMiembro = ViewBag.PermisosMiembro as Permisos ?? new Permisos();
                         }
                         <!-- BLOQUE ASISTENCIA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso || permisosMiembro.Familias || permisosMiembro.Matrimonios)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
@@ -129,6 +129,20 @@
                                             Miembros
                                         </a>
                                     }
+                                    @if (tieneAccesoTotal || permisosMiembro.Familias)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fa fa-heart"></i></div>
+                                            Familias
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Matrimonios)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Matrimonios", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-ring"></i></div>
+                                            Matrimonios
+                                        </a>
+                                    }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Lideres", "Congregantes")">
@@ -148,7 +162,7 @@
                             </div>
                         }
                         <!-- BLOQUE MANTENIMIENTO -->
-                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Zonas || permisosMiembro.Grupos)
+                        @if (tieneAccesoTotal || permisosMiembro.Zonas || permisosMiembro.Grupos || permisosMiembro.Ministerio)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMantenimiento" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
@@ -157,14 +171,6 @@
                             </a>
                             <div class="collapse" id="collapseMantenimiento" data-bs-parent="#sidenavAccordion">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    
-                                    @if (tieneAccesoTotal || permisosMiembro.Familias)
-                                    {
-                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Mantenedor")">
-                                            <div class="sb-nav-link-icon"><i class="fa fa-heart"></i></div>
-                                            Familias
-                                        </a>
-                                    }
                                     @if (tieneAccesoTotal || permisosMiembro.Zonas)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Zonas", "Mantenedor")">

@@ -19,6 +19,7 @@ namespace CASTIglesias.Controllers
         CN_Seguimiento cnSeguimiento,
         CN_DetalleSeguimiento cnDetalleSeguimiento,
         CN_Lideres cnLideres,
+        CN_Matrimonio cnMatrimonio,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -34,6 +35,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Seguimiento _cnSeguimiento = cnSeguimiento;
         private readonly CN_DetalleSeguimiento _cnDetalleSeguimiento = cnDetalleSeguimiento;
         private readonly CN_Lideres _cnLideres = cnLideres;
+        private readonly CN_Matrimonio _cnMatrimonio = cnMatrimonio;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -973,6 +975,181 @@ namespace CASTIglesias.Controllers
             }
         }
         #endregion Lideres
+
+        #region Familias
+        public IActionResult Familias()
+        {
+            try { ViewBag.ListaProvincias = _cnProvincias.ListarProvincias(); }
+            catch { ViewBag.ListaProvincias = new List<object>(); }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarFamilias()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var oListaFamilias = _cnFamilias.ListarFamilias(sedeID);
+                return Json(new { data = oListaFamilias });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarFamilia([FromBody] CapaEntidad.Familia objeto)
+        {
+            object resultado;
+            string mensaje = string.Empty;
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                objeto.ID_sede = sedeID;
+                if (objeto.ID_familia == 0)
+                    resultado = _cnFamilias.RegistrarFamilia(objeto, sedeID, out mensaje);
+                else
+                    resultado = _cnFamilias.EditarFamilia(objeto, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarFamilia(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var respuesta = _cnFamilias.EliminarFamilia(id, sedeID, out string mensaje);
+                return Json(new { resultado = respuesta, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ListarMiembrosPorFamilia(int idFamilia)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var miembros = _cnFamilias.ListarMiembrosDeFamilia(idFamilia, sedeID);
+                return Json(new { data = miembros });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult BuscarMiembrosParaFamilia(string query = "")
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var miembros = _cnFamilias.BuscarMiembrosParaAsignar(query, sedeID);
+                return Json(new { data = miembros });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var ok = _cnFamilias.AsignarMiembroAFamilia(idMiembro, idFamilia, tipoRelacion, sedeID, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult QuitarMiembroFamilia(int idMiembro)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var ok = _cnFamilias.QuitarMiembroFamilia(idMiembro, sedeID, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+        #endregion Familias
+
+        #region Matrimonios
+        public IActionResult Matrimonios() => View();
+
+        [HttpGet]
+        public JsonResult ListarMatrimonios()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnMatrimonio.ListarMatrimonios(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarMatrimonio([FromBody] CapaEntidad.Matrimonio objeto)
+        {
+            object resultado;
+            string mensaje = string.Empty;
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                objeto.ID_sede = sedeID;
+                if (objeto.ID_matrimonio == 0)
+                    resultado = _cnMatrimonio.RegistrarMatrimonio(objeto, sedeID, out mensaje);
+                else
+                    resultado = _cnMatrimonio.EditarMatrimonio(objeto, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarMatrimonio(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var respuesta = _cnMatrimonio.EliminarMatrimonio(id, sedeID, out string mensaje);
+                return Json(new { resultado = respuesta, mensaje });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+            }
+        }
+        #endregion Matrimonios
 
 
     }
