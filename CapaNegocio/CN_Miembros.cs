@@ -48,10 +48,6 @@ namespace CapaNegocio
                 errores.Add("El nombre del miembro no puede ser vacío.");
             if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.correo_electronico))
-                errores.Add("El correo del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.telefono_movil))
-                errores.Add("El teléfono móvil del miembro no puede ser vacío.");
 
             if (errores.Any())
             {
@@ -82,10 +78,6 @@ namespace CapaNegocio
                 errores.Add("El nombre del miembro no puede ser vacío.");
             if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.correo_electronico))
-                errores.Add("El correo del miembro no puede ser vacío.");
-            if (string.IsNullOrWhiteSpace(obj.telefono_movil))
-                errores.Add("El teléfono móvil del miembro no puede ser vacío.");
 
             // Si hay errores, enviarlos y no continuar
             if (errores.Any())
@@ -94,7 +86,7 @@ namespace CapaNegocio
                 return false;
             }
 
-            // ✅ Llamar al método de la capa de datos
+            // Llamar al método de la capa de datos
             return _capaDatos.EditarMiembro(obj, sedeID, out mensaje);
 
         }
@@ -150,7 +142,7 @@ namespace CapaNegocio
 
         #region MÉTODOS ZONAS, GRUPOS Y MINISTERIOS
         // ---------------------------------------------------------
-        // ✅ ASIGNAR ZONA Y GRUPO A MIEMBRO
+        // ASIGNAR ZONA Y GRUPO A MIEMBRO
         // ---------------------------------------------------------
         public bool SincronizarZGM(int idMiembro, int idSede, List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
         {
@@ -160,7 +152,7 @@ namespace CapaNegocio
 
 
         // ---------------------------------------------------------
-        // ✅ QUITAR ZONA O GRUPO DE MIEMBRO (NO BORRA FILA, SETEA 0)
+        // QUITAR ZONA O GRUPO DE MIEMBRO (NO BORRA FILA, SETEA 0)
         // ---------------------------------------------------------
         public int EditarGZMLista(List<Miembro_zona_grupo_ministerio> lista, out string mensaje)
         {
@@ -244,7 +236,7 @@ namespace CapaNegocio
                 return false;
             }
 
-            // ✅ Llamar al método de la capa de datos
+            // Llamar al método de la capa de datos
             return _capaDatos.EditarMiembroVisitante(obj, sedeID, out  mensaje);
 
         }
@@ -270,7 +262,7 @@ namespace CapaNegocio
                 mensaje = string.Join("\n", errores);
                 return false;
             }
-            // ✅ Llamar al método de la capa de datos
+            // Llamar al método de la capa de datos
             return _capaDatos.EditarMiembroSimpatizante(obj, sedeID, out mensaje);
         }
         #endregion
@@ -295,7 +287,7 @@ namespace CapaNegocio
                 mensaje = string.Join("\n", errores);
                 return false;
             }
-            // ✅ Llamar al método de la capa de datos
+            // Llamar al método de la capa de datos
             return _capaDatos.EditarMiembroProceso(obj, sedeID, out mensaje);
         }
         #endregion En proceso

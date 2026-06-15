@@ -48,5 +48,10 @@ namespace CapaNegocio
         {
             return _capaDatos.EliminarJoven(idZgm, sedeID, out mensaje);
         }
+
+        public bool EditarGrupoJoven(int idZgm, int idGrupo, int sedeID, out string mensaje)
+        {
+            return _capaDatos.EditarGrupoJoven(idZgm, idGrupo, sedeID, out mensaje);
+        }
     }
 }

@@ -1208,6 +1208,22 @@ namespace CASTIglesias.Controllers
                 return Json(new { resultado = false, mensaje = ex.Message });
             }
         }
+
+        [HttpPost]
+        public JsonResult CambiarGrupoJoven(int idZgm, int idGrupo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnJovenes.EditarGrupoJoven(idZgm, idGrupo, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = $"Error interno: {ex.Message}" });
+            }
+        }
         #endregion Jovenes
 
         #region Matrimonios

@@ -131,5 +131,25 @@ namespace CapaDatos
                 return false;
             }
         }
+
+        public bool EditarGrupoJoven(int idZgm, int idGrupo, int idSede, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var entry = _context.Miembros_Zona_Grupo_Ministerio.FirstOrDefault(z => z.ID == idZgm);
+                if (entry == null) { mensaje = "Registro no encontrado."; return false; }
+                if (idSede != 1000 && entry.ID_sede != idSede) { mensaje = "Acción denegada."; return false; }
+                entry.ID_grupo = idGrupo;
+                _context.SaveChanges();
+                mensaje = "Grupo actualizado correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"Error al actualizar el grupo: {ex.Message}";
+                return false;
+            }
+        }
     }
 }

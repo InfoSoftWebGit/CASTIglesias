@@ -74,6 +74,42 @@
     </div>
 </div>
 
+<!-- MODAL CAMBIAR GRUPO -->
+<div class="modal fade" id="FormModalEditarGrupo" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> Cambiar grupo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdZgm" value="0" />
+                <div class="mb-3">
+                    <label class="form-label">Joven</label>
+                    <input type="text" id="txtNombreJovenEditar" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Grupo</label>
+                    <select id="cboGrupoEditar" class="form-select">
+                        <option value="0">— Sin grupo —</option>
+                        @foreach (var g in grupos)
+                        {
+                            <option value="@g.ID_grupo">@g.Descripcion</option>
+                        }
+                    </select>
+                </div>
+                <div id="mensajeErrorEditar" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCambioGrupo()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL AÑADIR JOVEN -->
 <div class="modal fade" id="FormModalJoven" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-md">
@@ -177,13 +213,16 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-warning btn-sm btn-editarGrupo" title="Cambiar grupo">
+                                    <i class="fas fa-users-cog"></i>
+                                </button>
                                 <button type="button" class="btn btn-danger btn-sm btn-eliminarJoven" title="Quitar de jóvenes">
                                     <i class="fas fa-user-minus"></i>
                                 </button>
                             </div>`,
                         orderable: false,
                         searchable: false,
-                        width: "80px"
+                        width: "100px"
                     }
                 ]
             });
@@ -197,6 +236,11 @@
                     dataSrc: "data"
                 },
                 columns: columnas
+            });
+
+            $("#tablaJovenes tbody").on("click", ".btn-editarGrupo", function () {
+                const data = tablaJovenes.row($(this).closest("tr")).data();
+                abrirEditarGrupo(data);
             });
 
             $("#tablaJovenes tbody").on("click", ".btn-eliminarJoven", function () {
@@ -225,6 +269,7 @@
 
             // Autocomplete búsqueda de miembros
             $("#txtBuscarJoven").autocomplete({
+                appendTo: "#FormModalJoven .modal-body",
                 source: function (req, resp) {
                     $.get('@Url.Action("BuscarMiembros", "Congregantes")', { term: req.term }, function (res) {
                         const items = (res.data || []).map(function (m) {
@@ -275,6 +320,36 @@
             $("#mensajeErrorJoven").addClass("d-none").text('');
             edadFueraRango = false;
             new bootstrap.Modal(document.getElementById("FormModalJoven")).show();
+        }
+
+        const urlCambiarGrupo = '@Url.Action("CambiarGrupoJoven", "Congregantes")';
+
+        function abrirEditarGrupo(data) {
+            $("#hdnIdZgm").val(data.id_zgm);
+            $("#txtNombreJovenEditar").val((data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || ''));
+            $("#cboGrupoEditar").val(data.id_grupo > 0 ? data.id_grupo : 0);
+            $("#mensajeErrorEditar").addClass("d-none").text('');
+            new bootstrap.Modal(document.getElementById("FormModalEditarGrupo")).show();
+        }
+
+        function guardarCambioGrupo() {
+            const idZgm = parseInt($("#hdnIdZgm").val()) || 0;
+            const idGrupo = parseInt($("#cboGrupoEditar").val()) || 0;
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+            $.post(urlCambiarGrupo, { idZgm, idGrupo }, function (res) {
+                $(".modal-body").LoadingOverlay("hide");
+                if (res.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById("FormModalEditarGrupo")).hide();
+                    tablaJovenes.ajax.reload();
+                    tablaProximos.ajax.reload();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                } else {
+                    $("#mensajeErrorEditar").removeClass("d-none").text(res.mensaje);
+                }
+            }).fail(function () {
+                $(".modal-body").LoadingOverlay("hide");
+                $("#mensajeErrorEditar").removeClass("d-none").text("Error en la solicitud.");
+            });
         }
 
         function guardarJoven() {
