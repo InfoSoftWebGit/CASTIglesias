@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "Configuración de Jóvenes";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Configuración de Jóvenes</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
+        <li class="breadcrumb-item">Ajustes</li>
+        <li class="breadcrumb-item active">Jóvenes</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-friends me-1"></i>
+                    Zona de Jóvenes
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Define el rango de edad que conforma la zona de jóvenes y selecciona qué zona representa al grupo juvenil.
+                        Los miembros con edad fuera del rango generarán una alerta al intentar añadirlos.
+                    </p>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="txtEdadMinima" class="form-label">Edad mínima</label>
+                            <input id="txtEdadMinima" type="number" class="form-control" min="1" max="99" placeholder="Ej: 14" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="txtEdadMaxima" class="form-label">Edad máxima</label>
+                            <input id="txtEdadMaxima" type="number" class="form-control" min="1" max="99" placeholder="Ej: 24" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cboZonaJovenes" class="form-label">Zona de jóvenes</label>
+                        <select id="cboZonaJovenes" class="form-select">
+                            <option value="">— Sin zona configurada —</option>
+                        </select>
+                        <div class="form-text">
+                            Selecciona la zona que representa al grupo de jóvenes.
+                            Los miembros asignados a esta zona aparecerán en la vista de Jóvenes.
+                        </div>
+                    </div>
+
+                    <div id="alertaConfig" class="alert d-none mb-3"></div>
+
+                    <button id="btnGuardarJovenes" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const urlObtener = '@Url.Action("ObtenerConfigJovenes", "Ajustes")';
+    const urlGuardar = '@Url.Action("GuardarConfigJovenes", "Ajustes")';
+
+    $(document).ready(function () {
+        $.get(urlObtener, function (res) {
+            if (!res.success) return;
+
+            const config = res.data || {};
+            const zonas = res.zonas || [];
+
+            $('#txtEdadMinima').val(config.edad_minima || 14);
+            $('#txtEdadMaxima').val(config.edad_maxima || 24);
+
+            const cbo = $('#cboZonaJovenes');
+            zonas.forEach(function (z) {
+                cbo.append($('<option>').val(z.id).text(z.nombre));
+            });
+
+            if (config.id_zona_jovenes) {
+                cbo.val(config.id_zona_jovenes);
+            }
+        });
+
+        $('#btnGuardarJovenes').on('click', function () {
+            const edadMinima = parseInt($('#txtEdadMinima').val());
+            const edadMaxima = parseInt($('#txtEdadMaxima').val());
+            const idZona = parseInt($('#cboZonaJovenes').val()) || null;
+
+            if (isNaN(edadMinima) || isNaN(edadMaxima)) {
+                mostrarAlerta('danger', 'Introduce valores numéricos válidos para el rango de edad.');
+                return;
+            }
+            if (edadMinima >= edadMaxima) {
+                mostrarAlerta('danger', 'La edad mínima debe ser menor que la edad máxima.');
+                return;
+            }
+
+            $.ajax({
+                url: urlGuardar,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    edad_minima: edadMinima,
+                    edad_maxima: edadMaxima,
+                    id_zona_jovenes: idZona
+                }),
+                success: function (res) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: res.success ? 'success' : 'error',
+                        title: res.mensaje,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                },
+                error: function () {
+                    mostrarAlerta('danger', 'No se pudo guardar la configuración.');
+                }
+            });
+        });
+    });
+
+    function mostrarAlerta(tipo, texto) {
+        $('#alertaConfig').removeClass('d-none alert-success alert-danger alert-warning')
+            .addClass('alert-' + tipo)
+            .text(texto);
+    }
+</script>
+}

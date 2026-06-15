@@ -92,7 +92,7 @@
                             var permisosMiembro = ViewBag.PermisosMiembro as Permisos ?? new Permisos();
                         }
                         <!-- BLOQUE ASISTENCIA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso || permisosMiembro.Familias || permisosMiembro.Matrimonios)
+                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
@@ -141,6 +141,13 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Matrimonios", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-ring"></i></div>
                                             Matrimonios
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Jovenes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
+                                            Jóvenes
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)
@@ -265,6 +272,10 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
                                             Diezmos
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
+                                            Jóvenes
                                         </a>
                                     }
                                 </nav>

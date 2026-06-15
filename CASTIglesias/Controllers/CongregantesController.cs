@@ -20,6 +20,8 @@ namespace CASTIglesias.Controllers
         CN_DetalleSeguimiento cnDetalleSeguimiento,
         CN_Lideres cnLideres,
         CN_Matrimonio cnMatrimonio,
+        CN_Jovenes cnJovenes,
+        CN_ConfigJovenes cnConfigJovenes,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -36,6 +38,8 @@ namespace CASTIglesias.Controllers
         private readonly CN_DetalleSeguimiento _cnDetalleSeguimiento = cnDetalleSeguimiento;
         private readonly CN_Lideres _cnLideres = cnLideres;
         private readonly CN_Matrimonio _cnMatrimonio = cnMatrimonio;
+        private readonly CN_Jovenes _cnJovenes = cnJovenes;
+        private readonly CN_ConfigJovenes _cnConfigJovenes = cnConfigJovenes;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -1095,6 +1099,116 @@ namespace CASTIglesias.Controllers
             }
         }
         #endregion Familias
+
+        #region Jovenes
+        public IActionResult Jovenes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var config = _cnConfigJovenes.ObtenerConfig(sedeID);
+                var zonas = _cnZonas.ListarZonas(sedeID);
+                var grupos = config.id_zona_jovenes.HasValue
+                    ? _cnGrupos.ListarGrupos(sedeID)
+                        .Where(g => g.ID_zona == config.id_zona_jovenes.Value)
+                        .ToList()
+                    : new List<CapaEntidad.Grupos>();
+
+                ViewBag.ConfigJovenes = config;
+                ViewBag.GruposJovenes = grupos;
+            }
+            catch (Exception)
+            {
+                ViewBag.ConfigJovenes = new CapaEntidad.ConfigJovenes { edad_minima = 14, edad_maxima = 24 };
+                ViewBag.GruposJovenes = new List<CapaEntidad.Grupos>();
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarJovenes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnJovenes.ListarJovenes(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ListarJovenesProximosSalir()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnJovenes.ListarJovenesProximosSalir(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerConfigJovenes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var config = _cnConfigJovenes.ObtenerConfig(sedeID);
+                var grupos = config.id_zona_jovenes.HasValue
+                    ? _cnGrupos.ListarGrupos(sedeID)
+                        .Where(g => g.ID_zona == config.id_zona_jovenes.Value)
+                        .Select(g => new { id = g.ID_grupo, nombre = g.Descripcion })
+                        .ToList<object>()
+                    : new List<object>();
+
+                return Json(new { success = true, data = config, grupos });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AgregarJoven(int idMiembro, int idGrupo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                int resultado = _cnJovenes.AgregarJoven(idMiembro, idGrupo, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = 0, mensaje = $"Error interno: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarJoven(int idZgm)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnJovenes.EliminarJoven(idZgm, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+        #endregion Jovenes
 
         #region Matrimonios
         public IActionResult Matrimonios() => View();

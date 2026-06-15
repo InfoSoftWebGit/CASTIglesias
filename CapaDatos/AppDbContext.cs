@@ -30,6 +30,7 @@ namespace CapaDatos
         public DbSet<DetalleSeguimiento> DetallesSeguimiento { get; set; }
         public DbSet<Lider> Lideres { get; set; }
         public DbSet<Matrimonio> Matrimonios { get; set; }
+        public DbSet<ConfigJovenes> ConfigJovenes { get; set; }
         public DbSet<VistaUsuariosPermisos> VistaPermisosUsuarios { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -70,6 +70,10 @@ namespace CapaEntidad
         public bool MatrimoniosCrearEditar { get; set; }
         public bool MatrimoniosEliminar { get; set; }
 
+        public bool Jovenes { get; set; }
+        public bool JovenesCrearEditar { get; set; }
+        public bool JovenesEliminar { get; set; }
+
         public bool Ajustes { get; set; }
         public bool AjustesCrearEditar { get; set; }
         public bool AjustesEliminar { get; set; }

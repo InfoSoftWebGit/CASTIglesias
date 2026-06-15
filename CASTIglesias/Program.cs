@@ -64,6 +64,11 @@ builder.Services.AddScoped<CN_Lideres>();
 builder.Services.AddScoped<CD_Matrimonio>();
 builder.Services.AddScoped<CN_Matrimonio>();
 
+builder.Services.AddScoped<CD_ConfigJovenes>();
+builder.Services.AddScoped<CN_ConfigJovenes>();
+builder.Services.AddScoped<CD_Jovenes>();
+builder.Services.AddScoped<CN_Jovenes>();
+
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(

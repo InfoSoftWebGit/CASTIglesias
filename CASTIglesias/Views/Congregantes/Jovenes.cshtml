@@ -1,0 +1,323 @@
+@using CapaEntidad
+@{
+    ViewBag.Title = "Jóvenes";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var config = ViewBag.ConfigJovenes as ConfigJovenes ?? new ConfigJovenes { edad_minima = 14, edad_maxima = 24 };
+    var grupos = ViewBag.GruposJovenes as List<Grupos> ?? new List<Grupos>();
+    bool zonaSinConfigurar = !config.id_zona_jovenes.HasValue;
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">Jóvenes</li>
+</ol>
+
+@if (zonaSinConfigurar)
+{
+    <div class="alert alert-warning d-flex align-items-center mb-4">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span>No hay una zona de jóvenes configurada. Ve a <a href="@Url.Action("Jovenes", "Ajustes")"><strong>Ajustes → Jóvenes</strong></a> para configurar el rango de edad y la zona.</span>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-user-friends me-1"></i> Lista de Jóvenes
+            &nbsp;<span class="badge bg-secondary">Rango: @config.edad_minima – @config.edad_maxima años</span>
+        </span>
+        @if (!zonaSinConfigurar)
+        {
+            <button type="button" class="btn btn-success btn-sm" onclick="abrirModalJoven()">
+                <i class="fas fa-plus me-1"></i> Añadir joven
+            </button>
+        }
+    </div>
+    <div class="table-responsive">
+        <table id="tablaJovenes" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Edad</th>
+                    <th>Grupo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tabla de próximos a salir -->
+<div class="card">
+    <div class="card-header text-warning" style="background-color:#1E3A8A;">
+        <i class="fas fa-hourglass-end me-1"></i>
+        Próximos a salir del rango
+        <span class="badge bg-warning text-dark ms-2">Edad entre @(config.edad_maxima - 1) y @config.edad_maxima años</span>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaProximos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Edad</th>
+                    <th>Grupo</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL AÑADIR JOVEN -->
+<div class="modal fade" id="FormModalJoven" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title">Añadir joven</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Buscar miembro <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarJoven" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <input type="hidden" id="hdnIdMiembroJoven" value="0" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Edad</label>
+                        <input type="text" id="txtEdadJoven" class="form-control" readonly />
+                    </div>
+                    <div class="col-sm-8">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="txtTelefonoJoven" class="form-control" readonly />
+                    </div>
+                    <div id="alertaEdadJoven" class="col-12 d-none">
+                        <div class="alert alert-warning mb-0 py-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <span id="textoAlertaEdad"></span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Grupo</label>
+                        <select id="cboGrupoJoven" class="form-select">
+                            <option value="0">— Sin grupo —</option>
+                            @foreach (var g in grupos)
+                            {
+                                <option value="@g.ID_grupo">@g.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeErrorJoven" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarJoven" onclick="guardarJoven()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
+
+    <script>
+        const edadMinima = @config.edad_minima;
+        const edadMaxima = @config.edad_maxima;
+        let edadFueraRango = false;
+
+        const dtOptions = {
+            responsive: true,
+            ordering: false,
+            language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+            initComplete: function () {
+                $(this.api().table().header()).css({ 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' });
+            }
+        };
+
+        const columnas = [
+            { data: "nombre_miembro", defaultContent: "" },
+            { data: "apellidos_miembro", defaultContent: "" },
+            { data: "telefono_movil", defaultContent: '<span class="text-muted">—</span>' },
+            {
+                data: "edad",
+                defaultContent: '<span class="text-muted">—</span>',
+                render: function (d) { return d != null ? d + ' años' : '<span class="text-muted">—</span>'; }
+            },
+            { data: "nombre_grupo", defaultContent: '<span class="text-muted">—</span>' }
+        ];
+
+        let tablaJovenes, tablaProximos;
+
+        $(document).ready(function () {
+            tablaJovenes = $("#tablaJovenes").DataTable({
+                ...dtOptions,
+                ajax: {
+                    url: '@Url.Action("ListarJovenes", "Congregantes")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    ...columnas,
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarJoven" title="Quitar de jóvenes">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "80px"
+                    }
+                ]
+            });
+
+            tablaProximos = $("#tablaProximos").DataTable({
+                ...dtOptions,
+                ajax: {
+                    url: '@Url.Action("ListarJovenesProximosSalir", "Congregantes")',
+                    type: "GET",
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: columnas
+            });
+
+            $("#tablaJovenes tbody").on("click", ".btn-eliminarJoven", function () {
+                const data = tablaJovenes.row($(this).closest("tr")).data();
+                Swal.fire({
+                    title: "¿Quitar de jóvenes?",
+                    text: `Se eliminará a "${data.nombre_miembro} ${data.apellidos_miembro}" de la zona de jóvenes. Sus otros datos no se verán afectados.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, quitar",
+                    cancelButtonText: "Cancelar"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.post('@Url.Action("EliminarJoven", "Congregantes")', { idZgm: data.id_zgm }, function (res) {
+                            if (res.resultado) {
+                                tablaJovenes.ajax.reload();
+                                tablaProximos.ajax.reload();
+                                Swal.fire("Eliminado", res.mensaje, "success");
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Autocomplete búsqueda de miembros
+            $("#txtBuscarJoven").autocomplete({
+                source: function (req, resp) {
+                    $.get('@Url.Action("BuscarMiembros", "Congregantes")', { term: req.term }, function (res) {
+                        const items = (res.data || []).map(function (m) {
+                            return {
+                                label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                                value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                                id: m.id_miembro,
+                                edad: m.edad,
+                                telefono: m.telefono_movil
+                            };
+                        });
+                        resp(items);
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#hdnIdMiembroJoven").val(ui.item.id);
+                    $("#txtEdadJoven").val(ui.item.edad != null ? ui.item.edad : '');
+                    $("#txtTelefonoJoven").val(ui.item.telefono || '');
+                    comprobarEdad(ui.item.edad);
+                }
+            });
+        });
+
+        function comprobarEdad(edad) {
+            const alerta = $("#alertaEdadJoven");
+            if (edad == null) {
+                alerta.addClass("d-none");
+                edadFueraRango = false;
+                return;
+            }
+            if (edad < edadMinima || edad > edadMaxima) {
+                $("#textoAlertaEdad").text(`Este miembro tiene ${edad} años, fuera del rango configurado (${edadMinima}–${edadMaxima}). Se pedirá confirmación al guardar.`);
+                alerta.removeClass("d-none");
+                edadFueraRango = true;
+            } else {
+                alerta.addClass("d-none");
+                edadFueraRango = false;
+            }
+        }
+
+        function abrirModalJoven() {
+            $("#hdnIdMiembroJoven").val(0);
+            $("#txtBuscarJoven").val('');
+            $("#txtEdadJoven").val('');
+            $("#txtTelefonoJoven").val('');
+            $("#alertaEdadJoven").addClass("d-none");
+            $("#mensajeErrorJoven").addClass("d-none").text('');
+            edadFueraRango = false;
+            new bootstrap.Modal(document.getElementById("FormModalJoven")).show();
+        }
+
+        function guardarJoven() {
+            const idMiembro = parseInt($("#hdnIdMiembroJoven").val()) || 0;
+            if (idMiembro === 0) {
+                $("#mensajeErrorJoven").removeClass("d-none").text("Selecciona un miembro de la lista.");
+                return;
+            }
+
+            const doGuardar = function () {
+                const idGrupo = parseInt($("#cboGrupoJoven").val()) || 0;
+                $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+                $.post('@Url.Action("AgregarJoven", "Congregantes")', { idMiembro, idGrupo }, function (res) {
+                    $(".modal-body").LoadingOverlay("hide");
+                    if (res.resultado && res.resultado !== 0) {
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalJoven")).hide();
+                        tablaJovenes.ajax.reload();
+                        tablaProximos.ajax.reload();
+                        Swal.fire("Guardado", res.mensaje, "success");
+                    } else {
+                        $("#mensajeErrorJoven").removeClass("d-none").text(res.mensaje);
+                    }
+                }).fail(function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeErrorJoven").removeClass("d-none").text("Error en la solicitud.");
+                });
+            };
+
+            if (edadFueraRango) {
+                const edad = parseInt($("#txtEdadJoven").val());
+                Swal.fire({
+                    title: "Edad fuera del rango",
+                    text: `Este miembro tiene ${edad} años y está fuera del rango de jóvenes (${edadMinima}–${edadMaxima}). ¿Deseas añadirlo igualmente?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, añadir",
+                    cancelButtonText: "Cancelar"
+                }).then(result => {
+                    if (result.isConfirmed) doGuardar();
+                });
+            } else {
+                doGuardar();
+            }
+        }
+    </script>
+}
