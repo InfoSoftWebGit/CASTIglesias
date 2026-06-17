@@ -26,6 +26,7 @@ namespace CapaPresentaciónAdmin.Controllers
         private readonly CN_Grupos _cnGrupos;
         private readonly CN_Ministerio _cnMinisterio;
         private readonly CN_Paises _cnPaises;
+        private readonly CN_Culto _cnCulto;
 
         // Constructor con inyección de dependencias
         public MantenedorController(CN_Miembros negocioMiembros,
@@ -37,6 +38,7 @@ namespace CapaPresentaciónAdmin.Controllers
             CN_Municipio cnMunicipio,
             CN_Ministerio cnMinisterio,
             CN_Paises cnPaises,
+            CN_Culto cnCulto,
             CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos)
         {
             _cnMiembros = negocioMiembros;
@@ -48,6 +50,7 @@ namespace CapaPresentaciónAdmin.Controllers
             _cnMunicipios = cnMunicipio;
             _cnMinisterio = cnMinisterio;
             _cnPaises = cnPaises;
+            _cnCulto = cnCulto;
         }
         // ------------------------------------------------------------------------------------------------
         #endregion
@@ -417,6 +420,64 @@ namespace CapaPresentaciónAdmin.Controllers
             try
             {
                 var ok = _cnMiembros.QuitarMiembroDeServicio(idMiembro, idMinisterio, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        #endregion
+
+
+        ///////////////////////////// APARTADO DE CULTOS //////////////////////////////
+        #region Cultos
+
+        public IActionResult Cultos() => View();
+
+        [HttpGet]
+        public JsonResult ListarCultos()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnCulto.Listar(sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new List<object>(), error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarCulto([FromBody] CapaEntidad.Culto obj)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                bool ok;
+                string mensaje;
+                if (obj.id_culto == 0)
+                    ok = _cnCulto.Registrar(obj, sedeID, out mensaje);
+                else
+                    ok = _cnCulto.Editar(obj, sedeID, out mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarCulto(int id)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                bool ok = _cnCulto.Eliminar(id, sedeID, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
             catch (Exception ex)

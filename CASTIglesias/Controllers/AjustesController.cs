@@ -12,11 +12,15 @@ namespace CASTIglesias.Controllers
         private readonly CN_ConfigJovenes _cnConfigJovenes;
         private readonly CN_Zonas _cnZonas;
         private readonly CN_Grupos _cnGrupos;
+        private readonly CN_Culto _cnCulto;
+        private readonly CN_RequerimientoCulto _cnRequerimiento;
 
         public AjustesController(CN_ConfigDiezmo cnConfigDiezmo,
             CN_ConfigJovenes cnConfigJovenes,
             CN_Zonas cnZonas,
             CN_Grupos cnGrupos,
+            CN_Culto cnCulto,
+            CN_RequerimientoCulto cnRequerimiento,
             CN_Sedes cnSedes,
             CN_Permisos cnPermisos) : base(cnSedes, cnPermisos)
         {
@@ -24,6 +28,8 @@ namespace CASTIglesias.Controllers
             _cnConfigJovenes = cnConfigJovenes;
             _cnZonas = cnZonas;
             _cnGrupos = cnGrupos;
+            _cnCulto = cnCulto;
+            _cnRequerimiento = cnRequerimiento;
         }
 
         #region Diezmos
@@ -96,6 +102,77 @@ namespace CASTIglesias.Controllers
             {
                 int sedeID = ObtenerIdSedeUsuario();
                 bool ok = _cnConfigJovenes.GuardarConfig(obj, sedeID, out string mensaje);
+                return Json(new { success = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        #endregion
+
+        #region Servicios
+
+        public IActionResult Servicios() => View();
+
+        [HttpGet]
+        public JsonResult ObtenerCultosParaAjustes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var cultos = _cnCulto.Listar(sedeID)
+                    .Select(c => new { c.id_culto, c.nombre, c.hora, c.dia_semana })
+                    .ToList();
+                return Json(new { success = true, data = cultos });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ListarRequerimientos(int idCulto)
+        {
+            try
+            {
+                var lista = _cnRequerimiento.ListarPorCulto(idCulto);
+                return Json(new { success = true, data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarRequerimiento([FromBody] RequerimientoCulto obj)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                bool ok;
+                string mensaje;
+                if (obj.id_req == 0)
+                    ok = _cnRequerimiento.Registrar(obj, sedeID, out mensaje);
+                else
+                    ok = _cnRequerimiento.Editar(obj, sedeID, out mensaje);
+                return Json(new { success = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarRequerimiento(int id)
+        {
+            try
+            {
+                bool ok = _cnRequerimiento.Eliminar(id, out string mensaje);
                 return Json(new { success = ok, mensaje });
             }
             catch (Exception ex)

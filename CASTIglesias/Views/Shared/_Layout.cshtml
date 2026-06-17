@@ -265,6 +265,13 @@
                                             Asistencia
                                         </a>
                                     }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Cultos", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
+                                            Cultos y Servicios
+                                        </a>
+                                    }
                                 </nav>
                             </div>
                         }
@@ -293,6 +300,10 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
                                             Jóvenes
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Servicios", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
+                                            Servicios
                                         </a>
                                     }
                                 </nav>

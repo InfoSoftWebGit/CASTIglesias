@@ -34,6 +34,8 @@ namespace CapaDatos
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<DetallePago> DetallePagos { get; set; }
         public DbSet<VistaUsuariosPermisos> VistaPermisosUsuarios { get; set; }
+        public DbSet<Culto> Cultos { get; set; }
+        public DbSet<RequerimientoCulto> RequerimientosCulto { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VistaUsuariosPermisos>()

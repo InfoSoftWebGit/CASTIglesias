@@ -1,0 +1,181 @@
+@{
+    ViewBag.Title = "Cultos y Servicios";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+    <li class="breadcrumb-item active">Cultos y Servicios</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-church me-1"></i> Lista de Cultos y Servicios
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModal(0)">
+                    <i class="fas fa-plus me-1"></i> Añadir nuevo culto
+                </button>
+            </div>
+        </div>
+        <table id="tablaCultos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Día</th>
+                    <th>Hora</th>
+                    <th style="width:110px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modalCulto" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color:#1E3A8A;">
+                <h5 class="modal-title" id="modalCultoTitulo">Datos del culto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hidId" value="0" />
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nombre del culto / servicio</label>
+                        <input type="text" id="txtNombre" class="form-control" placeholder="Ej: Culto Dominical" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Día de la semana</label>
+                        <select id="cboDia" class="form-select">
+                            <option value="1">Lunes</option>
+                            <option value="2">Martes</option>
+                            <option value="3">Miércoles</option>
+                            <option value="4">Jueves</option>
+                            <option value="5">Viernes</option>
+                            <option value="6">Sábado</option>
+                            <option value="7" selected>Domingo</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Hora</label>
+                        <input type="time" id="txtHora" class="form-control" value="10:00" />
+                    </div>
+                </div>
+                <div id="mensajeError" class="alert alert-danger d-none mt-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCulto()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const urlListar  = '@Url.Action("ListarCultos",  "Mantenedor")';
+    const urlGuardar = '@Url.Action("GuardarCulto",  "Mantenedor")';
+    const urlEliminar = '@Url.Action("EliminarCulto", "Mantenedor")';
+
+    const dias = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+    let tabla;
+
+    $(document).ready(function () {
+        tabla = $('#tablaCultos').DataTable({
+            ajax: { url: urlListar, dataSrc: 'data' },
+            columns: [
+                { data: 'nombre' },
+                { data: 'dia_semana', render: d => dias[d] || d },
+                { data: 'hora', render: d => d || '—' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (d, t, row) {
+                        return `<button class="btn btn-sm btn-warning me-1" onclick='abrirModal(${row.id_culto}, ${JSON.stringify(row)})'>
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="eliminarCulto(${row.id_culto})">
+                                    <i class="fas fa-trash"></i>
+                                </button>`;
+                    }
+                }
+            ],
+            language: { url: 'https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json' }
+        });
+    });
+
+    function abrirModal(id, row) {
+        $('#hidId').val(id || 0);
+        $('#txtNombre').val(row ? row.nombre : '');
+        $('#cboDia').val(row ? row.dia_semana : 7);
+        $('#txtHora').val(row ? (row.hora || '10:00') : '10:00');
+        $('#mensajeError').addClass('d-none');
+        $('#modalCultoTitulo').text(id ? 'Editar culto' : 'Nuevo culto');
+        new bootstrap.Modal(document.getElementById('modalCulto')).show();
+    }
+
+    function guardarCulto() {
+        const nombre = $('#txtNombre').val().trim();
+        if (!nombre) {
+            $('#mensajeError').removeClass('d-none').text('El nombre es obligatorio.');
+            return;
+        }
+
+        $.ajax({
+            url: urlGuardar,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                id_culto:   parseInt($('#hidId').val()),
+                nombre:     nombre,
+                dia_semana: parseInt($('#cboDia').val()),
+                hora:       $('#txtHora').val()
+            }),
+            success: function (res) {
+                if (!res.resultado) {
+                    $('#mensajeError').removeClass('d-none').text(res.mensaje);
+                    return;
+                }
+                bootstrap.Modal.getInstance(document.getElementById('modalCulto')).hide();
+                tabla.ajax.reload();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
+            }
+        });
+    }
+
+    function eliminarCulto(id) {
+        Swal.fire({
+            title: '¿Eliminar este culto?',
+            text: 'Se eliminarán también los roles configurados para él.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Sí, eliminar'
+        }).then(result => {
+            if (!result.isConfirmed) return;
+            $.post(urlEliminar, { id }, function (res) {
+                if (res.resultado) {
+                    tabla.ajax.reload();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
+                } else {
+                    Swal.fire('Error', res.mensaje, 'error');
+                }
+            });
+        });
+    }
+</script>
+}
