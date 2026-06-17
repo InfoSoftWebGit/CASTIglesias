@@ -202,7 +202,7 @@ namespace CapaNegocio
             return _capaDatos.ListarMiembrosPorMinisterio(idMinisterio, sedeID);
         }
 
-        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, int sedeID, out string mensaje)
+        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, string esMinistra, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
 
@@ -222,12 +222,22 @@ namespace CapaNegocio
                 return false;
             }
 
-            return _capaDatos.AsignarMiembroAServicio(idMiembro, idMinisterio, rol.Trim(), sedeID, out mensaje);
+            return _capaDatos.AsignarMiembroAServicio(idMiembro, idMinisterio, rol.Trim(), esMinistra, sedeID, out mensaje);
         }
 
-        public bool QuitarMiembroDeServicio(int idMiembro, int idMinisterio, out string mensaje)
+        public bool EditarRolServicio(int idAsignacion, string nuevoRol, string esMinistra, int sedeID, out string mensaje)
         {
-            return _capaDatos.QuitarMiembroDeServicio(idMiembro, idMinisterio, out mensaje);
+            if (string.IsNullOrWhiteSpace(nuevoRol))
+            {
+                mensaje = "El rol no puede estar vacío.";
+                return false;
+            }
+            return _capaDatos.EditarRolServicio(idAsignacion, nuevoRol.Trim(), esMinistra, sedeID, out mensaje);
+        }
+
+        public bool QuitarMiembroDeServicio(int idAsignacion, out string mensaje)
+        {
+            return _capaDatos.QuitarMiembroDeServicio(idAsignacion, out mensaje);
         }
 
         #endregion

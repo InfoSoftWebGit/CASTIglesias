@@ -400,12 +400,20 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
-        public JsonResult GuardarMiembroServicio(int idMiembro, int idMinisterio, string rol)
+        public JsonResult GuardarMiembroServicio(int idMiembro, int idMinisterio, string rol,
+                                                  string esMinistra = "No", int idAsignacion = 0)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                var ok = _cnMiembros.AsignarMiembroAServicio(idMiembro, idMinisterio, rol, sedeID, out string mensaje);
+                bool ok;
+                string mensaje;
+
+                if (idAsignacion > 0)
+                    ok = _cnMiembros.EditarRolServicio(idAsignacion, rol, esMinistra, sedeID, out mensaje);
+                else
+                    ok = _cnMiembros.AsignarMiembroAServicio(idMiembro, idMinisterio, rol, esMinistra, sedeID, out mensaje);
+
                 return Json(new { resultado = ok, mensaje });
             }
             catch (Exception ex)
@@ -415,11 +423,11 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
-        public JsonResult EliminarMiembroServicio(int idMiembro, int idMinisterio)
+        public JsonResult EliminarMiembroServicio(int idAsignacion)
         {
             try
             {
-                var ok = _cnMiembros.QuitarMiembroDeServicio(idMiembro, idMinisterio, out string mensaje);
+                var ok = _cnMiembros.QuitarMiembroDeServicio(idAsignacion, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
             catch (Exception ex)

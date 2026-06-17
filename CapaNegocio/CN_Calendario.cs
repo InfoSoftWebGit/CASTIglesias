@@ -10,6 +10,16 @@ namespace CapaNegocio
 
         public CN_Calendario(CD_Calendario cd) => _cd = cd;
 
+        // ────────────────────────────────────────────────────────────
+        // CONSTANTES de tipo de calendario
+        // ────────────────────────────────────────────────────────────
+        public const int TIPO_SEGURIDAD     = 1;
+        public const int TIPO_ALABANZA      = 2;
+        public const int TIPO_AUDIOVISUALES = 3;
+
+        // ────────────────────────────────────────────────────────────
+        // GENERACIÓN
+        // ────────────────────────────────────────────────────────────
         public CalendarioServicioDTO Generar(CalendarioRequest req, int sedeId, out string error)
         {
             error = string.Empty;
@@ -29,15 +39,48 @@ namespace CapaNegocio
                 return resultado;
             }
 
-            // Agregar por rol_nombre tomando la cantidad máxima entre bloques
-            var rolesAgregados = requerimientos
+            // Agrupar requerimientos por rol (máxima cantidad entre bloques)
+            var todosRoles = requerimientos
                 .Where(r => !string.IsNullOrWhiteSpace(r.rol_nombre))
                 .GroupBy(r => r.rol_nombre!, StringComparer.OrdinalIgnoreCase)
-                .Select(g => new { Rol = g.Key, Cantidad = g.Max(r => r.cantidad) })
+                .Select(g => (Rol: g.Key, Cantidad: g.Max(r => r.cantidad)))
                 .ToList();
+
+            // Filtrar roles según el tipo de calendario
+            var rolesAgregados = FiltrarRolesPorTipo(todosRoles, req.TipoCalendario);
 
             var rolesNombres = rolesAgregados.Select(r => r.Rol).ToList();
             var miembrosPorRol = _cd.ObtenerMiembrosPorRol(sedeId, rolesNombres);
+
+            bool esAlabanza = req.TipoCalendario == TIPO_ALABANZA;
+            bool esViernes  = culto.dia_semana == 5;
+
+            // ── Lógica especial para Alabanza ────────────────────────
+            if (esAlabanza)
+            {
+                // La fila "Ministra" solo puede ser servida por miembros con es_ministra='Si'
+                var ministraKey = rolesNombres.FirstOrDefault(r =>
+                    r.Contains("ministra", StringComparison.OrdinalIgnoreCase));
+
+                if (ministraKey != null)
+                {
+                    var ministras = _cd.ObtenerMinistrasMiembros(sedeId);
+                    if (ministras.Any())
+                        miembrosPorRol[ministraKey] = ministras;
+                }
+
+                // Viernes: añadir fila "Zona Responsable" (rota cada 2 semanas)
+                if (esViernes)
+                {
+                    var zonas = _cd.ObtenerNombresZonas(sedeId);
+                    if (zonas.Any())
+                    {
+                        rolesAgregados.Add(("Zona Responsable", 1));
+                        rolesNombres.Add("Zona Responsable");
+                        miembrosPorRol["Zona Responsable"] = zonas;
+                    }
+                }
+            }
 
             var fechas = CalcularFechas(culto.dia_semana, req.FechaInicio, req.Periodicidad);
             if (!fechas.Any())
@@ -46,54 +89,63 @@ namespace CapaNegocio
                 return resultado;
             }
 
-            resultado.NombreCulto = culto.nombre ?? "";
+            resultado.NombreCulto   = culto.nombre ?? "";
             resultado.TipoCalendario = req.TipoCalendario;
-            resultado.Periodicidad = req.Periodicidad;
-            resultado.FechaInicio = fechas.First();
-            resultado.FechaFin = fechas.Last();
-            resultado.Roles = rolesNombres;
+            resultado.Periodicidad  = req.Periodicidad;
+            resultado.FechaInicio   = fechas.First();
+            resultado.FechaFin      = fechas.Last();
+            resultado.Roles         = rolesNombres;
 
-            // Índice de rotación por rol (se mantiene a través de todas las fechas)
+            // Índice de rotación por rol
             var indiceRot = rolesNombres.ToDictionary(r => r, _ => 0, StringComparer.OrdinalIgnoreCase);
-
+            int zonaServiceIdx = 0;
             var cultura = new CultureInfo("es-ES");
 
-            foreach (var fecha in fechas)
+            for (int serviceIdx = 0; serviceIdx < fechas.Count; serviceIdx++)
             {
+                var fecha = fechas[serviceIdx];
                 var entrada = new EntradaCalendario
                 {
-                    Fecha = fecha,
+                    Fecha    = fecha,
                     DiaSemana = cultura.DateTimeFormat.GetDayName(fecha.DayOfWeek)
                 };
 
-                foreach (var item in rolesAgregados)
+                foreach (var (Rol, Cantidad) in rolesAgregados)
                 {
-                    var rol = item.Rol;
-                    int cantidad = item.Cantidad;
-
-                    if (!miembrosPorRol.TryGetValue(rol, out var miembros) || !miembros.Any())
+                    // ── Zona Responsable en Viernes (cada 2 semanas) ──────────
+                    if (Rol == "Zona Responsable" && esAlabanza && esViernes)
                     {
-                        entrada.Asignaciones[rol] = Enumerable.Repeat("Sin asignar", cantidad).ToList();
+                        if (serviceIdx % 2 == 0)
+                        {
+                            var zonas = miembrosPorRol["Zona Responsable"];
+                            entrada.Asignaciones["Zona Responsable"] =
+                                new List<string> { zonas[zonaServiceIdx % zonas.Count] };
+                            zonaServiceIdx++;
+                        }
+                        else
+                        {
+                            entrada.Asignaciones["Zona Responsable"] = new List<string> { "—" };
+                        }
                         continue;
                     }
 
-                    int n = miembros.Count;
-                    int idx = indiceRot[rol];
-                    var asignados = new List<string>();
-
-                    // Round-robin: tomar 'cantidad' personas desde la posición actual
-                    for (int i = 0; i < cantidad; i++)
+                    // ── Rotación normal ──────────────────────────────────────
+                    if (!miembrosPorRol.TryGetValue(Rol, out var miembros) || !miembros.Any())
                     {
-                        if (i < n)
-                            asignados.Add(miembros[(idx + i) % n]);
-                        else
-                            asignados.Add("Sin asignar");
+                        // Rol sin miembros configurados: celda vacía (no "Sin asignar")
+                        entrada.Asignaciones[Rol] = new List<string>();
+                        continue;
                     }
 
-                    // Avanzar el índice por la cantidad de miembros disponibles usados
-                    indiceRot[rol] = (idx + Math.Min(cantidad, n)) % n;
+                    int n   = miembros.Count;
+                    int idx = indiceRot[Rol];
+                    // Solo asignamos personas disponibles; no rellenamos con "Sin asignar"
+                    var asignados = Enumerable.Range(0, Math.Min(Cantidad, n))
+                        .Select(i => miembros[(idx + i) % n])
+                        .ToList();
 
-                    entrada.Asignaciones[rol] = asignados;
+                    indiceRot[Rol] = (idx + Math.Min(Cantidad, n)) % n;
+                    entrada.Asignaciones[Rol] = asignados;
                 }
 
                 resultado.Entradas.Add(entrada);
@@ -102,9 +154,46 @@ namespace CapaNegocio
             return resultado;
         }
 
+        // ────────────────────────────────────────────────────────────
+        // Filtrado de roles según tipo de calendario
+        // ────────────────────────────────────────────────────────────
+        private static List<(string Rol, int Cantidad)> FiltrarRolesPorTipo(
+            List<(string Rol, int Cantidad)> todos, int tipo)
+        {
+            // Palabras clave por tipo
+            string[] kwSeguridad = {
+                "seguridad", "bienvenida", "acomodador", "ujier", "ugier",
+                "portero", "recepción", "recepcion", "entrada"
+            };
+            string[] kwAV = {
+                "proyección", "proyeccion", "sonido", "emisión", "emision",
+                "transmisión", "transmision", "multimedia", "dirige"
+            };
+            // Alabanza excluye roles de AV y seguridad
+            string[] exclAlabanza = {
+                "sonido", "proyección", "proyeccion", "emisión", "emision",
+                "transmisión", "transmision", "seguridad", "bienvenida",
+                "acomodador", "ujier", "ugier", "portero"
+            };
+
+            bool Contiene(string rol, string[] kw) =>
+                kw.Any(p => rol.Contains(p, StringComparison.OrdinalIgnoreCase));
+
+            List<(string, int)> filtrados = tipo switch
+            {
+                TIPO_SEGURIDAD     => todos.Where(r => Contiene(r.Rol, kwSeguridad)).ToList(),
+                TIPO_AUDIOVISUALES => todos.Where(r => Contiene(r.Rol, kwAV)).ToList(),
+                TIPO_ALABANZA      => todos.Where(r => !Contiene(r.Rol, exclAlabanza)).ToList(),
+                _                  => todos
+            };
+
+            // Si el filtro deja la lista vacía, usamos todos los roles como fallback
+            return filtrados.Any() ? filtrados : todos;
+        }
+
+        // ────────────────────────────────────────────────────────────
         private static List<DateTime> CalcularFechas(int diaSemana, DateTime fechaInicio, string periodicidad)
         {
-            // Mapeo 1=Lunes…7=Domingo → DayOfWeek
             DayOfWeek[] map =
             {
                 DayOfWeek.Sunday,    // índice 0 (no usado)
@@ -121,16 +210,15 @@ namespace CapaNegocio
                 ? map[diaSemana]
                 : DayOfWeek.Sunday;
 
-            // Primera ocurrencia >= fechaInicio
             var start = fechaInicio.Date;
             while (start.DayOfWeek != targetDow)
                 start = start.AddDays(1);
 
             DateTime end = periodicidad.ToLowerInvariant() switch
             {
-                "semanal"    => start.AddDays(27),         // ~4 semanas
+                "semanal"    => start.AddDays(27),
                 "trimestral" => start.AddMonths(3).AddDays(-1),
-                _            => start.AddMonths(1).AddDays(-1) // mensual por defecto
+                _            => start.AddMonths(1).AddDays(-1) // mensual
             };
 
             var fechas = new List<DateTime>();

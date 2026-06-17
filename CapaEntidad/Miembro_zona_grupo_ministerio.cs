@@ -19,6 +19,10 @@ namespace CapaEntidad
         [Column("rol_servicio")]
         public string? rol_servicio { get; set; }
 
+        /// <summary>Si es "Si", el miembro puede dirigir el servicio de alabanza (Ministra).</summary>
+        [Column("es_ministra")]
+        public string? es_ministra { get; set; } = "No";
+
         public int ID_sede { get; set; }
     }
 

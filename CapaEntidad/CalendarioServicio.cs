@@ -4,7 +4,7 @@ namespace CapaEntidad
     {
         public int IdCulto { get; set; }
         public string Periodicidad { get; set; } = "mensual"; // semanal, mensual, trimestral
-        public int TipoCalendario { get; set; } = 1;          // 1=Servidores, 2=Alabanza
+        public int TipoCalendario { get; set; } = 1;          // 1=Seguridad, 2=Alabanza, 3=Audiovisuales
         public DateTime FechaInicio { get; set; } = DateTime.Today;
     }
 

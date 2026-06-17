@@ -22,15 +22,15 @@
                     <div class="row g-4">
 
                         <!-- Tipo de calendario -->
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <label class="form-label fw-semibold">Tipo de calendario</label>
-                            <div class="d-flex gap-3 flex-wrap">
+                            <div class="d-flex gap-4 flex-wrap">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipoCalendario"
-                                           id="tipoServidores" value="1" checked />
-                                    <label class="form-check-label" for="tipoServidores">
-                                        <i class="fas fa-users me-1 text-primary"></i>
-                                        Servidores individuales
+                                           id="tipoSeguridad" value="1" checked />
+                                    <label class="form-check-label" for="tipoSeguridad">
+                                        <i class="fas fa-shield-alt me-1 text-warning"></i>
+                                        Seguridad y Bienvenida
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -39,6 +39,14 @@
                                     <label class="form-check-label" for="tipoAlabanza">
                                         <i class="fas fa-music me-1 text-success"></i>
                                         Alabanza
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipoCalendario"
+                                           id="tipoAudiovisuales" value="3" />
+                                    <label class="form-check-label" for="tipoAudiovisuales">
+                                        <i class="fas fa-video me-1 text-info"></i>
+                                        Audiovisuales
                                     </label>
                                 </div>
                             </div>
@@ -117,7 +125,7 @@
                     <div class="card-body p-0">
                         <div id="subtituloCalendario" class="px-3 pt-3 pb-1 text-muted small fst-italic"></div>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-sm table-striped mb-0" id="tablaCalendario">
+                            <table class="table table-bordered table-sm mb-0" id="tablaCalendario">
                                 <thead id="theadCalendario" class="table-dark"></thead>
                                 <tbody id="tbodyCalendario"></tbody>
                             </table>
@@ -126,7 +134,7 @@
                 </div>
             </div>
 
-            <!-- Sin resultados -->
+            <!-- Sin resultados / error -->
             <div id="panelVacio" class="d-none">
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -144,21 +152,23 @@
                 <div class="card-body small text-muted">
                     <p><strong>Tipos de calendario:</strong></p>
                     <ul class="ps-3">
-                        <li><strong>Servidores:</strong> muestra todos los roles configurados para el culto.</li>
-                        <li><strong>Alabanza:</strong> igual pero orientado al equipo de música.</li>
+                        <li><i class="fas fa-shield-alt text-warning me-1"></i>
+                            <strong>Seguridad y Bienvenida:</strong> acomodadores, porteros, bienvenida.
+                        </li>
+                        <li><i class="fas fa-music text-success me-1"></i>
+                            <strong>Alabanza:</strong> tabla transpuesta (fechas como columnas, instrumentos como filas). Requiere campo <em>Ministra</em> configurado.
+                        </li>
+                        <li><i class="fas fa-video text-info me-1"></i>
+                            <strong>Audiovisuales:</strong> proyección, sonido, emisión.
+                        </li>
                     </ul>
                     <p><strong>Rotación automática:</strong><br>
-                       El sistema distribuye a las personas de forma equitativa. Si hay 2 pianistas y el culto necesita 1,
-                       se alternarán domingo a domingo.</p>
+                       Las personas se distribuyen de forma equitativa. Si hay 2 pianistas y el culto necesita 1, se alternarán.</p>
                     <p><strong>Requisito previo:</strong><br>
                        Los roles del culto se configuran en <strong>Ajustes → Servicios</strong>.<br>
-                       Los miembros deben tener asignado su <em>rol de servicio</em> en sus fichas de ministerio.</p>
-                    <hr />
-                    <p><strong>Exportar:</strong></p>
-                    <ul class="ps-3">
-                        <li><strong>Excel</strong>: descarga un archivo .xlsx.</li>
-                        <li><strong>PDF</strong>: abre el diálogo de impresión; elige «Guardar como PDF».</li>
-                    </ul>
+                       Los miembros deben tener asignado su rol en sus fichas de ministerio.</p>
+                    <p class="mb-0"><strong>Ministra (Alabanza):</strong><br>
+                       Marca el campo <em>¿Puede ministrar?</em> en la vista de Servicios del ministerio de Alabanza para que el miembro aparezca en la fila "Ministra".</p>
                 </div>
             </div>
         </div>
@@ -169,14 +179,90 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
+    /* ── Tabla calendario ────────────────────────────────────────────────────── */
+    #tablaCalendario {
+        font-size: 15px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    #tablaCalendario thead th {
+        background-color: #1E3A8A;
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        padding: 12px 14px;
+        border: 1px solid rgba(255,255,255,.15);
+        white-space: nowrap;
+    }
+    #tablaCalendario thead th:first-child { border-radius: 8px 0 0 0; }
+    #tablaCalendario thead th:last-child  { border-radius: 0 8px 0 0; }
+
+    #tablaCalendario tbody tr { transition: background .15s; }
+    #tablaCalendario tbody tr:nth-child(odd)  td { background-color: #fff; }
+    #tablaCalendario tbody tr:nth-child(even) td { background-color: #f5f8ff; }
+    #tablaCalendario tbody tr:hover td { background-color: #e8eeff !important; }
+
+    #tablaCalendario tbody td {
+        padding: 10px 14px;
+        vertical-align: middle;
+        border: 1px solid #e2e8f0;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    /* Columna fecha en estándar */
+    #tablaCalendario tbody td:first-child {
+        font-weight: 600;
+        color: #1E3A8A;
+        white-space: nowrap;
+    }
+
+    /* Fila Ministra (Alabanza transpuesto) */
+    #tablaCalendario tr.fila-ministra td:first-child {
+        font-weight: 700; color: #1E3A8A; background-color: #dbeafe !important;
+    }
+    #tablaCalendario tr.fila-ministra td { background-color: #eff6ff !important; }
+
+    /* Fila Zona Responsable */
+    #tablaCalendario tr.fila-zona td:first-child {
+        font-weight: 700; color: #166534; background-color: #dcfce7 !important;
+    }
+    #tablaCalendario tr.fila-zona td { background-color: #f0fdf4 !important; }
+
+    /* Badge "sin datos" */
+    .badge-vacio {
+        color: #94a3b8; font-style: italic; font-size: 13px;
+    }
+
+    /* Card resultado */
+    #panelCalendario .card {
+        border: none;
+        box-shadow: 0 4px 20px rgba(30,58,138,.10);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    #panelCalendario .card-header {
+        background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 14px 20px;
+        border-bottom: none;
+    }
+    #subtituloCalendario {
+        font-size: 13px;
+        color: #64748b;
+        padding: 10px 20px 4px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
     @@media print {
-        /* Ocultar todo excepto el calendario */
-        body > *,
-        .sb-nav-fixed .sb-topnav,
-        .sb-nav-fixed #layoutSidenav #layoutSidenav_nav,
-        .sb-nav-fixed #layoutSidenav #layoutSidenav_content > nav,
+        .sb-topnav,
+        #layoutSidenav_nav,
+        footer,
         .no-print,
-        .breadcrumb,
+        ol.breadcrumb,
         h1.mt-4,
         #paginaCalendario > .row > .col-lg-9 > .card:first-of-type,
         #panelVacio {
@@ -185,56 +271,62 @@
         #panelCalendario {
             display: block !important;
         }
-        .card {
-            border: none !important;
-            box-shadow: none !important;
+        #layoutSidenav_content {
+            margin-left: 0 !important;
+            padding: 0 !important;
         }
+        main.sb-content { padding-top: 0 !important; }
+        .container-fluid { padding-left: 0 !important; padding-right: 0 !important; }
+        .card { border: 1px solid #cbd5e1 !important; box-shadow: none !important; }
         .card-header {
-            background-color: #1E3A8A !important;
-            color: white !important;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+            background-color: #1E3A8A !important; color: white !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
         }
         .table-dark th {
-            background-color: #1E3A8A !important;
-            color: white !important;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+            background-color: #1E3A8A !important; color: white !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
         }
-        .table-striped > tbody > tr:nth-of-type(odd) > * {
-            background-color: #f8f9fa !important;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
+        #tablaCalendario tbody tr:nth-child(odd) td {
+            background-color: #f5f8ff !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
         }
-        @@page {
-            margin: 1.5cm;
-            size: landscape;
+        #tablaCalendario tr.fila-ministra td {
+            background-color: #eff6ff !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
         }
+        #tablaCalendario tr.fila-ministra td:first-child {
+            background-color: #dbeafe !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        }
+        #tablaCalendario tr.fila-zona td {
+            background-color: #f0fdf4 !important;
+            print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        }
+        @@page { margin: 1.5cm; size: landscape; }
     }
 </style>
 
 <script>
-    const urlCultos          = '@Url.Action("ObtenerCultos",       "Calendario")';
-    const urlGenerar         = '@Url.Action("GenerarCalendario",   "Calendario")';
-    const urlExportarExcel   = '@Url.Action("ExportarExcel",       "Calendario")';
-    const dias               = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const urlCultos        = '@Url.Action("ObtenerCultos",     "Calendario")';
+    const urlGenerar       = '@Url.Action("GenerarCalendario", "Calendario")';
+    const urlExportarExcel = '@Url.Action("ExportarExcel",     "Calendario")';
+    const dias             = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-    let requestActual = null;  // guarda el último request para exportar
+    let requestActual = null;
+
+    const TIPO_SEGURIDAD     = 1;
+    const TIPO_ALABANZA      = 2;
+    const TIPO_AUDIOVISUALES = 3;
 
     $(document).ready(function () {
-        // Fecha de hoy por defecto
         const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm   = String(hoy.getMonth() + 1).padStart(2, '0');
-        const dd   = String(hoy.getDate()).padStart(2, '0');
-        $('#txtFechaInicio').val(`${yyyy}-${mm}-${dd}`);
+        $('#txtFechaInicio').val(hoy.toISOString().slice(0, 10));
 
-        // Cargar cultos
-        $.get(urlCultos, function (res) {
+        $.get(urlCultos, res => {
             if (!res.success) return;
-            const cbo = $('#cboCulto');
             (res.data || []).forEach(c => {
-                cbo.append($('<option>').val(c.id_culto).text(`${c.nombre} — ${dias[c.dia_semana] || ''}`));
+                $('#cboCulto').append($('<option>').val(c.id_culto)
+                    .text(`${c.nombre} — ${dias[c.dia_semana] || ''}`));
             });
         });
     });
@@ -242,14 +334,14 @@
     function obtenerRequest() {
         const idCulto = parseInt($('#cboCulto').val());
         if (!idCulto) {
-            Swal.fire({ icon: 'warning', title: 'Falta seleccionar el culto', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            Swal.fire({ icon: 'warning', title: 'Selecciona un culto', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
             return null;
         }
         return {
-            idCulto:         idCulto,
-            periodicidad:    $('input[name=periodicidad]:checked').val(),
-            tipoCalendario:  parseInt($('input[name=tipoCalendario]:checked').val()),
-            fechaInicio:     $('#txtFechaInicio').val()
+            idCulto,
+            periodicidad:   $('input[name=periodicidad]:checked').val(),
+            tipoCalendario: parseInt($('input[name=tipoCalendario]:checked').val()),
+            fechaInicio:    $('#txtFechaInicio').val()
         };
     }
 
@@ -266,7 +358,7 @@
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(req),
-            success: function (res) {
+            success(res) {
                 btn.prop('disabled', false).html('<i class="fas fa-calendar-check me-1"></i> Generar calendario');
                 if (!res.success) {
                     $('#panelCalendario').addClass('d-none');
@@ -275,57 +367,111 @@
                     return;
                 }
                 $('#panelVacio').addClass('d-none');
-                renderCalendario(res.data);
+                if (req.tipoCalendario === TIPO_ALABANZA)
+                    renderAlabanza(res.data);
+                else
+                    renderEstandar(res.data);
                 $('#panelCalendario').removeClass('d-none');
             },
-            error: function () {
+            error() {
                 btn.prop('disabled', false).html('<i class="fas fa-calendar-check me-1"></i> Generar calendario');
                 Swal.fire('Error', 'No se pudo generar el calendario.', 'error');
             }
         });
     }
 
-    function renderCalendario(cal) {
-        const tipoLabel = cal.tipoCalendario === 2 ? 'Alabanza' : 'Servidores';
-        const iconoCal  = cal.tipoCalendario === 2
-            ? '<i class="fas fa-music me-2 text-success"></i>'
-            : '<i class="fas fa-users me-2 text-primary"></i>';
+    /* ── Layout estándar (Seguridad / Audiovisuales): filas=fechas, cols=roles ── */
+    function renderEstandar(cal) {
+        const tipo = cal.tipoCalendario;
+        const [icono, tipoLabel, color] = tipo === TIPO_AUDIOVISUALES
+            ? ['<i class="fas fa-video me-2"></i>', 'Audiovisuales', '#0e7490']
+            : ['<i class="fas fa-shield-alt me-2"></i>', 'Seguridad y Bienvenida', '#b45309'];
 
-        $('#lblTituloCalendario').html(`${iconoCal}Calendario de ${tipoLabel} — ${cal.nombreCulto}`);
+        actualizarCabeceras(cal,
+            `${icono}Calendario de ${tipoLabel} — ${esc(cal.nombreCulto)}`);
 
+        const roles = cal.roles || [];
+        let th = '<tr><th style="min-width:110px">Fecha</th><th>Día</th>';
+        roles.forEach(r => { th += `<th>${esc(r)}</th>`; });
+        $('#theadCalendario').html(th + '</tr>');
+
+        let tb = '';
+        (cal.entradas || []).forEach(e => {
+            const dia = e.diaSemana.length
+                ? e.diaSemana[0].toUpperCase() + e.diaSemana.slice(1) : '';
+            tb += `<tr>
+                <td class="text-nowrap">${formatFecha(e.fecha)}</td>
+                <td style="color:#475569">${esc(dia)}</td>`;
+            roles.forEach(r => {
+                const personas = (e.asignaciones && e.asignaciones[r]) || [];
+                tb += `<td>${renderPersonas(personas)}</td>`;
+            });
+            tb += '</tr>';
+        });
+        $('#tbodyCalendario').html(tb);
+    }
+
+    /* ── Layout Alabanza: filas=roles, columnas=fechas (transpuesto) ── */
+    function renderAlabanza(cal) {
+        actualizarCabeceras(cal,
+            `<i class="fas fa-music me-2"></i>Cronograma de Alabanza — ${esc(cal.nombreCulto)}`);
+
+        const entradas = cal.entradas || [];
+        const roles    = cal.roles    || [];
+
+        // Cabecera: primera col = "Rol", luego una col por fecha
+        let th = '<tr><th style="min-width:160px">Rol / Instrumento</th>';
+        entradas.forEach(e => {
+            const d = new Date(e.fecha);
+            const dStr = d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            const dayAb = e.diaSemana.length > 0
+                ? e.diaSemana[0].toUpperCase() + e.diaSemana.slice(1, 3) : '';
+            th += `<th class="text-center" style="min-width:120px">${dStr}<br><small style="font-weight:400;letter-spacing:0">${dayAb}</small></th>`;
+        });
+        $('#theadCalendario').html(th + '</tr>');
+
+        let tb = '';
+        roles.forEach(rol => {
+            const esMinistra = rol.toLowerCase().includes('ministra');
+            const esZona     = rol === 'Zona Responsable';
+            const claseRow   = esMinistra ? 'fila-ministra' : esZona ? 'fila-zona' : '';
+
+            tb += `<tr class="${claseRow}"><td>${esc(rol)}</td>`;
+            entradas.forEach(e => {
+                const personas = (e.asignaciones && e.asignaciones[rol]) || [];
+                tb += `<td class="text-center">${renderPersonas(personas, esZona)}</td>`;
+            });
+            tb += '</tr>';
+        });
+        $('#tbodyCalendario').html(tb);
+    }
+
+    /* ── helpers ─────────────────────────────────────────────────────── */
+    function actualizarCabeceras(cal, titulo) {
+        $('#lblTituloCalendario').html(titulo);
         const fi = formatFecha(cal.fechaInicio);
         const ff = formatFecha(cal.fechaFin);
-        const perLabel = { semanal: 'Semanal (4 semanas)', mensual: 'Mensual (1 mes)', trimestral: 'Trimestral (3 meses)' };
-        $('#subtituloCalendario').html(`Período: <strong>${fi}</strong> – <strong>${ff}</strong> &nbsp;|&nbsp; ${perLabel[cal.periodicidad] || cal.periodicidad}`);
+        const perMap = { semanal: 'Semanal', mensual: 'Mensual', trimestral: 'Trimestral' };
+        const perLabel = perMap[cal.periodicidad] || cal.periodicidad;
+        $('#subtituloCalendario').html(
+            `Período: <strong>${fi}</strong> – <strong>${ff}</strong> &nbsp;|&nbsp; ${perLabel}`);
+    }
 
-        // Cabecera
-        const roles = cal.roles || [];
-        let thHtml = '<tr><th>Fecha</th><th>Día</th>';
-        roles.forEach(r => { thHtml += `<th>${escHtml(r)}</th>`; });
-        thHtml += '</tr>';
-        $('#theadCalendario').html(thHtml);
-
-        // Filas
-        let tbHtml = '';
-        (cal.entradas || []).forEach(e => {
-            tbHtml += `<tr><td class="text-nowrap">${formatFecha(e.fecha)}</td><td class="text-capitalize">${escHtml(e.diaSemana)}</td>`;
-            roles.forEach(r => {
-                const personas = (e.asignaciones && e.asignaciones[r]) ? e.asignaciones[r] : [];
-                const celda = personas.length
-                    ? personas.map(p => p === 'Sin asignar'
-                        ? `<span class="badge bg-secondary">Sin asignar</span>`
-                        : escHtml(p)).join('<br>')
-                    : '<span class="badge bg-secondary">Sin asignar</span>';
-                tbHtml += `<td>${celda}</td>`;
-            });
-            tbHtml += '</tr>';
-        });
-        $('#tbodyCalendario').html(tbHtml);
+    function renderPersonas(personas, esZona = false) {
+        if (!personas || !personas.length)
+            return '<span class="badge-vacio">—</span>';
+        return personas.map(p => {
+            if (p === '—') return '<span class="badge-vacio">—</span>';
+            if (esZona) return `<span class="badge bg-success px-2">${esc(p)}</span>`;
+            return esc(p);
+        }).join('<br>');
     }
 
     async function exportarExcel() {
-        if (!requestActual) { Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); return; }
-
+        if (!requestActual) {
+            Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            return;
+        }
         try {
             const resp = await fetch(urlExportarExcel, {
                 method: 'POST',
@@ -333,19 +479,14 @@
                 body: JSON.stringify(requestActual)
             });
             if (!resp.ok) { Swal.fire('Error', 'No se pudo generar el Excel.', 'error'); return; }
-
-            const blob = await resp.blob();
-            const cd   = resp.headers.get('Content-Disposition') || '';
+            const blob  = await resp.blob();
+            const cd    = resp.headers.get('Content-Disposition') || '';
             const match = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
             const nombre = match ? match[1].replace(/['"]/g, '') : 'Calendario.xlsx';
-
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = nombre;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+            const url   = URL.createObjectURL(blob);
+            const a     = document.createElement('a');
+            a.href = url; a.download = nombre;
+            document.body.appendChild(a); a.click(); a.remove();
             URL.revokeObjectURL(url);
         } catch {
             Swal.fire('Error', 'No se pudo descargar el archivo.', 'error');
@@ -353,18 +494,20 @@
     }
 
     function exportarPdf() {
-        if (!requestActual) { Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 }); return; }
+        if (!requestActual) {
+            Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            return;
+        }
         window.print();
     }
 
     function formatFecha(iso) {
         if (!iso) return '';
         const d = new Date(iso);
-        if (isNaN(d)) return iso;
-        return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return isNaN(d) ? iso : d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    function escHtml(str) {
+    function esc(str) {
         if (!str) return '';
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }

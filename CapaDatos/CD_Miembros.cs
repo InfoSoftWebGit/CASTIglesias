@@ -787,49 +787,55 @@ namespace CapaDatos
                            where mzgm.ID_ministerio == idMinisterio
                            join m in _context.Miembros on mzgm.ID_miembro equals m.id_miembro
                            where sedeID == 1000 || m.id_sede == sedeID
+                           orderby m.apellidos_miembro, m.nombre_miembro
                            select new MiembroServicioDTO
                            {
+                               id_asignacion = mzgm.ID,
                                id_miembro = m.id_miembro,
                                numero_miembro = m.numero_miembro,
                                nombre_miembro = m.nombre_miembro,
                                apellidos_miembro = m.apellidos_miembro,
                                id_ministerio = mzgm.ID_ministerio,
-                               rol_servicio = mzgm.rol_servicio
+                               rol_servicio = mzgm.rol_servicio,
+                               es_ministra = mzgm.es_ministra
                            };
 
             return consulta.ToList();
         }
 
         /// <summary>
-        /// Asigna (o actualiza el rol de) un miembro en un ministerio.
+        /// Añade una nueva asignación de rol para un miembro en un ministerio.
+        /// Un miembro puede tener múltiples roles distintos en el mismo ministerio.
         /// </summary>
-        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, int sedeID, out string mensaje)
+        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, string esMinistra, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
             try
             {
-                var fila = _context.Miembros_Zona_Grupo_Ministerio
-                    .FirstOrDefault(x => x.ID_miembro == idMiembro && x.ID_ministerio == idMinisterio);
+                bool duplicado = _context.Miembros_Zona_Grupo_Ministerio.Any(x =>
+                    x.ID_miembro == idMiembro &&
+                    x.ID_ministerio == idMinisterio &&
+                    x.rol_servicio == rol);
 
-                if (fila != null)
+                if (duplicado)
                 {
-                    fila.rol_servicio = rol;
+                    mensaje = "Este miembro ya tiene ese rol asignado en este ministerio.";
+                    return false;
                 }
-                else
+
+                _context.Miembros_Zona_Grupo_Ministerio.Add(new Miembro_zona_grupo_ministerio
                 {
-                    _context.Miembros_Zona_Grupo_Ministerio.Add(new Miembro_zona_grupo_ministerio
-                    {
-                        ID_miembro = idMiembro,
-                        ID_ministerio = idMinisterio,
-                        ID_zona = 0,
-                        ID_grupo = 0,
-                        rol_servicio = rol,
-                        ID_sede = sedeID
-                    });
-                }
+                    ID_miembro = idMiembro,
+                    ID_ministerio = idMinisterio,
+                    ID_zona = 0,
+                    ID_grupo = 0,
+                    rol_servicio = rol,
+                    es_ministra = esMinistra == "Si" ? "Si" : "No",
+                    ID_sede = sedeID
+                });
 
                 _context.SaveChanges();
-                mensaje = "Miembro asignado correctamente.";
+                mensaje = "Rol asignado correctamente.";
                 return true;
             }
             catch (Exception ex)
@@ -840,20 +846,57 @@ namespace CapaDatos
         }
 
         /// <summary>
-        /// Quita a un miembro de un ministerio. Si la fila solo representaba al ministerio
-        /// (sin zona ni grupo) se elimina; de lo contrario solo se limpia el ministerio y su rol.
+        /// Edita el rol de una asignación existente identificada por su PK.
         /// </summary>
-        public bool QuitarMiembroDeServicio(int idMiembro, int idMinisterio, out string mensaje)
+        public bool EditarRolServicio(int idAsignacion, string nuevoRol, string esMinistra, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
             try
             {
-                var fila = _context.Miembros_Zona_Grupo_Ministerio
-                    .FirstOrDefault(x => x.ID_miembro == idMiembro && x.ID_ministerio == idMinisterio);
-
+                var fila = _context.Miembros_Zona_Grupo_Ministerio.Find(idAsignacion);
                 if (fila == null)
                 {
-                    mensaje = "El miembro no estaba asignado a este ministerio.";
+                    mensaje = "Asignación no encontrada.";
+                    return false;
+                }
+
+                bool duplicado = _context.Miembros_Zona_Grupo_Ministerio.Any(x =>
+                    x.ID != idAsignacion &&
+                    x.ID_miembro == fila.ID_miembro &&
+                    x.ID_ministerio == fila.ID_ministerio &&
+                    x.rol_servicio == nuevoRol);
+
+                if (duplicado)
+                {
+                    mensaje = "Este miembro ya tiene ese rol asignado en este ministerio.";
+                    return false;
+                }
+
+                fila.rol_servicio = nuevoRol;
+                fila.es_ministra = esMinistra == "Si" ? "Si" : "No";
+                _context.SaveChanges();
+                mensaje = "Rol actualizado correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = ex.Message;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Elimina una asignación de rol específica por su PK (ID de miembro_zona_grupo_ministerio).
+        /// </summary>
+        public bool QuitarMiembroDeServicio(int idAsignacion, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var fila = _context.Miembros_Zona_Grupo_Ministerio.Find(idAsignacion);
+                if (fila == null)
+                {
+                    mensaje = "Asignación no encontrada.";
                     return false;
                 }
 
@@ -868,7 +911,7 @@ namespace CapaDatos
                 }
 
                 _context.SaveChanges();
-                mensaje = "Miembro quitado del ministerio correctamente.";
+                mensaje = "Rol eliminado correctamente.";
                 return true;
             }
             catch (Exception ex)

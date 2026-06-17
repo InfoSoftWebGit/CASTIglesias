@@ -23,6 +23,33 @@ namespace CapaDatos
                 .ToList();
         }
 
+        /// Nombres de miembros con es_ministra='Si' (para la fila Ministra en Alabanza)
+        public List<string> ObtenerMinistrasMiembros(int sedeId)
+        {
+            var q = (from zgm in _context.Miembros_Zona_Grupo_Ministerio
+                     join m in _context.Miembros on zgm.ID_miembro equals m.id_miembro
+                     where (zgm.ID_sede == sedeId || sedeId == 1000)
+                           && zgm.es_ministra == "Si"
+                           && m.miembro_activo == "Si"
+                     select new { zgm.ID_miembro, Nombre = (m.nombre_miembro + " " + m.apellidos_miembro).Trim() })
+                    .ToList();
+
+            return q.GroupBy(x => x.ID_miembro)
+                    .Select(g => g.First().Nombre)
+                    .ToList();
+        }
+
+        /// Nombres de las zonas para la rotación de Viernes en Alabanza
+        public List<string> ObtenerNombresZonas(int sedeId)
+        {
+            return _context.Zona
+                .Where(z => sedeId == 1000 || z.ID_sede == sedeId)
+                .Where(z => z.nombre_zona != null && z.nombre_zona != "")
+                .OrderBy(z => z.nombre_zona)
+                .Select(z => z.nombre_zona!)
+                .ToList();
+        }
+
         // Devuelve un diccionario rol → lista de nombres de miembros activos con ese rol_servicio
         public Dictionary<string, List<string>> ObtenerMiembrosPorRol(int sedeId, List<string> roles)
         {
