@@ -413,11 +413,23 @@
                     const currentPath = window.location.pathname.toLowerCase();
                     const currentId = new URLSearchParams(window.location.search).get('id');
 
+                    function iconoMinisterio(nombre) {
+                        if (!nombre) return 'fas fa-users-cog';
+                        var n = nombre.toLowerCase();
+                        if (n.includes('alabanza') || n.includes('sonido'))  return 'fas fa-music';
+                        if (n.includes('emisi') || n.includes('cámara') || n.includes('camara')) return 'fas fa-video';
+                        if (n.includes('bienvenida') || n.includes('seguridad') || n.includes('ugier')) return 'fas fa-handshake';
+                        if (n.includes('proyecci'))  return 'fas fa-desktop';
+                        if (n.includes('pastoral'))  return 'fas fa-book-open';
+                        if (n.includes('misiones'))  return 'fas fa-route';
+                        return 'fas fa-users-cog';
+                    }
+
                     ministerios.forEach(function (m) {
                         const link = document.createElement('a');
                         link.className = 'nav-link collapsed-sub-item';
                         link.href = urlBaseServicios + '?id=' + m.id;
-                        link.innerHTML = '<div class="sb-nav-link-icon"><i class="fas fa-music"></i></div>' +
+                        link.innerHTML = '<div class="sb-nav-link-icon"><i class="' + iconoMinisterio(m.descripcion) + '"></i></div>' +
                             $('<div>').text(m.descripcion || '').html();
                         serviciosSubmenu.appendChild(link);
 

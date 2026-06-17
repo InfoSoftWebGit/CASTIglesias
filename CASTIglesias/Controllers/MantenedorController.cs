@@ -308,8 +308,8 @@ namespace CapaPresentaciónAdmin.Controllers
         // Roles musicales para el ministerio de Alabanza.
         private static readonly string[] RolesAlabanza =
         {
-            "Vocalista", "Sonidista", "Baterista", "Guitarrista",
-            "Guitarrista Eléctrico", "Bajista", "Pianista"
+            "Vocalista", "Vocalista Principal", "Coro", "Sonidista", "Baterista",
+            "Guitarrista", "Guitarrista Eléctrico", "Bajista", "Pianista"
         };
 
         // Roles para el resto de ministerios.
@@ -321,6 +321,26 @@ namespace CapaPresentaciónAdmin.Controllers
         private static bool EsAlabanza(string descripcion) =>
             !string.IsNullOrWhiteSpace(descripcion) &&
             descripcion.Trim().Equals("Alabanza", StringComparison.OrdinalIgnoreCase);
+
+        private static string IconoParaMinisterio(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return "fas fa-users-cog";
+            var n = nombre.Trim();
+            if (n.Contains("Alabanza", StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Sonido",   StringComparison.OrdinalIgnoreCase))  return "fas fa-music";
+            if (n.Contains("Emisión",  StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Emision",  StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Cámara",   StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Camara",   StringComparison.OrdinalIgnoreCase))  return "fas fa-video";
+            if (n.Contains("Bienvenida", StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Seguridad",  StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Ugier",      StringComparison.OrdinalIgnoreCase)) return "fas fa-handshake";
+            if (n.Contains("Proyección", StringComparison.OrdinalIgnoreCase) ||
+                n.Contains("Proyeccion", StringComparison.OrdinalIgnoreCase)) return "fas fa-desktop";
+            if (n.Contains("Pastoral",   StringComparison.OrdinalIgnoreCase)) return "fas fa-book-open";
+            if (n.Contains("Misiones",   StringComparison.OrdinalIgnoreCase)) return "fas fa-route";
+            return "fas fa-users-cog";
+        }
 
         public IActionResult Servicios(int id)
         {
@@ -338,6 +358,7 @@ namespace CapaPresentaciónAdmin.Controllers
             ViewBag.NombreMinisterio = ministerio.Descripcion;
             ViewBag.EsAlabanza = esAlabanza;
             ViewBag.Roles = esAlabanza ? RolesAlabanza : RolesGenerales;
+            ViewBag.Icono = IconoParaMinisterio(ministerio.Descripcion);
 
             return View();
         }
