@@ -315,12 +315,31 @@ namespace CapaPresentaciónAdmin.Controllers
         // Roles para el resto de ministerios.
         private static readonly string[] RolesGenerales =
         {
-            "Proyección", "Emisión", "Cámara", "Seguridad/Ugier", "Bienvenida", "Pastoral"
+            "Proyección", "Emisión", "Cámara", "Seguridad/Ugier", "Bienvenida", "Pastoral", "Misionero/a"
         };
 
-        private static bool EsAlabanza(string descripcion) =>
+        // Roles para el ministerio de Redes Sociales.
+        private static readonly string[] RolesRedesSociales =
+        {
+            "Reel Semanal", "Publicidad culto de oración",
+            "Publicidad culto dominical", "Resumen de prédica"
+        };
+
+        private static bool EsAlabanzaOSonido(string descripcion) =>
             !string.IsNullOrWhiteSpace(descripcion) &&
-            descripcion.Trim().Equals("Alabanza", StringComparison.OrdinalIgnoreCase);
+            (descripcion.Trim().Equals("Alabanza",    StringComparison.OrdinalIgnoreCase) ||
+             descripcion.Trim().Equals("Sonido",      StringComparison.OrdinalIgnoreCase));
+
+        private static bool EsRedesSociales(string descripcion) =>
+            !string.IsNullOrWhiteSpace(descripcion) &&
+            descripcion.Contains("Redes", StringComparison.OrdinalIgnoreCase);
+
+        private static string[] RolesParaMinisterio(string descripcion)
+        {
+            if (EsAlabanzaOSonido(descripcion)) return RolesAlabanza;
+            if (EsRedesSociales(descripcion))   return RolesRedesSociales;
+            return RolesGenerales;
+        }
 
         private static string IconoParaMinisterio(string nombre)
         {
@@ -339,6 +358,7 @@ namespace CapaPresentaciónAdmin.Controllers
                 n.Contains("Proyeccion", StringComparison.OrdinalIgnoreCase)) return "fas fa-desktop";
             if (n.Contains("Pastoral",   StringComparison.OrdinalIgnoreCase)) return "fas fa-book-open";
             if (n.Contains("Misiones",   StringComparison.OrdinalIgnoreCase)) return "fas fa-route";
+            if (n.Contains("Redes",      StringComparison.OrdinalIgnoreCase)) return "fas fa-share-nodes";
             return "fas fa-users-cog";
         }
 
@@ -352,12 +372,10 @@ namespace CapaPresentaciónAdmin.Controllers
                 return RedirectToAction("Ministerios");
             }
 
-            bool esAlabanza = EsAlabanza(ministerio.Descripcion);
-
             ViewBag.IdMinisterio = ministerio.ID;
             ViewBag.NombreMinisterio = ministerio.Descripcion;
-            ViewBag.EsAlabanza = esAlabanza;
-            ViewBag.Roles = esAlabanza ? RolesAlabanza : RolesGenerales;
+            ViewBag.EsAlabanza = EsAlabanzaOSonido(ministerio.Descripcion);
+            ViewBag.Roles = RolesParaMinisterio(ministerio.Descripcion);
             ViewBag.Icono = IconoParaMinisterio(ministerio.Descripcion);
 
             return View();
