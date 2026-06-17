@@ -14,13 +14,35 @@ namespace CapaDatos
             {
                 return _context.RequerimientosCulto
                     .Where(r => r.id_culto == idCulto)
-                    .OrderBy(r => r.rol_nombre)
+                    .OrderBy(r => r.id_bloque).ThenBy(r => r.rol_nombre)
                     .ToList();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"CD_RequerimientoCulto.ListarPorCulto: {ex.Message}");
                 return new List<RequerimientoCulto>();
+            }
+        }
+
+        // Todos los nombres de rol únicos en la sede (para autocomplete)
+        public List<string> ObtenerRolesExistentes(int sedeID)
+        {
+            try
+            {
+                var query = _context.RequerimientosCulto.AsQueryable();
+                if (sedeID != 1000)
+                    query = query.Where(r => r.id_sede == sedeID);
+                return query
+                    .Select(r => r.rol_nombre!)
+                    .Where(n => n != null && n != "")
+                    .Distinct()
+                    .OrderBy(n => n)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CD_RequerimientoCulto.ObtenerRolesExistentes: {ex.Message}");
+                return new List<string>();
             }
         }
 
@@ -55,6 +77,7 @@ namespace CapaDatos
                 }
                 existente.rol_nombre = obj.rol_nombre;
                 existente.cantidad = obj.cantidad;
+                existente.id_bloque = obj.id_bloque;
                 _context.SaveChanges();
                 mensaje = "Rol actualizado correctamente.";
                 return true;
@@ -73,11 +96,7 @@ namespace CapaDatos
             try
             {
                 var obj = _context.RequerimientosCulto.Find(id);
-                if (obj == null)
-                {
-                    mensaje = "Requerimiento no encontrado.";
-                    return false;
-                }
+                if (obj == null) { mensaje = "Requerimiento no encontrado."; return false; }
                 _context.RequerimientosCulto.Remove(obj);
                 _context.SaveChanges();
                 mensaje = "Rol eliminado correctamente.";

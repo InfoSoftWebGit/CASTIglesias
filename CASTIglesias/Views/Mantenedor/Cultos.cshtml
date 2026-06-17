@@ -26,7 +26,7 @@
                 <tr>
                     <th>Nombre</th>
                     <th>Día</th>
-                    <th>Hora</th>
+                    <th>Bloques horarios</th>
                     <th style="width:110px;">Acciones</th>
                 </tr>
             </thead>
@@ -37,7 +37,7 @@
 
 <!-- Modal -->
 <div class="modal fade" id="modalCulto" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color:#1E3A8A;">
                 <h5 class="modal-title" id="modalCultoTitulo">Datos del culto</h5>
@@ -45,12 +45,13 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hidId" value="0" />
-                <div class="row g-3">
-                    <div class="col-12">
+
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-8">
                         <label class="form-label">Nombre del culto / servicio</label>
                         <input type="text" id="txtNombre" class="form-control" placeholder="Ej: Culto Dominical" autocomplete="off" />
                     </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                         <label class="form-label">Día de la semana</label>
                         <select id="cboDia" class="form-select">
                             <option value="1">Lunes</option>
@@ -62,11 +63,21 @@
                             <option value="7" selected>Domingo</option>
                         </select>
                     </div>
-                    <div class="col-sm-6">
-                        <label class="form-label">Hora</label>
-                        <input type="time" id="txtHora" class="form-control" value="10:00" />
-                    </div>
                 </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0 fw-semibold">Bloques horarios</label>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarBloque()">
+                        <i class="fas fa-plus me-1"></i> Añadir bloque
+                    </button>
+                </div>
+                <div id="contenedorBloques">
+                    <!-- filas de bloques se inyectan aquí -->
+                </div>
+                <div id="sinBloques" class="text-muted small text-center py-2">
+                    Sin bloques horarios. Pulsa "Añadir bloque" para definir el horario.
+                </div>
+
                 <div id="mensajeError" class="alert alert-danger d-none mt-3"></div>
             </div>
             <div class="modal-footer">
@@ -85,26 +96,44 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    const urlListar  = '@Url.Action("ListarCultos",  "Mantenedor")';
-    const urlGuardar = '@Url.Action("GuardarCulto",  "Mantenedor")';
-    const urlEliminar = '@Url.Action("EliminarCulto", "Mantenedor")';
+    const urlListar        = '@Url.Action("ListarCultos",       "Mantenedor")';
+    const urlListarBloques = '@Url.Action("ListarBloquesCulto", "Mantenedor")';
+    const urlGuardar       = '@Url.Action("GuardarCulto",       "Mantenedor")';
+    const urlEliminar      = '@Url.Action("EliminarCulto",      "Mantenedor")';
 
     const dias = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
     let tabla;
+    // cache de bloques por culto para mostrarlos en la tabla
+    let cacheBloques = {};
 
     $(document).ready(function () {
         tabla = $('#tablaCultos').DataTable({
-            ajax: { url: urlListar, dataSrc: 'data' },
+            ajax: {
+                url: urlListar,
+                dataSrc: 'data',
+                complete: function () {
+                    // cargar bloques para todos los cultos de la tabla
+                    tabla.rows().data().each(function (row) {
+                        cargarBloquesTabla(row.id_culto);
+                    });
+                }
+            },
             columns: [
                 { data: 'nombre' },
                 { data: 'dia_semana', render: d => dias[d] || d },
-                { data: 'hora', render: d => d || '—' },
+                {
+                    data: 'id_culto',
+                    orderable: false,
+                    render: function (id) {
+                        return `<span id="bloques-${id}" class="text-muted small">—</span>`;
+                    }
+                },
                 {
                     data: null,
                     orderable: false,
                     render: function (d, t, row) {
-                        return `<button class="btn btn-sm btn-warning me-1" onclick='abrirModal(${row.id_culto}, ${JSON.stringify(row)})'>
+                        return `<button class="btn btn-sm btn-warning me-1" onclick="abrirModal(${row.id_culto})">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn btn-sm btn-danger" onclick="eliminarCulto(${row.id_culto})">
@@ -117,14 +146,94 @@
         });
     });
 
-    function abrirModal(id, row) {
+    function cargarBloquesTabla(idCulto) {
+        $.get(urlListarBloques, { idCulto }, function (res) {
+            const bloques = res.data || [];
+            const texto = bloques.length === 0
+                ? '—'
+                : bloques.map((b, i) => `Bloque ${i+1}: ${b.hora_inicio}–${b.hora_fin}`).join(' | ');
+            $(`#bloques-${idCulto}`).text(texto);
+        });
+    }
+
+    // ─── Modal ───────────────────────────────────────────────────────────────
+    let bloquesModal = []; // array de { id_bloque, hora_inicio, hora_fin }
+
+    function abrirModal(id) {
         $('#hidId').val(id || 0);
-        $('#txtNombre').val(row ? row.nombre : '');
-        $('#cboDia').val(row ? row.dia_semana : 7);
-        $('#txtHora').val(row ? (row.hora || '10:00') : '10:00');
+        $('#txtNombre').val('');
+        $('#cboDia').val(7);
         $('#mensajeError').addClass('d-none');
+        bloquesModal = [];
+        $('#contenedorBloques').empty();
+        $('#sinBloques').removeClass('d-none');
+
+        if (id) {
+            // Cargar datos del culto desde la tabla
+            const row = tabla.rows().data().toArray().find(r => r.id_culto === id);
+            if (row) {
+                $('#txtNombre').val(row.nombre);
+                $('#cboDia').val(row.dia_semana);
+            }
+            // Cargar bloques existentes
+            $.get(urlListarBloques, { idCulto: id }, function (res) {
+                (res.data || []).forEach(function (b) {
+                    bloquesModal.push({ id_bloque: b.id_bloque, hora_inicio: b.hora_inicio, hora_fin: b.hora_fin });
+                    renderizarBloques();
+                });
+            });
+        }
+
         $('#modalCultoTitulo').text(id ? 'Editar culto' : 'Nuevo culto');
         new bootstrap.Modal(document.getElementById('modalCulto')).show();
+    }
+
+    function agregarBloque() {
+        bloquesModal.push({ id_bloque: 0, hora_inicio: '09:00', hora_fin: '11:00' });
+        renderizarBloques();
+    }
+
+    function eliminarBloqueModal(idx) {
+        bloquesModal.splice(idx, 1);
+        renderizarBloques();
+    }
+
+    function renderizarBloques() {
+        const cont = $('#contenedorBloques').empty();
+        if (bloquesModal.length === 0) {
+            $('#sinBloques').removeClass('d-none');
+            return;
+        }
+        $('#sinBloques').addClass('d-none');
+        bloquesModal.forEach(function (b, i) {
+            cont.append(`
+                <div class="row g-2 align-items-center mb-2" id="fila-bloque-${i}">
+                    <div class="col-auto">
+                        <span class="badge bg-secondary">Bloque ${i + 1}</span>
+                    </div>
+                    <div class="col">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Desde</span>
+                            <input type="time" class="form-control bloque-inicio" data-idx="${i}" value="${b.hora_inicio || '09:00'}" />
+                            <span class="input-group-text">Hasta</span>
+                            <input type="time" class="form-control bloque-fin" data-idx="${i}" value="${b.hora_fin || '11:00'}" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarBloqueModal(${i})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>`);
+        });
+
+        // Sincronizar cambios de inputs con el array
+        $('.bloque-inicio').off('change').on('change', function () {
+            bloquesModal[$(this).data('idx')].hora_inicio = $(this).val();
+        });
+        $('.bloque-fin').off('change').on('change', function () {
+            bloquesModal[$(this).data('idx')].hora_fin = $(this).val();
+        });
     }
 
     function guardarCulto() {
@@ -134,6 +243,10 @@
             return;
         }
 
+        // Leer valores actuales de los inputs (por si no dispararon change)
+        $('.bloque-inicio').each(function () { bloquesModal[$(this).data('idx')].hora_inicio = $(this).val(); });
+        $('.bloque-fin').each(function ()    { bloquesModal[$(this).data('idx')].hora_fin    = $(this).val(); });
+
         $.ajax({
             url: urlGuardar,
             type: 'POST',
@@ -142,7 +255,7 @@
                 id_culto:   parseInt($('#hidId').val()),
                 nombre:     nombre,
                 dia_semana: parseInt($('#cboDia').val()),
-                hora:       $('#txtHora').val()
+                bloques:    bloquesModal
             }),
             success: function (res) {
                 if (!res.resultado) {
@@ -150,7 +263,7 @@
                     return;
                 }
                 bootstrap.Modal.getInstance(document.getElementById('modalCulto')).hide();
-                tabla.ajax.reload();
+                tabla.ajax.reload(null, false);
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
             }
         });
@@ -159,7 +272,7 @@
     function eliminarCulto(id) {
         Swal.fire({
             title: '¿Eliminar este culto?',
-            text: 'Se eliminarán también los roles configurados para él.',
+            text: 'Se eliminarán también sus bloques y los roles configurados.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -169,7 +282,7 @@
             if (!result.isConfirmed) return;
             $.post(urlEliminar, { id }, function (res) {
                 if (res.resultado) {
-                    tabla.ajax.reload();
+                    tabla.ajax.reload(null, false);
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
                 } else {
                     Swal.fire('Error', res.mensaje, 'error');

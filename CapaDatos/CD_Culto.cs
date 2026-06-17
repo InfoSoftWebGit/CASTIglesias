@@ -13,10 +13,10 @@ namespace CapaDatos
             try
             {
                 if (sedeID == 1000)
-                    return _context.Cultos.OrderBy(c => c.dia_semana).ThenBy(c => c.hora).ToList();
+                    return _context.Cultos.OrderBy(c => c.dia_semana).ThenBy(c => c.nombre).ToList();
                 return _context.Cultos
                     .Where(c => c.id_sede == sedeID)
-                    .OrderBy(c => c.dia_semana).ThenBy(c => c.hora)
+                    .OrderBy(c => c.dia_semana).ThenBy(c => c.nombre)
                     .ToList();
             }
             catch (Exception ex)
@@ -26,46 +26,75 @@ namespace CapaDatos
             }
         }
 
-        public bool Registrar(Culto obj, out string mensaje)
+        // Guarda culto + sus bloques en una transacción
+        public bool GuardarConBloques(CultoConBloquesDTO dto, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
+            using var tx = _context.Database.BeginTransaction();
             try
             {
-                _context.Cultos.Add(obj);
-                _context.SaveChanges();
-                mensaje = "Culto registrado correctamente.";
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"CD_Culto.Registrar: {ex.Message}");
-                mensaje = $"Error al registrar: {ex.Message}";
-                return false;
-            }
-        }
-
-        public bool Editar(Culto obj, out string mensaje)
-        {
-            mensaje = string.Empty;
-            try
-            {
-                var existente = _context.Cultos.Find(obj.id_culto);
-                if (existente == null || (existente.id_sede != obj.id_sede && obj.id_sede != 1000))
+                Culto culto;
+                if (dto.id_culto == 0)
                 {
-                    mensaje = "Culto no encontrado o sin permiso.";
-                    return false;
+                    culto = new Culto { nombre = dto.nombre, dia_semana = dto.dia_semana, id_sede = sedeID };
+                    _context.Cultos.Add(culto);
+                    _context.SaveChanges();
                 }
-                existente.nombre = obj.nombre;
-                existente.hora = obj.hora;
-                existente.dia_semana = obj.dia_semana;
+                else
+                {
+                    culto = _context.Cultos.Find(dto.id_culto)!;
+                    if (culto == null || (culto.id_sede != sedeID && sedeID != 1000))
+                    {
+                        mensaje = "Culto no encontrado o sin permiso.";
+                        return false;
+                    }
+                    culto.nombre = dto.nombre;
+                    culto.dia_semana = dto.dia_semana;
+                    _context.SaveChanges();
+                }
+
+                // Sincronizar bloques: comparar IDs existentes vs enviados
+                var bloquesExistentes = _context.BloquesCulto.Where(b => b.id_culto == culto.id_culto).ToList();
+                var idsEnviados = dto.bloques.Where(b => b.id_bloque > 0).Select(b => b.id_bloque).ToHashSet();
+
+                // Eliminar bloques que ya no están (y sus requerimientos)
+                foreach (var b in bloquesExistentes.Where(b => !idsEnviados.Contains(b.id_bloque)))
+                {
+                    var reqs = _context.RequerimientosCulto.Where(r => r.id_bloque == b.id_bloque).ToList();
+                    _context.RequerimientosCulto.RemoveRange(reqs);
+                    _context.BloquesCulto.Remove(b);
+                }
                 _context.SaveChanges();
-                mensaje = "Culto actualizado correctamente.";
+
+                // Añadir / actualizar bloques enviados
+                for (int i = 0; i < dto.bloques.Count; i++)
+                {
+                    var bDto = dto.bloques[i];
+                    bDto.orden = i + 1;
+                    if (bDto.id_bloque == 0)
+                    {
+                        bDto.id_culto = culto.id_culto;
+                        bDto.id_sede = sedeID;
+                        _context.BloquesCulto.Add(bDto);
+                    }
+                    else
+                    {
+                        var existente = bloquesExistentes.First(b => b.id_bloque == bDto.id_bloque);
+                        existente.hora_inicio = bDto.hora_inicio;
+                        existente.hora_fin = bDto.hora_fin;
+                        existente.orden = bDto.orden;
+                    }
+                }
+                _context.SaveChanges();
+                tx.Commit();
+                mensaje = dto.id_culto == 0 ? "Culto registrado correctamente." : "Culto actualizado correctamente.";
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_Culto.Editar: {ex.Message}");
-                mensaje = $"Error al editar: {ex.Message}";
+                tx.Rollback();
+                Console.WriteLine($"CD_Culto.GuardarConBloques: {ex.Message}");
+                mensaje = $"Error al guardar: {ex.Message}";
                 return false;
             }
         }
@@ -81,9 +110,10 @@ namespace CapaDatos
                     mensaje = "Culto no encontrado o sin permiso.";
                     return false;
                 }
-                // Eliminar requerimientos asociados
                 var reqs = _context.RequerimientosCulto.Where(r => r.id_culto == id).ToList();
                 _context.RequerimientosCulto.RemoveRange(reqs);
+                var bloques = _context.BloquesCulto.Where(b => b.id_culto == id).ToList();
+                _context.BloquesCulto.RemoveRange(bloques);
                 _context.Cultos.Remove(obj);
                 _context.SaveChanges();
                 mensaje = "Culto eliminado correctamente.";

@@ -11,7 +11,7 @@
     </ol>
 
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-church me-1"></i>
@@ -19,8 +19,8 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
-                        Selecciona un culto o servicio y define cuántas personas son necesarias en cada rol.
-                        Estos datos se usarán para generar calendarios de servidores.
+                        Selecciona un culto o servicio y define cuántas personas necesitas en cada rol,
+                        pudiendo especificarlo a nivel general o por bloque horario.
                     </p>
 
                     <div class="mb-4">
@@ -30,28 +30,14 @@
                         </select>
                     </div>
 
+                    <!-- Panel principal (oculto hasta seleccionar culto) -->
                     <div id="panelRequerimientos" class="d-none">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0" id="lblCultoSeleccionado"></h6>
-                            <button class="btn btn-success btn-sm" onclick="abrirModalRol(0)">
-                                <i class="fas fa-plus me-1"></i> Añadir rol
-                            </button>
-                        </div>
 
-                        <table class="table table-sm table-bordered table-striped" id="tablaRoles">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Rol / Función</th>
-                                    <th style="width:90px;" class="text-center">Cantidad</th>
-                                    <th style="width:90px;" class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyRoles"></tbody>
-                        </table>
+                        <!-- Tabs: General + un tab por bloque -->
+                        <ul class="nav nav-tabs mb-3" id="tabsBloques" role="tablist"></ul>
 
-                        <div id="sinRoles" class="text-muted text-center py-3 d-none">
-                            No hay roles configurados para este servicio todavía.
-                        </div>
+                        <!-- Contenido de cada tab -->
+                        <div class="tab-content" id="tabsContenido"></div>
                     </div>
 
                     <div id="panelVacio" class="text-muted text-center py-4">
@@ -62,20 +48,16 @@
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-3">
             <div class="card mb-4 border-info">
                 <div class="card-header bg-info text-white">
                     <i class="fas fa-info-circle me-1"></i> Ayuda
                 </div>
                 <div class="card-body small text-muted">
-                    <p>Los cultos y servicios se gestionan desde <strong>Control → Cultos y Servicios</strong>.</p>
-                    <p>Aquí defines cuántas personas necesitas en cada rol para cada servicio. Por ejemplo:</p>
-                    <ul class="mb-0">
-                        <li>1 Guitarrista</li>
-                        <li>1 Pianista</li>
-                        <li>1 Sonidista</li>
-                        <li>3 Seguridad/Ugier</li>
-                    </ul>
+                    <p>Los cultos y sus bloques se gestionan desde <strong>Control → Cultos y Servicios</strong>.</p>
+                    <p><strong>General:</strong> roles que aplican a todo el culto, sin importar el bloque.</p>
+                    <p><strong>Bloque N:</strong> roles específicos para ese tramo horario.</p>
+                    <p>El autocomplete del campo "Rol" te sugiere roles ya usados en otros servicios.</p>
                 </div>
             </div>
         </div>
@@ -91,10 +73,12 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <input type="hidden" id="hidReqId" value="0" />
+                <input type="hidden" id="hidReqId"    value="0" />
+                <input type="hidden" id="hidBloqueId" value="" />
                 <div class="mb-3">
                     <label class="form-label">Rol / Función</label>
                     <input type="text" id="txtRolNombre" class="form-control" placeholder="Ej: Guitarrista" autocomplete="off" />
+                    <div class="form-text">Empieza a escribir para ver sugerencias.</div>
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Cantidad necesaria</label>
@@ -113,28 +97,78 @@
 </div>
 
 @section scripts {
+<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css" />
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-    const urlCultos        = '@Url.Action("ObtenerCultosParaAjustes", "Ajustes")';
-    const urlListarReqs    = '@Url.Action("ListarRequerimientos",     "Ajustes")';
-    const urlGuardarReq    = '@Url.Action("GuardarRequerimiento",     "Ajustes")';
-    const urlEliminarReq   = '@Url.Action("EliminarRequerimiento",    "Ajustes")';
+    const urlCultos      = '@Url.Action("ObtenerCultosParaAjustes", "Ajustes")';
+    const urlListarReqs  = '@Url.Action("ListarRequerimientos",     "Ajustes")';
+    const urlGuardarReq  = '@Url.Action("GuardarRequerimiento",     "Ajustes")';
+    const urlEliminarReq = '@Url.Action("EliminarRequerimiento",    "Ajustes")';
+    const urlRoles       = '@Url.Action("ObtenerRolesExistentes",   "Ajustes")';
 
     const dias = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+    // Roles comunes predefinidos — siempre disponibles en el autocomplete
+    const rolesBase = [
+        'Vocalista', 'Vocalista Principal', 'Coro', 'Baterista',
+        'Guitarrista', 'Guitarrista Eléctrico', 'Bajista', 'Pianista',
+        'Sonidista', 'Proyección', 'Emisión', 'Cámara',
+        'Seguridad/Ugier', 'Bienvenida', 'Pastoral', 'Predicador/a', 'Misionero/a'
+    ];
+
     let cultoActual = null;
+    let rolesExistentes = [...rolesBase]; // empezamos con los predefinidos
+
+    function actualizarAutocomplete() {
+        const unicos = [...new Set(rolesExistentes)].sort();
+        $('#txtRolNombre').autocomplete('option', 'source', function (req, resp) {
+            const term = req.term.toLowerCase();
+            resp(unicos.filter(r => r.toLowerCase().includes(term)));
+        });
+    }
 
     $(document).ready(function () {
-        $.get(urlCultos, function (res) {
-            if (!res.success) return;
-            const cbo = $('#cboCulto');
-            (res.data || []).forEach(function (c) {
-                const dia = dias[c.dia_semana] || '';
-                const hora = c.hora ? ` ${c.hora}` : '';
-                cbo.append($('<option>').val(c.id_culto).text(`${c.nombre} — ${dia}${hora}`));
-            });
+        // Inicializar autocomplete antes de cargar datos
+        $('#txtRolNombre').autocomplete({
+            source: function (req, resp) {
+                const term = req.term.toLowerCase();
+                const unicos = [...new Set(rolesExistentes)].sort();
+                resp(unicos.filter(r => r.toLowerCase().includes(term)));
+            },
+            minLength: 1
         });
 
+        // Cargar cultos
+        $.get(urlCultos, function (res) {
+            if (!res.success) {
+                console.error('Error al cargar cultos:', res.mensaje);
+                return;
+            }
+            const cbo = $('#cboCulto');
+            const data = res.data || [];
+            if (data.length === 0) {
+                cbo.append('<option disabled>— No hay cultos creados todavía —</option>');
+                return;
+            }
+            data.forEach(function (c) {
+                const dia = dias[c.dia_semana] || '';
+                cbo.append($('<option>').val(c.id_culto).text(`${c.nombre} — ${dia}`));
+            });
+        }).fail(function (xhr) {
+            console.error('Fallo al cargar cultos:', xhr.statusText);
+        });
+
+        // Enriquecer autocomplete con roles ya guardados en BD
+        $.get(urlRoles, function (res) {
+            if (res.success && res.data && res.data.length > 0) {
+                rolesExistentes = [...new Set([...rolesBase, ...res.data])];
+                actualizarAutocomplete();
+            }
+        });
+
+        // Cambio de culto
         $('#cboCulto').on('change', function () {
             const id = parseInt($(this).val());
             if (!id) {
@@ -144,43 +178,98 @@
                 return;
             }
             cultoActual = id;
-            const texto = $(this).find('option:selected').text();
-            $('#lblCultoSeleccionado').text(texto);
             $('#panelVacio').addClass('d-none');
             $('#panelRequerimientos').removeClass('d-none');
-            cargarRoles(id);
+            cargarRequerimientos(id);
         });
     });
 
-    function cargarRoles(idCulto) {
+    function cargarRequerimientos(idCulto) {
         $.get(urlListarReqs, { idCulto }, function (res) {
-            const tbody = $('#tbodyRoles').empty();
-            const lista = res.data || [];
-            if (lista.length === 0) {
-                $('#sinRoles').removeClass('d-none');
-                return;
-            }
-            $('#sinRoles').addClass('d-none');
-            lista.forEach(function (r) {
-                tbody.append(`
-                    <tr>
-                        <td>${r.rol_nombre}</td>
-                        <td class="text-center">${r.cantidad}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-warning me-1" onclick='abrirModalRol(${r.id_req}, ${JSON.stringify(r)})'>
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarRol(${r.id_req})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>`);
-            });
+            if (!res.success) return;
+
+            const bloques = res.bloques || [];
+            const reqs    = res.data    || [];
+
+            construirTabs(bloques, reqs);
         });
     }
 
-    function abrirModalRol(id, row) {
+    function construirTabs(bloques, reqs) {
+        const tabsList    = $('#tabsBloques').empty();
+        const tabsContent = $('#tabsContenido').empty();
+
+        // Siempre hay un tab "General"
+        const tabs = [{ id: 'general', label: 'General', id_bloque: null }];
+        bloques.forEach(function (b, i) {
+            tabs.push({ id: `bloque-${b.id_bloque}`, label: `Bloque ${i + 1} (${b.hora_inicio}–${b.hora_fin})`, id_bloque: b.id_bloque });
+        });
+
+        tabs.forEach(function (tab, idx) {
+            const active = idx === 0 ? 'active' : '';
+            const show   = idx === 0 ? 'show active' : '';
+
+            // Tab button
+            tabsList.append(`
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link ${active}" id="tab-${tab.id}" data-bs-toggle="tab"
+                            data-bs-target="#pane-${tab.id}" type="button" role="tab">
+                        ${tab.label}
+                    </button>
+                </li>`);
+
+            // Tab pane
+            const reqsFiltrados = reqs.filter(r =>
+                tab.id_bloque === null ? r.id_bloque === null : r.id_bloque === tab.id_bloque
+            );
+
+            tabsContent.append(`
+                <div class="tab-pane fade ${show}" id="pane-${tab.id}" role="tabpanel">
+                    <div class="d-flex justify-content-end mb-2">
+                        <button class="btn btn-success btn-sm"
+                                onclick="abrirModalRol(0, ${tab.id_bloque === null ? 'null' : tab.id_bloque})">
+                            <i class="fas fa-plus me-1"></i> Añadir rol
+                        </button>
+                    </div>
+                    ${renderTablaRoles(reqsFiltrados, `tabla-${tab.id}`)}
+                </div>`);
+        });
+    }
+
+    function renderTablaRoles(lista, tablaId) {
+        if (lista.length === 0) {
+            return `<p class="text-muted text-center py-3" id="vacio-${tablaId}">Sin roles configurados todavía.</p>`;
+        }
+        let rows = lista.map(r => `
+            <tr>
+                <td>${r.rol_nombre}</td>
+                <td class="text-center">${r.cantidad}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-warning me-1"
+                            onclick='abrirModalRol(${r.id_req}, ${r.id_bloque === null ? "null" : r.id_bloque}, ${JSON.stringify(r)})'>
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarRol(${r.id_req})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>`).join('');
+        return `
+            <table class="table table-sm table-bordered table-striped" id="${tablaId}">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Rol / Función</th>
+                        <th style="width:90px;" class="text-center">Cantidad</th>
+                        <th style="width:90px;" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+    }
+
+    function abrirModalRol(id, idBloque, row) {
         $('#hidReqId').val(id || 0);
+        $('#hidBloqueId').val(idBloque ?? '');
         $('#txtRolNombre').val(row ? row.rol_nombre : '');
         $('#txtCantidad').val(row ? row.cantidad : 1);
         $('#mensajeErrorRol').addClass('d-none');
@@ -189,8 +278,10 @@
     }
 
     function guardarRol() {
-        const rolNombre = $('#txtRolNombre').val().trim();
-        const cantidad  = parseInt($('#txtCantidad').val());
+        const rolNombre  = $('#txtRolNombre').val().trim();
+        const cantidad   = parseInt($('#txtCantidad').val()) || 1;
+        const idBloqueRaw = $('#hidBloqueId').val();
+        const idBloque   = idBloqueRaw === '' || idBloqueRaw === 'null' ? null : parseInt(idBloqueRaw);
 
         if (!rolNombre) {
             $('#mensajeErrorRol').removeClass('d-none').text('El nombre del rol es obligatorio.');
@@ -205,8 +296,9 @@
             data: JSON.stringify({
                 id_req:     parseInt($('#hidReqId').val()),
                 id_culto:   cultoActual,
+                id_bloque:  idBloque,
                 rol_nombre: rolNombre,
-                cantidad:   cantidad || 1
+                cantidad:   cantidad
             }),
             success: function (res) {
                 if (!res.success) {
@@ -214,7 +306,12 @@
                     return;
                 }
                 bootstrap.Modal.getInstance(document.getElementById('modalRol')).hide();
-                cargarRoles(cultoActual);
+                // Enriquecer autocomplete si el rol es nuevo
+                if (!rolesExistentes.includes(rolNombre)) {
+                    rolesExistentes.push(rolNombre);
+                    actualizarAutocomplete();
+                }
+                cargarRequerimientos(cultoActual);
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
             }
         });
@@ -232,7 +329,7 @@
             if (!result.isConfirmed) return;
             $.post(urlEliminarReq, { id }, function (res) {
                 if (res.success) {
-                    cargarRoles(cultoActual);
+                    cargarRequerimientos(cultoActual);
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
                 } else {
                     Swal.fire('Error', res.mensaje, 'error');
@@ -241,4 +338,7 @@
         });
     }
 </script>
+<style>
+    .ui-autocomplete { z-index: 9999 !important; }
+</style>
 }

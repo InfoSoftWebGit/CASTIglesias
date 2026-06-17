@@ -12,6 +12,9 @@ namespace CapaNegocio
         public List<RequerimientoCulto> ListarPorCulto(int idCulto)
             => _capaDatos.ListarPorCulto(idCulto);
 
+        public List<string> ObtenerRolesExistentes(int sedeID)
+            => _capaDatos.ObtenerRolesExistentes(sedeID);
+
         public bool Registrar(RequerimientoCulto obj, int sedeID, out string mensaje)
         {
             obj.id_sede = sedeID;

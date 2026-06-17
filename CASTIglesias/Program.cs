@@ -75,6 +75,7 @@ builder.Services.AddScoped<CD_Gasto>();
 builder.Services.AddScoped<CN_Gasto>();
 
 builder.Services.AddScoped<CD_Culto>();
+builder.Services.AddScoped<CD_BloqueCulto>();
 builder.Services.AddScoped<CN_Culto>();
 builder.Services.AddScoped<CD_RequerimientoCulto>();
 builder.Services.AddScoped<CN_RequerimientoCulto>();

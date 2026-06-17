@@ -123,7 +123,7 @@ namespace CASTIglesias.Controllers
             {
                 int sedeID = ObtenerIdSedeUsuario();
                 var cultos = _cnCulto.Listar(sedeID)
-                    .Select(c => new { c.id_culto, c.nombre, c.hora, c.dia_semana })
+                    .Select(c => new { c.id_culto, c.nombre, c.dia_semana })
                     .ToList();
                 return Json(new { success = true, data = cultos });
             }
@@ -138,8 +138,25 @@ namespace CASTIglesias.Controllers
         {
             try
             {
-                var lista = _cnRequerimiento.ListarPorCulto(idCulto);
-                return Json(new { success = true, data = lista });
+                int sedeID = ObtenerIdSedeUsuario();
+                var reqs = _cnRequerimiento.ListarPorCulto(idCulto);
+                var bloques = _cnCulto.ListarBloques(idCulto);
+                return Json(new { success = true, data = reqs, bloques });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerRolesExistentes()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var roles = _cnRequerimiento.ObtenerRolesExistentes(sedeID);
+                return Json(new { success = true, data = roles });
             }
             catch (Exception ex)
             {

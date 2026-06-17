@@ -451,18 +451,27 @@ namespace CapaPresentaciónAdmin.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult ListarBloquesCulto(int idCulto)
+        {
+            try
+            {
+                var bloques = _cnCulto.ListarBloques(idCulto);
+                return Json(new { data = bloques });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new List<object>(), error = ex.Message });
+            }
+        }
+
         [HttpPost]
-        public JsonResult GuardarCulto([FromBody] CapaEntidad.Culto obj)
+        public JsonResult GuardarCulto([FromBody] CapaEntidad.CultoConBloquesDTO dto)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                bool ok;
-                string mensaje;
-                if (obj.id_culto == 0)
-                    ok = _cnCulto.Registrar(obj, sedeID, out mensaje);
-                else
-                    ok = _cnCulto.Editar(obj, sedeID, out mensaje);
+                bool ok = _cnCulto.Guardar(dto, sedeID, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
             catch (Exception ex)
