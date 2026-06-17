@@ -17,6 +17,7 @@ namespace CapaPresentaciónAdmin.Controllers
     public class MantenedorController : BaseController
     {
         
+        private readonly CN_Miembros _cnMiembros;
         private readonly CN_Diezmo _cnDiezmo;
         private readonly CN_Usuarios _cnUsuarios;
         private readonly CN_Zonas _cnZonas;
@@ -38,6 +39,7 @@ namespace CapaPresentaciónAdmin.Controllers
             CN_Paises cnPaises,
             CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos)
         {
+            _cnMiembros = negocioMiembros;
             _cnDiezmo = negocioDiezmo;
             _cnUsuarios = negocioUsuarios;
             _cnZonas = cnZonas;
@@ -298,6 +300,93 @@ namespace CapaPresentaciónAdmin.Controllers
             }
         }
 #endregion MINISTERIOS
+
+
+        ///////////////////////////// APARTADO DE SERVICIOS //////////////////////////////
+        #region Servicios
+
+        // Roles musicales para el ministerio de Alabanza.
+        private static readonly string[] RolesAlabanza =
+        {
+            "Vocalista", "Sonidista", "Baterista", "Guitarrista",
+            "Guitarrista Eléctrico", "Bajista", "Pianista"
+        };
+
+        // Roles para el resto de ministerios.
+        private static readonly string[] RolesGenerales =
+        {
+            "Proyección", "Emisión", "Cámara", "Seguridad/Ugier", "Bienvenida", "Pastoral"
+        };
+
+        private static bool EsAlabanza(string descripcion) =>
+            !string.IsNullOrWhiteSpace(descripcion) &&
+            descripcion.Trim().Equals("Alabanza", StringComparison.OrdinalIgnoreCase);
+
+        public IActionResult Servicios(int id)
+        {
+            int sedeID = ObtenerIdSedeUsuario();
+
+            var ministerio = _cnMinisterio.ListarMinisterios(sedeID).FirstOrDefault(m => m.ID == id);
+            if (ministerio == null)
+            {
+                return RedirectToAction("Ministerios");
+            }
+
+            bool esAlabanza = EsAlabanza(ministerio.Descripcion);
+
+            ViewBag.IdMinisterio = ministerio.ID;
+            ViewBag.NombreMinisterio = ministerio.Descripcion;
+            ViewBag.EsAlabanza = esAlabanza;
+            ViewBag.Roles = esAlabanza ? RolesAlabanza : RolesGenerales;
+
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarMiembrosServicio(int idMinisterio)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnMiembros.ListarMiembrosPorMinisterio(idMinisterio, sedeID);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new List<object>(), error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult GuardarMiembroServicio(int idMiembro, int idMinisterio, string rol)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var ok = _cnMiembros.AsignarMiembroAServicio(idMiembro, idMinisterio, rol, sedeID, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarMiembroServicio(int idMiembro, int idMinisterio)
+        {
+            try
+            {
+                var ok = _cnMiembros.QuitarMiembroDeServicio(idMiembro, idMinisterio, out string mensaje);
+                return Json(new { resultado = ok, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ex.Message });
+            }
+        }
+
+        #endregion
 
 
         ///////////////////////////// APARTADO DE USUARIOS //////////////////////////////

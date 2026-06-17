@@ -194,6 +194,42 @@ namespace CapaNegocio
             }
         }
 
+        // ---------------------------------------------------------
+        // SERVICIOS: MIEMBROS Y ROLES POR MINISTERIO
+        // ---------------------------------------------------------
+        public List<MiembroServicioDTO> ListarMiembrosPorMinisterio(int idMinisterio, int sedeID)
+        {
+            return _capaDatos.ListarMiembrosPorMinisterio(idMinisterio, sedeID);
+        }
+
+        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, int sedeID, out string mensaje)
+        {
+            mensaje = string.Empty;
+
+            if (idMiembro <= 0)
+            {
+                mensaje = "Debe seleccionar un miembro válido.";
+                return false;
+            }
+            if (idMinisterio <= 0)
+            {
+                mensaje = "Ministerio no válido.";
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(rol))
+            {
+                mensaje = "Debe asignar un rol al miembro.";
+                return false;
+            }
+
+            return _capaDatos.AsignarMiembroAServicio(idMiembro, idMinisterio, rol.Trim(), sedeID, out mensaje);
+        }
+
+        public bool QuitarMiembroDeServicio(int idMiembro, int idMinisterio, out string mensaje)
+        {
+            return _capaDatos.QuitarMiembroDeServicio(idMiembro, idMinisterio, out mensaje);
+        }
+
         #endregion
 
         #region Visitantes

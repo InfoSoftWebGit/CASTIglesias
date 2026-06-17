@@ -22,7 +22,6 @@ namespace CASTIglesias.Controllers
         private readonly CN_Miembros _negocioMiembros;
         private readonly CN_Usuarios _cnUsuario;
         private readonly CN_Gasto _cnGasto;
-        private readonly CN_GastoMiembro _cnGastoMiembro;
         private readonly CN_Zonas _cnZonas;
 
         public EconomiaController(
@@ -33,7 +32,6 @@ namespace CASTIglesias.Controllers
             CN_Usuarios negocioUsuarios,
             CN_Permisos negocioPermisos,
             CN_Gasto cnGasto,
-            CN_GastoMiembro cnGastoMiembro,
             CN_Zonas cnZonas
         ) : base(negocioSedes,negocioPermisos)
         {
@@ -42,7 +40,6 @@ namespace CASTIglesias.Controllers
             _negocioMiembros = negocioMiembro;
             _cnUsuario = negocioUsuarios;
             _cnGasto = cnGasto;
-            _cnGastoMiembro = cnGastoMiembro;
             _cnZonas = cnZonas;
         }
 
@@ -538,30 +535,15 @@ namespace CASTIglesias.Controllers
         #endregion
 
         // ------------------------------------------------------------------------------------------------
-        #region GastosMiembros
-
-        public IActionResult GastosMiembros()
-        {
-            var permisos = ViewBag.PermisosMiembro as Permisos;
-            bool tieneAccesoTotal = HttpContext.User.IsInRole("AdminGlobal")
-                || HttpContext.User.IsInRole("PastorGeneral")
-                || HttpContext.User.IsInRole("PastorSede");
-
-            if (!tieneAccesoTotal && (permisos == null || !permisos.GastosMiembros))
-                return RedirectToAction("NoAutorizado", "Home");
-
-            int sedeID = ObtenerIdSedeUsuario();
-            ViewBag.Zonas = _cnZonas.ListarZonas(sedeID);
-            return View();
-        }
+        #region DetallePago
 
         [HttpGet]
-        public JsonResult ListarGastosMiembros()
+        public JsonResult ListarDetallePagos()
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                var data = _cnGastoMiembro.ListarGastos(sedeID);
+                var data = _cnGasto.ListarDetallePagos(sedeID);
                 return Json(new { data });
             }
             catch (Exception ex)
@@ -571,7 +553,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
-        public JsonResult GuardarGastoMiembro(GastoMiembro obj)
+        public JsonResult GuardarDetallePago(DetallePago obj)
         {
             try
             {
@@ -581,10 +563,10 @@ namespace CASTIglesias.Controllers
 
                 string mensaje;
                 int resultado;
-                if (obj.id_gasto == 0)
-                    resultado = _cnGastoMiembro.IngresarGasto(obj, sedeID, out mensaje);
+                if (obj.id_detalle == 0)
+                    resultado = _cnGasto.IngresarDetallePago(obj, sedeID, out mensaje);
                 else
-                    resultado = _cnGastoMiembro.EditarGasto(obj, sedeID, out mensaje) ? obj.id_gasto : 0;
+                    resultado = _cnGasto.EditarDetallePago(obj, sedeID, out mensaje) ? obj.id_detalle : 0;
 
                 return Json(new { resultado, mensaje });
             }
@@ -599,12 +581,12 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
-        public JsonResult EliminarGastoMiembro(int id)
+        public JsonResult EliminarDetallePago(int id)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                bool resultado = _cnGastoMiembro.EliminarGasto(id, sedeID, out string mensaje);
+                bool resultado = _cnGasto.EliminarDetallePago(id, sedeID, out string mensaje);
                 return Json(new { resultado, mensaje });
             }
             catch (Exception ex)

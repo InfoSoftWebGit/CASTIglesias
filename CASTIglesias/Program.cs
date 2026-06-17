@@ -1,7 +1,9 @@
 ﻿using CapaDatos;
 using CapaNegocio;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,8 +73,6 @@ builder.Services.AddScoped<CN_Jovenes>();
 
 builder.Services.AddScoped<CD_Gasto>();
 builder.Services.AddScoped<CN_Gasto>();
-builder.Services.AddScoped<CD_GastoMiembro>();
-builder.Services.AddScoped<CN_GastoMiembro>();
 
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -102,6 +102,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Forzar InvariantCulture en el binding de formularios (evita que el punto
+// sea interpretado como separador de miles en sistemas con cultura es-ES)
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
+    SupportedCultures    = new[] { CultureInfo.InvariantCulture },
+    SupportedUICultures  = new[] { CultureInfo.InvariantCulture }
+});
 
 app.UseRouting();
 

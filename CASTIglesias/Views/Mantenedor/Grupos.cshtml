@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+<style>.ui-autocomplete { z-index: 9999 !important; }</style>
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
@@ -56,7 +57,13 @@
                     </div>
                     <div class="col-sm-12">
                         <label class="form-label">Encargados</label>
-                        <input type="text" class="form-control" id="txtEncargados" placeholder="Nombres de los encargados" autocomplete="off" />
+                        <input type="text" class="form-control mb-2" id="txtBuscarEncargado" placeholder="Busca un miembro para añadir…" />
+                        <div id="contenedorEncargados" class="border rounded p-2" style="min-height:48px; background:#f8f9fa; display:none;">
+                            <table class="table table-sm mb-0" id="tablaEncargadosModal">
+                                <tbody id="tbodyEncargados"></tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted">Escribe al menos 2 letras para buscar. Pulsa sobre el nombre para añadirlo.</small>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -78,12 +85,60 @@
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
+        let encargadosList = []; // array de nombres seleccionados
         let tabladata;
         let filaSeleccionada;
 
+        function renderEncargados() {
+            const tbody = $("#tbodyEncargados");
+            tbody.empty();
+            if (encargadosList.length === 0) {
+                $("#contenedorEncargados").hide();
+                return;
+            }
+            $("#contenedorEncargados").show();
+            encargadosList.forEach(nombre => {
+                tbody.append(`<tr>
+                    <td>${nombre}</td>
+                    <td style="width:36px">
+                        <button type="button" class="btn btn-danger btn-sm p-1 px-2" onclick="quitarEncargado('${nombre.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>`);
+            });
+        }
+
+        function quitarEncargado(nombre) {
+            encargadosList = encargadosList.filter(n => n !== nombre);
+            renderEncargados();
+        }
+
         $(document).ready(function () {
+            $("#txtBuscarEncargado").autocomplete({
+                source: (req, resp) => {
+                    $.get(urlBuscarMiembros, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
+                        resp((res.data || []).map(m => ({
+                            label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')
+                        })));
+                    });
+                },
+                minLength: 2,
+                select: (e, ui) => {
+                    const nombre = ui.item.value.trim();
+                    if (nombre && !encargadosList.includes(nombre))
+                        encargadosList.push(nombre);
+                    renderEncargados();
+                    setTimeout(() => $("#txtBuscarEncargado").val(''), 0);
+                    return false;
+                }
+            });
+
             if ($.fn.DataTable.isDataTable("#tablaGrupos")) {
                 $("#tablaGrupos").DataTable().clear().destroy();
             }
@@ -207,8 +262,13 @@
         function abrirModalGrupos(json = null) {
             $("#txtid").val(json?.iD_grupo || 0);
             $("#txtDescripcion").val(json?.descripcion || "");
-            $("#txtEncargados").val(json?.encargados || "");
+            $("#txtBuscarEncargado").val("");
             $("#mensajeError").addClass("d-none").text("");
+
+            // Poblar lista de encargados desde el string guardado
+            const encStr = json?.encargados || "";
+            encargadosList = encStr ? encStr.split(',').map(n => n.trim()).filter(n => n) : [];
+            renderEncargados();
 
             cargarZonas(json?.iD_zona || null);
 
@@ -230,7 +290,7 @@
             const Grupo = {
                 iD_grupo: parseInt($("#txtid").val()) || 0,
                 descripcion: descripcion,
-                encargados: $("#txtEncargados").val().trim(),
+                encargados: encargadosList.join(', '),
                 iD_zona: idZona
             };
 

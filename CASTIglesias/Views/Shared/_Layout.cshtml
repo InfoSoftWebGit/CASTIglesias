@@ -198,13 +198,23 @@
                                             <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
                                             Ministerios
                                         </a>
+                                        <a class="nav-link collapsed-sub-item collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseServicios" aria-expanded="false">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-hands-helping"></i></div>
+                                            Servicios
+                                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                                        </a>
+                                        <div class="collapse" id="collapseServicios">
+                                            <nav class="sb-sidenav-menu-nested nav" id="serviciosSubmenu" data-url-servicios="@Url.Action("Servicios", "Mantenedor")" data-url-listar="@Url.Action("ListarMinisterios", "Mantenedor")">
+                                                <span class="nav-link collapsed-sub-item text-white-50" id="serviciosCargando" style="font-size: 0.85rem;">Cargando…</span>
+                                            </nav>
+                                        </div>
                                     }
                                 </nav>
                             </div>
                         }
 
                         <!-- BLOQUE ECONOMÍA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos || permisosMiembro.Gastos || permisosMiembro.GastosMiembros)
+                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos || permisosMiembro.Gastos)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseEconomia" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
@@ -232,13 +242,6 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "Economia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                                             Gastos
-                                        </a>
-                                    }
-                                    @if (tieneAccesoTotal || permisosMiembro.GastosMiembros)
-                                    {
-                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("GastosMiembros", "Economia")">
-                                            <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                                            Gastos de Miembros
                                         </a>
                                     }
                                 </nav>
@@ -389,6 +392,48 @@
                     }
                 }
             });
+
+            // Submenú dinámico de Servicios (lista los ministerios de la sede)
+            const serviciosSubmenu = document.getElementById('serviciosSubmenu');
+            if (serviciosSubmenu) {
+                const urlBaseServicios = serviciosSubmenu.dataset.urlServicios;
+                const urlListar = serviciosSubmenu.dataset.urlListar;
+                const cargando = document.getElementById('serviciosCargando');
+
+                $.get(urlListar, function (res) {
+                    const ministerios = (res && res.data) ? res.data : [];
+                    if (cargando) cargando.remove();
+
+                    if (ministerios.length === 0) {
+                        serviciosSubmenu.insertAdjacentHTML('beforeend',
+                            '<span class="nav-link collapsed-sub-item text-white-50" style="font-size: 0.85rem;">Sin ministerios</span>');
+                        return;
+                    }
+
+                    const currentPath = window.location.pathname.toLowerCase();
+                    const currentId = new URLSearchParams(window.location.search).get('id');
+
+                    ministerios.forEach(function (m) {
+                        const link = document.createElement('a');
+                        link.className = 'nav-link collapsed-sub-item';
+                        link.href = urlBaseServicios + '?id=' + m.id;
+                        link.innerHTML = '<div class="sb-nav-link-icon"><i class="fas fa-music"></i></div>' +
+                            $('<div>').text(m.descripcion || '').html();
+                        serviciosSubmenu.appendChild(link);
+
+                        // Mantener abierto y marcar activo si estamos en esta vista de servicio
+                        if (currentPath === urlBaseServicios.toLowerCase() && String(m.id) === currentId) {
+                            link.classList.add('active');
+                            $('#collapseServicios').collapse('show');
+                            $('#collapseMantenimiento').collapse('show');
+                            const parentLink = document.querySelector('[data-bs-target="#collapseMantenimiento"]');
+                            if (parentLink) { parentLink.classList.remove('collapsed'); parentLink.setAttribute('aria-expanded', 'true'); }
+                            const serviciosLink = document.querySelector('[data-bs-target="#collapseServicios"]');
+                            if (serviciosLink) { serviciosLink.classList.remove('collapsed'); serviciosLink.setAttribute('aria-expanded', 'true'); }
+                        }
+                    });
+                });
+            }
 
             // Dropdown sede estable
             const sedeBtn = document.getElementById('dropdownSede');

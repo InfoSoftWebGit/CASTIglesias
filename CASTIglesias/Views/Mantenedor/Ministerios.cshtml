@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+<style>.ui-autocomplete { z-index: 9999 !important; }</style>
 
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -50,7 +51,7 @@
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Nombre del líder</label>
-                        <input type="text" class="form-control" id="txtNombreLider" placeholder="Nombre Líder" autocomplete="off" />
+                        <input type="text" class="form-control" id="txtNombreLider" placeholder="Busca un miembro…" />
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -72,8 +73,10 @@
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
         let tabladata;
         let filaSeleccionada;
 
@@ -91,6 +94,18 @@
 
 
         $(document).ready(function () {
+            $("#txtNombreLider").autocomplete({
+                source: (req, resp) => {
+                    $.get(urlBuscarMiembros, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
+                        resp((res.data || []).map(m => ({
+                            label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')
+                        })));
+                    });
+                },
+                minLength: 2
+            });
+
             // Inicialización de DataTables
             tabladata = $("#tablaMinisterios").DataTable({
                 responsive: true,
@@ -200,7 +215,6 @@
         }
 
 
-        Guardar
         function GuardarMinisterio() {
             const Ministerio = {
                 // 🔑 Usamos iD_zona para ser consistentes al enviar el objeto

@@ -664,12 +664,27 @@ namespace CapaDatos
             {
                 var existentes = _context.Miembros_Zona_Grupo_Ministerio
                     .Where(x => x.ID_miembro == idMiembro).ToList();
+
+                // Preservar los roles de servicio asignados por ministerio antes de reescribir.
+                var rolesPorMinisterio = existentes
+                    .Where(x => x.ID_ministerio != 0 && !string.IsNullOrEmpty(x.rol_servicio))
+                    .GroupBy(x => x.ID_ministerio)
+                    .ToDictionary(g => g.Key, g => g.First().rol_servicio);
+
                 _context.Miembros_Zona_Grupo_Ministerio.RemoveRange(existentes);
 
                 foreach (var item in lista)
                 {
                     item.ID_miembro = idMiembro;
                     item.ID_sede = idSede;
+
+                    // Si esta fila trae un ministerio que ya tenía un rol asignado, lo conservamos.
+                    if (item.ID_ministerio != 0 && string.IsNullOrEmpty(item.rol_servicio)
+                        && rolesPorMinisterio.TryGetValue(item.ID_ministerio, out var rolPrevio))
+                    {
+                        item.rol_servicio = rolPrevio;
+                    }
+
                     _context.Miembros_Zona_Grupo_Ministerio.Add(item);
                 }
 
@@ -755,6 +770,111 @@ namespace CapaDatos
             {
                 mensaje = ex.Message;
                 return 0;
+            }
+        }
+
+        #endregion
+
+
+        #region Servicios (miembros y roles por ministerio)
+
+        /// <summary>
+        /// Lista los miembros asignados a un ministerio concreto junto con su rol de servicio.
+        /// </summary>
+        public List<MiembroServicioDTO> ListarMiembrosPorMinisterio(int idMinisterio, int sedeID)
+        {
+            var consulta = from mzgm in _context.Miembros_Zona_Grupo_Ministerio
+                           where mzgm.ID_ministerio == idMinisterio
+                           join m in _context.Miembros on mzgm.ID_miembro equals m.id_miembro
+                           where sedeID == 1000 || m.id_sede == sedeID
+                           select new MiembroServicioDTO
+                           {
+                               id_miembro = m.id_miembro,
+                               numero_miembro = m.numero_miembro,
+                               nombre_miembro = m.nombre_miembro,
+                               apellidos_miembro = m.apellidos_miembro,
+                               id_ministerio = mzgm.ID_ministerio,
+                               rol_servicio = mzgm.rol_servicio
+                           };
+
+            return consulta.ToList();
+        }
+
+        /// <summary>
+        /// Asigna (o actualiza el rol de) un miembro en un ministerio.
+        /// </summary>
+        public bool AsignarMiembroAServicio(int idMiembro, int idMinisterio, string rol, int sedeID, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var fila = _context.Miembros_Zona_Grupo_Ministerio
+                    .FirstOrDefault(x => x.ID_miembro == idMiembro && x.ID_ministerio == idMinisterio);
+
+                if (fila != null)
+                {
+                    fila.rol_servicio = rol;
+                }
+                else
+                {
+                    _context.Miembros_Zona_Grupo_Ministerio.Add(new Miembro_zona_grupo_ministerio
+                    {
+                        ID_miembro = idMiembro,
+                        ID_ministerio = idMinisterio,
+                        ID_zona = 0,
+                        ID_grupo = 0,
+                        rol_servicio = rol,
+                        ID_sede = sedeID
+                    });
+                }
+
+                _context.SaveChanges();
+                mensaje = "Miembro asignado correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = ex.Message;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Quita a un miembro de un ministerio. Si la fila solo representaba al ministerio
+        /// (sin zona ni grupo) se elimina; de lo contrario solo se limpia el ministerio y su rol.
+        /// </summary>
+        public bool QuitarMiembroDeServicio(int idMiembro, int idMinisterio, out string mensaje)
+        {
+            mensaje = string.Empty;
+            try
+            {
+                var fila = _context.Miembros_Zona_Grupo_Ministerio
+                    .FirstOrDefault(x => x.ID_miembro == idMiembro && x.ID_ministerio == idMinisterio);
+
+                if (fila == null)
+                {
+                    mensaje = "El miembro no estaba asignado a este ministerio.";
+                    return false;
+                }
+
+                if (fila.ID_zona == 0 && fila.ID_grupo == 0)
+                {
+                    _context.Miembros_Zona_Grupo_Ministerio.Remove(fila);
+                }
+                else
+                {
+                    fila.ID_ministerio = 0;
+                    fila.rol_servicio = null;
+                }
+
+                _context.SaveChanges();
+                mensaje = "Miembro quitado del ministerio correctamente.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = ex.Message;
+                return false;
             }
         }
 

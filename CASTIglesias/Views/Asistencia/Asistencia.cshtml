@@ -1,8 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Asistencia";
     Layout = "~/Views/Shared/_Layout.cshtml";
-}@* 
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<style>.ui-autocomplete { z-index: 9999 !important; }</style>
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
     <li class="breadcrumb-item active">Asistencia</li>
@@ -18,8 +19,8 @@
                 <button type="button" class="btn btn-success" onclick="abrirModalAsistencia()">Añadir nueva asistencia</button>
             </div>
         </div>
-
-        <table id="tablaAsistencias" class="table table-bordered table-striped border-top">
+        <hr />
+        <table id="tablaAsistencias" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
                     <th>Turno</th>
@@ -80,7 +81,7 @@
                     </div>
                     <div class="col-sm-12">
                         <label class="form-label">Miembro a cargo<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Nombre del miembro que registra" />
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Busca un miembro…" autocomplete="off" />
                     </div>
                 </div>
 
@@ -114,11 +115,14 @@
 </style> *@
 
 @section scripts {
-    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
         let tabladata;
         let filaSeleccionada;
 
@@ -137,6 +141,18 @@
         }
 
         $(document).ready(function () {
+            $("#txtNombreMiembro").autocomplete({
+                source: (req, resp) => {
+                    $.get(urlBuscarMiembros, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
+                        resp((res.data || []).map(m => ({
+                            label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')
+                        })));
+                    });
+                },
+                minLength: 2
+            });
+
             tabladata = $("#tablaAsistencias").DataTable({
                 responsive: true,
                 ordering: true,

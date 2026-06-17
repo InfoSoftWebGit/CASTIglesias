@@ -1,0 +1,268 @@
+@{
+    ViewBag.Title = "Servicios - " + (ViewBag.NombreMinisterio as string);
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roles = ViewBag.Roles as string[] ?? new string[0];
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+<style>.ui-autocomplete { z-index: 9999 !important; }</style>
+
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Mantenedor" asp-action="Ministerios">Ministerios</a></li>
+    <li class="breadcrumb-item active">Servicios · @ViewBag.NombreMinisterio</li>
+</ol>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-hands-helping me-1"></i> Miembros del ministerio: <strong>@ViewBag.NombreMinisterio</strong>
+    </div>
+    <div class="table-responsive">
+        <div class="row mb-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-success" onclick="abrirModalServicio()">Añadir miembro</button>
+            </div>
+        </div>
+
+        <table id="tablaServicios" class="table table-bordered table-striped border-top" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Rol</th>
+                    <th style="width: 100px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="FormModalServicio" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalServicio">Asignar miembro al ministerio</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input id="txtIdMiembro" type="hidden" value="0" />
+                <input id="hdnEdicion" type="hidden" value="0" />
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label">Miembro</label>
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Busca por nombre o apellidos…" autocomplete="off" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" id="cmbRol">
+                            <option value="">-- Selecciona un rol --</option>
+                            @foreach (var rol in roles)
+                            {
+                                <option value="@rol">@rol</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeError" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarServicio()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
+
+    <script>
+        const idMinisterio = @ViewBag.IdMinisterio;
+        const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
+        let tabladata;
+        let filaSeleccionada;
+
+        function getFilaData(button) {
+            var tr = $(button).closest("tr");
+            var data = tabladata.row(tr).data();
+            if (!data) {
+                tr = tr.prev("tr");
+                data = tabladata.row(tr).data();
+            }
+            return { tr: tr, data: data };
+        }
+
+        $(document).ready(function () {
+            $("#txtNombreMiembro").autocomplete({
+                source: (req, resp) => {
+                    $.get(urlBuscarMiembros, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
+                        resp((res.data || []).map(m => ({
+                            label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                            id: m.id_miembro
+                        })));
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#txtIdMiembro").val(ui.item.id);
+                }
+            });
+
+            // Si el usuario reescribe el nombre manualmente, invalidamos el id seleccionado.
+            $("#txtNombreMiembro").on("input", function () {
+                $("#txtIdMiembro").val(0);
+            });
+
+            tabladata = $("#tablaServicios").DataTable({
+                responsive: true,
+                ordering: true,
+                ajax: {
+                    url: '@Url.Action("ListarMiembrosServicio", "Mantenedor")',
+                    type: "GET",
+                    data: { idMinisterio: idMinisterio },
+                    dataType: "json",
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "nombre_miembro" },
+                    { data: "apellidos_miembro" },
+                    { data: "rol_servicio", defaultContent: "" },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-primary btn-sm btn-editarServicio">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarServicio">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ],
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                },
+                initComplete: function () {
+                    $('#tablaServicios thead').css({
+                        'background-color': '#1E3A8A',
+                        'color': 'white',
+                        'text-align': 'center'
+                    });
+                }
+            });
+
+            // Editar rol
+            $("#tablaServicios tbody").on("click", ".btn-editarServicio", function () {
+                const fila = getFilaData(this);
+                if (fila.data) {
+                    filaSeleccionada = fila.tr;
+                    abrirModalServicio(fila.data);
+                }
+            });
+
+            // Quitar miembro del ministerio
+            $("#tablaServicios tbody").on("click", ".btn-eliminarServicio", function () {
+                const fila = getFilaData(this);
+                if (!fila.data) return;
+
+                Swal.fire({
+                    title: "¿Estás seguro?",
+                    text: `¿Desea quitar a ${fila.data.nombre_miembro} ${fila.data.apellidos_miembro} de este ministerio?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, quitar",
+                    cancelButtonText: "No"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("EliminarMiembroServicio", "Mantenedor")',
+                            type: "POST",
+                            data: { idMiembro: fila.data.id_miembro, idMinisterio: idMinisterio },
+                            success: function (res) {
+                                if (res.resultado) {
+                                    tabladata.row(fila.tr).remove().draw(false);
+                                    Swal.fire("Hecho", "El miembro fue quitado del ministerio.", "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje || "No se pudo quitar el miembro.", "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error", "Error en la solicitud.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        function abrirModalServicio(json = null) {
+            $("#mensajeError").addClass("d-none").text("");
+
+            if (json) {
+                // Edición de rol: el miembro queda fijado, solo se cambia el rol.
+                $("#hdnEdicion").val("1");
+                $("#txtIdMiembro").val(json.id_miembro);
+                $("#txtNombreMiembro").val((json.nombre_miembro || '') + ' ' + (json.apellidos_miembro || '')).prop("disabled", true);
+                $("#cmbRol").val(json.rol_servicio || "");
+                $("#tituloModalServicio").text("Cambiar rol del miembro");
+            } else {
+                $("#hdnEdicion").val("0");
+                $("#txtIdMiembro").val(0);
+                $("#txtNombreMiembro").val("").prop("disabled", false);
+                $("#cmbRol").val("");
+                $("#tituloModalServicio").text("Asignar miembro al ministerio");
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById("FormModalServicio"));
+            modal.show();
+        }
+
+        function GuardarServicio() {
+            const idMiembro = parseInt($("#txtIdMiembro").val()) || 0;
+            const rol = $("#cmbRol").val();
+
+            if (idMiembro <= 0) {
+                $("#mensajeError").removeClass("d-none").text("Debes seleccionar un miembro de la lista de búsqueda.");
+                return;
+            }
+            if (!rol) {
+                $("#mensajeError").removeClass("d-none").text("Debes seleccionar un rol.");
+                return;
+            }
+
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+
+            $.ajax({
+                url: '@Url.Action("GuardarMiembroServicio", "Mantenedor")',
+                type: "POST",
+                data: { idMiembro: idMiembro, idMinisterio: idMinisterio, rol: rol },
+                dataType: "json",
+                success: function (data) {
+                    $(".modal-body").LoadingOverlay("hide");
+                    if (data.resultado) {
+                        bootstrap.Modal.getInstance(document.getElementById("FormModalServicio")).hide();
+                        tabladata.ajax.reload(null, false);
+                    } else {
+                        $("#mensajeError").removeClass("d-none").text(data.mensaje || "Error al guardar.");
+                    }
+                },
+                error: function () {
+                    $(".modal-body").LoadingOverlay("hide");
+                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX al guardar.");
+                }
+            });
+        }
+    </script>
+}

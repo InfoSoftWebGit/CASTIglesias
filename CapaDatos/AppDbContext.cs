@@ -32,7 +32,7 @@ namespace CapaDatos
         public DbSet<Matrimonio> Matrimonios { get; set; }
         public DbSet<ConfigJovenes> ConfigJovenes { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
-        public DbSet<GastoMiembro> GastosMiembros { get; set; }
+        public DbSet<DetallePago> DetallePagos { get; set; }
         public DbSet<VistaUsuariosPermisos> VistaPermisosUsuarios { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

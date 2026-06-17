@@ -2,8 +2,7 @@
     ViewData["Title"] = "Conceptos";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-@* 
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
@@ -20,7 +19,7 @@
                 <button type="button" class="btn btn-success" onclick="abrirModalConcepto()">Añadir nuevo concepto</button>
             </div>
         </div>
-
+        <hr />
         <table id="tablaConceptos" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
@@ -87,10 +86,10 @@
 
 
 @section scripts {
-    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
     <script>
         let tabladata;
         let filaSeleccionada;

@@ -16,6 +16,9 @@ namespace CapaEntidad
         public int ID_grupo { get; set; } = 0;
         public int ID_ministerio { get; set; } = 0;
 
+        [Column("rol_servicio")]
+        public string? rol_servicio { get; set; }
+
         public int ID_sede { get; set; }
     }
 
