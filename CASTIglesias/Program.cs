@@ -80,6 +80,9 @@ builder.Services.AddScoped<CN_Culto>();
 builder.Services.AddScoped<CD_RequerimientoCulto>();
 builder.Services.AddScoped<CN_RequerimientoCulto>();
 
+builder.Services.AddScoped<CD_Calendario>();
+builder.Services.AddScoped<CN_Calendario>();
+
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
