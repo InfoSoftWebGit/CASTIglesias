@@ -143,6 +143,58 @@
 
 <div class="card mb-4">
     <div class="card-header">
+        <i class="fas fa-file-invoice-dollar me-1"></i>
+        Gastos
+    </div>
+    <div class="card-body">
+        <div class="row align-items-end mb-3 g-2">
+            <div class="col-sm-3 col-md-2">
+                <label class="form-label fw-semibold">Vista</label>
+                <select class="form-select form-select-sm" id="modoGasto">
+                    <option value="anual">Año completo</option>
+                    <option value="mensual">Mes completo</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <label class="form-label fw-semibold">Año</label>
+                <input type="number" class="form-control form-control-sm" id="anioGasto" min="2000" max="2099" />
+            </div>
+            <div class="col-sm-3 col-md-2" id="colMesGasto" style="display:none">
+                <label class="form-label fw-semibold">Mes</label>
+                <select class="form-select form-select-sm" id="mesGasto">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div class="col-sm-2 col-md-1">
+                <button class="btn btn-primary btn-sm w-100" id="btnActualizarGasto">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+        </div>
+        <div style="position:relative; height:350px;">
+            <canvas id="graficoGastos"></canvas>
+        </div>
+        <p class="text-muted text-center mt-2 mb-0" id="gastoSinDatos" style="display:none">
+            <i class="fas fa-info-circle"></i> No hay registros de gastos para el período seleccionado.
+        </p>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="card mb-4">
+    <div class="card-header">
         <i class="fas fa-hand-holding-usd me-1"></i>
         Diezmos por Concepto
     </div>
@@ -450,6 +502,104 @@
 
         $(document).ready(function () {
             cargarGraficoDiezmos();
+        });
+    </script>
+
+    <script>
+        // ── Gráfico de Gastos ──────────────────────────────────────────────
+        let graficoGastosInstance = null;
+
+        const hoyGasto = new Date();
+        $('#anioGasto').val(hoyGasto.getFullYear());
+        $('#mesGasto').val(hoyGasto.getMonth() + 1);
+
+        $('#modoGasto').on('change', function () {
+            $('#colMesGasto').toggle($(this).val() === 'mensual');
+        });
+
+        function cargarGraficoGastos() {
+            const modo = $('#modoGasto').val();
+            const anio = $('#anioGasto').val();
+            const mes  = $('#mesGasto').val();
+            const params = { modo, anio };
+            if (modo === 'mensual') params.mes = mes;
+
+            $.get('@Url.Action("ObtenerGraficoGastos", "Home")', params, function (res) {
+                const sinDatos = !res.totales || res.totales.every(v => v === 0);
+                $('#gastoSinDatos').toggle(sinDatos);
+
+                if (graficoGastosInstance) {
+                    graficoGastosInstance.destroy();
+                    graficoGastosInstance = null;
+                }
+                if (sinDatos) return;
+
+                const zonaBreakdown = res.zonaBreakdown || [];
+
+                graficoGastosInstance = new Chart(document.getElementById('graficoGastos'), {
+                    type: 'bar',
+                    data: {
+                        labels: res.labels,
+                        datasets: [{
+                            label: 'Gastos',
+                            data: res.totales,
+                            backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (item) {
+                                        return ' Total: ' + parseFloat(item.parsed.y).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+                                    },
+                                    afterBody: function (items) {
+                                        const idx = items[0].dataIndex;
+                                        const lineas = [];
+                                        zonaBreakdown.forEach(function (z) {
+                                            const val = z.datos[idx];
+                                            if (val && val > 0) {
+                                                lineas.push(' ' + z.zona + ': ' + parseFloat(val).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }));
+                                            }
+                                        });
+                                        if (lineas.length > 0) {
+                                            lineas.unshift('──────────────────');
+                                        }
+                                        return lineas;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { stacked: false },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (val) {
+                                        return parseFloat(val).toLocaleString('es-ES', {
+                                            style: 'currency', currency: 'EUR',
+                                            minimumFractionDigits: 0, maximumFractionDigits: 0
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }).fail(function () {
+                $('#gastoSinDatos').show();
+            });
+        }
+
+        $('#btnActualizarGasto').on('click', cargarGraficoGastos);
+
+        $(document).ready(function () {
+            cargarGraficoGastos();
         });
     </script>
 }

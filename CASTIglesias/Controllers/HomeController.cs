@@ -262,6 +262,106 @@ namespace CASTIglesias.Controllers
         }
         #endregion GRÁFICO DE DIEZMOS
 
+        #region GRÁFICO DE GASTOS
+        [HttpGet]
+        public JsonResult ObtenerGraficoGastos(string modo = "anual", int? anio = null, int? mes = null)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                int anioFiltro = anio ?? DateTime.Today.Year;
+                int mesFiltro = mes ?? DateTime.Today.Month;
+
+                var baseQuery = _context.Gastos
+                    .Where(g => g.fecha_gasto.HasValue && g.fecha_gasto.Value.Year == anioFiltro);
+
+                if (sedeID != 1000)
+                    baseQuery = baseQuery.Where(g => g.id_sede == sedeID);
+
+                var zonasNombres = _context.Zona
+                    .Where(z => sedeID == 1000 || z.ID_sede == sedeID)
+                    .Select(z => new { z.ID_zona, z.nombre_zona })
+                    .ToList();
+
+                if (modo == "anual")
+                {
+                    var agrupado = baseQuery
+                        .GroupBy(g => new { Mes = g.fecha_gasto!.Value.Month, IdZona = (int?)g.id_zona })
+                        .Select(g => new { g.Key.Mes, g.Key.IdZona, Total = g.Sum(x => x.cantidad) })
+                        .ToList();
+
+                    var nombresMeses = new[] { "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" };
+                    var labels = nombresMeses.Select(m => $"{m} {anioFiltro}").ToList();
+
+                    var totales = Enumerable.Range(1, 12)
+                        .Select(m => agrupado.Where(a => a.Mes == m).Sum(a => a.Total))
+                        .ToList();
+
+                    var zonaBreakdown = zonasNombres.Select(z => new
+                    {
+                        zona = z.nombre_zona,
+                        datos = Enumerable.Range(1, 12)
+                            .Select(m => agrupado.Where(a => a.Mes == m && a.IdZona == z.ID_zona).Sum(a => a.Total))
+                            .ToList()
+                    }).ToList();
+
+                    // Incluir gastos sin zona asignada
+                    var sinZonaDatos = Enumerable.Range(1, 12)
+                        .Select(m => agrupado.Where(a => a.Mes == m && a.IdZona == null).Sum(a => a.Total))
+                        .ToList();
+                    if (sinZonaDatos.Any(v => v > 0))
+                    {
+                        zonaBreakdown = zonaBreakdown.Append(new { zona = "Sin zona", datos = sinZonaDatos }).ToList();
+                    }
+
+                    return Json(new { labels, totales, zonaBreakdown });
+                }
+                else
+                {
+                    var filtrado = baseQuery.Where(g => g.fecha_gasto!.Value.Month == mesFiltro);
+                    var agrupado = filtrado
+                        .GroupBy(g => new { Dia = g.fecha_gasto!.Value.Day, IdZona = (int?)g.id_zona })
+                        .Select(g => new { g.Key.Dia, g.Key.IdZona, Total = g.Sum(x => x.cantidad) })
+                        .ToList();
+
+                    int diasEnMes = DateTime.DaysInMonth(anioFiltro, mesFiltro);
+                    var labels = Enumerable.Range(1, diasEnMes).Select(d => d.ToString()).ToList();
+
+                    var totales = Enumerable.Range(1, diasEnMes)
+                        .Select(d => agrupado.Where(a => a.Dia == d).Sum(a => a.Total))
+                        .ToList();
+
+                    var zonaBreakdown = zonasNombres.Select(z => new
+                    {
+                        zona = z.nombre_zona,
+                        datos = Enumerable.Range(1, diasEnMes)
+                            .Select(d => agrupado.Where(a => a.Dia == d && a.IdZona == z.ID_zona).Sum(a => a.Total))
+                            .ToList()
+                    }).ToList();
+
+                    var sinZonaDatos = Enumerable.Range(1, diasEnMes)
+                        .Select(d => agrupado.Where(a => a.Dia == d && a.IdZona == null).Sum(a => a.Total))
+                        .ToList();
+                    if (sinZonaDatos.Any(v => v > 0))
+                    {
+                        zonaBreakdown = zonaBreakdown.Append(new { zona = "Sin zona", datos = sinZonaDatos }).ToList();
+                    }
+
+                    return Json(new { labels, totales, zonaBreakdown });
+                }
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoGastos: {ex.Message}");
+                return Json(new { labels = new List<string>(), totales = new List<decimal>(), zonaBreakdown = new List<object>() });
+            }
+        }
+        #endregion GRÁFICO DE GASTOS
+
         #region MÉTODOS PARA LAS TARJETAS DEL DASHBOARD
         [HttpGet]
         public IActionResult ObtenerZonasConMiembros()
