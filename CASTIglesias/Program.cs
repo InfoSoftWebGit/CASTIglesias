@@ -82,6 +82,10 @@ builder.Services.AddScoped<CN_RequerimientoCulto>();
 
 builder.Services.AddScoped<CD_Calendario>();
 builder.Services.AddScoped<CN_Calendario>();
+builder.Services.AddScoped<CD_Sala>();
+builder.Services.AddScoped<CN_Sala>();
+builder.Services.AddScoped<CD_EventoCalendario>();
+builder.Services.AddScoped<CN_EventoCalendario>();
 
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>

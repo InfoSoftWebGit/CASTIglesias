@@ -1,0 +1,289 @@
+@using CapaEntidad
+@{
+    ViewData["Title"] = "Salas";
+    var zonas = ViewBag.Zonas as List<Zona> ?? new List<Zona>();
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<style>
+    .badge-libre     { background-color: #22c55e; }
+    .badge-reservado { background-color: #ef4444; }
+    .card-header-sala {
+        background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%);
+        color: #fff; font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Salas</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Inicio</a></li>
+        <li class="breadcrumb-item">Control</li>
+        <li class="breadcrumb-item active">Salas</li>
+    </ol>
+
+    <div class="card shadow-sm" style="border:none; border-radius:12px; overflow:hidden">
+        <div class="card-header card-header-sala d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-door-open me-2"></i>Gestión de Salas</span>
+            <button class="btn btn-light btn-sm fw-semibold" onclick="abrirModalNueva()">
+                <i class="fas fa-plus me-1"></i> Nueva sala
+            </button>
+        </div>
+        <div class="card-body p-3">
+            <table id="tablaSalas" class="table table-bordered table-sm" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Zona responsable</th>
+                        <th>Fecha reserva</th>
+                        <th style="width:130px">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal Sala ──────────────────────────────────────────────────────────── -->
+<div class="modal fade" id="modalSala" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background:#1E3A8A">
+                <h5 class="modal-title" id="tituloModalSala">Nueva sala</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdSala" value="0" />
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Nombre de la sala <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreSala" placeholder="Ej: Sala 1, Templo, Aula…" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Estado</label>
+                        <select class="form-select" id="cmbReservado" onchange="toggleReservaFields()">
+                            <option value="No">Libre</option>
+                            <option value="Si">Reservado</option>
+                        </select>
+                    </div>
+                    <div id="camposReserva" class="col-12 d-none">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label">Zona que reserva</label>
+                                <select class="form-select" id="cmbZonaReserva">
+                                    <option value="">— Sin zona —</option>
+                                    @foreach (var z in zonas)
+                                    {
+                                        <option value="@z.ID_zona">@z.nombre_zona</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Fecha y hora de reserva</label>
+                                <input type="datetime-local" class="form-control" id="txtFechaReserva" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div id="errSala" class="alert alert-danger d-none py-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="guardarSala()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Modal Eventos de la sala ──────────────────────────────────────────── -->
+<div class="modal fade" id="modalEventosSala" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background:#1E3A8A">
+                <h5 class="modal-title" id="tituloEventosSala">Reservas futuras</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <table class="table table-bordered table-sm mb-0" id="tablaEventosSala">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Evento</th>
+                            <th>Fecha</th>
+                            <th>Hora inicio</th>
+                            <th>Hora fin</th>
+                            <th>Zona</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEventosSala"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+const urlListar   = '@Url.Action("Listar",            "Sala")';
+const urlGuardar  = '@Url.Action("Guardar",           "Sala")';
+const urlEliminar = '@Url.Action("Eliminar",          "Sala")';
+const urlEventos  = '@Url.Action("ObtenerEventosSala","Sala")';
+let dt;
+
+$(document).ready(function () {
+    dt = $('#tablaSalas').DataTable({
+        ajax: { url: urlListar, dataSrc: 'data' },
+        columns: [
+            { data: 'nombre_sala' },
+            {
+                data: 'reservado',
+                render: v => v === 'Si'
+                    ? '<span class="badge badge-reservado px-2">Reservado</span>'
+                    : '<span class="badge badge-libre px-2">Libre</span>'
+            },
+            { data: 'nombre_zona', defaultContent: '<span class="text-muted">—</span>' },
+            { data: 'fecha_reserva', defaultContent: '<span class="text-muted">—</span>' },
+            {
+                data: null,
+                orderable: false, searchable: false,
+                render: d =>
+                    `<div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-info text-white btn-eventos" data-id="${d.id_sala}" title="Ver reservas">
+                            <i class="fas fa-calendar-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-primary btn-editar" data-id="${d.id_sala}" title="Editar">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger btn-eliminar" data-id="${d.id_sala}" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>`
+            }
+        ],
+        language: { url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json' },
+        initComplete: () => {
+            $('#tablaSalas thead').css({ 'background-color': '#1E3A8A', 'color': 'white' });
+        }
+    });
+
+    // Editar
+    $('#tablaSalas tbody').on('click', '.btn-editar', function () {
+        const row = dt.row($(this).closest('tr')).data();
+        if (!row) return;
+        $('#hdnIdSala').val(row.id_sala);
+        $('#txtNombreSala').val(row.nombre_sala);
+        $('#cmbReservado').val(row.reservado);
+        $('#cmbZonaReserva').val(row.id_zona_reserva || '');
+        if (row.fecha_reserva) {
+            // fecha_reserva viene como "dd/MM/yyyy HH:mm" → convertir a datetime-local
+            const parts = row.fecha_reserva.split(/[\/ :]/);
+            if (parts.length >= 5)
+                $('#txtFechaReserva').val(`${parts[2]}-${parts[1]}-${parts[0]}T${parts[3]}:${parts[4]}`);
+        }
+        toggleReservaFields();
+        $('#tituloModalSala').text('Editar sala');
+        new bootstrap.Modal(document.getElementById('modalSala')).show();
+    });
+
+    // Eliminar
+    $('#tablaSalas tbody').on('click', '.btn-eliminar', function () {
+        const row = dt.row($(this).closest('tr')).data();
+        if (!row) return;
+        Swal.fire({
+            title: '¿Eliminar sala?',
+            text: `¿Deseas eliminar la sala "${row.nombre_sala}"?`,
+            icon: 'warning', showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar', cancelButtonText: 'No'
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            $.post(urlEliminar, { idSala: row.id_sala }, res => {
+                if (res.resultado) { dt.ajax.reload(); Swal.fire('Hecho', res.mensaje, 'success'); }
+                else Swal.fire('Error', res.mensaje, 'error');
+            });
+        });
+    });
+
+    // Ver eventos de la sala
+    $('#tablaSalas tbody').on('click', '.btn-eventos', function () {
+        const row = dt.row($(this).closest('tr')).data();
+        if (!row) return;
+        $('#tituloEventosSala').text(`Reservas futuras — ${row.nombre_sala}`);
+        $.get(urlEventos, { idSala: row.id_sala }, res => {
+            let html = '';
+            if (!res.success || !res.data.length) {
+                html = '<tr><td colspan="5" class="text-center text-muted py-3">Sin reservas futuras</td></tr>';
+            } else {
+                res.data.forEach(e => {
+                    html += `<tr>
+                        <td>${esc(e.nombre_evento)}</td>
+                        <td>${e.fecha_inicio}</td>
+                        <td>${e.hora_inicio || '—'}</td>
+                        <td>${e.hora_fin || '—'}</td>
+                        <td>${e.nombre_zona || '—'}</td>
+                    </tr>`;
+                });
+            }
+            $('#tbodyEventosSala').html(html);
+            new bootstrap.Modal(document.getElementById('modalEventosSala')).show();
+        });
+    });
+});
+
+function abrirModalNueva() {
+    $('#hdnIdSala').val(0);
+    $('#txtNombreSala').val('');
+    $('#cmbReservado').val('No');
+    $('#cmbZonaReserva').val('');
+    $('#txtFechaReserva').val('');
+    $('#errSala').addClass('d-none').text('');
+    toggleReservaFields();
+    $('#tituloModalSala').text('Nueva sala');
+    new bootstrap.Modal(document.getElementById('modalSala')).show();
+}
+
+function toggleReservaFields() {
+    const reservado = $('#cmbReservado').val();
+    reservado === 'Si'
+        ? $('#camposReserva').removeClass('d-none')
+        : $('#camposReserva').addClass('d-none');
+}
+
+function guardarSala() {
+    const nombre = $('#txtNombreSala').val().trim();
+    if (!nombre) { $('#errSala').removeClass('d-none').text('El nombre es obligatorio.'); return; }
+
+    $('#errSala').addClass('d-none');
+    $.post(urlGuardar, {
+        idSala:        $('#hdnIdSala').val(),
+        nombreSala:    nombre,
+        reservado:     $('#cmbReservado').val(),
+        idZonaReserva: $('#cmbZonaReserva').val() || null,
+        fechaReserva:  $('#txtFechaReserva').val() || null
+    }, res => {
+        if (res.resultado) {
+            bootstrap.Modal.getInstance(document.getElementById('modalSala')).hide();
+            dt.ajax.reload();
+            Swal.fire({ icon: 'success', title: res.mensaje, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+        } else {
+            $('#errSala').removeClass('d-none').text(res.mensaje);
+        }
+    });
+}
+
+function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+}

@@ -37,6 +37,8 @@ namespace CapaDatos
         public DbSet<Culto> Cultos { get; set; }
         public DbSet<BloqueCulto> BloquesCulto { get; set; }
         public DbSet<RequerimientoCulto> RequerimientosCulto { get; set; }
+        public DbSet<Sala> Salas { get; set; }
+        public DbSet<EventoCalendario> EventosCalendario { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VistaUsuariosPermisos>()

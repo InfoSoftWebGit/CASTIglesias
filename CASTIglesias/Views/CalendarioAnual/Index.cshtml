@@ -1,0 +1,294 @@
+@using CapaEntidad
+@{
+    ViewData["Title"] = "Calendario Anual";
+    var zonas = ViewBag.Zonas as List<Zona> ?? new List<Zona>();
+    var salas = ViewBag.Salas as List<Sala> ?? new List<Sala>();
+}
+<!-- FullCalendar v6 -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
+
+<style>
+    #wrapCalendario {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(30,58,138,.10);
+        padding: 20px;
+    }
+    /* Cabecera del calendario */
+    .fc .fc-toolbar-title        { font-size: 1.25rem; font-weight: 700; color: #1E3A8A; }
+    .fc .fc-button-primary       { background-color: #1E3A8A !important; border-color: #1E3A8A !important; }
+    .fc .fc-button-primary:hover { background-color: #1e40af !important; }
+    .fc .fc-button-active        { background-color: #1e40af !important; }
+    .fc .fc-daygrid-day-number   { color: #374151; font-weight: 600; }
+    .fc .fc-col-header-cell-cushion { color: #1E3A8A; font-weight: 700; text-transform: capitalize; }
+    .fc-event { cursor: pointer; border-radius: 5px !important; font-size: 12px; }
+    .fc-daygrid-event-dot { display: none; }
+    /* Día de hoy */
+    .fc .fc-day-today { background-color: #eff6ff !important; }
+</style>
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Calendario Anual</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Inicio</a></li>
+        <li class="breadcrumb-item">Control</li>
+        <li class="breadcrumb-item active">Calendario Anual</li>
+    </ol>
+
+    <div id="wrapCalendario">
+        <div id="fullcalendar"></div>
+    </div>
+</div>
+
+<!-- ── Modal Evento ──────────────────────────────────────────────────────── -->
+<div class="modal fade" id="modalEvento" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background:#1E3A8A">
+                <h5 class="modal-title" id="tituloModalEvento">Nuevo evento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdEvento" value="0" />
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Nombre del evento <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreEvento" placeholder="Ej: Retiro de Jóvenes, Culto de Navidad…" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFechaEvento" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Hora inicio</label>
+                        <input type="time" class="form-control" id="txtHoraInicio" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Hora fin</label>
+                        <input type="time" class="form-control" id="txtHoraFin" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Zona organizadora</label>
+                        <select class="form-select" id="cmbZona">
+                            <option value="">— Sin zona —</option>
+                            @foreach (var z in zonas)
+                            {
+                                <option value="@z.ID_zona">@z.nombre_zona</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Sala</label>
+                        <select class="form-select" id="cmbSala">
+                            <option value="">— Sin sala —</option>
+                            @foreach (var s in salas)
+                            {
+                                <option value="@s.id_sala">@s.nombre_sala</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Descripción</label>
+                        <textarea class="form-control" id="txtDescripcion" rows="2" placeholder="Opcional…"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Color</label>
+                        <div class="d-flex flex-wrap gap-2 mt-1" id="colorPicker">
+                            @{
+                                var colores = new[] {
+                                    ("#1E3A8A","Azul"),("#2563EB","Azul claro"),
+                                    ("#16a34a","Verde"),("#ca8a04","Naranja"),
+                                    ("#9333ea","Morado"),("#dc2626","Rojo"),
+                                    ("#0891b2","Cian"),("#374151","Gris")
+                                };
+                            }
+                            @foreach (var (hex, label) in colores)
+                            {
+                                <button type="button" class="color-btn rounded-circle border-0"
+                                        data-color="@hex" title="@label"
+                                        style="width:28px;height:28px;background:@hex;cursor:pointer"
+                                        onclick="selectColor('@hex', this)"></button>
+                            }
+                        </div>
+                        <input type="hidden" id="hdnColor" value="#1E3A8A" />
+                    </div>
+                    <div class="col-12">
+                        <div id="errEvento" class="alert alert-danger d-none py-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
+                    <i class="fas fa-trash me-1"></i> Eliminar
+                </button>
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary" onclick="guardarEvento()">
+                        <i class="fas fa-save me-1"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+const urlEventos  = '@Url.Action("ObtenerEventos",  "CalendarioAnual")';
+const urlGuardar  = '@Url.Action("GuardarEvento",   "CalendarioAnual")';
+const urlEliminar = '@Url.Action("EliminarEvento",  "CalendarioAnual")';
+
+let calendar;
+let colorActual = '#1E3A8A';
+
+document.addEventListener('DOMContentLoaded', function () {
+    const el = document.getElementById('fullcalendar');
+    calendar = new FullCalendar.Calendar(el, {
+        locale: 'es',
+        initialView: 'dayGridMonth',
+        height: 'auto',
+        headerToolbar: {
+            left:   'prev,next today',
+            center: 'title',
+            right:  'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día' },
+        events: {
+            url: urlEventos,
+            extraParams: () => ({})   // start/end los agrega FullCalendar automáticamente
+        },
+        eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+        // Clic en un día vacío → nuevo evento
+        dateClick: function (info) {
+            abrirModalNuevo(info.dateStr);
+        },
+        // Clic en evento existente → editar
+        eventClick: function (info) {
+            const ev = info.event;
+            const p  = ev.extendedProps;
+            abrirModalEdicion(
+                ev.id, ev.title,
+                ev.startStr.slice(0,10),
+                p.horaInicio, p.horaFin,
+                p.idZona, p.idSala, p.descripcion,
+                ev.backgroundColor || '#1E3A8A'
+            );
+        },
+        // Tooltip rápido con zona y sala
+        eventDidMount: function (info) {
+            const p = info.event.extendedProps;
+            const parts = [];
+            if (p.nombreZona) parts.push('Zona: ' + p.nombreZona);
+            if (p.nombreSala) parts.push('Sala: ' + p.nombreSala);
+            if (p.descripcion) parts.push(p.descripcion);
+            if (parts.length) info.el.title = parts.join(' | ');
+        }
+    });
+    calendar.render();
+    // Marcar el color inicial
+    document.querySelector(`[data-color="${colorActual}"]`)?.classList.add('ring');
+});
+
+function abrirModalNuevo(fecha) {
+    resetModal();
+    $('#hdnIdEvento').val(0);
+    $('#txtFechaEvento').val(fecha || '');
+    $('#tituloModalEvento').text('Nuevo evento');
+    $('#btnEliminarEvento').addClass('d-none');
+    new bootstrap.Modal(document.getElementById('modalEvento')).show();
+}
+
+function abrirModalEdicion(id, titulo, fecha, hi, hf, idZona, idSala, desc, color) {
+    resetModal();
+    $('#hdnIdEvento').val(id);
+    $('#txtNombreEvento').val(titulo);
+    $('#txtFechaEvento').val(fecha);
+    $('#txtHoraInicio').val(hi || '');
+    $('#txtHoraFin').val(hf || '');
+    $('#cmbZona').val(idZona || '');
+    $('#cmbSala').val(idSala || '');
+    $('#txtDescripcion').val(desc || '');
+    selectColor(color || '#1E3A8A');
+    $('#tituloModalEvento').text('Editar evento');
+    $('#btnEliminarEvento').removeClass('d-none');
+    new bootstrap.Modal(document.getElementById('modalEvento')).show();
+}
+
+function resetModal() {
+    $('#txtNombreEvento,#txtHoraInicio,#txtHoraFin,#txtDescripcion').val('');
+    $('#cmbZona,#cmbSala').val('');
+    $('#errEvento').addClass('d-none').text('');
+    selectColor('#1E3A8A');
+}
+
+function selectColor(hex, btn) {
+    colorActual = hex;
+    $('#hdnColor').val(hex);
+    document.querySelectorAll('.color-btn').forEach(b => {
+        b.style.outline = 'none';
+        b.style.boxShadow = 'none';
+    });
+    const target = btn || document.querySelector(`[data-color="${hex}"]`);
+    if (target) target.style.boxShadow = '0 0 0 3px #fff, 0 0 0 5px ' + hex;
+}
+
+function guardarEvento() {
+    const nombre = $('#txtNombreEvento').val().trim();
+    const fecha  = $('#txtFechaEvento').val();
+    if (!nombre) { $('#errEvento').removeClass('d-none').text('El nombre es obligatorio.'); return; }
+    if (!fecha)  { $('#errEvento').removeClass('d-none').text('La fecha es obligatoria.'); return; }
+
+    const payload = {
+        id_evento:    parseInt($('#hdnIdEvento').val()) || 0,
+        nombre_evento: nombre,
+        fecha_inicio:  fecha,
+        hora_inicio:   $('#txtHoraInicio').val() || null,
+        hora_fin:      $('#txtHoraFin').val()    || null,
+        id_zona:       parseInt($('#cmbZona').val()) || null,
+        id_sala:       parseInt($('#cmbSala').val()) || null,
+        descripcion:   $('#txtDescripcion').val() || null,
+        color:         $('#hdnColor').val() || '#1E3A8A'
+    };
+
+    $.ajax({
+        url: urlGuardar, type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        success(res) {
+            if (res.resultado) {
+                bootstrap.Modal.getInstance(document.getElementById('modalEvento')).hide();
+                calendar.refetchEvents();
+                Swal.fire({ icon: 'success', title: res.mensaje, toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+            } else {
+                $('#errEvento').removeClass('d-none').text(res.mensaje);
+            }
+        },
+        error() { $('#errEvento').removeClass('d-none').text('Error de conexión.'); }
+    });
+}
+
+function eliminarEvento() {
+    const id = parseInt($('#hdnIdEvento').val());
+    if (!id) return;
+    Swal.fire({
+        title: '¿Eliminar evento?', icon: 'warning',
+        showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'No'
+    }).then(r => {
+        if (!r.isConfirmed) return;
+        $.post(urlEliminar, { idEvento: id }, res => {
+            bootstrap.Modal.getInstance(document.getElementById('modalEvento')).hide();
+            calendar.refetchEvents();
+            Swal.fire({
+                icon: res.resultado ? 'success' : 'error',
+                title: res.mensaje, toast: true, position: 'top-end',
+                showConfirmButton: false, timer: 2000
+            });
+        });
+    });
+}
+</script>
+}
