@@ -55,15 +55,19 @@
                         <label class="form-label fw-semibold">Nombre del evento <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtNombreEvento" placeholder="Ej: Retiro de Jóvenes, Culto de Navidad…" />
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="txtFechaEvento" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Fecha fin <small class="text-muted fw-normal">(si ocupa varios días)</small></label>
+                        <input type="date" class="form-control" id="txtFechaFin" />
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label fw-semibold">Hora inicio</label>
                         <input type="time" class="form-control" id="txtHoraInicio" />
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label fw-semibold">Hora fin</label>
                         <input type="time" class="form-control" id="txtHoraFin" />
                     </div>
@@ -117,11 +121,21 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer d-flex justify-content-between">
-                <button class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
-                    <i class="fas fa-trash me-1"></i> Eliminar
-                </button>
-                <div class="ms-auto d-flex gap-2">
+            <div class="modal-footer d-flex justify-content-between flex-wrap gap-2">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
+                        <i class="fas fa-trash me-1"></i> Eliminar
+                    </button>
+                    <div class="d-none d-flex gap-2" id="grpExportEvento">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="abrirGoogleCalendar()" title="Agregar a Google Calendar">
+                            <i class="fab fa-google me-1"></i> Google Calendar
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="descargarIcs()" title="Descargar archivo .ics (compatible con Outlook, Apple Calendar…)">
+                            <i class="fas fa-file-download me-1"></i> .ics
+                        </button>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-primary" onclick="guardarEvento()">
                         <i class="fas fa-save me-1"></i> Guardar
@@ -173,9 +187,10 @@ document.addEventListener('DOMContentLoaded', function () {
             abrirModalEdicion(
                 ev.id, ev.title,
                 ev.startStr.slice(0,10),
+                p.fechaFin || '',
                 p.horaInicio, p.horaFin,
                 p.idZona, p.idSala, p.descripcion,
-                ev.backgroundColor || '#1E3A8A'
+                p.color || '#1E3A8A'
             );
         },
         // Tooltip rápido con zona y sala
@@ -199,14 +214,16 @@ function abrirModalNuevo(fecha) {
     $('#txtFechaEvento').val(fecha || '');
     $('#tituloModalEvento').text('Nuevo evento');
     $('#btnEliminarEvento').addClass('d-none');
+    $('#grpExportEvento').addClass('d-none');
     new bootstrap.Modal(document.getElementById('modalEvento')).show();
 }
 
-function abrirModalEdicion(id, titulo, fecha, hi, hf, idZona, idSala, desc, color) {
+function abrirModalEdicion(id, titulo, fecha, fechaFin, hi, hf, idZona, idSala, desc, color) {
     resetModal();
     $('#hdnIdEvento').val(id);
     $('#txtNombreEvento').val(titulo);
     $('#txtFechaEvento').val(fecha);
+    $('#txtFechaFin').val(fechaFin || '');
     $('#txtHoraInicio').val(hi || '');
     $('#txtHoraFin').val(hf || '');
     $('#cmbZona').val(idZona || '');
@@ -215,11 +232,12 @@ function abrirModalEdicion(id, titulo, fecha, hi, hf, idZona, idSala, desc, colo
     selectColor(color || '#1E3A8A');
     $('#tituloModalEvento').text('Editar evento');
     $('#btnEliminarEvento').removeClass('d-none');
+    $('#grpExportEvento').removeClass('d-none');
     new bootstrap.Modal(document.getElementById('modalEvento')).show();
 }
 
 function resetModal() {
-    $('#txtNombreEvento,#txtHoraInicio,#txtHoraFin,#txtDescripcion').val('');
+    $('#txtNombreEvento,#txtFechaFin,#txtHoraInicio,#txtHoraFin,#txtDescripcion').val('');
     $('#cmbZona,#cmbSala').val('');
     $('#errEvento').addClass('d-none').text('');
     selectColor('#1E3A8A');
@@ -246,6 +264,7 @@ function guardarEvento() {
         id_evento:    parseInt($('#hdnIdEvento').val()) || 0,
         nombre_evento: nombre,
         fecha_inicio:  fecha,
+        fecha_fin:     $('#txtFechaFin').val() || null,
         hora_inicio:   $('#txtHoraInicio').val() || null,
         hora_fin:      $('#txtHoraFin').val()    || null,
         id_zona:       parseInt($('#cmbZona').val()) || null,
@@ -269,6 +288,95 @@ function guardarEvento() {
         },
         error() { $('#errEvento').removeClass('d-none').text('Error de conexión.'); }
     });
+}
+
+// ── Exportar a Google Calendar (opción A) ────────────────────────────────
+function abrirGoogleCalendar() {
+    const titulo    = $('#txtNombreEvento').val().trim();
+    const fechaIni  = $('#txtFechaEvento').val();
+    if (!titulo || !fechaIni) {
+        Swal.fire({ icon: 'warning', title: 'Completa el nombre y la fecha primero.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+        return;
+    }
+    const fechaFin  = $('#txtFechaFin').val();
+    const horaIni   = $('#txtHoraInicio').val();
+    const horaFin   = $('#txtHoraFin').val();
+    const desc      = $('#txtDescripcion').val() || '';
+
+    const toGcal = (d, t) => d.replace(/-/g, '') + (t ? 'T' + t.replace(':', '') + '00' : '');
+
+    let start, end;
+    if (horaIni) {
+        start = toGcal(fechaIni, horaIni);
+        end   = toGcal(fechaFin || fechaIni, horaFin || horaIni);
+    } else {
+        start = toGcal(fechaIni, null);
+        // Para eventos de todo el día Google Calendar usa end exclusivo (+1 día)
+        const endDate = new Date((fechaFin || fechaIni) + 'T00:00:00');
+        endDate.setDate(endDate.getDate() + 1);
+        end = endDate.toISOString().slice(0, 10).replace(/-/g, '');
+    }
+
+    const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text='    + encodeURIComponent(titulo)
+        + '&dates='   + start + '/' + end
+        + '&details=' + encodeURIComponent(desc);
+    window.open(url, '_blank', 'noopener');
+}
+
+// ── Descargar archivo .ics (opción B) ───────────────────────────────────
+function descargarIcs() {
+    const titulo    = $('#txtNombreEvento').val().trim();
+    const fechaIni  = $('#txtFechaEvento').val();
+    if (!titulo || !fechaIni) {
+        Swal.fire({ icon: 'warning', title: 'Completa el nombre y la fecha primero.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+        return;
+    }
+    const fechaFin  = $('#txtFechaFin').val();
+    const horaIni   = $('#txtHoraInicio').val();
+    const horaFin   = $('#txtHoraFin').val();
+    const desc      = $('#txtDescripcion').val() || '';
+
+    const toIcs = (d, t) => d.replace(/-/g, '') + (t ? 'T' + t.replace(':', '') + '00' : '');
+
+    let dtstart, dtend;
+    if (horaIni) {
+        dtstart = 'DTSTART:'             + toIcs(fechaIni, horaIni);
+        dtend   = 'DTEND:'               + toIcs(fechaFin || fechaIni, horaFin || horaIni);
+    } else {
+        dtstart = 'DTSTART;VALUE=DATE:'  + toIcs(fechaIni, null);
+        const endDate = new Date((fechaFin || fechaIni) + 'T00:00:00');
+        endDate.setDate(endDate.getDate() + 1);
+        dtend   = 'DTEND;VALUE=DATE:'    + endDate.toISOString().slice(0, 10).replace(/-/g, '');
+    }
+
+    const uid  = Date.now() + 'soporte@congrega.es';
+    const now  = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 15) + 'Z';
+
+    const lineas = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Congrega CRM//ES',
+        'CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        'UID:'      + uid,
+        'DTSTAMP:'  + now,
+        dtstart,
+        dtend,
+        'SUMMARY:'  + titulo.replace(/,/g, '\\,'),
+        desc ? 'DESCRIPTION:' + desc.replace(/\r?\n/g, '\\n').replace(/,/g, '\\,') : null,
+        'END:VEVENT',
+        'END:VCALENDAR'
+    ].filter(Boolean).join('\r\n');
+
+    const blob = new Blob([lineas], { type: 'text/calendar;charset=utf-8' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = titulo.replace(/\s+/g, '_') + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
 }
 
 function eliminarEvento() {

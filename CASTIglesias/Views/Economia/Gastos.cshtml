@@ -6,8 +6,13 @@
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 <style>
-    /* Fix: autocomplete dropdown visible dentro de modales Bootstrap */
     .ui-autocomplete { z-index: 9999 !important; }
+    .btn-xs { padding: .3rem .6rem; font-size: .82rem; line-height: 1.4; }
+    #tablaGastos tbody tr { cursor: pointer; }
+    #tablaGastos tbody tr.fila-seleccionada > td { background-color: #dbeafe !important; }
+    #gridDetalle thead th { background-color: #1E3A8A; color: #fff; font-size: .82rem; white-space: nowrap; }
+    #gridDetalle td { vertical-align: middle; font-size: .85rem; }
+    #gridDetalle tbody tr.editando > td { background-color: #fffde7; }
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -41,30 +46,43 @@
     </div>
 </div>
 
-<!-- ══ TABLA 2: DETALLE DE PAGO ════════════════════════════════════════ -->
-<div class="card mb-4">
+<!-- ══ PLACEHOLDER: sin selección ════════════════════════════════════ -->
+<div class="card mb-4" id="cardPlaceholder">
+    <div class="card-body text-center text-muted py-4">
+        <i class="fas fa-hand-point-up fa-2x mb-2 d-block"></i>
+        Selecciona un gasto de la tabla superior para ver su detalle de pago
+    </div>
+</div>
+
+<!-- ══ GRID DETALLE: estilo Business Central ═════════════════════════ -->
+<div class="card mb-4 d-none" id="cardDetalle">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-receipt me-1"></i> Detalle de Pago</span>
-        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalDetalle()">
-            <i class="fas fa-plus me-1"></i> Añadir detalle
+        <span>
+            <i class="fas fa-receipt me-1"></i>
+            Detalle &mdash; <strong id="lblGastoSel"></strong>
+        </span>
+        <button type="button" class="btn btn-success btn-sm" onclick="nuevaLinea()">
+            <i class="fas fa-plus me-1"></i> Nueva línea
         </button>
     </div>
     <div class="table-responsive">
-        <table id="tablaDetalle" class="table table-bordered table-striped border-top" style="width:100%">
+        <table class="table table-bordered table-sm border-top mb-0" id="gridDetalle">
             <thead>
                 <tr>
-                    <th>Nº Pago</th>
-                    <th>Fecha</th>
-                    <th>Miembro</th>
-                    <th>Razón</th>
-                    <th>Cantidad</th>
-                    <th>Tipo cuenta</th>
-                    <th>Devuelto</th>
-                    <th>Acciones</th>
+                    <th style="min-width:200px">Miembro <span class="text-warning">*</span></th>
+                    <th style="min-width:120px">Fecha <span class="text-warning">*</span></th>
+                    <th style="min-width:110px">Cantidad&nbsp;(€) <span class="text-warning">*</span></th>
+                    <th style="min-width:220px">Razón <span class="text-warning">*</span></th>
+                    <th style="min-width:170px">Tipo cuenta <span class="text-warning">*</span></th>
+                    <th style="min-width:100px">Devuelto</th>
+                    <th style="width:90px"></th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody id="gridDetalleTbody"></tbody>
         </table>
+        <div id="gridVacio" class="text-center text-muted py-3 d-none">
+            <i class="fas fa-inbox me-1"></i> Sin líneas de detalle. Pulsa "Nueva línea" para añadir.
+        </div>
     </div>
 </div>
 
@@ -135,67 +153,6 @@
     </div>
 </div>
 
-<!-- ══ MODAL: DETALLE DE PAGO ══════════════════════════════════════════ -->
-<div class="modal fade" id="FormModalDetalle" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="tituloModalDetalle">Añadir detalle de pago</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="hdnIdDetalle" value="0" />
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Nº de pago <span class="text-danger">*</span></label>
-                        <input type="number" id="txtDetNumeroPago" class="form-control" min="1000" step="1" placeholder="Ej: 1000" />
-                    </div>
-                    <div class="col-md-5">
-                        <label class="form-label">Miembro <span class="text-danger">*</span></label>
-                        <input type="text" id="txtDetBuscarMiembro" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
-                        <input type="hidden" id="hdnDetIdMiembro" value="0" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Fecha <span class="text-danger">*</span></label>
-                        <input type="date" id="txtDetFecha" class="form-control" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Cantidad (€) <span class="text-danger">*</span></label>
-                        <input type="text" inputmode="decimal" id="txtDetCantidad" class="form-control" placeholder="0,00" />
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label">Razón / Descripción <span class="text-danger">*</span></label>
-                        <textarea id="txtDetRazon" class="form-control" rows="2" placeholder="Ej: Pago de alquiler sala…"></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Tipo de cuenta <span class="text-danger">*</span></label>
-                        <select id="cboDetTipoCuenta" class="form-select" onchange="toggleDetDevuelto()">
-                            <option value="Cuenta Congregacional">Cuenta Congregacional</option>
-                            <option value="Cuenta Propia">Cuenta Propia</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6" id="divDetDevuelto" style="display:none">
-                        <label class="form-label">¿Devuelto al miembro?</label>
-                        <select id="cboDetDevuelto" class="form-select">
-                            <option value="No">No</option>
-                            <option value="Si">Sí</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <div id="mensajeErrorDetalle" class="alert alert-danger d-none"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="guardarDetalle()">
-                    <i class="fas fa-save me-1"></i> Guardar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section scripts {
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
@@ -214,8 +171,11 @@
 
         const headerStyle = { 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' };
 
-        let tablaGastos, tablaDetalle;
+        let tablaGastos;
+        let gastoActual = null;   // GastoDTO del gasto seleccionado
+        let gridRequestId = 0;    // Evita respuestas AJAX obsoletas
 
+        // ══════════════════════════════════════════════════════════════════
         $(document).ready(function () {
 
             // ── Tabla Gastos ────────────────────────────────────────────
@@ -225,6 +185,14 @@
                 language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
                 ajax: { url: urlListarGastos, type: "GET", dataType: "json", dataSrc: "data" },
                 initComplete: function () { $(this.api().table().header()).css(headerStyle); },
+                drawCallback: function () {
+                    if (!gastoActual) return;
+                    tablaGastos.rows().every(function () {
+                        const d = this.data();
+                        if (d && d.id_gasto === gastoActual.id_gasto)
+                            $(this.node()).addClass('fila-seleccionada');
+                    });
+                },
                 columns: [
                     { data: "numero_pago", defaultContent: '<span class="text-muted">—</span>' },
                     { data: "fechaFormateada", defaultContent: "", render: d => d ? d.split('-').reverse().join('/') : '' },
@@ -246,9 +214,18 @@
                 ]
             });
 
+            // Clic en fila de gastos → seleccionar y cargar detalle
+            $("#tablaGastos tbody").on("click", "tr", function (e) {
+                if ($(e.target).closest('.btn-editar-gasto, .btn-eliminar-gasto').length) return;
+                const data = tablaGastos.row(this).data();
+                if (!data) return;
+                seleccionarGasto(data, this);
+            });
+
             $("#tablaGastos tbody").on("click", ".btn-editar-gasto", function () {
                 abrirModalGasto(tablaGastos.row($(this).closest("tr")).data());
             });
+
             $("#tablaGastos tbody").on("click", ".btn-eliminar-gasto", function () {
                 const d = tablaGastos.row($(this).closest("tr")).data();
                 Swal.fire({
@@ -260,8 +237,13 @@
                     if (r.isConfirmed)
                         $.post(urlEliminarGasto, { id: d.id_gasto }, res => {
                             if (res.resultado) {
+                                // Si se eliminó el gasto seleccionado, ocultar el grid
+                                if (gastoActual && gastoActual.id_gasto === d.id_gasto) {
+                                    gastoActual = null;
+                                    $('#cardDetalle').addClass('d-none');
+                                    $('#cardPlaceholder').removeClass('d-none');
+                                }
                                 tablaGastos.ajax.reload();
-                                tablaDetalle.ajax.reload();
                                 Swal.fire("Eliminado", res.mensaje, "success");
                             } else {
                                 Swal.fire("Error", res.mensaje, "error");
@@ -272,72 +254,47 @@
 
             autocomplete("#txtBuscarMiembro", "#hdnIdMiembro");
 
-            // ── Tabla Detalle ───────────────────────────────────────────
-            tablaDetalle = $("#tablaDetalle").DataTable({
-                responsive: true,
-                ordering: false,
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
-                ajax: { url: urlListarDetalle, type: "GET", dataType: "json", dataSrc: "data" },
-                initComplete: function () { $(this.api().table().header()).css(headerStyle); },
-                columns: [
-                    { data: "numero_pago", defaultContent: "" },
-                    { data: "fechaFormateada", defaultContent: "" },
-                    { data: "nombre_miembro_completo", defaultContent: "" },
-                    { data: "razon", defaultContent: "" },
-                    { data: "cantidad", render: d => parseFloat(d).toFixed(2) + ' €' },
-                    {
-                        data: "tipo_cuenta",
-                        render: d => d === 'Cuenta Propia'
-                            ? '<span class="badge bg-warning text-dark">Cuenta Propia</span>'
-                            : '<span class="badge bg-primary">Cuenta Congregacional</span>'
-                    },
-                    {
-                        data: null,
-                        render: row => {
-                            if (row.tipo_cuenta === 'Cuenta Propia')
-                                return row.devuelto === 'Si'
-                                    ? '<span class="badge bg-success">Sí</span>'
-                                    : '<span class="badge bg-danger">No</span>';
-                            return '<span class="text-muted">—</span>';
-                        }
-                    },
-                    {
-                        defaultContent: `<div class="d-flex justify-content-center gap-2">
-                            <button class="btn btn-warning btn-sm btn-editar-detalle" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger btn-sm btn-eliminar-detalle" title="Eliminar"><i class="fas fa-trash"></i></button>
-                        </div>`,
-                        orderable: false, searchable: false, width: "100px"
-                    }
-                ]
+            // ── Delegación de eventos del grid de detalle ───────────────
+            $("#gridDetalleTbody").on("click", ".btn-editar-fila", function () {
+                ponerEnEdicion($(this).closest("tr"));
             });
 
-            $("#tablaDetalle tbody").on("click", ".btn-editar-detalle", function () {
-                abrirModalDetalle(tablaDetalle.row($(this).closest("tr")).data());
+            $("#gridDetalleTbody").on("click", ".btn-cancelar-fila", function () {
+                cancelarEdicion($(this).closest("tr"));
             });
-            $("#tablaDetalle tbody").on("click", ".btn-eliminar-detalle", function () {
-                const d = tablaDetalle.row($(this).closest("tr")).data();
+
+            $("#gridDetalleTbody").on("click", ".btn-guardar-fila", function () {
+                guardarFila($(this).closest("tr"));
+            });
+
+            $("#gridDetalleTbody").on("click", ".btn-eliminar-fila", function () {
+                const tr = $(this).closest("tr");
+                const id = parseInt(tr.attr("data-id")) || 0;
+                if (id === 0) { tr.remove(); actualizarVacio(); return; }
                 Swal.fire({
-                    title: "¿Eliminar detalle?",
-                    text: `Se eliminará el detalle de pago nº ${d.numero_pago} por ${parseFloat(d.cantidad).toFixed(2)} €.`,
+                    title: "¿Eliminar línea?",
+                    text: "Se eliminará esta línea del detalle de pago.",
                     icon: "warning", showCancelButton: true,
                     confirmButtonText: "Sí, eliminar", cancelButtonText: "Cancelar"
                 }).then(r => {
-                    if (r.isConfirmed)
-                        $.post(urlEliminarDetalle, { id: d.id_detalle }, res => {
-                            if (res.resultado) { tablaDetalle.ajax.reload(); Swal.fire("Eliminado", res.mensaje, "success"); }
-                            else Swal.fire("Error", res.mensaje, "error");
-                        });
+                    if (!r.isConfirmed) return;
+                    $.post(urlEliminarDetalle, { id }, res => {
+                        if (res.resultado) {
+                            tr.remove();
+                            actualizarVacio();
+                            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
+                        } else {
+                            Swal.fire("Error", res.mensaje, "error");
+                        }
+                    });
                 });
             });
-
-            autocomplete("#txtDetBuscarMiembro", "#hdnDetIdMiembro");
         });
 
-        // ── Helpers ──────────────────────────────────────────────────────
+        // ══ Helpers ═══════════════════════════════════════════════════════
 
         function parsearDecimal(val) {
             val = (val || '').toString().trim();
-            // Formato europeo "1.234,56" → quitar puntos de miles, coma a punto
             if (val.includes(',') && val.includes('.'))
                 val = val.replace(/\./g, '').replace(',', '.');
             else
@@ -345,8 +302,18 @@
             return parseFloat(val) || 0;
         }
 
+        function escHtml(s) {
+            return $('<div>').text(s || '').html();
+        }
+
+        function actualizarVacio() {
+            const hayFilas = $('#gridDetalleTbody tr').length > 0;
+            $('#gridVacio').toggleClass('d-none', hayFilas);
+        }
+
         function autocomplete(inputSel, hiddenSel) {
             $(inputSel).autocomplete({
+                appendTo: 'body',
                 source: (req, resp) => {
                     $.get(urlBuscar, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
                         resp((res.data || []).map(m => ({
@@ -367,13 +334,7 @@
             if (tipo !== 'Cuenta Propia') $("#cboDevuelto").val('No');
         }
 
-        function toggleDetDevuelto() {
-            const tipo = $("#cboDetTipoCuenta").val();
-            $("#divDetDevuelto").toggle(tipo === 'Cuenta Propia');
-            if (tipo !== 'Cuenta Propia') $("#cboDetDevuelto").val('No');
-        }
-
-        // ── Modal Gasto ───────────────────────────────────────────────────
+        // ══ Modal Gasto ════════════════════════════════════════════════════
 
         function abrirModalGasto(data) {
             $("#hdnIdGasto").val(data ? data.id_gasto : 0);
@@ -411,7 +372,6 @@
                 tipo_cuenta: $("#cboTipoCuenta").val(),
                 devuelto:    $("#cboDevuelto").val(),
                 fecha_gasto: fecha
-                // numero_pago no se envía: el servidor lo genera automáticamente al crear
             };
 
             $("#FormModalGasto .modal-body").LoadingOverlay("show", { text: "Guardando..." });
@@ -420,7 +380,6 @@
                 if (res.resultado && res.resultado !== 0) {
                     bootstrap.Modal.getInstance(document.getElementById("FormModalGasto")).hide();
                     tablaGastos.ajax.reload();
-                    tablaDetalle.ajax.reload(); // el detalle se creó automáticamente en el servidor
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 3000, timerProgressBar: true });
                 } else {
                     mostrarError("#mensajeErrorGasto", res.mensaje);
@@ -431,66 +390,264 @@
             });
         }
 
-        // ── Modal Detalle ─────────────────────────────────────────────────
-
-        function abrirModalDetalle(data) {
-            $("#hdnIdDetalle").val(data ? data.id_detalle : 0);
-            $("#txtDetNumeroPago").val(data ? data.numero_pago : '');
-            $("#hdnDetIdMiembro").val(data ? data.id_miembro : 0);
-            $("#txtDetBuscarMiembro").val(data ? data.nombre_miembro_completo : '');
-            $("#txtDetFecha").val(data ? data.fechaFormateada : '');
-            $("#txtDetCantidad").val(data ? parseFloat(data.cantidad).toFixed(2) : '');
-            $("#txtDetRazon").val(data ? data.razon : '');
-            $("#cboDetTipoCuenta").val(data ? data.tipo_cuenta : 'Cuenta Congregacional');
-            $("#cboDetDevuelto").val(data ? data.devuelto : 'No');
-            toggleDetDevuelto();
-            $("#mensajeErrorDetalle").addClass("d-none").text('');
-            $("#tituloModalDetalle").text(data ? 'Editar detalle' : 'Añadir detalle de pago');
-            new bootstrap.Modal(document.getElementById("FormModalDetalle")).show();
+        function mostrarError(sel, msg) {
+            $(sel).removeClass("d-none").text(msg);
         }
 
-        function guardarDetalle() {
-            const numeroPago = parseInt($("#txtDetNumeroPago").val()) || 0;
-            const idMiembro  = parseInt($("#hdnDetIdMiembro").val()) || 0;
-            const cantidad   = parsearDecimal($("#txtDetCantidad").val());
-            const razon      = $("#txtDetRazon").val().trim();
-            const fecha      = $("#txtDetFecha").val();
+        // ══ Grid Detalle (estilo Business Central) ════════════════════════
 
-            if (numeroPago <= 0) { mostrarError("#mensajeErrorDetalle", "El número de pago es obligatorio."); return; }
-            if (idMiembro === 0) { mostrarError("#mensajeErrorDetalle", "Selecciona el miembro."); return; }
-            if (cantidad <= 0)   { mostrarError("#mensajeErrorDetalle", "La cantidad debe ser mayor que cero."); return; }
-            if (!razon)          { mostrarError("#mensajeErrorDetalle", "La razón no puede estar vacía."); return; }
-            if (!fecha)          { mostrarError("#mensajeErrorDetalle", "La fecha es obligatoria."); return; }
+        function seleccionarGasto(data, trDom) {
+            gastoActual = data;
 
-            const payload = {
-                id_detalle:  parseInt($("#hdnIdDetalle").val()) || 0,
-                numero_pago: numeroPago,
-                id_miembro:  idMiembro,
-                cantidad,
-                razon,
-                tipo_cuenta: $("#cboDetTipoCuenta").val(),
-                devuelto:    $("#cboDetDevuelto").val(),
-                fecha:       fecha
-            };
+            // Resaltar fila seleccionada
+            $('#tablaGastos tbody tr').removeClass('fila-seleccionada');
+            $(trDom).addClass('fila-seleccionada');
 
-            $("#FormModalDetalle .modal-body").LoadingOverlay("show", { text: "Guardando..." });
-            $.post(urlGuardarDetalle, payload, res => {
-                $("#FormModalDetalle .modal-body").LoadingOverlay("hide");
-                if (res.resultado && res.resultado !== 0) {
-                    bootstrap.Modal.getInstance(document.getElementById("FormModalDetalle")).hide();
-                    tablaDetalle.ajax.reload();
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+            // Actualizar cabecera del grid
+            const fecha = data.fechaFormateada ? data.fechaFormateada.split('-').reverse().join('/') : '';
+            $('#lblGastoSel').text(`Nº ${data.numero_pago} — ${data.nombre_miembro_completo} (${fecha})`);
+
+            $('#cardPlaceholder').addClass('d-none');
+            $('#cardDetalle').removeClass('d-none');
+
+            cargarGrid(data.numero_pago);
+        }
+
+        function cargarGrid(numeroPago) {
+            const myId = ++gridRequestId;
+            const tbody = $('#gridDetalleTbody');
+            tbody.html('<tr><td colspan="7" class="text-center py-2 text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Cargando…</td></tr>');
+            $('#gridVacio').addClass('d-none');
+
+            $.get(urlListarDetalle, { numeroPago }, res => {
+                if (myId !== gridRequestId) return;
+                tbody.empty();
+                const filas = res.data || [];
+                if (filas.length === 0) {
+                    $('#gridVacio').removeClass('d-none');
                 } else {
-                    mostrarError("#mensajeErrorDetalle", res.mensaje);
+                    filas.forEach(d => tbody.append(crearFilaVista(d)));
                 }
             }).fail(() => {
-                $("#FormModalDetalle .modal-body").LoadingOverlay("hide");
-                mostrarError("#mensajeErrorDetalle", "Error en la solicitud.");
+                if (myId !== gridRequestId) return;
+                tbody.html('<tr><td colspan="7" class="text-center text-danger py-2">Error al cargar el detalle.</td></tr>');
             });
         }
 
-        function mostrarError(sel, msg) {
-            $(sel).removeClass("d-none").text(msg);
+        function crearFilaVista(d) {
+            const fechaDisplay = d.fechaFormateada ? d.fechaFormateada.split('-').reverse().join('/') : '—';
+            const cantidadDisplay = parseFloat(d.cantidad || 0).toFixed(2) + ' €';
+
+            const tipoBadge = d.tipo_cuenta === 'Cuenta Propia'
+                ? '<span class="badge bg-warning text-dark">Cuenta Propia</span>'
+                : '<span class="badge bg-primary">Cuenta Congregacional</span>';
+
+            const devueltoDisplay = d.tipo_cuenta === 'Cuenta Propia'
+                ? (d.devuelto === 'Si' ? '<span class="badge bg-success">Sí</span>' : '<span class="badge bg-danger">No</span>')
+                : '<span class="text-muted">—</span>';
+
+            const tr = $(`<tr data-id="${d.id_detalle}" data-id-miembro="${d.id_miembro}" data-numero-pago="${d.numero_pago}">
+                <td>${escHtml(d.nombre_miembro_completo)}</td>
+                <td>${fechaDisplay}</td>
+                <td class="text-end">${cantidadDisplay}</td>
+                <td>${escHtml(d.razon)}</td>
+                <td>${tipoBadge}</td>
+                <td>${devueltoDisplay}</td>
+                <td>
+                    <div class="d-flex gap-1 justify-content-center">
+                        <button class="btn btn-warning btn-xs btn-editar-fila" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-xs btn-eliminar-fila" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`);
+
+            tr.data('dto', d);
+            return tr;
+        }
+
+        function ponerEnEdicion(tr) {
+            // Si otra fila está en edición, cancelarla primero
+            const otraEdicion = $('#gridDetalleTbody tr.editando');
+            if (otraEdicion.length && !otraEdicion.is(tr)) {
+                const esNueva = (parseInt(otraEdicion.attr('data-id')) || 0) === 0;
+                if (esNueva) {
+                    otraEdicion.remove();
+                    actualizarVacio();
+                } else {
+                    const dOriginal = otraEdicion.data('dto');
+                    otraEdicion.removeClass('editando');
+                    const nuevaTr = crearFilaVista(dOriginal);
+                    nuevaTr.data('dto', dOriginal);
+                    otraEdicion.replaceWith(nuevaTr);
+                }
+            }
+
+            const d = tr.data('dto') || {};
+            const esNuevo = (parseInt(tr.attr('data-id')) || 0) === 0;
+            const esPropia = d.tipo_cuenta === 'Cuenta Propia';
+
+            tr.addClass('editando');
+            tr.empty();
+
+            // Celda Miembro
+            const inpMiembro = $('<input type="text" autocomplete="off" placeholder="Buscar miembro…">')
+                .addClass('form-control form-control-sm inp-miembro').val(d.nombre_miembro_completo || '');
+            const hdnMiembro = $('<input type="hidden">').addClass('hdn-id-miembro').val(d.id_miembro || 0);
+            const errMiembro = $('<div class="invalid-feedback">').text('Selecciona un miembro');
+            tr.append($('<td>').append(inpMiembro, hdnMiembro, errMiembro));
+
+            // Celda Fecha
+            const inpFecha = $('<input type="date">').addClass('form-control form-control-sm inp-fecha').val(d.fechaFormateada || '');
+            const errFecha = $('<div class="invalid-feedback">').text('Fecha obligatoria');
+            tr.append($('<td>').append(inpFecha, errFecha));
+
+            // Celda Cantidad
+            const inpCantidad = $('<input type="text" inputmode="decimal" placeholder="0,00">')
+                .addClass('form-control form-control-sm inp-cantidad')
+                .val(d.cantidad ? parseFloat(d.cantidad).toFixed(2) : '');
+            const errCantidad = $('<div class="invalid-feedback">').text('Cantidad mayor que 0');
+            tr.append($('<td>').append(inpCantidad, errCantidad));
+
+            // Celda Razón
+            const inpRazon = $('<input type="text" placeholder="Razón…">').addClass('form-control form-control-sm inp-razon').val(d.razon || '');
+            const errRazon = $('<div class="invalid-feedback">').text('Razón obligatoria');
+            tr.append($('<td>').append(inpRazon, errRazon));
+
+            // Celda Tipo cuenta
+            const selTipo = $('<select>').addClass('form-select form-select-sm inp-tipo-cuenta').append(
+                $('<option value="Cuenta Congregacional">').text('Cuenta Congregacional').prop('selected', !esPropia),
+                $('<option value="Cuenta Propia">').text('Cuenta Propia').prop('selected', esPropia)
+            );
+            tr.append($('<td>').append(selTipo));
+
+            // Celda Devuelto
+            const selDevuelto = $('<select>').addClass('form-select form-select-sm inp-devuelto').append(
+                $('<option value="No">').text('No').prop('selected', d.devuelto !== 'Si'),
+                $('<option value="Si">').text('Sí').prop('selected', d.devuelto === 'Si')
+            );
+            const spanNoAplica = $('<span class="text-muted">').text('—');
+            if (esPropia) spanNoAplica.hide(); else selDevuelto.hide();
+            tr.append($('<td>').append(selDevuelto, spanNoAplica));
+
+            selTipo.on('change', function () {
+                const p = $(this).val() === 'Cuenta Propia';
+                selDevuelto.toggle(p);
+                spanNoAplica.toggle(!p);
+                if (!p) selDevuelto.val('No');
+            });
+
+            // Celda Acciones
+            const btnGuardar  = $('<button class="btn btn-success btn-xs btn-guardar-fila" title="Guardar">').html('<i class="fas fa-check"></i>');
+            const btnCancelar = $('<button class="btn btn-secondary btn-xs btn-cancelar-fila" title="Cancelar">').html('<i class="fas fa-times"></i>');
+            const divBtns = $('<div class="d-flex gap-1 justify-content-center">').append(btnGuardar, btnCancelar);
+            if (!esNuevo) divBtns.append($('<button class="btn btn-danger btn-xs btn-eliminar-fila" title="Eliminar">').html('<i class="fas fa-trash"></i>'));
+            tr.append($('<td>').append(divBtns));
+
+            // Autocomplete miembro en el grid
+            inpMiembro.autocomplete({
+                appendTo: 'body',
+                source: (req, resp) => {
+                    $.get(urlBuscar, { busqueda: req.term, tipoBusqueda: 'nombre' }, res => {
+                        resp((res.data || []).map(m => ({
+                            label: `${m.nombre_miembro || ''} ${m.apellidos_miembro || ''}`.trim(),
+                            value: `${m.nombre_miembro || ''} ${m.apellidos_miembro || ''}`.trim(),
+                            id: m.id_miembro
+                        })));
+                    });
+                },
+                minLength: 2,
+                select: (e, ui) => {
+                    hdnMiembro.val(ui.item.id);
+                    inpMiembro.removeClass('is-invalid');
+                }
+            });
+
+            inpMiembro.on('input', () => { if (!inpMiembro.val().trim()) hdnMiembro.val(0); });
+            inpMiembro.trigger('focus');
+        }
+
+        function cancelarEdicion(tr) {
+            const esNuevo = (parseInt(tr.attr('data-id')) || 0) === 0;
+            if (esNuevo) {
+                tr.remove();
+                actualizarVacio();
+            } else {
+                tr.removeClass('editando');
+                const d = tr.data('dto');
+                const nuevaTr = crearFilaVista(d);
+                nuevaTr.data('dto', d);
+                tr.replaceWith(nuevaTr);
+            }
+        }
+
+        function guardarFila(tr) {
+            const idDetalle  = parseInt(tr.attr('data-id')) || 0;
+            const idMiembro  = parseInt(tr.find('.hdn-id-miembro').val()) || 0;
+            const fecha      = tr.find('.inp-fecha').val();
+            const cantidad   = parsearDecimal(tr.find('.inp-cantidad').val());
+            const razon      = tr.find('.inp-razon').val().trim();
+            const tipoCuenta = tr.find('.inp-tipo-cuenta').val();
+            const devuelto   = tr.find('.inp-devuelto').is(':visible') ? tr.find('.inp-devuelto').val() : 'No';
+
+            // Validación con resaltado visual
+            let valido = true;
+
+            const setInvalid = (inp, condicion) => {
+                inp.toggleClass('is-invalid', condicion);
+                if (condicion) valido = false;
+            };
+
+            setInvalid(tr.find('.inp-miembro'),  idMiembro <= 0);
+            setInvalid(tr.find('.inp-fecha'),     !fecha);
+            setInvalid(tr.find('.inp-cantidad'),  cantidad <= 0);
+            setInvalid(tr.find('.inp-razon'),     !razon);
+
+            if (!valido) {
+                tr.find('.is-invalid').first().trigger('focus');
+                return;
+            }
+
+            const payload = {
+                id_detalle:  idDetalle,
+                numero_pago: gastoActual.numero_pago,
+                id_miembro:  idMiembro,
+                fecha:       fecha,
+                cantidad:    cantidad,
+                razon:       razon,
+                tipo_cuenta: tipoCuenta,
+                devuelto:    devuelto
+            };
+
+            const btnGuardar = tr.find('.btn-guardar-fila').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.post(urlGuardarDetalle, payload, res => {
+                if (res.resultado && res.resultado !== 0) {
+                    cargarGrid(gastoActual.numero_pago);
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
+                } else {
+                    btnGuardar.prop('disabled', false).html('<i class="fas fa-check"></i>');
+                    Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
+                }
+            }).fail(() => {
+                btnGuardar.prop('disabled', false).html('<i class="fas fa-check"></i>');
+                Swal.fire('Error', 'Error en la solicitud.', 'error');
+            });
+        }
+
+        function nuevaLinea() {
+            if (!gastoActual) return;
+
+            if ($('#gridDetalleTbody tr.editando').length > 0) {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Guarda o cancela la línea actual antes de añadir otra.', showConfirmButton: false, timer: 3000 });
+                return;
+            }
+
+            $('#gridVacio').addClass('d-none');
+
+            const tr = $('<tr data-id="0">').data('dto', {});
+            $('#gridDetalleTbody').append(tr);
+            ponerEnEdicion(tr);
+            tr[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     </script>
 }

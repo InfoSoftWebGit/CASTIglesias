@@ -24,6 +24,7 @@ namespace CapaDatos
                         id_evento    = e.id_evento,
                         nombre_evento = e.nombre_evento ?? "",
                         fecha_inicio = e.fecha_inicio.ToString("yyyy-MM-dd"),
+                        fecha_fin    = e.fecha_fin != null ? e.fecha_fin.Value.ToString("yyyy-MM-dd") : null,
                         hora_inicio  = e.hora_inicio,
                         hora_fin     = e.hora_fin,
                         id_zona      = e.id_zona,
@@ -53,6 +54,7 @@ namespace CapaDatos
                         id_evento    = e.id_evento,
                         nombre_evento = e.nombre_evento ?? "",
                         fecha_inicio = e.fecha_inicio.ToString("yyyy-MM-dd"),
+                        fecha_fin    = e.fecha_fin != null ? e.fecha_fin.Value.ToString("yyyy-MM-dd") : null,
                         hora_inicio  = e.hora_inicio,
                         hora_fin     = e.hora_fin,
                         id_zona      = e.id_zona,
@@ -79,6 +81,7 @@ namespace CapaDatos
                     if (existing == null) { mensaje = "Evento no encontrado."; return false; }
                     existing.nombre_evento = ev.nombre_evento;
                     existing.fecha_inicio  = ev.fecha_inicio;
+                    existing.fecha_fin     = ev.fecha_fin;
                     existing.hora_inicio   = ev.hora_inicio;
                     existing.hora_fin      = ev.hora_fin;
                     existing.id_zona       = ev.id_zona;

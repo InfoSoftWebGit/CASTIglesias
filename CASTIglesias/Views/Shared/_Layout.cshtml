@@ -400,7 +400,8 @@
 
             // Expandir menú activo
             const currentPath = window.location.pathname.toLowerCase();
-            document.querySelectorAll('.sb-sidenav-menu-nested a.nav-link').forEach(link => {
+            document.querySelectorAll('.sb-sidenav-menu-nested a.nav-link:not([data-bs-toggle])').forEach(link => {
+                if (!link.getAttribute('href') || link.getAttribute('href') === '#') return;
                 const linkUrl = new URL(link.href).pathname.toLowerCase();
                 if (currentPath === linkUrl || (linkUrl.endsWith('/') && currentPath.startsWith(linkUrl))) {
                     const collapseDiv = link.closest('.collapse');

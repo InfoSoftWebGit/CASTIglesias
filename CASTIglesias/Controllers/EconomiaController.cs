@@ -426,6 +426,15 @@ namespace CASTIglesias.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult GuardarConcepto(Concepto obj)
+        {
+            if (obj.ID_concepto == 0)
+                return IngresarConcepto(obj);
+            else
+                return EditarConcepto(obj);
+        }
+
         [HttpGet]
         public JsonResult ObtenerConceptos()
         {
@@ -538,12 +547,14 @@ namespace CASTIglesias.Controllers
         #region DetallePago
 
         [HttpGet]
-        public JsonResult ListarDetallePagos()
+        public JsonResult ListarDetallePagos(int? numeroPago = null)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
                 var data = _cnGasto.ListarDetallePagos(sedeID);
+                if (numeroPago.HasValue)
+                    data = data.Where(d => d.numero_pago == numeroPago.Value).ToList();
                 return Json(new { data });
             }
             catch (Exception ex)

@@ -16,6 +16,10 @@ namespace CapaEntidad
         [Column("fecha_inicio")]
         public DateTime fecha_inicio { get; set; }
 
+        /// <summary>Fecha de fin del evento (null = mismo día que fecha_inicio)</summary>
+        [Column("fecha_fin")]
+        public DateTime? fecha_fin { get; set; }
+
         /// <summary>Hora de inicio en formato "HH:mm", nullable = todo el día</summary>
         [Column("hora_inicio")]
         public string? hora_inicio { get; set; }
@@ -45,6 +49,7 @@ namespace CapaEntidad
         public int    id_evento      { get; set; }
         public string nombre_evento  { get; set; } = "";
         public string fecha_inicio   { get; set; } = "";   // "yyyy-MM-dd"
+        public string? fecha_fin     { get; set; }         // "yyyy-MM-dd", null = mismo día
         public string? hora_inicio   { get; set; }
         public string? hora_fin      { get; set; }
         public int?   id_zona        { get; set; }
@@ -76,5 +81,7 @@ namespace CapaEntidad
         public string? descripcion { get; set; }
         public string? horaInicio  { get; set; }
         public string? horaFin     { get; set; }
+        public string? fechaFin    { get; set; }
+        public string  color       { get; set; } = "#1E3A8A";
     }
 }

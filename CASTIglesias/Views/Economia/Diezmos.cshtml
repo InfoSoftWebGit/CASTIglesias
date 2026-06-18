@@ -83,7 +83,7 @@
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">Cantidad<span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="txtCantidad" placeholder="0.0€" autocomplete="off" />
+                        <input type="text" inputmode="decimal" class="form-control" id="txtCantidad" placeholder="0,00€" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" id="txtSede" hidden />
@@ -127,6 +127,15 @@
     <script>
         let tabladata;
         let filaSeleccionada;
+
+        function parsearDecimal(val) {
+            val = (val || '').toString().trim();
+            if (val.includes(',') && val.includes('.'))
+                val = val.replace(/\./g, '').replace(',', '.');
+            else
+                val = val.replace(',', '.');
+            return parseFloat(val) || 0;
+        }
 
         // Guarda el NUMERO DE MIEMBRO (ID visible) del miembro seleccionado. 0 si es anónimo.
         let NUMERO_MIEMBRO_SELECCIONADO = 0;
@@ -547,7 +556,7 @@
                 numero_miembro: NUMERO_MIEMBRO_SELECCIONADO,
                 nombre_miembro: $("#txtNombreMiembro").val().trim(),
                 apellidos_miembro: $("#txtApellidoMiembro").val().trim(),
-                cantidad_diezmo: parseFloat($("#txtCantidad").val()) || 0,
+                cantidad_diezmo: parsearDecimal($("#txtCantidad").val()),
                 sede: $("#txtSede").val().trim(),
                 iD_concepto: parseInt($("#ddlConcepto").val()) || 0,
                 nombre_concepto: nombreConceptoSeleccionado
