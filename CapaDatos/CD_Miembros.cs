@@ -118,7 +118,7 @@ namespace CapaDatos
                     consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
                 }
 
-                return consultaBase.Count();
+                return consultaBase.Count(m => m.miembro_activo == "Si");
             }
             catch (Exception ex)
             {

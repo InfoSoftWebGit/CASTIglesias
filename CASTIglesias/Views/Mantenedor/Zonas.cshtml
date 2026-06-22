@@ -3,7 +3,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
-<style>.ui-autocomplete { z-index: 9999 !important; }</style>
+<style>
+    .ui-autocomplete { z-index: 9999 !important; }
+    .celda-truncada { display: block; max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
 
 
 <ol class="breadcrumb mb-4 mt-4">
@@ -124,7 +127,7 @@
                 columns: [
                     { data: "nombre_zona" },
                     { data: "nombre_lider" },
-                    { data: "descripcion" },
+                    { data: "descripcion", render: d => `<span class="celda-truncada" title="${d ?? ''}">${d ?? ''}</span>` },
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
