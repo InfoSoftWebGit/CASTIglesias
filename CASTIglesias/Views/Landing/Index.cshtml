@@ -72,105 +72,147 @@
             position: relative;
             overflow: hidden;
         }
-        .hero-section::before {
-            content: '';
-            position: absolute; top: -40%; right: -15%;
-            width: 700px; height: 700px;
-            background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
-            border-radius: 50%; pointer-events: none;
+
+        /* Floating animations */
+        @@keyframes floatA {
+            0%, 100% { transform: translateY(0px); }
+            50%       { transform: translateY(-14px); }
         }
-        .hero-section::after {
-            content: '';
-            position: absolute; bottom: -30%; left: -10%;
-            width: 500px; height: 500px;
-            background: radial-gradient(circle, rgba(0,191,165,0.08) 0%, transparent 70%);
-            border-radius: 50%; pointer-events: none;
+        @@keyframes floatB {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50%       { transform: translateY(10px) rotate(1.5deg); }
         }
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            background: rgba(0,191,165,0.13);
-            border: 1px solid rgba(0,191,165,0.35);
-            color: var(--teal);
+        @@keyframes floatC {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            33%       { transform: translateY(-8px) translateX(5px); }
+            66%       { transform: translateY(5px) translateX(-4px); }
+        }
+        @@keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        /* Glassmorphism base */
+        .glass {
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        /* Hero visual container */
+        .hero-visual {
+            position: relative;
+            height: 500px;
+        }
+
+        /* Main dashboard glass card */
+        .hero-main-card {
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            width: 340px;
             border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.83rem;
-            font-weight: 600;
-            margin-bottom: 1.4rem;
+            padding: 22px 24px;
+            animation: floatB 7s ease-in-out infinite;
+            z-index: 3;
+        }
+        .hmc-header {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+        }
+        .hmc-icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: rgba(59,130,246,0.22);
+            display: flex; align-items: center; justify-content: center;
+            color: #60A5FA; font-size: 0.88rem;
+        }
+        .hmc-title { color: white; font-weight: 700; font-size: 0.92rem; }
+        .hmc-sub   { color: rgba(255,255,255,0.4); font-size: 0.7rem; margin-top: 1px; }
+
+        /* KPI 2-col grid inside main card */
+        .kpi-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
+        }
+        .kpi-tile {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 11px;
+            padding: 10px 12px;
+        }
+        .kpi-tile .kt-lbl { color: rgba(255,255,255,0.38); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-tile .kt-val { color: white; font-size: 1.2rem; font-weight: 800; line-height: 1.25; }
+        .kpi-tile .kt-badge {
+            font-size: 0.63rem; font-weight: 700; padding: 2px 7px;
+            border-radius: 10px; display: inline-block; margin-top: 4px;
+        }
+        .badge-green { background: rgba(16,185,129,0.2); color: #34D399; }
+        .badge-blue  { background: rgba(59,130,246,0.2); color: #60A5FA; }
+        .badge-amber { background: rgba(245,158,11,0.2); color: #FCD34D; }
+
+        /* Mini bar chart */
+        .mini-bars {
+            display: flex; align-items: flex-end; gap: 4px; height: 48px;
+        }
+        .mini-bars .mb {
+            flex: 1; border-radius: 3px 3px 0 0;
+            background: rgba(59,130,246,0.28);
+            transition: background 0.2s;
+        }
+        .mini-bars .mb.hi { background: rgba(96,165,250,0.8); }
+        .mini-bars-label {
+            color: rgba(255,255,255,0.35); font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; margin-top: 12px;
+        }
+
+        /* Floating small cards */
+        .hero-float {
+            position: absolute;
+            border-radius: 14px;
+            padding: 13px 16px;
+            min-width: 158px;
+            z-index: 4;
+        }
+        .hf-icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.78rem; margin-bottom: 8px;
+        }
+        .hf-lbl   { color: rgba(255,255,255,0.42); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .hf-val   { color: white; font-size: 1.08rem; font-weight: 800; line-height: 1.2; }
+        .hf-trend { font-size: 0.67rem; font-weight: 600; margin-top: 3px; }
+
+        /* Decorative rings & dots */
+        .deco-ring {
+            position: absolute; border-radius: 50%; pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .deco-dot {
+            position: absolute; border-radius: 50%; pointer-events: none;
+            background: rgba(255,255,255,0.14);
+        }
+        .dot-grid {
+            position: absolute; pointer-events: none;
+            display: grid; grid-template-columns: repeat(9,1fr); gap: 13px;
+            opacity: 0.12;
+        }
+        .dot-grid span { width: 3px; height: 3px; background: white; border-radius: 50%; display: block; }
+
+        /* Hero text elements */
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(0,191,165,0.13); border: 1px solid rgba(0,191,165,0.35);
+            color: var(--teal); border-radius: 20px; padding: 6px 16px;
+            font-size: 0.83rem; font-weight: 600; margin-bottom: 1.4rem;
         }
         .hero-title {
-            font-size: 3rem;
-            font-weight: 800;
-            color: white;
-            line-height: 1.15;
-            margin-bottom: 1.2rem;
+            font-size: 3rem; font-weight: 800; color: white;
+            line-height: 1.15; margin-bottom: 1.2rem;
         }
         .hero-title span { color: var(--teal); }
         .hero-subtitle {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.78);
-            line-height: 1.65;
-            margin-bottom: 2.2rem;
-            max-width: 480px;
-        }
-
-        /* ── CAROUSEL MOCKUP ── */
-        .carousel-mockup {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 32px 80px rgba(0,0,0,0.45);
-        }
-        .mockup-topbar {
-            background: rgba(0,0,0,0.32);
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .mockup-dot { width: 11px; height: 11px; border-radius: 50%; }
-        .mockup-topbar-title {
-            color: rgba(255,255,255,0.55);
-            font-size: 0.78rem;
-            margin-left: 8px;
-            font-weight: 500;
-        }
-        .carousel-inner.mockup-body {
-            padding: 24px;
-            min-height: 370px;
-        }
-        .carousel-item-inner { min-height: 320px; }
-        .slide-icon-box {
-            width: 58px; height: 58px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.4rem;
-            margin-bottom: 14px;
-        }
-        .slide-title { color: white; font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; }
-        .slide-desc  { color: rgba(255,255,255,0.68); font-size: 0.92rem; margin-bottom: 14px; }
-        .slide-feature {
-            display: flex; align-items: center; gap: 10px;
-            color: rgba(255,255,255,0.82); font-size: 0.86rem; margin-bottom: 7px;
-        }
-        .slide-feature i { color: var(--teal); flex-shrink: 0; }
-        .mockup-kpi-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px;
-        }
-        .mockup-kpi {
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; padding: 12px 14px;
-        }
-        .mockup-kpi .kpi-label { color: rgba(255,255,255,0.45); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
-        .mockup-kpi .kpi-value { color: white; font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
-        .carousel-indicators button { width: 8px; height: 8px; border-radius: 50%; }
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 38px; height: 38px; top: 50%; transform: translateY(-50%);
-            background: rgba(255,255,255,0.14); border-radius: 50%;
+            font-size: 1.05rem; color: rgba(255,255,255,0.75);
+            line-height: 1.7; margin-bottom: 2.2rem; max-width: 460px;
         }
 
         /* ── STATS BAND ── */
@@ -181,24 +223,17 @@
         /* ── SECTION HEADERS ── */
         .section-badge {
             display: inline-block;
-            background: rgba(30,58,138,0.08);
-            color: var(--primary);
-            border-radius: 20px;
-            padding: 4px 16px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-bottom: 12px;
+            background: rgba(30,58,138,0.08); color: var(--primary);
+            border-radius: 20px; padding: 4px 16px;
+            font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
         }
-        .section-title { font-size: 2rem; font-weight: 800; color: var(--text); }
+        .section-title    { font-size: 2rem; font-weight: 800; color: var(--text); }
         .section-subtitle { color: var(--text-light); font-size: 1rem; max-width: 560px; margin: 0 auto; line-height: 1.65; }
 
-        /* ── FEATURE CARDS ── */
+        /* ── FEATURE CARDS (overview) ── */
         .feature-card {
-            background: white;
-            border-radius: 16px;
-            padding: 28px 24px;
+            background: white; border-radius: 16px; padding: 28px 24px;
             border: 1.5px solid #E9ECF3;
             transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             height: 100%;
@@ -216,16 +251,154 @@
         .feature-card h5 { font-weight: 700; font-size: 1.03rem; margin-bottom: 8px; }
         .feature-card p  { color: var(--text-light); font-size: 0.9rem; line-height: 1.6; margin: 0; }
 
+        /* ── CÓMO FUNCIONA ── */
+        .how-section { background: var(--bg-light); }
+        .step-wrap { position: relative; }
+        .step-connector {
+            position: absolute; top: 26px;
+            left: calc(50% + 30px); width: calc(100% - 60px);
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            opacity: 0.2;
+        }
+        .step-num {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: var(--primary); color: white;
+            font-size: 1.2rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px; position: relative; z-index: 1;
+            box-shadow: 0 6px 20px rgba(30,58,138,0.35);
+        }
+        .step-card { text-align: center; padding: 8px 16px 0; }
+        .step-card h5 { font-weight: 700; font-size: 1.02rem; margin-bottom: 8px; color: var(--text); }
+        .step-card p  { color: var(--text-light); font-size: 0.89rem; line-height: 1.6; margin: 0; }
+        .step-icon-ring {
+            width: 70px; height: 70px; border-radius: 50%;
+            border: 2px dashed rgba(30,58,138,0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+        }
+        .step-icon-ring i { font-size: 1.5rem; color: var(--primary); }
+
+        /* ── ALTERNATING SECTIONS ── */
+        .alt-section { padding: 86px 0; }
+        .alt-section.bg-alt { background: var(--bg-light); }
+
+        /* Module badge in alt sections */
+        .mod-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            border-radius: 20px; padding: 5px 15px;
+            font-size: 0.79rem; font-weight: 700; margin-bottom: 14px;
+        }
+        .alt-title    { font-size: 1.75rem; font-weight: 800; color: var(--text); line-height: 1.25; margin-bottom: 12px; }
+        .alt-desc     { color: var(--text-light); font-size: 0.96rem; line-height: 1.7; margin-bottom: 24px; }
+        .alt-feature  {
+            display: flex; align-items: flex-start; gap: 11px;
+            margin-bottom: 13px; font-size: 0.92rem; color: var(--text);
+        }
+        .alt-feature-icon {
+            width: 28px; height: 28px; border-radius: 7px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; margin-top: 1px;
+        }
+        .alt-feature strong { display: block; font-weight: 600; font-size: 0.9rem; }
+        .alt-feature span   { color: var(--text-light); font-size: 0.85rem; line-height: 1.5; }
+
+        /* App mockup panels in alt sections */
+        .app-panel {
+            border-radius: 18px; overflow: hidden;
+            box-shadow: 0 28px 70px rgba(30,58,138,0.16);
+            border: 1.5px solid #E2E8F4;
+        }
+        .ap-topbar {
+            padding: 10px 16px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .ap-dot { width: 10px; height: 10px; border-radius: 50%; opacity: 0.8; }
+        .ap-title { font-size: 0.75rem; font-weight: 500; margin-left: 7px; opacity: 0.65; }
+        .ap-body { background: #FAFBFF; padding: 20px; }
+
+        /* Member list rows */
+        .member-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 9px 12px; border-radius: 10px; background: white;
+            border: 1px solid #EEF1F8; margin-bottom: 8px;
+        }
+        .member-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.82rem; font-weight: 700; color: white; flex-shrink: 0;
+        }
+        .member-name  { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+        .member-meta  { font-size: 0.76rem; color: var(--text-light); }
+        .member-badge {
+            margin-left: auto; font-size: 0.7rem; font-weight: 700;
+            padding: 3px 9px; border-radius: 20px;
+        }
+
+        /* Finance rows */
+        .fin-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px; border-radius: 9px; background: white;
+            border: 1px solid #EEF1F8; margin-bottom: 7px;
+        }
+        .fin-icon { width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; flex-shrink: 0; }
+        .fin-label { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-left: 10px; }
+        .fin-amount { font-size: 0.9rem; font-weight: 800; }
+        .fin-bars {
+            display: flex; align-items: flex-end; gap: 5px; height: 55px; margin-top: 14px; padding: 0 4px;
+        }
+        .fin-bar { flex: 1; border-radius: 4px 4px 0 0; }
+
+        /* Timeline for seguimiento */
+        .timeline-item {
+            display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;
+        }
+        .tl-line-wrap { display: flex; flex-direction: column; align-items: center; }
+        .tl-dot {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; color: white;
+        }
+        .tl-line { width: 2px; flex: 1; min-height: 20px; background: #E9ECF3; margin-top: 4px; }
+        .tl-content { padding-top: 4px; }
+        .tl-type   { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+        .tl-person { font-size: 0.75rem; color: var(--text-light); margin-top: 1px; }
+        .tl-date   { font-size: 0.7rem; color: var(--text-light); margin-top: 2px; }
+
+        /* ── TESTIMONIALS ── */
+        .testimonial-section { background: var(--primary-dark); }
+        .testimonial-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 30px 26px; height: 100%;
+            transition: background 0.25s ease, border-color 0.25s ease;
+        }
+        .testimonial-card:hover {
+            background: rgba(255,255,255,0.09);
+            border-color: rgba(255,255,255,0.18);
+        }
+        .t-stars { color: var(--amber); font-size: 0.88rem; margin-bottom: 14px; letter-spacing: 2px; }
+        .t-quote {
+            color: rgba(255,255,255,0.82); font-size: 0.95rem;
+            line-height: 1.72; margin-bottom: 22px; font-style: italic;
+        }
+        .t-author { display: flex; align-items: center; gap: 12px; }
+        .t-avatar {
+            width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; font-weight: 800; color: white;
+        }
+        .t-name { color: white; font-weight: 700; font-size: 0.92rem; }
+        .t-role { color: rgba(255,255,255,0.42); font-size: 0.78rem; margin-top: 2px; }
+
         /* ── PRICING ── */
         .pricing-section { background: var(--bg-light); }
         .pricing-card {
-            background: white;
-            border-radius: 20px;
-            padding: 36px 30px;
+            background: white; border-radius: 20px; padding: 36px 30px;
             border: 2px solid #E9ECF3;
             transition: border-color 0.25s ease, box-shadow 0.25s ease;
-            position: relative;
-            height: 100%;
+            position: relative; height: 100%;
         }
         .pricing-card.popular {
             border-color: var(--primary);
@@ -253,10 +426,10 @@
         }
         .plan-feature i { color: var(--teal); margin-top: 2px; flex-shrink: 0; }
         .btn-plan {
-            width: 100%; border-radius: 10px;
-            padding: 12px; font-weight: 600; font-size: 0.94rem;
-            margin-top: 22px; transition: all 0.2s; text-decoration: none;
-            display: inline-block; text-align: center;
+            width: 100%; border-radius: 10px; padding: 12px;
+            font-weight: 600; font-size: 0.94rem;
+            margin-top: 22px; transition: all 0.2s;
+            text-decoration: none; display: inline-block; text-align: center;
         }
         .btn-plan-primary { background: var(--primary); color: white; border: 2px solid var(--primary); }
         .btn-plan-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
@@ -265,17 +438,12 @@
 
         /* ── CONTACT ── */
         .contact-info-icon {
-            width: 46px; height: 46px;
-            background: rgba(30,58,138,0.07);
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            width: 46px; height: 46px; background: rgba(30,58,138,0.07);
+            border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .contact-card {
-            background: white;
-            border-radius: 20px; padding: 40px;
-            box-shadow: 0 12px 44px rgba(0,0,0,0.07);
-            border: 1.5px solid #E9ECF3;
+            background: white; border-radius: 20px; padding: 40px;
+            box-shadow: 0 12px 44px rgba(0,0,0,0.07); border: 1.5px solid #E9ECF3;
         }
         .form-label { font-size: 0.88rem; font-weight: 600; }
         .form-control, .form-select {
@@ -298,8 +466,7 @@
         /* ── FOOTER ── */
         .site-footer {
             background: var(--primary-dark);
-            color: rgba(255,255,255,0.65);
-            padding: 50px 0 22px;
+            color: rgba(255,255,255,0.65); padding: 50px 0 22px;
         }
         .footer-brand-text { color: white; font-weight: 800; font-size: 1.2rem; }
         .footer-brand-text span { color: var(--teal); }
@@ -307,21 +474,78 @@
         .site-footer a:hover { color: var(--teal); }
         .footer-divider { border-color: rgba(255,255,255,0.1); margin: 28px 0 18px; }
 
+        /* ── CAROUSEL MOCKUP ── */
+        .carousel-mockup {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 32px 80px rgba(0,0,0,0.45);
+        }
+        .mockup-topbar {
+            background: rgba(0,0,0,0.32);
+            padding: 10px 16px;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .mockup-dot { width: 11px; height: 11px; border-radius: 50%; }
+        .mockup-topbar-title {
+            color: rgba(255,255,255,0.55); font-size: 0.78rem;
+            margin-left: 8px; font-weight: 500;
+        }
+        .carousel-inner.mockup-body { padding: 24px; min-height: 370px; }
+        .carousel-item-inner { min-height: 320px; }
+        .slide-icon-box {
+            width: 58px; height: 58px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; margin-bottom: 14px;
+        }
+        .slide-title { color: white; font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; }
+        .slide-desc  { color: rgba(255,255,255,0.68); font-size: 0.92rem; margin-bottom: 14px; }
+        .slide-feature {
+            display: flex; align-items: center; gap: 10px;
+            color: rgba(255,255,255,0.82); font-size: 0.86rem; margin-bottom: 7px;
+        }
+        .slide-feature i { color: var(--teal); flex-shrink: 0; }
+        .mockup-kpi-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px;
+        }
+        .mockup-kpi {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 12px 14px;
+        }
+        .mockup-kpi .kpi-label { color: rgba(255,255,255,0.45); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        .mockup-kpi .kpi-value { color: white; font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+        .carousel-indicators button { width: 8px; height: 8px; border-radius: 50%; }
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 38px; height: 38px; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.14); border-radius: 50%;
+        }
+
         /* ── RESPONSIVE ── */
         @@media (max-width: 991px) {
-            .hero-title { font-size: 2.2rem; }
-            .pricing-card.popular { transform: none; }
+            .hero-title  { font-size: 2.2rem; }
             .hero-subtitle { max-width: 100%; }
+            .hero-visual { height: 420px; }
+            .hero-main-card { width: 280px; left: 10px; }
+            .pricing-card.popular { transform: none; }
+            .step-connector { display: none; }
+        }
+        @@media (max-width: 767px) {
+            .hero-visual { display: none; }
+            .alt-section { padding: 50px 0; }
         }
         @@media (max-width: 575px) {
-            .hero-title { font-size: 1.85rem; }
+            .hero-title   { font-size: 1.85rem; }
             .contact-card { padding: 24px 18px; }
+            .section-title { font-size: 1.65rem; }
         }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════ NAVBAR ═══════════════ -->
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
 <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="#inicio">
@@ -335,6 +559,7 @@
             <ul class="navbar-nav mx-auto gap-1">
                 <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
+                <li class="nav-item"><a class="nav-link" href="#como-funciona">Cómo funciona</a></li>
                 <li class="nav-item"><a class="nav-link" href="#precios">Precios</a></li>
                 <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
             </ul>
@@ -345,25 +570,70 @@
     </div>
 </nav>
 
-<!-- ═══════════════ HERO ═══════════════ -->
+<!-- ═══════════════════ HERO ═══════════════════ -->
 <section id="inicio" class="hero-section">
-    <div class="container" style="position:relative;z-index:1;">
+
+    <!-- Decorative rings -->
+    <div class="deco-ring" style="width:700px;height:700px;top:-200px;right:-160px;"></div>
+    <div class="deco-ring" style="width:420px;height:420px;top:-60px;right:-40px;border-color:rgba(255,255,255,0.04);"></div>
+    <div class="deco-ring" style="width:320px;height:320px;bottom:-120px;left:-100px;"></div>
+    <div class="deco-ring" style="width:160px;height:160px;bottom:80px;left:30px;border-color:rgba(0,191,165,0.12);"></div>
+
+    <!-- Background glow blobs -->
+    <div style="position:absolute;width:550px;height:550px;top:-120px;right:-60px;
+                background:radial-gradient(circle,rgba(59,130,246,0.1) 0%,transparent 68%);
+                border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;width:400px;height:400px;bottom:-100px;left:-80px;
+                background:radial-gradient(circle,rgba(0,191,165,0.07) 0%,transparent 68%);
+                border-radius:50%;pointer-events:none;"></div>
+
+    <!-- Dot grid -->
+    <div class="dot-grid" style="top:90px;right:10px;width:160px;">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Floating decorative dots -->
+    <div class="deco-dot" style="width:8px;height:8px;top:22%;left:42%;animation:floatA 4s ease-in-out infinite;"></div>
+    <div class="deco-dot" style="width:5px;height:5px;top:65%;left:48%;animation:floatC 6s ease-in-out infinite 1s;"></div>
+    <div class="deco-dot" style="width:10px;height:10px;top:30%;right:18%;animation:floatB 5s ease-in-out infinite 0.5s;opacity:0.08;"></div>
+
+    <div class="container" style="position:relative;z-index:2;">
         <div class="row align-items-center g-5">
-            <!-- Texto -->
-            <div class="col-lg-5" data-aos="fade-right">
+
+            <!-- ── LEFT: copy ── -->
+            <div class="col-lg-5">
                 <div class="hero-badge">
-                    <i class="fas fa-star-of-david"></i> Software diseñado para iglesias
+                    Software diseñado para iglesias
                 </div>
                 <h1 class="hero-title">
-                    Gestiona tu iglesia de forma <span>inteligente</span>
+                    Gestiona tu iglesia<br>de forma <span>inteligente</span>
                 </h1>
                 <p class="hero-subtitle">
                     Congrega es el CRM pensado para comunidades de fe. Controla congregantes,
                     grupos, finanzas, asistencia y mucho más desde una sola plataforma.
                 </p>
+
+                <!-- Trust pills -->
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> Multi-sede
+                    </span>
+                    <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> 100% en la nube
+                    </span>
+                    <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> Soporte incluido
+                    </span>
+                </div>
+
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="/Login" class="btn btn-lg px-4 py-3"
-                       style="background:var(--teal);color:white;border-radius:10px;font-weight:700;">
+                       style="background:var(--teal);color:white;border-radius:10px;font-weight:700;box-shadow:0 6px 24px rgba(0,191,165,0.35);">
                         <i class="fas fa-sign-in-alt me-2"></i>Acceder a la app
                     </a>
                     <a href="#caracteristicas" class="btn btn-outline-light btn-lg px-4 py-3"
@@ -373,7 +643,7 @@
                 </div>
             </div>
 
-            <!-- Carousel mockup -->
+            <!-- ── RIGHT: carousel mockup ── -->
             <div class="col-lg-7">
                 <div class="carousel-mockup">
                     <div class="mockup-topbar">
@@ -497,7 +767,7 @@
     </div>
 </section>
 
-<!-- ═══════════════ STATS BAND ═══════════════ -->
+<!-- ═══════════════════ STATS BAND ═══════════════════ -->
 <div class="stats-band">
     <div class="container">
         <div class="row g-4 text-center justify-content-center">
@@ -521,7 +791,7 @@
     </div>
 </div>
 
-<!-- ═══════════════ CARACTERÍSTICAS ═══════════════ -->
+<!-- ═══════════════════ CARACTERÍSTICAS (overview grid) ═══════════════════ -->
 <section id="caracteristicas" class="py-5" style="background:#fff;">
     <div class="container py-4">
         <div class="text-center mb-5">
@@ -556,7 +826,7 @@
                         <i class="fas fa-calendar-check" style="color:#F59E0B;"></i>
                     </div>
                     <h5>Asistencia al Culto</h5>
-                    <p>Registro de asistencia por sesión con conteo de adultos, niños e invitados. Gráficas históricas comparativas por turno.</p>
+                    <p>Registro de asistencia por sesión con conteo de adultos, niños e invitados. Gráficas históricas comparativas.</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -565,7 +835,7 @@
                         <i class="fas fa-hand-holding-usd" style="color:#10B981;"></i>
                     </div>
                     <h5>Economía</h5>
-                    <p>Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación de informes a Excel.</p>
+                    <p>Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación a Excel.</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -583,14 +853,447 @@
                         <i class="fas fa-building" style="color:#1E3A8A;"></i>
                     </div>
                     <h5>Multi-sede</h5>
-                    <p>Gestiona múltiples sedes desde un único acceso de administrador global. Cada sede accede únicamente a sus propios datos.</p>
+                    <p>Gestiona múltiples sedes desde un único acceso de administrador global. Cada sede accede solo a sus datos.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ═══════════════ PRECIOS ═══════════════ -->
+<!-- ═══════════════════ CÓMO FUNCIONA ═══════════════════ -->
+<section id="como-funciona" class="py-5 how-section">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <div class="section-badge">Cómo funciona</div>
+            <h2 class="section-title mt-2">En marcha en tres pasos</h2>
+            <p class="section-subtitle mt-3">
+                Sin instalaciones complicadas. En menos de un día tienes tu iglesia digitalizada y tu equipo trabajando.
+            </p>
+        </div>
+        <div class="row g-0 justify-content-center">
+
+            <!-- Step 1 -->
+            <div class="col-md-4 step-wrap">
+                <div class="step-icon-ring">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="step-num">1</div>
+                <div class="step-card">
+                    <h5>Solicita tu acceso</h5>
+                    <p>Rellena el formulario de contacto y te enviamos tus credenciales en menos de 24 horas. Sin tarjeta, sin permanencia.</p>
+                </div>
+                <!-- connector -->
+                <div class="step-connector d-none d-md-block"></div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-md-4 step-wrap">
+                <div class="step-icon-ring">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <div class="step-num">2</div>
+                <div class="step-card">
+                    <h5>Configura tu iglesia</h5>
+                    <p>Crea tu sede, define zonas y grupos, y activa los módulos que necesitas. Te acompañamos durante todo el proceso.</p>
+                </div>
+                <div class="step-connector d-none d-md-block"></div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-md-4 step-wrap">
+                <div class="step-icon-ring">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="step-num">3</div>
+                <div class="step-card">
+                    <h5>Gestiona tu comunidad</h5>
+                    <p>Empieza a registrar congregantes, tomar asistencia y controlar finanzas. Todo desde cualquier dispositivo.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ ALT SECTION 1 — Congregantes ═══════════════════ -->
+<section class="alt-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <!-- Text -->
+            <div class="col-lg-5">
+                <div class="mod-badge" style="background:rgba(59,130,246,0.1);color:#2563EB;">
+                    <i class="fas fa-users"></i> Congregantes
+                </div>
+                <h2 class="alt-title">Conoce a cada persona de tu iglesia</h2>
+                <p class="alt-desc">
+                    Ficha completa por congregante: datos personales, familia, contacto, estado espiritual,
+                    zona, grupo y observaciones privadas. Todo en un solo lugar.
+                </p>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div>
+                        <strong>Ficha personal completa</strong>
+                        <span>Nombre, fecha de nacimiento, teléfono, correo, dirección y foto de perfil.</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(0,191,165,0.1);color:#00BFA5;">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <div>
+                        <strong>Búsqueda y filtros avanzados</strong>
+                        <span>Filtra por estado, zona, grupo, sede o cualquier combinación de criterios.</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6;">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <strong>Historial y cambios de estado</strong>
+                        <span>Registra la evolución espiritual: visitante → simpatizante → miembro.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual: member list mockup -->
+            <div class="col-lg-7">
+                <div class="app-panel">
+                    <div class="ap-topbar" style="background:#1E3A8A;">
+                        <div class="ap-dot" style="background:#FF5F57;"></div>
+                        <div class="ap-dot" style="background:#FFBD2E;"></div>
+                        <div class="ap-dot" style="background:#28CA41;"></div>
+                        <span class="ap-title" style="color:white;">Congregantes — Listado</span>
+                    </div>
+                    <div class="ap-body">
+                        <!-- Search bar mockup -->
+                        <div style="background:white;border:1.5px solid #E2E8F4;border-radius:8px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-search" style="color:#94A3B8;font-size:0.82rem;"></i>
+                            <span style="color:#94A3B8;font-size:0.83rem;">Buscar congregante...</span>
+                            <span style="margin-left:auto;background:#EEF2FF;color:#4F46E5;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:6px;">Filtros</span>
+                        </div>
+                        <!-- Member rows -->
+                        <div class="member-row">
+                            <div class="member-avatar" style="background:#3B82F6;">MA</div>
+                            <div>
+                                <div class="member-name">María Alonso García</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Norte · Grupo Jóvenes</div>
+                            </div>
+                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">Miembro</span>
+                        </div>
+                        <div class="member-row">
+                            <div class="member-avatar" style="background:#10B981;">JR</div>
+                            <div>
+                                <div class="member-name">Juan Rodríguez Pérez</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Sur · Ministerio Alabanza</div>
+                            </div>
+                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">Miembro</span>
+                        </div>
+                        <div class="member-row">
+                            <div class="member-avatar" style="background:#F59E0B;">LM</div>
+                            <div>
+                                <div class="member-name">Laura Martínez Ruiz</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Centro · Sin grupo</div>
+                            </div>
+                            <span class="member-badge" style="background:#FEF9C3;color:#854D0E;">Simpatizante</span>
+                        </div>
+                        <div class="member-row">
+                            <div class="member-avatar" style="background:#8B5CF6;">CS</div>
+                            <div>
+                                <div class="member-name">Carlos Sánchez López</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Norte · Sin asignar</div>
+                            </div>
+                            <span class="member-badge" style="background:#E0F2FE;color:#0369A1;">Visitante</span>
+                        </div>
+                        <div style="text-align:center;margin-top:12px;">
+                            <span style="font-size:0.78rem;color:#94A3B8;">Mostrando 4 de 248 congregantes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ ALT SECTION 2 — Economía ═══════════════════ -->
+<section class="alt-section bg-alt">
+    <div class="container">
+        <div class="row align-items-center g-5 flex-lg-row-reverse">
+
+            <!-- Text -->
+            <div class="col-lg-5">
+                <div class="mod-badge" style="background:rgba(16,185,129,0.1);color:#059669;">
+                    <i class="fas fa-hand-holding-usd"></i> Economía
+                </div>
+                <h2 class="alt-title">Control total de las finanzas de tu iglesia</h2>
+                <p class="alt-desc">
+                    Registra diezmos, ofrendas y cualquier concepto económico. Genera gráficas comparativas
+                    y exporta informes en Excel para rendición de cuentas.
+                </p>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(16,185,129,0.1);color:#10B981;">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <strong>Conceptos personalizados</strong>
+                        <span>Configura tus propios conceptos: diezmo, ofrenda, misiones, fondo pastoral…</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div>
+                        <strong>Gráficas mensuales y anuales</strong>
+                        <span>Visualiza la evolución de cada concepto y compara períodos fácilmente.</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(245,158,11,0.1);color:#F59E0B;">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <div>
+                        <strong>Exportación a Excel</strong>
+                        <span>Descarga informes detallados para presentarlos en las reuniones de liderazgo.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual: finance mockup -->
+            <div class="col-lg-7">
+                <div class="app-panel">
+                    <div class="ap-topbar" style="background:#0D1B3D;">
+                        <div class="ap-dot" style="background:#FF5F57;"></div>
+                        <div class="ap-dot" style="background:#FFBD2E;"></div>
+                        <div class="ap-dot" style="background:#28CA41;"></div>
+                        <span class="ap-title" style="color:white;">Economía — Diezmos por Concepto · 2025</span>
+                    </div>
+                    <div class="ap-body">
+                        <!-- Month selector bar -->
+                        <div style="display:flex;gap:6px;margin-bottom:16px;overflow:hidden;">
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Ene</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Feb</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Mar</span>
+                            <span style="background:#1E3A8A;color:white;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Abr</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">May</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Jun</span>
+                        </div>
+                        <!-- Finance rows -->
+                        <div class="fin-row">
+                            <div class="fin-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;"><i class="fas fa-cross"></i></div>
+                            <span class="fin-label">Diezmo General</span>
+                            <span class="fin-amount" style="color:#3B82F6;">2.100 €</span>
+                        </div>
+                        <div class="fin-row">
+                            <div class="fin-icon" style="background:rgba(16,185,129,0.1);color:#10B981;"><i class="fas fa-heart"></i></div>
+                            <span class="fin-label">Ofrenda</span>
+                            <span class="fin-amount" style="color:#10B981;">640 €</span>
+                        </div>
+                        <div class="fin-row">
+                            <div class="fin-icon" style="background:rgba(245,158,11,0.1);color:#F59E0B;"><i class="fas fa-globe"></i></div>
+                            <span class="fin-label">Misiones</span>
+                            <span class="fin-amount" style="color:#F59E0B;">500 €</span>
+                        </div>
+                        <!-- Mini bar chart -->
+                        <div class="fin-bars">
+                            <div class="fin-bar" style="height:55%;background:rgba(59,130,246,0.6);"></div>
+                            <div class="fin-bar" style="height:40%;background:rgba(59,130,246,0.6);"></div>
+                            <div class="fin-bar" style="height:70%;background:rgba(59,130,246,0.6);"></div>
+                            <div class="fin-bar" style="height:50%;background:rgba(59,130,246,0.6);"></div>
+                            <div class="fin-bar" style="height:85%;background:#3B82F6;border-radius:4px 4px 0 0;"></div>
+                            <div class="fin-bar" style="height:65%;background:rgba(59,130,246,0.6);"></div>
+                        </div>
+                        <div style="text-align:right;margin-top:10px;">
+                            <span style="font-size:0.78rem;color:#94A3B8;">Total mes: </span>
+                            <span style="font-size:0.9rem;font-weight:800;color:#1E3A8A;">3.240 €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ ALT SECTION 3 — Seguimiento Pastoral ═══════════════════ -->
+<section class="alt-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <!-- Text -->
+            <div class="col-lg-5">
+                <div class="mod-badge" style="background:rgba(139,92,246,0.1);color:#7C3AED;">
+                    <i class="fas fa-clipboard-list"></i> Seguimiento Pastoral
+                </div>
+                <h2 class="alt-title">Acompaña a cada persona en su camino de fe</h2>
+                <p class="alt-desc">
+                    Registra cada visita, llamada o consejería de forma privada. El líder asignado
+                    puede consultar el historial completo para dar continuidad al cuidado pastoral.
+                </p>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6;">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div>
+                        <strong>Tipos de seguimiento</strong>
+                        <span>Visita domiciliaria, llamada telefónica, consejería, oración o mensaje.</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(30,58,138,0.1);color:#1E3A8A;">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <strong>Responsable asignado</strong>
+                        <span>Cada seguimiento queda asociado al líder o pastor que lo realizó.</span>
+                    </div>
+                </div>
+                <div class="alt-feature">
+                    <div class="alt-feature-icon" style="background:rgba(0,191,165,0.1);color:#00BFA5;">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div>
+                        <strong>Notas privadas y seguras</strong>
+                        <span>Las observaciones son internas y solo visibles para el equipo autorizado.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual: timeline mockup -->
+            <div class="col-lg-7">
+                <div class="app-panel">
+                    <div class="ap-topbar" style="background:#4C1D95;">
+                        <div class="ap-dot" style="background:#FF5F57;"></div>
+                        <div class="ap-dot" style="background:#FFBD2E;"></div>
+                        <div class="ap-dot" style="background:#28CA41;"></div>
+                        <span class="ap-title" style="color:white;">Seguimiento — Carlos Sánchez López</span>
+                    </div>
+                    <div class="ap-body">
+                        <!-- Header -->
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+                            <div style="width:42px;height:42px;border-radius:50%;background:#8B5CF6;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.9rem;">CS</div>
+                            <div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#1F2937;">Carlos Sánchez López</div>
+                                <div style="font-size:0.75rem;color:#94A3B8;">Visitante · Zona Norte</div>
+                            </div>
+                            <span style="margin-left:auto;background:#EDE9FE;color:#6D28D9;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:6px;">3 seguimientos</span>
+                        </div>
+                        <!-- Timeline -->
+                        <div class="timeline-item">
+                            <div class="tl-line-wrap">
+                                <div class="tl-dot" style="background:#8B5CF6;"><i class="fas fa-comments" style="font-size:0.7rem;"></i></div>
+                                <div class="tl-line"></div>
+                            </div>
+                            <div class="tl-content">
+                                <div class="tl-type">Consejería</div>
+                                <div class="tl-person">Pastor Juan — <span style="font-style:italic;color:#6B7280;">"Necesita apoyo en su situación familiar..."</span></div>
+                                <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 18 Jun 2025</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="tl-line-wrap">
+                                <div class="tl-dot" style="background:#3B82F6;"><i class="fas fa-phone" style="font-size:0.7rem;"></i></div>
+                                <div class="tl-line"></div>
+                            </div>
+                            <div class="tl-content">
+                                <div class="tl-type">Llamada telefónica</div>
+                                <div class="tl-person">Líder María — <span style="font-style:italic;color:#6B7280;">"Animo y seguimiento semanal acordado."</span></div>
+                                <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 10 Jun 2025</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item" style="margin-bottom:0;">
+                            <div class="tl-line-wrap">
+                                <div class="tl-dot" style="background:#10B981;"><i class="fas fa-home" style="font-size:0.7rem;"></i></div>
+                            </div>
+                            <div class="tl-content">
+                                <div class="tl-type">Visita domiciliaria</div>
+                                <div class="tl-person">Pastor Juan — <span style="font-style:italic;color:#6B7280;">"Primera visita, muy receptivo."</span></div>
+                                <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 2 Jun 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ TESTIMONIOS ═══════════════════ -->
+<section class="py-5 testimonial-section">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <div class="section-badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);">Testimonios</div>
+            <h2 class="section-title mt-2" style="color:white;">Lo que dicen nuestros pastores</h2>
+            <p class="section-subtitle mt-3" style="color:rgba(255,255,255,0.55);">
+                Iglesias de distintos tamaños confían en Congrega CRM para organizar y cuidar a sus congregaciones.
+            </p>
+        </div>
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="t-stars">★★★★★</div>
+                    <p class="t-quote">
+                        "Antes llevábamos el registro de miembros en hojas de Excel que nadie actualizaba.
+                        Con Congrega lo cambiamos todo: ahora sabemos exactamente quién viene, quién necesita
+                        atención y cuánto estamos recibiendo cada mes. Es una bendición para nuestro equipo."
+                    </p>
+                    <div class="t-author">
+                        <div class="t-avatar" style="background:#3B82F6;">PR</div>
+                        <div>
+                            <div class="t-name">Pastor Roberto Fernández</div>
+                            <div class="t-role">Iglesia Evangélica Betania · Madrid</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="t-stars">★★★★★</div>
+                    <p class="t-quote">
+                        "El módulo de seguimiento pastoral ha transformado nuestra forma de cuidar a las personas.
+                        Podemos ver el historial completo de cada congregante y el equipo de líderes sabe
+                        exactamente qué acciones tomar. La comunicación interna mejoró enormemente."
+                    </p>
+                    <div class="t-author">
+                        <div class="t-avatar" style="background:#10B981;">ES</div>
+                        <div>
+                            <div class="t-name">Evangelista Sara Molina</div>
+                            <div class="t-role">Comunidad de Fe Ágape · Barcelona</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="t-stars">★★★★★</div>
+                    <p class="t-quote">
+                        "Gestionamos tres sedes desde un solo panel. Antes era imposible tener una visión
+                        global; ahora el pastor principal ve en tiempo real el estado de cada congregación.
+                        El soporte del equipo de Congrega es también excelente: siempre disponibles."
+                    </p>
+                    <div class="t-author">
+                        <div class="t-avatar" style="background:#F59E0B;">AD</div>
+                        <div>
+                            <div class="t-name">Apóstol David Herrera</div>
+                            <div class="t-role">Red de Iglesias Roca Viva · Sevilla</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ PRECIOS ═══════════════════ -->
 <section id="precios" class="py-5 pricing-section">
     <div class="container py-4">
         <div class="text-center mb-5">
@@ -613,22 +1316,10 @@
                         Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización.
                     </div>
                     <hr />
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Acceso a <strong>3 módulos</strong> a elegir</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Hasta <strong>1 sede</strong></span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span><strong>15 horas</strong> de soporte incluidas</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Actualizaciones automáticas</span>
-                    </div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Acceso a <strong>3 módulos</strong> a elegir</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Hasta <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>15 horas</strong> de soporte incluidas</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
                     <a href="#contacto" class="btn btn-plan btn-plan-outline">Contratar S+</a>
                 </div>
             </div>
@@ -645,26 +1336,11 @@
                         La opción más elegida. Acceso ampliado para iglesias en crecimiento que necesitan mayor flexibilidad.
                     </div>
                     <hr />
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Acceso a <strong>5 módulos</strong> a elegir</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Hasta <strong>1 sede</strong></span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span><strong>30 horas</strong> de soporte incluidas</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Actualizaciones automáticas</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Dashboard con gráficas avanzadas</span>
-                    </div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Acceso a <strong>5 módulos</strong> a elegir</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Hasta <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>30 horas</strong> de soporte incluidas</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Dashboard con gráficas avanzadas</span></div>
                     <a href="#contacto" class="btn btn-plan btn-plan-primary">Contratar P+</a>
                 </div>
             </div>
@@ -678,36 +1354,17 @@
                     <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#92680a;border-radius:20px;padding:3px 12px;font-size:0.77rem;font-weight:700;margin-bottom:10px;">
                         <i class="fas fa-cross"></i> Especial para Pastores
                     </div>
-                    <!-- Precio Max+: ajusta este valor según corresponda -->
                     <div class="plan-price"><sup>€</sup>25 <span class="period">/mes</span></div>
                     <div class="plan-desc">
-                        El plan completo, pensado para pastores y líderes principales que necesitan visibilidad y control total de su congregación.
+                        El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación.
                     </div>
                     <hr />
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span><strong>Acceso completo</strong> a todos los módulos</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span><strong>Multi-sede</strong> incluido</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span><strong>45 horas</strong> de soporte incluidas</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Actualizaciones automáticas</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Soporte prioritario</span>
-                    </div>
-                    <div class="plan-feature">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Personalización de módulos</span>
-                    </div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>Acceso completo</strong> a todos los módulos</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>Multi-sede</strong> incluido</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>45 horas</strong> de soporte incluidas</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Soporte prioritario</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Personalización de módulos</span></div>
                     <a href="#contacto" class="btn btn-plan btn-plan-outline">Contratar Max+</a>
                 </div>
             </div>
@@ -722,12 +1379,11 @@
     </div>
 </section>
 
-<!-- ═══════════════ CONTACTO ═══════════════ -->
+<!-- ═══════════════════ CONTACTO ═══════════════════ -->
 <section id="contacto" class="py-5" style="background:#fff;">
     <div class="container py-4">
         <div class="row g-5 align-items-start">
 
-            <!-- Info columna izquierda -->
             <div class="col-lg-4">
                 <div class="section-badge">Contacto</div>
                 <h2 class="section-title mt-2">¿Hablamos?</h2>
@@ -757,45 +1413,37 @@
                 </div>
             </div>
 
-            <!-- Formulario -->
             <div class="col-lg-8">
                 <div class="contact-card">
                     <form id="frmContacto" onsubmit="enviarContacto(event)" novalidate>
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label class="form-label">Nombre <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cNombre"
-                                       placeholder="Tu nombre" required />
+                                <input type="text" class="form-control" id="cNombre" placeholder="Tu nombre" required />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cApellidos"
-                                       placeholder="Tus apellidos" required />
+                                <input type="text" class="form-control" id="cApellidos" placeholder="Tus apellidos" required />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Teléfono</label>
-                                <input type="tel" class="form-control" id="cTelefono"
-                                       placeholder="+34 600 000 000" />
+                                <input type="tel" class="form-control" id="cTelefono" placeholder="+34 600 000 000" />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="cEmail"
-                                       placeholder="correo@ejemplo.com" required />
+                                <input type="email" class="form-control" id="cEmail" placeholder="correo@ejemplo.com" required />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">País <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cPais"
-                                       placeholder="España" required />
+                                <input type="text" class="form-control" id="cPais" placeholder="España" required />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label">Ciudad <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cCiudad"
-                                       placeholder="Madrid" required />
+                                <input type="text" class="form-control" id="cCiudad" placeholder="Madrid" required />
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Nombre de la iglesia <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cIglesia"
-                                       placeholder="Iglesia..." required />
+                                <input type="text" class="form-control" id="cIglesia" placeholder="Iglesia..." required />
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Mensaje <span class="text-danger">*</span></label>
@@ -815,7 +1463,7 @@
     </div>
 </section>
 
-<!-- ═══════════════ FOOTER ═══════════════ -->
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
 <footer class="site-footer">
     <div class="container">
         <div class="row g-4">
@@ -831,6 +1479,7 @@
                 <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">Producto</div>
                 <div class="d-flex flex-column gap-2">
                     <a href="#caracteristicas">Características</a>
+                    <a href="#como-funciona">Cómo funciona</a>
                     <a href="#precios">Precios</a>
                     <a href="#contacto">Contacto</a>
                 </div>
@@ -860,12 +1509,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
-    // Navbar: efecto al hacer scroll
+    // Navbar scroll effect
     window.addEventListener('scroll', function () {
         document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
     });
 
-    // Cerrar navbar móvil al pulsar un enlace de anclaje
+    // Close mobile navbar on anchor link click
     document.querySelectorAll('#navbarMenu a[href^="#"]').forEach(function (link) {
         link.addEventListener('click', function () {
             var collapse = document.getElementById('navbarMenu');
@@ -875,7 +1524,7 @@
         });
     });
 
-    // Formulario de contacto
+    // Contact form
     function enviarContacto(e) {
         e.preventDefault();
 
