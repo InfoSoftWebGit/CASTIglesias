@@ -85,7 +85,7 @@ namespace CASTIglesias.Controllers
         public IActionResult ReestablecerClave() => View();
        
         [HttpPost]
-        public IActionResult Reestablecer(string correo)
+        public IActionResult ReestablecerClave(string correo)
         {
             var oUsuario = _negocioUsuarios.ListarTodosLosUsuariosParaLogin().FirstOrDefault(u => u.correo_electronico == correo);
 
