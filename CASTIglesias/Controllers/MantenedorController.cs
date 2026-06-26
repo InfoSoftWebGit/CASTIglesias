@@ -318,7 +318,7 @@ namespace CapaPresentaciónAdmin.Controllers
         // Roles para el resto de ministerios.
         private static readonly string[] RolesGenerales =
         {
-            "Proyección", "Emisión", "Cámara", "Seguridad/Ugier", "Bienvenida", "Pastoral", "Misionero/a"
+            "Proyección", "Emisión", "Cámara", "Sonidista", "Seguridad/Ugier", "Bienvenida", "Pastoral", "Misionero/a"
         };
 
         // Roles para el ministerio de Redes Sociales.

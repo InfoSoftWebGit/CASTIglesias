@@ -165,15 +165,16 @@ namespace CapaNegocio
                 "seguridad", "bienvenida", "acomodador", "ujier", "ugier",
                 "portero", "recepción", "recepcion", "entrada"
             };
+            // "sonid" cubre tanto "Sonido" como "Sonidista"
             string[] kwAV = {
-                "proyección", "proyeccion", "sonido", "emisión", "emision",
-                "transmisión", "transmision", "multimedia", "dirige"
+                "proyección", "proyeccion", "sonid", "emisión", "emision",
+                "cámara", "camara", "transmisión", "transmision", "multimedia", "dirige"
             };
             // Alabanza excluye roles de AV y seguridad
             string[] exclAlabanza = {
-                "sonido", "proyección", "proyeccion", "emisión", "emision",
-                "transmisión", "transmision", "seguridad", "bienvenida",
-                "acomodador", "ujier", "ugier", "portero"
+                "sonid", "proyección", "proyeccion", "emisión", "emision",
+                "cámara", "camara", "transmisión", "transmision",
+                "seguridad", "bienvenida", "acomodador", "ujier", "ugier", "portero"
             };
 
             bool Contiene(string rol, string[] kw) =>

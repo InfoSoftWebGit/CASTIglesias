@@ -31,11 +31,11 @@ namespace CapaDatos
                      where (zgm.ID_sede == sedeId || sedeId == 1000)
                            && zgm.es_ministra == "Si"
                            && m.miembro_activo == "Si"
-                     select new { zgm.ID_miembro, Nombre = (m.nombre_miembro + " " + m.apellidos_miembro).Trim() })
+                     select new { zgm.ID_miembro, m.nombre_miembro, m.apellidos_miembro })
                     .ToList();
 
             return q.GroupBy(x => x.ID_miembro)
-                    .Select(g => g.First().Nombre)
+                    .Select(g => NombreCorto(g.First().nombre_miembro, g.First().apellidos_miembro))
                     .ToList();
         }
 
@@ -58,34 +58,54 @@ namespace CapaDatos
             if (!roles.Any())
                 return result;
 
+            // Se trae a memoria primero para comparar con OrdinalIgnoreCase,
+            // evitando dependencias de la collation de MySQL.
+            // Usamos != "No" en lugar de == "Si" para incluir miembros con NULL
+            // (registros anteriores a que se añadiera la columna miembro_activo).
             var raw = (from zgm in _context.Miembros_Zona_Grupo_Ministerio
                        join m in _context.Miembros on zgm.ID_miembro equals m.id_miembro
                        where (zgm.ID_sede == sedeId || sedeId == 1000)
                              && zgm.rol_servicio != null
-                             && roles.Contains(zgm.rol_servicio)
-                             && m.miembro_activo == "Si"
+                             && zgm.rol_servicio != ""
+                             && m.miembro_activo != "No"
                        select new
                        {
                            zgm.ID_miembro,
                            Rol = zgm.rol_servicio!,
-                           Nombre = (m.nombre_miembro + " " + m.apellidos_miembro).Trim()
+                           m.nombre_miembro,
+                           m.apellidos_miembro
                        })
+                      .ToList()
+                      .Where(x => roles.Contains(x.Rol, StringComparer.OrdinalIgnoreCase))
                       .ToList();
 
             // Deduplicar: mismo miembro + mismo rol = una sola entrada
             var dedup = raw
-                .GroupBy(x => new { x.ID_miembro, x.Rol })
+                .GroupBy(x => new { x.ID_miembro, RolNorm = x.Rol.ToLowerInvariant() })
                 .Select(g => g.First())
                 .ToList();
 
             foreach (var item in dedup)
             {
-                if (!result.ContainsKey(item.Rol))
-                    result[item.Rol] = new List<string>();
-                result[item.Rol].Add(item.Nombre);
+                // Usar el nombre de rol tal como viene de la lista de requerimientos
+                var rolKey = roles.FirstOrDefault(r =>
+                    string.Equals(r, item.Rol, StringComparison.OrdinalIgnoreCase)) ?? item.Rol;
+
+                if (!result.ContainsKey(rolKey))
+                    result[rolKey] = new List<string>();
+                result[rolKey].Add(NombreCorto(item.nombre_miembro, item.apellidos_miembro));
             }
 
             return result;
+        }
+
+        // Primer nombre + primer apellido: el nombre completo es demasiado largo
+        // para mostrarse legible en las celdas del calendario / Excel.
+        private static string NombreCorto(string? nombre, string? apellidos)
+        {
+            static string Primera(string? s) =>
+                (s ?? "").Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "";
+            return (Primera(nombre) + " " + Primera(apellidos)).Trim();
         }
     }
 }

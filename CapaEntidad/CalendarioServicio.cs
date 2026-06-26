@@ -26,4 +26,12 @@ namespace CapaEntidad
         // clave = rol_nombre, valor = lista de nombres asignados
         public Dictionary<string, List<string>> Asignaciones { get; set; } = new();
     }
+
+    public class CalendarioAgrupadoRequest
+    {
+        public List<int> IdsCultos { get; set; } = new();
+        public string Periodicidad { get; set; } = "mensual";
+        public int TipoCalendario { get; set; } = 3;
+        public DateTime FechaInicio { get; set; } = DateTime.Today;
+    }
 }
