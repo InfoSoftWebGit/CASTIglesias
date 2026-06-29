@@ -22,7 +22,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer la tabla provincias con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer la tabla provincias con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Provincia>();
             }
         }

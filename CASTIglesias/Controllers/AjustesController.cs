@@ -51,7 +51,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -66,7 +66,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -91,7 +91,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -106,7 +106,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -129,7 +129,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -145,7 +145,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -160,7 +160,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -180,7 +180,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -194,7 +194,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, mensaje = ex.Message });
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 

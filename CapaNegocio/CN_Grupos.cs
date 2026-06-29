@@ -85,7 +85,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el grupo: " + ex.Message;
+                mensaje = "Error al eliminar el grupo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

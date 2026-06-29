@@ -19,7 +19,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_RequerimientoCulto.ListarPorCulto: {ex.Message}");
+                Console.WriteLine($"CD_RequerimientoCulto.ListarPorCulto: {ErrorHelper.Mensaje(ex)}");
                 return new List<RequerimientoCulto>();
             }
         }
@@ -41,7 +41,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_RequerimientoCulto.ObtenerRolesExistentes: {ex.Message}");
+                Console.WriteLine($"CD_RequerimientoCulto.ObtenerRolesExistentes: {ErrorHelper.Mensaje(ex)}");
                 return new List<string>();
             }
         }
@@ -58,8 +58,8 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_RequerimientoCulto.Registrar: {ex.Message}");
-                mensaje = $"Error al registrar: {ex.Message}";
+                Console.WriteLine($"CD_RequerimientoCulto.Registrar: {ErrorHelper.Mensaje(ex)}");
+                mensaje = $"Error al registrar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -84,8 +84,8 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_RequerimientoCulto.Editar: {ex.Message}");
-                mensaje = $"Error al editar: {ex.Message}";
+                Console.WriteLine($"CD_RequerimientoCulto.Editar: {ErrorHelper.Mensaje(ex)}");
+                mensaje = $"Error al editar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -104,8 +104,8 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_RequerimientoCulto.Eliminar: {ex.Message}");
-                mensaje = $"Error al eliminar: {ex.Message}";
+                Console.WriteLine($"CD_RequerimientoCulto.Eliminar: {ErrorHelper.Mensaje(ex)}");
+                mensaje = $"Error al eliminar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }

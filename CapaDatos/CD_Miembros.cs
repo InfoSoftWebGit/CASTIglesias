@@ -99,7 +99,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ListarMiembros EF Core: {ex.Message}");
+                Console.WriteLine($"Error ListarMiembros EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroDetalleDTO>();
             }
         }
@@ -122,7 +122,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ContadorMiembros EF Core: {ex.Message}");
+                Console.WriteLine($"Error ContadorMiembros EF Core: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
         }
@@ -138,7 +138,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ContadorPorEstado({estado}) EF Core: {ex.Message}");
+                Console.WriteLine($"Error ContadorPorEstado({estado}) EF Core: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
         }
@@ -306,7 +306,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al registrar miembro: {ex.Message}";
+                mensaje = $"Error al registrar miembro: {ErrorHelper.Mensaje(ex)}";
                 return 0;
             }
         }
@@ -434,7 +434,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al actualizar miembro: {ex.Message}";
+                mensaje = $"Error al actualizar miembro: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -472,7 +472,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al eliminar miembro: {ex.Message}";
+                mensaje = $"Error al eliminar miembro: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -490,7 +490,7 @@ namespace CapaDatos
                 totalMiembrosHombres = _context.Miembros.Count(m => m.sexo == "Masculino" && m.id_sede == ID_sede);
             } catch (Exception ex)
             {
-                Console.WriteLine($"Error ContadorMiembrosHombres EF Core: {ex.Message}");
+                Console.WriteLine($"Error ContadorMiembrosHombres EF Core: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
             return totalMiembrosHombres;
@@ -508,7 +508,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ContadorMiembrosHombres EF Core: {ex.Message}");
+                Console.WriteLine($"Error ContadorMiembrosHombres EF Core: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
             return totalMiembrosMujeres;
@@ -530,7 +530,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ContadorMiembrosJUVEC EF Core: {ex.Message}");
+                Console.WriteLine($"Error ContadorMiembrosJUVEC EF Core: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
             return totalMiembrosJovenes;
@@ -555,7 +555,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error BuscarMiembroPorID EF Core: {ex.Message}");
+                Console.WriteLine($"Error BuscarMiembroPorID EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Miembro>();
             }
         }
@@ -580,7 +580,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error BuscarMiembrosPorTexto EF Core: {ex.Message}");
+                Console.WriteLine($"Error BuscarMiembrosPorTexto EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Miembro>();
             }
         }
@@ -598,7 +598,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ObtenerMiembroPorId EF Core: {ex.Message}");
+                Console.WriteLine($"Error ObtenerMiembroPorId EF Core: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }
@@ -614,7 +614,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ObtenerMaxNumeroMiembro: {ex.Message}");
+                Console.WriteLine($"Error ObtenerMaxNumeroMiembro: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
         }
@@ -694,7 +694,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -740,7 +740,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -768,7 +768,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -840,7 +840,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -880,7 +880,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -916,7 +916,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -972,7 +972,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ListarVisitantes EF Core: {ex.Message}");
+                Console.WriteLine($"Error ListarVisitantes EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroDetalleDTO>();
             }
         }
@@ -1036,7 +1036,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al registrar visitante: {ex.Message}";
+                mensaje = $"Error al registrar visitante: {ErrorHelper.Mensaje(ex)}";
                 return 0;
             }
         }
@@ -1080,7 +1080,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al editar miembro: {ex.Message}";
+                mensaje = $"Error al editar miembro: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -1145,7 +1145,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ListarVisitantes EF Core: {ex.Message}");
+                Console.WriteLine($"Error ListarVisitantes EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroDetalleDTO>();
             }
         }
@@ -1229,7 +1229,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al registrar visitante: {ex.Message}";
+                mensaje = $"Error al registrar visitante: {ErrorHelper.Mensaje(ex)}";
                 return 0;
             }
         }
@@ -1283,7 +1283,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al editar miembro: {ex.Message}";
+                mensaje = $"Error al editar miembro: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -1361,7 +1361,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ListarMiembrosSimpatizantes EF Core: {ex.Message}");
+                Console.WriteLine($"Error ListarMiembrosSimpatizantes EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroDetalleDTO>();
             }
         }
@@ -1417,7 +1417,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al registrar visitante: {ex.Message}";
+                mensaje = $"Error al registrar visitante: {ErrorHelper.Mensaje(ex)}";
                 return 0;
             }
         }
@@ -1479,7 +1479,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al editar miembro: {ex.Message}";
+                mensaje = $"Error al editar miembro: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -1526,7 +1526,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR avanzarEstado: {ex.Message}");
+                Console.WriteLine($"ERROR avanzarEstado: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }
@@ -1570,7 +1570,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR retrocederEstado: {ex.Message}");
+                Console.WriteLine($"ERROR retrocederEstado: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }
@@ -1649,7 +1649,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error ObtenerMiembroPorID EF Core: {ex.Message}");
+                Console.WriteLine($"Error ObtenerMiembroPorID EF Core: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }

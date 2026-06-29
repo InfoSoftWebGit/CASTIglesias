@@ -63,7 +63,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al calcular el total de Diezmos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al calcular el total de Diezmos: {ErrorHelper.Mensaje(ex)}");
                 return 0;
             }
         }
@@ -106,7 +106,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener historial de diezmos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al obtener historial de diezmos: {ErrorHelper.Mensaje(ex)}");
                 return new List<DiezmoDTO>();
             }
         }
@@ -147,7 +147,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el diezmo: " + ex.Message;
+                mensaje = "Error al eliminar el diezmo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -192,7 +192,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el diezmo: " + ex.Message;
+                mensaje = "Error al registrar el diezmo: " + ErrorHelper.Mensaje(ex);
                 resultado = 0;
             }
             return resultado;
@@ -240,7 +240,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar el diezmo: " + ex.Message;
+                mensaje = "Error al actualizar el diezmo: " + ErrorHelper.Mensaje(ex);
                 resultado = false;
             }
 

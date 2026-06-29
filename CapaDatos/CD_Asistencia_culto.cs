@@ -38,7 +38,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al leer las asistencias: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al leer las asistencias: {ErrorHelper.Mensaje(ex)}");
                 return new List<Asistencia_culto>();
             }
         }
@@ -80,12 +80,12 @@ namespace CapaDatos
             }
             catch (DbUpdateException ex)
             {
-                Mensaje = $"Error al registrar en la base de datos: {ex.InnerException?.Message ?? ex.Message}";
+                Mensaje = $"Error al registrar en la base de datos: {ErrorHelper.Mensaje(ex)}";
                 idGenerado = 0;
             }
             catch (Exception ex)
             {
-                Mensaje = $"Ocurrió un error: {ex.Message}";
+                Mensaje = $"Ocurrió un error: {ErrorHelper.Mensaje(ex)}";
                 idGenerado = 0;
             }
             return idGenerado;
@@ -110,12 +110,12 @@ namespace CapaDatos
             }
             catch (DbUpdateException ex)
             {
-                Mensaje = $"Error al actualizar en la base de datos: {ex.InnerException?.Message ?? ex.Message}";
+                Mensaje = $"Error al actualizar en la base de datos: {ErrorHelper.Mensaje(ex)}";
                 resultado = false;
             }
             catch (Exception ex)
             {
-                Mensaje = $"Ocurrió un error: {ex.Message}";
+                Mensaje = $"Ocurrió un error: {ErrorHelper.Mensaje(ex)}";
                 resultado = false;
             }
             return resultado;
@@ -150,12 +150,12 @@ namespace CapaDatos
             }
             catch (DbUpdateException ex)
             {
-                Mensaje = $"Error al eliminar en la base de datos. Puede haber relaciones de clave externa: {ex.InnerException?.Message ?? ex.Message}";
+                Mensaje = $"Error al eliminar en la base de datos: {ErrorHelper.Mensaje(ex)}";
                 resultado = false;
             }
             catch (Exception ex)
             {
-                Mensaje = $"Ocurrió un error: {ex.Message}";
+                Mensaje = $"Ocurrió un error: {ErrorHelper.Mensaje(ex)}";
                 resultado = false;
             }
             return resultado;

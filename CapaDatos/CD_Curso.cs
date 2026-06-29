@@ -38,7 +38,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al leer los cursos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al leer los cursos: {ErrorHelper.Mensaje(ex)}");
                 return new List<Curso>();
             }
         }

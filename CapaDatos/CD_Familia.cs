@@ -41,7 +41,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al leer las familias: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al leer las familias: {ErrorHelper.Mensaje(ex)}");
                 return new List<Familia>();
             }
         }
@@ -65,7 +65,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar a la familia: " + ex.Message;
+                mensaje = "Error al registrar a la familia: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -113,7 +113,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar los datos de la familia: " + ex.Message;
+                mensaje = "Error al actualizar los datos de la familia: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -158,7 +158,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar la familia: " + ex.Message;
+                mensaje = "Error al eliminar la familia: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -186,7 +186,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error ListarMiembrosDeFamilia: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error ListarMiembrosDeFamilia: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroFamiliaDTO>();
             }
         }
@@ -224,7 +224,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error BuscarMiembrosParaAsignar: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error BuscarMiembrosParaAsignar: {ErrorHelper.Mensaje(ex)}");
                 return new List<MiembroFamiliaDTO>();
             }
         }
@@ -264,7 +264,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al asignar miembro: " + ex.Message;
+                mensaje = "Error al asignar miembro: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -291,7 +291,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al quitar miembro de la familia: " + ex.Message;
+                mensaje = "Error al quitar miembro de la familia: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

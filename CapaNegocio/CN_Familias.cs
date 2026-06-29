@@ -83,7 +83,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar la familia: " + ex.Message;
+                mensaje = "Error al eliminar la familia: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

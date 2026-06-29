@@ -20,7 +20,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al listar países: {ex.Message}");
+                Console.WriteLine($"Error al listar países: {ErrorHelper.Mensaje(ex)}");
                 return new List<Pais>();
             }
         }

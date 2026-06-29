@@ -40,7 +40,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer zonas con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer zonas con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Ministerio>();
             }
         }
@@ -69,7 +69,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el Ministerio: " + ex.Message;
+                mensaje = "Error al registrar el Ministerio: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -110,7 +110,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al editar el ministerio: " + ex.Message;
+                mensaje = "Error al editar el ministerio: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -148,7 +148,7 @@ namespace CapaDatos
                 mensaje = "Ministerio eliminado";
                 return true;
             }
-            catch (Exception ex) { mensaje = "Error: " + ex.Message; return false; }
+            catch (Exception ex) { mensaje = "Error: " + ErrorHelper.Mensaje(ex); return false; }
         }
         public List<Ministerio> BuscarMinisteriosPorNombre(int sedeID, string nombre)
         {

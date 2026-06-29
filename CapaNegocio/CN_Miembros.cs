@@ -166,7 +166,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -180,7 +180,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                mensaje = ex.Message;
+                mensaje = ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -193,7 +193,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al obtener las zonas, grupos y ministerios del miembro: " + ex.Message);
+                throw new Exception("Error al obtener las zonas, grupos y ministerios del miembro: " + ErrorHelper.Mensaje(ex));
             }
         }
 

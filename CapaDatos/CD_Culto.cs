@@ -21,7 +21,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_Culto.Listar: {ex.Message} | Inner: {ex.InnerException?.Message}");
+                Console.WriteLine($"CD_Culto.Listar: {ErrorHelper.Mensaje(ex)} | Inner: {ex.InnerException?.Message}");
                 return new List<Culto>();
             }
         }
@@ -93,8 +93,8 @@ namespace CapaDatos
             catch (Exception ex)
             {
                 tx.Rollback();
-                Console.WriteLine($"CD_Culto.GuardarConBloques: {ex.Message}");
-                mensaje = $"Error al guardar: {ex.Message}";
+                Console.WriteLine($"CD_Culto.GuardarConBloques: {ErrorHelper.Mensaje(ex)}");
+                mensaje = $"Error al guardar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -112,8 +112,12 @@ namespace CapaDatos
                 }
                 var reqs = _context.RequerimientosCulto.Where(r => r.id_culto == id).ToList();
                 _context.RequerimientosCulto.RemoveRange(reqs);
+                _context.SaveChanges();
+
                 var bloques = _context.BloquesCulto.Where(b => b.id_culto == id).ToList();
                 _context.BloquesCulto.RemoveRange(bloques);
+                _context.SaveChanges();
+
                 _context.Cultos.Remove(obj);
                 _context.SaveChanges();
                 mensaje = "Culto eliminado correctamente.";
@@ -121,8 +125,8 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_Culto.Eliminar: {ex.Message}");
-                mensaje = $"Error al eliminar: {ex.Message}";
+                Console.WriteLine($"CD_Culto.Eliminar: {ErrorHelper.Mensaje(ex)} | Inner: {ex.InnerException?.Message}");
+                mensaje = $"Error al eliminar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }

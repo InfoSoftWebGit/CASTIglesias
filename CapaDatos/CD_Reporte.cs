@@ -40,7 +40,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer reportes con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer reportes con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Diezmo>();
             }
         }

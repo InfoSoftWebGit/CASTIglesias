@@ -106,7 +106,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -176,11 +176,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, objeto = (Diezmo)null, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), objeto = (Diezmo)null, error = true });
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = 0, mensaje = "Error interno: " + ex.Message, objeto = (Diezmo)null, error = true });
+                return Json(new { resultado = 0, mensaje = "Error interno: " + ErrorHelper.Mensaje(ex), objeto = (Diezmo)null, error = true });
             }
         }
 
@@ -200,7 +200,7 @@ namespace CASTIglesias.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 // Manejar la excepción: devolver JSON de error si falla la autorización
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -249,7 +249,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new List<object>(), error = "Error al buscar miembros: " + ex.Message });
+                return Json(new { data = new List<object>(), error = "Error al buscar miembros: " + ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -302,7 +302,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -347,7 +347,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -390,7 +390,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -422,7 +422,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -456,11 +456,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                return Json(new { data = new object[0], error = ex.Message });
+                return Json(new { data = new object[0], error = ErrorHelper.Mensaje(ex) });
             }
         }
         #endregion
@@ -494,7 +494,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new object[0], error = ex.Message });
+                return Json(new { data = new object[0], error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -518,11 +518,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = 0, mensaje = "Error interno: " + ex.Message });
+                return Json(new { resultado = 0, mensaje = "Error interno: " + ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -537,7 +537,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -559,7 +559,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new object[0], error = ex.Message });
+                return Json(new { data = new object[0], error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -583,11 +583,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = 0, mensaje = "Error interno: " + ex.Message });
+                return Json(new { resultado = 0, mensaje = "Error interno: " + ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -602,7 +602,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 

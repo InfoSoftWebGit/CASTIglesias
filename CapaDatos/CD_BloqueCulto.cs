@@ -19,7 +19,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"CD_BloqueCulto.ListarPorCulto: {ex.Message}");
+                Console.WriteLine($"CD_BloqueCulto.ListarPorCulto: {ErrorHelper.Mensaje(ex)}");
                 return new List<BloqueCulto>();
             }
         }

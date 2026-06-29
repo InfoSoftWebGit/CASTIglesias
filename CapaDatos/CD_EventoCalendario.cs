@@ -94,7 +94,7 @@ namespace CapaDatos
                 mensaje = "Evento guardado correctamente.";
                 return true;
             }
-            catch (Exception ex) { mensaje = ex.Message; return false; }
+            catch (Exception ex) { mensaje = ErrorHelper.Mensaje(ex); return false; }
         }
 
         public bool Eliminar(int idEvento, int sedeId, out string mensaje)
@@ -112,7 +112,7 @@ namespace CapaDatos
                 mensaje = "Evento eliminado.";
                 return true;
             }
-            catch (Exception ex) { mensaje = ex.Message; return false; }
+            catch (Exception ex) { mensaje = ErrorHelper.Mensaje(ex); return false; }
         }
     }
 }

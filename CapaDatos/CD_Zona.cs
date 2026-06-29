@@ -40,7 +40,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer zonas con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer zonas con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Zona>();
             }
         }
@@ -69,7 +69,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar la Zona: " + ex.Message;
+                mensaje = "Error al registrar la Zona: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -125,7 +125,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al editar la zona: " + ex.Message;
+                mensaje = "Error al editar la zona: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -163,7 +163,7 @@ namespace CapaDatos
                 mensaje = "Zona eliminada";
                 return true;
             }
-            catch (Exception ex) { mensaje = "Error: " + ex.Message; return false; }
+            catch (Exception ex) { mensaje = "Error: " + ErrorHelper.Mensaje(ex); return false; }
         }
         public List<Zona> BuscarZonasPorNombre(int sedeID, string nombre)
         {

@@ -70,7 +70,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -180,11 +180,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { error = ex.Message });
+                return Json(new { error = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoAsistencia: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoAsistencia: {ErrorHelper.Mensaje(ex)}");
                 return Json(new object[0]);
             }
         }
@@ -252,11 +252,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { error = ex.Message });
+                return Json(new { error = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoDiezmos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoDiezmos: {ErrorHelper.Mensaje(ex)}");
                 return Json(new { labels = new List<string>(), series = new List<object>() });
             }
         }
@@ -352,11 +352,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { error = ex.Message });
+                return Json(new { error = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoGastos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error en ObtenerGraficoGastos: {ErrorHelper.Mensaje(ex)}");
                 return Json(new { labels = new List<string>(), totales = new List<decimal>(), zonaBreakdown = new List<object>() });
             }
         }
@@ -389,11 +389,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return Unauthorized(new { error = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al obtener zonas con miembros: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al obtener zonas con miembros: {ErrorHelper.Mensaje(ex)}");
                 return new JsonResult(new List<object>());
             }
         }
@@ -453,7 +453,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { error = ex.Message });
+                return Unauthorized(new { error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -482,7 +482,7 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
             catch
             {
@@ -522,11 +522,11 @@ namespace CASTIglesias.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new { total = 0, error = ex.Message });
+                return Unauthorized(new { total = 0, error = ErrorHelper.Mensaje(ex) });
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al calcular el total de Diezmos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al calcular el total de Diezmos: {ErrorHelper.Mensaje(ex)}");
                 return Json(new { total = 0 });
             }
         }

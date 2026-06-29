@@ -179,7 +179,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ErrorHelper.Mensaje(ex) });
             }
         }
     }

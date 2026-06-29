@@ -53,7 +53,7 @@ namespace CASTIglesias.Controllers
 
                 return Json(new { success = true, data = lista });
             }
-            catch (Exception ex) { return Json(new { success = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
 
         [HttpPost]
@@ -83,7 +83,7 @@ namespace CASTIglesias.Controllers
                 var ok = _cnSala.Guardar(sala, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
-            catch (Exception ex) { return Json(new { resultado = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
 
         [HttpPost]
@@ -95,7 +95,7 @@ namespace CASTIglesias.Controllers
                 var ok = _cnSala.Eliminar(idSala, sedeId, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
-            catch (Exception ex) { return Json(new { resultado = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
 
         [HttpGet]
@@ -107,7 +107,7 @@ namespace CASTIglesias.Controllers
                 var eventos = _cnEvento.ObtenerPorSala(idSala, sedeId);
                 return Json(new { success = true, data = eventos });
             }
-            catch (Exception ex) { return Json(new { success = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
     }
 }

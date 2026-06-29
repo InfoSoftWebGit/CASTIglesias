@@ -39,7 +39,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al guardar la configuración: {ex.Message}";
+                mensaje = $"Error al guardar la configuración: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }

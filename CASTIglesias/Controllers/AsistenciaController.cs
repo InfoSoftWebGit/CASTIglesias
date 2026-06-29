@@ -51,7 +51,7 @@ namespace CASTIglesias.Controllers
             }
             catch (Exception ex)
             {
-                Mensaje = $"Error al listar asistencias: {ex.Message}";
+                Mensaje = $"Error al listar asistencias: {ErrorHelper.Mensaje(ex)}";
                 // Devolver un error JSON
                 return StatusCode(500, new { success = false, message = Mensaje });
             }

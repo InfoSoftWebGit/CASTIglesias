@@ -50,7 +50,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al listar detalles: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al listar detalles: {ErrorHelper.Mensaje(ex)}");
                 return new List<DetalleSeguimiento>();
             }
         }
@@ -67,7 +67,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el detalle: " + ex.Message;
+                mensaje = "Error al registrar el detalle: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -103,7 +103,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar el detalle: " + ex.Message;
+                mensaje = "Error al actualizar el detalle: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -132,7 +132,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el detalle: " + ex.Message;
+                mensaje = "Error al eliminar el detalle: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

@@ -70,7 +70,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
         [HttpGet]
@@ -88,7 +88,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { error = true, mensaje = ex.Message });
+                return Json(new { error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -113,7 +113,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -128,7 +128,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
         #endregion Zonas
@@ -160,7 +160,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -179,7 +179,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { error = true, mensaje = ex.Message });
+                return Json(new { error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -205,7 +205,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -220,7 +220,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -240,7 +240,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
         [HttpGet]
@@ -258,7 +258,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { error = true, mensaje = ex.Message });
+                return Json(new { error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -283,7 +283,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -299,7 +299,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 #endregion MINISTERIOS
@@ -395,7 +395,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new List<object>(), error = ex.Message });
+                return Json(new { data = new List<object>(), error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -418,7 +418,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -432,7 +432,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -455,7 +455,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new List<object>(), error = ex.Message });
+                return Json(new { data = new List<object>(), error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -469,7 +469,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new List<object>(), error = ex.Message });
+                return Json(new { data = new List<object>(), error = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -484,7 +484,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -499,7 +499,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -535,7 +535,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -562,7 +562,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -585,7 +585,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
         [HttpGet]
@@ -606,7 +606,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { resultado = false, mensaje = "Error al obtener permisos: " + ex.Message });
+                return StatusCode(500, new { resultado = false, mensaje = "Error al obtener permisos: " + ErrorHelper.Mensaje(ex) });
             }
         }
         #endregion
@@ -638,7 +638,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 
@@ -662,7 +662,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = 0, mensaje = ex.Message, error = true });
+                return Json(new { resultado = 0, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -680,7 +680,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Json(new { resultado = false, mensaje = ex.Message, error = true });
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
 
@@ -752,7 +752,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = "Error al filtrar municipios: " + ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = "Error al filtrar municipios: " + ErrorHelper.Mensaje(ex) });
             }
         }
         #endregion
@@ -770,7 +770,7 @@ namespace CapaPresentaciónAdmin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { data = new object[0], error = true, mensaje = "Error al listar países: " + ex.Message });
+                return Json(new { data = new object[0], error = true, mensaje = "Error al listar países: " + ErrorHelper.Mensaje(ex) });
             }
         }
         #endregion

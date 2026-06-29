@@ -57,7 +57,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el concepto: " + ex.Message;
+                mensaje = "Error al registrar el concepto: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -105,7 +105,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar los datos del concepto: " + ex.Message;
+                mensaje = "Error al actualizar los datos del concepto: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -142,7 +142,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el grupo: " + ex.Message;
+                mensaje = "Error al eliminar el grupo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

@@ -33,7 +33,7 @@ namespace CapaNegocio
             catch (Exception ex)
             {
                 // Manejo o registro de errores
-                Console.WriteLine($"Error en CN_Permisos: {ex.Message}");
+                Console.WriteLine($"Error en CN_Permisos: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }

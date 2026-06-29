@@ -25,7 +25,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al listar seguimientos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al listar seguimientos: {ErrorHelper.Mensaje(ex)}");
                 return new List<Seguimiento>();
             }
         }
@@ -42,7 +42,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el seguimiento: " + ex.Message;
+                mensaje = "Error al registrar el seguimiento: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -78,7 +78,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar el seguimiento: " + ex.Message;
+                mensaje = "Error al actualizar el seguimiento: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -107,7 +107,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el seguimiento: " + ex.Message;
+                mensaje = "Error al eliminar el seguimiento: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

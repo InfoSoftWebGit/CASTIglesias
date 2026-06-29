@@ -2,6 +2,7 @@
 using MimeKit;
 using System.Security.Cryptography;
 using System.Text;
+using CapaEntidad;
 
 namespace CapaNegocio
 {
@@ -50,7 +51,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al enviar correo: " + ex.Message);
+                Console.WriteLine("Error al enviar correo: " + ErrorHelper.Mensaje(ex));
                 resultado = false;
             }
 

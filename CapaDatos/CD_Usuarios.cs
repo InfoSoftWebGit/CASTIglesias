@@ -250,7 +250,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al listar usuarios: {ex.Message}");
+                Console.WriteLine($"Error al listar usuarios: {ErrorHelper.Mensaje(ex)}");
                 // 🚨 Devolvemos la lista de DTOs vacía
                 return new List<UsuarioDTO_Permisos>();
             }
@@ -305,7 +305,7 @@ namespace CapaDatos
                 mensaje = "Usuario registrado correctamente";
                 return idGenerado;
             }
-            catch (Exception ex) { mensaje = "Error: " + ex.Message; return 0; }
+            catch (Exception ex) { mensaje = "Error: " + ErrorHelper.Mensaje(ex); return 0; }
         }
 
         // ----------------------------------------------------
@@ -352,7 +352,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error: " + ex.Message;
+                mensaje = "Error: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -392,7 +392,7 @@ namespace CapaDatos
                 mensaje = "Usuario eliminado";
                 return true;
             }
-            catch (Exception ex) { mensaje = "Error: " + ex.Message; return false; }
+            catch (Exception ex) { mensaje = "Error: " + ErrorHelper.Mensaje(ex); return false; }
         }
 
         // ----------------------------------------------------

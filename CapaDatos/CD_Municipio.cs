@@ -22,7 +22,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al leer los municipios con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer los municipios con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Municipio>();
             }
         }
@@ -37,7 +37,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al filtrar municipios: {ex.Message}");
+                Console.WriteLine($"Error al filtrar municipios: {ErrorHelper.Mensaje(ex)}");
                 return new List<Municipio>();
             }
         }

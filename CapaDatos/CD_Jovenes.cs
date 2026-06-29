@@ -95,7 +95,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al añadir joven: {ex.Message}";
+                mensaje = $"Error al añadir joven: {ErrorHelper.Mensaje(ex)}";
                 return 0;
             }
         }
@@ -127,7 +127,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al eliminar: {ex.Message}";
+                mensaje = $"Error al eliminar: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }
@@ -147,7 +147,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = $"Error al actualizar el grupo: {ex.Message}";
+                mensaje = $"Error al actualizar el grupo: {ErrorHelper.Mensaje(ex)}";
                 return false;
             }
         }

@@ -37,7 +37,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al leer los grupos: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al leer los grupos: {ErrorHelper.Mensaje(ex)}");
                 return new List<Grupos>();
             }
         }
@@ -83,7 +83,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el grupo: " + ex.Message;
+                mensaje = "Error al registrar el grupo: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -139,7 +139,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar los datos del grupo: " + ex.Message;
+                mensaje = "Error al actualizar los datos del grupo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -182,7 +182,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el grupo: " + ex.Message;
+                mensaje = "Error al eliminar el grupo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

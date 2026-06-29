@@ -45,7 +45,7 @@ namespace CASTIglesias.Controllers
                 var eventos = _cnEvento.ObtenerParaCalendario(sedeId, desde, hasta);
                 return Json(eventos);
             }
-            catch (Exception ex) { return Json(new { error = ex.Message }); }
+            catch (Exception ex) { return Json(new { error = ErrorHelper.Mensaje(ex) }); }
         }
 
         [HttpPost]
@@ -58,7 +58,7 @@ namespace CASTIglesias.Controllers
                 var ok = _cnEvento.Guardar(dto, sedeId, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
-            catch (Exception ex) { return Json(new { resultado = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
 
         [HttpPost]
@@ -70,7 +70,7 @@ namespace CASTIglesias.Controllers
                 var ok = _cnEvento.Eliminar(idEvento, sedeId, out string mensaje);
                 return Json(new { resultado = ok, mensaje });
             }
-            catch (Exception ex) { return Json(new { resultado = false, mensaje = ex.Message }); }
+            catch (Exception ex) { return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) }); }
         }
     }
 }

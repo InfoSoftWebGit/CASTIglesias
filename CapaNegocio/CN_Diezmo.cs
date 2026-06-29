@@ -115,7 +115,7 @@ namespace CapaNegocio
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el diezmo: " + ex.Message;
+                mensaje = "Error al eliminar el diezmo: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

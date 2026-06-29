@@ -54,7 +54,7 @@ namespace CapaDatos
                 mensaje = sala.id_sala == 0 ? "Sala creada correctamente." : "Sala actualizada correctamente.";
                 return true;
             }
-            catch (Exception ex) { mensaje = ex.Message; return false; }
+            catch (Exception ex) { mensaje = ErrorHelper.Mensaje(ex); return false; }
         }
 
         public bool Eliminar(int idSala, int sedeId, out string mensaje)
@@ -81,7 +81,7 @@ namespace CapaDatos
                 mensaje = "Sala eliminada correctamente.";
                 return true;
             }
-            catch (Exception ex) { mensaje = ex.Message; return false; }
+            catch (Exception ex) { mensaje = ErrorHelper.Mensaje(ex); return false; }
         }
     }
 }

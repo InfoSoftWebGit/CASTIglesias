@@ -48,7 +48,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el matrimonio: " + ex.Message;
+                mensaje = "Error al registrar el matrimonio: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -79,7 +79,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar el matrimonio: " + ex.Message;
+                mensaje = "Error al actualizar el matrimonio: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -108,7 +108,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el matrimonio: " + ex.Message;
+                mensaje = "Error al eliminar el matrimonio: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }

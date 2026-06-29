@@ -32,7 +32,7 @@ namespace CapaDatos
             catch (Exception ex)
             {
                 // En un entorno real, usarías un sistema de logging aquí.
-                Console.WriteLine($"Error al leer sedes con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al leer sedes con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return new List<Sedes>();
             }
         }
@@ -56,7 +56,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al obtener sede {sedeID} con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al obtener sede {sedeID} con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return null;
             }
         }
@@ -82,7 +82,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al obtener el nombre de la sede {sedeID} con EF Core: {ex.Message}");
+                Console.WriteLine($"Error al obtener el nombre de la sede {sedeID} con EF Core: {ErrorHelper.Mensaje(ex)}");
                 return "Error, verifica la consola para encontrar el problema."; // Devuelve null en caso de error
             }
         }

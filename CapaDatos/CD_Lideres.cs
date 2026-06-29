@@ -46,7 +46,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al listar líderes: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al listar líderes: {ErrorHelper.Mensaje(ex)}");
                 return new List<object>();
             }
         }
@@ -76,7 +76,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al registrar el líder: " + ex.Message;
+                mensaje = "Error al registrar el líder: " + ErrorHelper.Mensaje(ex);
                 return 0;
             }
         }
@@ -120,7 +120,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al actualizar el líder: " + ex.Message;
+                mensaje = "Error al actualizar el líder: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
@@ -159,7 +159,7 @@ namespace CapaDatos
             }
             catch (Exception ex)
             {
-                mensaje = "Error al eliminar el líder: " + ex.Message;
+                mensaje = "Error al eliminar el líder: " + ErrorHelper.Mensaje(ex);
                 return false;
             }
         }
