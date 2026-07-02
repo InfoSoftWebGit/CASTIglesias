@@ -27,6 +27,11 @@ namespace CapaNegocio
             return _capaDatos.ContadorMiembros(sedeID);
         }
 
+        public int ContadorMiembrosBaja(int sedeID)
+        {
+            return _capaDatos.ContadorMiembrosBaja(sedeID);
+        }
+
         public int ContadorPorEstado(int sedeID, string estado)
         {
             return _capaDatos.ContadorPorEstado(sedeID, estado);
@@ -48,8 +53,6 @@ namespace CapaNegocio
                 errores.Add("El nombre del miembro no puede ser vacío.");
             if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (obj.acepta_LOPD == false)
-                errores.Add("El miembro debe aceptar la ley de protección de datos para poder utilizar sus datos en esta aplicación.");
             if (obj.diezmo_individual != null && obj.diezmo_familiar != null)
                 errores.Add("El miembro solo puede tener un número de Diezmo asignado, siendo individual o, si está casado, Familiar.");
             if (errores.Any())

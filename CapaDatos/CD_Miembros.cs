@@ -127,6 +127,29 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Cuenta los miembros de baja (miembro_activo == "No"). Si sedeID es 1000 (Admin Global), cuenta todos. Si es != 1000, filtra por sede.
+        /// </summary>
+        public int ContadorMiembrosBaja(int sedeID)
+        {
+            try
+            {
+                var consultaBase = _context.Miembros.AsQueryable();
+
+                if (sedeID != 1000)
+                {
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
+                }
+
+                return consultaBase.Count(m => m.miembro_activo == "No");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ContadorMiembrosBaja EF Core: {ErrorHelper.Mensaje(ex)}");
+                return 0;
+            }
+        }
+
         public int ContadorPorEstado(int sedeID, string estado)
         {
             try

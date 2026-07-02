@@ -69,6 +69,21 @@
             </div>
         </div>
     </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card text-white mb-4" style="background-color: #B91C1C;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Total de Miembros de Baja</h6>
+                        <h6 id="totalmiembrosbaja"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-slash fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row" id="contenedor-zonas">
@@ -279,6 +294,10 @@
             $.get('@Url.Action("ContadorMiembros", "Congregantes")', function (data) {
                 $("#totalmiembros").text(data.resultado ?? 0);
             }).fail(function () { $("#totalmiembros").text('Error'); });
+
+            $.get('@Url.Action("ContadorMiembrosBaja", "Congregantes")', function (data) {
+                $("#totalmiembrosbaja").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalmiembrosbaja").text('Error'); });
 
             $.get('@Url.Action("ContadorVisitantes", "Congregantes")', function (data) {
                 $("#totalvisitantes").text(data.resultado ?? 0);

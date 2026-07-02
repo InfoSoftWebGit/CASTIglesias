@@ -34,8 +34,13 @@ namespace CapaEntidad
         [Column("EsLider")]
         public string? esLider { get; set; }
 
+        private string? _sexo;
         [Column("Sexo")]
-        public string? sexo { get; set; } = string.Empty;
+        public string? sexo
+        {
+            get => _sexo;
+            set => _sexo = string.IsNullOrWhiteSpace(value) ? null : value;
+        }
 
         [Column("Telefono_fijo")]
         public string? telefono_fijo { get; set; }

@@ -224,7 +224,7 @@
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="chkAceptaLOPD">
                         <label class="form-check-label fw-semibold" style="color:#6a1b9a;" for="chkAceptaLOPD">
-                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD) <span class="text-danger">*</span>
+                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD)
                         </label>
                     </div>
                 </div>
@@ -481,14 +481,12 @@
         function GuardarMiembro() {
             const nombre = $("#txtNombres").val().trim();
             const apellido = $("#txtApellido").val().trim();
-            const lopd = $("#chkAceptaLOPD").prop("checked");
 
             $("#txtNombres").toggleClass("is-invalid", !nombre);
             $("#txtApellido").toggleClass("is-invalid", !apellido);
-            $("#chkAceptaLOPD").toggleClass("is-invalid", !lopd);
 
-            if (!nombre || !apellido || !lopd) {
-                Swal.fire("Campos obligatorios", "Nombre, apellido y aceptación de LOPD son obligatorios.", "warning");
+            if (!nombre || !apellido) {
+                Swal.fire("Campos obligatorios", "Nombre y apellido son obligatorios.", "warning");
                 return;
             }
 

@@ -179,6 +179,26 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        public JsonResult ContadorMiembrosBaja()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                int totalMiembrosBaja = _cnMiembros.ContadorMiembrosBaja(sedeID);
+
+                return Json(new { resultado = totalMiembrosBaja });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+            catch (Exception)
+            {
+                return Json(new { resultado = 0, error = true, mensaje = "Ocurrió un error al contar los miembros de baja." });
+            }
+        }
+
+        [HttpGet]
         public JsonResult ContadorMiembrosHombres()
         {
             try
