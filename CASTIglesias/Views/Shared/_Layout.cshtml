@@ -183,7 +183,7 @@
                             var permisosMiembro = ViewBag.PermisosMiembro as Permisos ?? new Permisos();
                         }
                         <!-- BLOQUE ASISTENCIA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes)
+                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
@@ -220,6 +220,19 @@
                                             Miembros
                                         </a>
                                     }
+                                </nav>
+                            </div>
+                        }
+                        <!-- BLOQUE DISCIPULADO -->
+                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Miembros)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDiscipulado" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                Discipulado
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseDiscipulado" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
                                     @if (tieneAccesoTotal || permisosMiembro.Familias)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Congregantes")">

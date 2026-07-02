@@ -26,6 +26,11 @@
             @* <div class="col-12 mb-2">
                 <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">Añadir nuevo miembro</button>
             </div> *@
+            <div class="col-12 mb-2 text-end">
+                <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
+                    <i class="fas fa-user-slash"></i> Ver bajas
+                </button>
+            </div>
         </div>
 
         <hr />
@@ -397,6 +402,20 @@
                 ],
                 language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
             });
+
+            // Alternar entre el listado de activos (por defecto) y el de bajas
+            var mostrandoBajas = false;
+            $("#btnToggleBajas").click(function () {
+                mostrandoBajas = !mostrandoBajas;
+                $(this)
+                    .toggleClass("btn-outline-danger", !mostrandoBajas)
+                    .toggleClass("btn-outline-success", mostrandoBajas)
+                    .html(mostrandoBajas
+                        ? '<i class="fas fa-user-check"></i> Ver activos'
+                        : '<i class="fas fa-user-slash"></i> Ver bajas');
+                tabladata.ajax.url('@Url.Action("ListarSimpatizantes", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
+            });
+
             $("#tablaMiembros tbody").on("click", ".btn-editarMiembro", function () {
                 filaSeleccionada = $(this).closest("tr");
                 var data = tabladata.row(filaSeleccionada).data();

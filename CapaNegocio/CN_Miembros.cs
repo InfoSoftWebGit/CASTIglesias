@@ -15,9 +15,9 @@ namespace CapaNegocio
             _capaDatos = capaDatos;
         }
                                                  #region MÉTODOS COMUNES
-        public List<MiembroDetalleDTO> ListarMiembros(int sedeID)
+        public List<MiembroDetalleDTO> ListarMiembros(int sedeID, bool bajas = false)
         {
-            var oListaMiembros = _capaDatos.ListarMiembros(sedeID);
+            var oListaMiembros = _capaDatos.ListarMiembros(sedeID, bajas);
 
             return oListaMiembros;
         }
@@ -47,14 +47,18 @@ namespace CapaNegocio
 
             var errores = new List<string>();
 
-            if (obj.numero_miembro <= 0)
-                errores.Add("El número del miembro no puede ser 0 o menor.");
+            // El número de miembro y el diezmo solo son obligatorios para el estado "Miembro"
+            if (obj.estado == "Miembro")
+            {
+                if (obj.numero_miembro <= 0)
+                    errores.Add("El número del miembro no puede ser 0 o menor.");
+                if (obj.diezmo_individual != null && obj.diezmo_familiar != null)
+                    errores.Add("El miembro solo puede tener un número de Diezmo asignado, siendo individual o, si está casado, Familiar.");
+            }
             if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
             if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
-            if (obj.diezmo_individual != null && obj.diezmo_familiar != null)
-                errores.Add("El miembro solo puede tener un número de Diezmo asignado, siendo individual o, si está casado, Familiar.");
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -78,7 +82,8 @@ namespace CapaNegocio
 
             var errores = new List<string>();
 
-            if (obj.numero_miembro <= 0)
+            // El número de miembro solo es obligatorio para el estado "Miembro"
+            if (obj.estado == "Miembro" && obj.numero_miembro <= 0)
                 errores.Add("El número del miembro no puede ser 0 o menor.");
             if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
@@ -249,9 +254,9 @@ namespace CapaNegocio
         #endregion
 
         #region Visitantes
-            public List<MiembroDetalleDTO> ListarVisitantes(int ID_sede)
+            public List<MiembroDetalleDTO> ListarVisitantes(int ID_sede, bool bajas = false)
         {
-                return _capaDatos.ListarVisitantes(ID_sede);
+                return _capaDatos.ListarVisitantes(ID_sede, bajas);
         }
         public int RegistrarMiembroVisitante(MiembroDetalleDTO obj, int sedeID, out string mensaje)
         {
@@ -296,9 +301,9 @@ namespace CapaNegocio
 
         #region Simpatizantes
 
-        public List<MiembroDetalleDTO> ListarSimpatizantes(int ID_sede)
+        public List<MiembroDetalleDTO> ListarSimpatizantes(int ID_sede, bool bajas = false)
         {
-            return _capaDatos.ListarSimpatizantes(ID_sede);
+            return _capaDatos.ListarSimpatizantes(ID_sede, bajas);
         }
 
         public bool EditarMiembroSimpatizante(MiembroDetalleDTO obj, int sedeID, out string mensaje)
@@ -321,9 +326,9 @@ namespace CapaNegocio
 
         #region En proceso
 
-        public List<MiembroDetalleDTO> ListarMiembrosProceso(int ID_sede)
+        public List<MiembroDetalleDTO> ListarMiembrosProceso(int ID_sede, bool bajas = false)
         {
-            return _capaDatos.ListarMiembrosProceso(ID_sede);
+            return _capaDatos.ListarMiembrosProceso(ID_sede, bajas);
         }
 
         public bool EditarMiembroProceso(MiembroDetalleDTO obj, int sedeID, out string mensaje)

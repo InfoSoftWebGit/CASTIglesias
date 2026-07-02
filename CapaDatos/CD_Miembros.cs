@@ -22,13 +22,14 @@ namespace CapaDatos
         /// <param name="sedeID">ID de la sede del usuario logueado (1000 para todos).</param>
         // En CapaDatos
 
-        public List<MiembroDetalleDTO> ListarMiembros(int sedeID)
+        public List<MiembroDetalleDTO> ListarMiembros(int sedeID, bool bajas = false)
         {
             try
             {
                 var consultaMiembros = _context.Miembros
                  .AsQueryable()
-                 .Where(m => m.estado == "Miembro");
+                 .Where(m => m.estado == "Miembro")
+                 .Where(m => bajas ? m.miembro_activo == "No" : m.miembro_activo != "No");
                 if (sedeID != 1000)
                 {
                     consultaMiembros = consultaMiembros.Where(m => m.id_sede == sedeID);
@@ -186,7 +187,8 @@ namespace CapaDatos
                     return 0;
                 }
 
-                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                if (obj.numero_miembro > 0 &&
+                    _context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
                     mensaje = "El número de miembro ya pertenece a otro miembro en esta sede.";
                     return 0;
@@ -370,7 +372,8 @@ namespace CapaDatos
                 //     return false;
                 // }
 
-                if (_context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro &&
+                if (obj.numero_miembro > 0 &&
+                    _context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro &&
                                                m.id_miembro != obj.id_miembro &&
                                                m.id_sede == miembro.id_sede))
                 {
@@ -948,13 +951,14 @@ namespace CapaDatos
 
 
         #region Visitantes
-        public List<MiembroDetalleDTO> ListarVisitantes(int sedeID)
+        public List<MiembroDetalleDTO> ListarVisitantes(int sedeID, bool bajas = false)
         {
             try
             {
                 var consultaBase = _context.Miembros
                     .AsQueryable()
-                    .Where(m => m.estado == "Visitante");
+                    .Where(m => m.estado == "Visitante")
+                    .Where(m => bajas ? m.miembro_activo == "No" : m.miembro_activo != "No");
 
                 if (sedeID != 1000)
                 {
@@ -984,6 +988,8 @@ namespace CapaDatos
                         fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                         pais_nacimiento = m.pais_nacimiento,
                         acepta_LOPD = m.acepta_LOPD,
+                        miembro_activo = m.miembro_activo,
+                        fecha_baja = m.fecha_baja,
                         id_sede = m.id_sede,
                         nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
                         nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
@@ -1111,13 +1117,14 @@ namespace CapaDatos
         #endregion Visitates
 
         #region Simpatizantes
-        public List<MiembroDetalleDTO> ListarSimpatizantes(int sedeID)
+        public List<MiembroDetalleDTO> ListarSimpatizantes(int sedeID, bool bajas = false)
         {
             try
             {
                 var consultaBase = _context.Miembros
                     .AsQueryable()
-                    .Where(m => m.estado == "Simpatizante");
+                    .Where(m => m.estado == "Simpatizante")
+                    .Where(m => bajas ? m.miembro_activo == "No" : m.miembro_activo != "No");
 
                 if (sedeID != 1000)
                 {
@@ -1157,6 +1164,8 @@ namespace CapaDatos
                         acepta_LOPD = m.acepta_LOPD,
                         id_responsable = m.id_responsable,
                         observaciones = m.observaciones,
+                        miembro_activo = m.miembro_activo,
+                        fecha_baja = m.fecha_baja,
                         id_sede = m.id_sede,
                         nombre_Provincia = p_join == null ? string.Empty : p_join.nombre_provincia,
                         nombre_Municipio = mun_join == null ? string.Empty : mun_join.nombre_municipio,
@@ -1313,13 +1322,14 @@ namespace CapaDatos
         #endregion Simpatizantes
 
         #region Proceso
-        public List<MiembroDetalleDTO> ListarMiembrosProceso(int sedeID)
+        public List<MiembroDetalleDTO> ListarMiembrosProceso(int sedeID, bool bajas = false)
         {
             try
             {
                 var consultaMiembros = _context.Miembros
                  .AsQueryable()
-                 .Where(m => m.estado == "Proceso");
+                 .Where(m => m.estado == "Proceso")
+                 .Where(m => bajas ? m.miembro_activo == "No" : m.miembro_activo != "No");
                 if (sedeID != 1000)
                 {
                     consultaMiembros = consultaMiembros.Where(m => m.id_sede == sedeID);
@@ -1371,6 +1381,7 @@ namespace CapaDatos
                             id_responsable = m.id_responsable,
                             id_role = m.id_role,
                             id_usuario = m.id_usuario,
+                            miembro_activo = m.miembro_activo,
 
                             nombre_Provincia = p.nombre_provincia, // Nombre traído del JOIN
                             nombre_Municipio = mun.nombre_municipio, // Nombre traído del JOIN
@@ -1537,6 +1548,12 @@ namespace CapaDatos
 
                     case "Proceso":
                         miembro.estado = "Miembro";
+                        // Si aún no tiene número de miembro asignado, se asigna automáticamente
+                        // el siguiente al último existente en su sede.
+                        if (miembro.numero_miembro <= 0)
+                        {
+                            miembro.numero_miembro = ObtenerMaxNumeroMiembro(miembro.id_sede) + 1;
+                        }
                         break;
 
                     case "Miembro":

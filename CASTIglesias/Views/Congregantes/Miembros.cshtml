@@ -22,6 +22,13 @@
     </div>
 
     <div class="table-responsive">
+        <div class="row">
+            <div class="col-12 mb-2 text-end">
+                <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
+                    <i class="fas fa-user-slash"></i> Ver bajas
+                </button>
+            </div>
+        </div>
 
         <hr />
         <table id="tablaMiembros" class="table table-bordered table-striped border-top" style="width: 100%">
@@ -357,10 +364,6 @@
                     <button type="button" class="btn btn-warning" id="btnRetrocederEstado">
                         ⬅️ Retroceder Estado
                     </button>
-
-                    <button type="button" class="btn btn-info text-white" id="btnAvanzarEstado">
-                        ➡️ Avanzar Estado
-                    </button>
                 </div>
 
                 <div>
@@ -495,6 +498,19 @@
                     }
                 ],
                 language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+            });
+
+            // Alternar entre el listado de activos (por defecto) y el de bajas
+            var mostrandoBajas = false;
+            $("#btnToggleBajas").click(function () {
+                mostrandoBajas = !mostrandoBajas;
+                $(this)
+                    .toggleClass("btn-outline-danger", !mostrandoBajas)
+                    .toggleClass("btn-outline-success", mostrandoBajas)
+                    .html(mostrandoBajas
+                        ? '<i class="fas fa-user-check"></i> Ver activos'
+                        : '<i class="fas fa-user-slash"></i> Ver bajas');
+                tabladata.ajax.url('@Url.Action("ListarMiembros", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
             });
 
                 $("#tablaMiembros tbody").on("click", ".btn-abrirModalZonasGruposMinisterios", function () {
@@ -699,6 +715,7 @@
         function GuardarMiembro() {
             let miembroDTO = {
                 iD_miembro: parseInt($("#txtid").val() || 0),
+                estado: $("#txtEstadoMiembro").val() || "Miembro",
                 numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
 
                 diezmo_individual: $("#txtDiezmoIndividual").val() || null,

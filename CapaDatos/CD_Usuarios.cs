@@ -163,6 +163,18 @@ namespace CapaDatos
                     permisoExistente.ProcesoCrearEditar = objPermisosDTO.ProcesoCrearEditar;
                     permisoExistente.ProcesoEliminar = objPermisosDTO.ProcesoEliminar;
 
+                    permisoExistente.Matrimonios = objPermisosDTO.Matrimonios;
+                    permisoExistente.MatrimoniosCrearEditar = objPermisosDTO.MatrimoniosCrearEditar;
+                    permisoExistente.MatrimoniosEliminar = objPermisosDTO.MatrimoniosEliminar;
+
+                    permisoExistente.Jovenes = objPermisosDTO.Jovenes;
+                    permisoExistente.JovenesCrearEditar = objPermisosDTO.JovenesCrearEditar;
+                    permisoExistente.JovenesEliminar = objPermisosDTO.JovenesEliminar;
+
+                    permisoExistente.Gastos = objPermisosDTO.Gastos;
+                    permisoExistente.GastosCrearEditar = objPermisosDTO.GastosCrearEditar;
+                    permisoExistente.GastosEliminar = objPermisosDTO.GastosEliminar;
+
                     permisoExistente.Ajustes = objPermisosDTO.Ajustes;
                     permisoExistente.AjustesCrearEditar = objPermisosDTO.AjustesCrearEditar;
                     permisoExistente.AjustesEliminar = objPermisosDTO.AjustesEliminar;

@@ -65,13 +65,13 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        public JsonResult ListarMiembros()
+        public JsonResult ListarMiembros(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
             try
             {
                 // CORRECCIÓN: Usar el nombre de la variable de la dependencia consolidada
-                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarMiembros(sedeID);
+                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarMiembros(sedeID, bajas);
 
                 var oListaSedes = _cnSedes.ListarSedes();
                 var sedesMap = oListaSedes.ToDictionary(s => s.ID, s => s.nombre_sede);
@@ -380,13 +380,13 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
-        public JsonResult ListarVisitantes()
+        public JsonResult ListarVisitantes(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
             try
             {
                 // CORRECCIÓN: Usar el nombre de la variable de la dependencia consolidada
-                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarVisitantes(sedeID);
+                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarVisitantes(sedeID, bajas);
 
                 var oListaSedes = _cnSedes.ListarSedes();
                 var sedesMap = oListaSedes.ToDictionary(s => s.ID, s => s.nombre_sede);
@@ -466,13 +466,13 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
-        public JsonResult ListarSimpatizantes()
+        public JsonResult ListarSimpatizantes(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
             try
             {
                 // CORRECCIÓN: Usar el nombre de la variable de la dependencia consolidada
-                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarSimpatizantes(sedeID);
+                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarSimpatizantes(sedeID, bajas);
 
                 var oListaSedes = _cnSedes.ListarSedes();
                 var sedesMap = oListaSedes.ToDictionary(s => s.ID, s => s.nombre_sede);
@@ -551,13 +551,13 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
-        public JsonResult ListarMiembrosProceso()
+        public JsonResult ListarMiembrosProceso(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
             try
             {
                 // CORRECCIÓN: Usar el nombre de la variable de la dependencia consolidada
-                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarMiembrosProceso(sedeID);
+                List<MiembroDetalleDTO> oListaMiembros = _cnMiembros.ListarMiembrosProceso(sedeID, bajas);
 
                 var oListaSedes = _cnSedes.ListarSedes();
                 var sedesMap = oListaSedes.ToDictionary(s => s.ID, s => s.nombre_sede);

@@ -27,6 +27,13 @@
                 <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">Añadir nuevo miembro</button>
             </div>
         </div> *@
+        <div class="row">
+            <div class="col-12 mb-2 text-end">
+                <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
+                    <i class="fas fa-user-slash"></i> Ver bajas
+                </button>
+            </div>
+        </div>
 
         <hr />
         <table id="tablaMiembros" class="table table-bordered table-striped border-top" style="width: 100%">
@@ -502,6 +509,19 @@
                 language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
             });
 
+            // Alternar entre el listado de activos (por defecto) y el de bajas
+            var mostrandoBajas = false;
+            $("#btnToggleBajas").click(function () {
+                mostrandoBajas = !mostrandoBajas;
+                $(this)
+                    .toggleClass("btn-outline-danger", !mostrandoBajas)
+                    .toggleClass("btn-outline-success", mostrandoBajas)
+                    .html(mostrandoBajas
+                        ? '<i class="fas fa-user-check"></i> Ver activos'
+                        : '<i class="fas fa-user-slash"></i> Ver bajas');
+                tabladata.ajax.url('@Url.Action("ListarMiembrosProceso", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
+            });
+
                 $("#tablaMiembros tbody").on("click", ".btn-abrirModalZonasGruposMinisterios", function () {
             const fila = $(this).closest("tr");
             const data = tabladata.row(fila).data();
@@ -698,10 +718,11 @@
             modal.show();
         }
 
-        // ✅ GUARDAR MIEMBRO
-        function GuardarMiembro() {
-            let miembroDTO = {
+        // CONSTRUIR DTO DESDE EL FORMULARIO
+        function construirMiembroDTO() {
+            return {
                 iD_miembro: parseInt($("#txtid").val() || 0),
+                estado: "Proceso",
                 numero_miembro: parseInt($("#txtNumeroMiembro").val() || 0),
 
                 diezmo_individual: $("#txtDiezmoIndividual").val() || null,
@@ -759,6 +780,11 @@
                 relacion_con: $("#txtRelacionCon").val() || null,
                 tipo_relacion_familiar: $("#cboTipoRelacionFamiliar").val() || null,
             };
+        }
+
+        // GUARDAR MIEMBRO (onSuccess opcional para encadenar acciones tras el guardado)
+        function GuardarMiembro(onSuccess) {
+            let miembroDTO = construirMiembroDTO();
             $.ajax({
                 url: '@Url.Action("RegistrarMiembro", "Congregantes")',
                 type: "POST",
@@ -771,6 +797,10 @@
                 success: function (res) {
                     $.LoadingOverlay("hide");
                     if (res.resultado) {
+                        if (typeof onSuccess === "function") {
+                            onSuccess();
+                            return;
+                        }
                         $("#FormModalMiembros").modal("hide");
                         tabladata.ajax.reload(null, false);
                         Swal.fire("Éxito", "Miembro guardado correctamente", "success");
@@ -1007,31 +1037,36 @@
 
             Swal.fire({
                 title: "¿Avanzar estado?",
-                text: "Esto cambiará el estado del miembro al siguiente.",
+                text: "Se guardarán los cambios y el miembro pasará al estado Miembro. Si no tiene número de miembro, se le asignará automáticamente el siguiente disponible.",
                 icon: "question",
                 showCancelButton: true,
                 confirmButtonText: "Sí, avanzar",
                 cancelButtonText: "Cancelar"
             }).then(result => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: '@Url.Action("AvanzarEstado", "Congregantes")',
-                        type: "POST",
-                        data: { idMiembro: idMiembro },
-                        beforeSend: function () { $.LoadingOverlay("show"); },
-                        success: function (res) {
-                            $.LoadingOverlay("hide");
-                            if (res.success) {
-                                Swal.fire("Perfecto", "El estado fue avanzado.", "success");
-                                tabladata.ajax.reload(null, false);
-                            } else {
-                                Swal.fire("Error", res.mensaje, "error");
+                    // Primero se guardan los cambios del formulario y, si todo va bien, se avanza el estado
+                    GuardarMiembro(function () {
+                        $.ajax({
+                            url: '@Url.Action("AvanzarEstado", "Congregantes")',
+                            type: "POST",
+                            data: { idMiembro: idMiembro },
+                            beforeSend: function () { $.LoadingOverlay("show"); },
+                            success: function (res) {
+                                $.LoadingOverlay("hide");
+                                if (res.success) {
+                                    $("#FormModalMiembros").modal("hide");
+                                    tabladata.ajax.reload(null, false);
+                                    const numero = res.data && res.data.numero_miembro ? ` Nº de miembro: ${res.data.numero_miembro}.` : "";
+                                    Swal.fire("Perfecto", `Los cambios se guardaron y el estado fue avanzado.${numero}`, "success");
+                                } else {
+                                    Swal.fire("Error", res.mensaje, "error");
+                                }
+                            },
+                            error: function () {
+                                $.LoadingOverlay("hide");
+                                Swal.fire("Error", "No se pudo avanzar el estado.", "error");
                             }
-                        },
-                        error: function () {
-                            $.LoadingOverlay("hide");
-                            Swal.fire("Error", "No se pudo avanzar el estado.", "error");
-                        }
+                        });
                     });
                 }
             });
