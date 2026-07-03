@@ -14,5 +14,7 @@ namespace CapaEntidad
         public string? prefijo_individual { get; set; }
 
         public string? prefijo_familiar { get; set; }
+
+        public string? prefijo_miembro { get; set; }
     }
 }

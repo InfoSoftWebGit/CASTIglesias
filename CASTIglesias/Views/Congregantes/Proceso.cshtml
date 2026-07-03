@@ -69,6 +69,7 @@
                 <input id="txtID_sede" type="hidden" value="0" />
                 <label for="txtNumeroMiembro" class="form-label">Número de Miembro</label>
                 <div class="input-group mb-2">
+                    <span class="input-group-text" id="prefijoNumeroMiembro" style="display:none;"></span>
                     <input id="txtNumeroMiembro" type="number" class="form-control" placeholder="Número de miembro" />
                     <button type="button" class="btn btn-outline-secondary" onclick="asignarNumeroMiembro()">
                         <i class="fas fa-hashtag"></i> Asignar Nº Miembro
@@ -472,7 +473,7 @@
                     dataSrc: "data"
                 },
                 columns: [
-                    { data: "numero_miembro" },
+                    { data: "numero_miembro", render: function (valor) { return formatearNumeroMiembro(valor); } },
                     { data: "nombre_miembro" },
                     { data: "apellidos_miembro" },
                     { data: "correo_electronico" },
@@ -1056,7 +1057,7 @@
                                 if (res.success) {
                                     $("#FormModalMiembros").modal("hide");
                                     tabladata.ajax.reload(null, false);
-                                    const numero = res.data && res.data.numero_miembro ? ` Nº de miembro: ${res.data.numero_miembro}.` : "";
+                                    const numero = res.data && res.data.numero_miembro ? ` Nº de miembro: ${formatearNumeroMiembro(res.data.numero_miembro)}.` : "";
                                     Swal.fire("Perfecto", `Los cambios se guardaron y el estado fue avanzado.${numero}`, "success");
                                 } else {
                                     Swal.fire("Error", res.mensaje, "error");
@@ -1115,7 +1116,7 @@
         // ======================
         // NUMERACIÓN DIEZMO
         // ======================
-        let configDiezmo = { prefijo_individual: '', prefijo_familiar: '' };
+        let configDiezmo = { prefijo_individual: '', prefijo_familiar: '', prefijo_miembro: '' };
 
         $.ajax({
             url: '@Url.Action("ObtenerConfigDiezmo", "Ajustes")',
@@ -1124,9 +1125,20 @@
                 if (res.success && res.data) {
                     configDiezmo.prefijo_individual = res.data.prefijo_individual || '';
                     configDiezmo.prefijo_familiar = res.data.prefijo_familiar || '';
+                    configDiezmo.prefijo_miembro = res.data.prefijo_miembro || '';
+                    $("#prefijoNumeroMiembro").text(configDiezmo.prefijo_miembro).toggle(!!configDiezmo.prefijo_miembro);
+                    if (tabladata) {
+                        tabladata.rows().invalidate('data').draw(false);
+                    }
                 }
             }
         });
+
+        function formatearNumeroMiembro(numero) {
+            if (!numero) return numero;
+            if (!configDiezmo.prefijo_miembro) return numero;
+            return configDiezmo.prefijo_miembro + String(numero).padStart(4, '0');
+        }
 
         function asignarNumeroMiembro() {
             $.ajax({

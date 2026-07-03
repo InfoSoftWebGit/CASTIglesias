@@ -590,7 +590,7 @@ namespace CASTIglesias.Controllers
                 int siguiente = maxNumero + 1;
 
                 var config = _cnConfigDiezmo.ObtenerConfig(sedeID);
-                string prefijo = config?.prefijo_individual ?? "";
+                string prefijo = config?.prefijo_miembro ?? "";
                 string formateado = prefijo + siguiente.ToString("D4");
 
                 return Json(new { success = true, numero = siguiente, formateado });

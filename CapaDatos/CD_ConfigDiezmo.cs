@@ -31,6 +31,7 @@ namespace CapaDatos
                 {
                     existente.prefijo_individual = obj.prefijo_individual;
                     existente.prefijo_familiar = obj.prefijo_familiar;
+                    existente.prefijo_miembro = obj.prefijo_miembro;
                     _context.Entry(existente).State = EntityState.Modified;
                 }
                 _context.SaveChanges();

@@ -1,13 +1,13 @@
 @{
-    ViewData["Title"] = "Configuración de Diezmos";
+    ViewData["Title"] = "Configuración de Diezmos y Miembros";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Configuración de Diezmos</h1>
+    <h1 class="mt-4">Configuración de Diezmos y Miembros</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
         <li class="breadcrumb-item">Ajustes</li>
-        <li class="breadcrumb-item active">Diezmos</li>
+        <li class="breadcrumb-item active">Diezmos y Miembros</li>
     </ol>
 
     <div class="row">
@@ -42,14 +42,40 @@
                         </div>
                         <div class="form-text">Máximo 10 caracteres.</div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <button id="btnGuardar" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Guardar configuración
-                    </button>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-id-card me-1"></i>
+                    Numeración de Miembros
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Define el prefijo que se mostrará delante del número de miembro.
+                        El número se sigue guardando sin prefijo; este solo se aplica al visualizarlo.
+                        Por ejemplo, con prefijo <strong>M</strong> el miembro 25 se mostrará como <strong>M0025</strong>.
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="txtPrefijoMiembro" class="form-label">Prefijo Número de Miembro</label>
+                        <div class="input-group">
+                            <input id="txtPrefijoMiembro" type="text" class="form-control" maxlength="10"
+                                   placeholder="Ej: M, MBR..." />
+                            <span class="input-group-text text-muted" id="previewMiembro"></span>
+                        </div>
+                        <div class="form-text">Máximo 10 caracteres.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <button id="btnGuardar" class="btn btn-primary mb-4">
+        <i class="fas fa-save me-1"></i> Guardar configuración
+    </button>
 </div>
 
 @section scripts {
@@ -69,8 +95,10 @@
             if (res.success && res.data) {
                 $('#txtPrefijoIndividual').val(res.data.prefijo_individual || '');
                 $('#txtPrefijoFamiliar').val(res.data.prefijo_familiar || '');
+                $('#txtPrefijoMiembro').val(res.data.prefijo_miembro || '');
                 actualizarPreview('#txtPrefijoIndividual', '#previewIndividual');
                 actualizarPreview('#txtPrefijoFamiliar', '#previewFamiliar');
+                actualizarPreview('#txtPrefijoMiembro', '#previewMiembro');
             }
         });
 
@@ -82,15 +110,20 @@
             actualizarPreview('#txtPrefijoFamiliar', '#previewFamiliar');
         });
 
+        $('#txtPrefijoMiembro').on('input', function () {
+            actualizarPreview('#txtPrefijoMiembro', '#previewMiembro');
+        });
+
         $('#btnGuardar').on('click', function () {
             const prefijo_individual = $('#txtPrefijoIndividual').val().trim();
             const prefijo_familiar = $('#txtPrefijoFamiliar').val().trim();
+            const prefijo_miembro = $('#txtPrefijoMiembro').val().trim();
 
             $.ajax({
                 url: urlGuardar,
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ prefijo_individual, prefijo_familiar }),
+                data: JSON.stringify({ prefijo_individual, prefijo_familiar, prefijo_miembro }),
                 success: function (res) {
                     Swal.fire({
                         toast: true,
