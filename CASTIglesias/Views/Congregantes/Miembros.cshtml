@@ -19,6 +19,7 @@
 <div class="card">
     <div class="card-header">
         <i class="fas fa-users me-1"></i> Lista de Miembros
+        <span class="badge bg-success ms-2 fs-6 align-middle" id="badgeEstadoListado">Activos</span>
     </div>
 
     <div class="table-responsive">
@@ -511,6 +512,13 @@
                     .html(mostrandoBajas
                         ? '<i class="fas fa-user-check"></i> Ver activos'
                         : '<i class="fas fa-user-slash"></i> Ver bajas');
+
+                // La etiqueta de la cabecera refleja el listado que se está viendo
+                $("#badgeEstadoListado")
+                    .toggleClass("bg-success", !mostrandoBajas)
+                    .toggleClass("bg-danger", mostrandoBajas)
+                    .text(mostrandoBajas ? "Bajas" : "Activos");
+
                 tabladata.ajax.url('@Url.Action("ListarMiembros", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
             });
 
