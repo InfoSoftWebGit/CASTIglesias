@@ -190,7 +190,7 @@ namespace CapaDatos
                 if (obj.numero_miembro > 0 &&
                     _context.Miembros.Any(m => m.numero_miembro == obj.numero_miembro && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
                 {
-                    mensaje = "El número de miembro ya pertenece a otro miembro en esta sede.";
+                    mensaje = "El número de miembro ya pertenece a " + obj.nombre_miembro + " " + obj.apellidos_miembro + " (Recomendamos utilizar el botón de 'Asignar Nº Miembro').";
                     return 0;
                 }
 
@@ -377,7 +377,7 @@ namespace CapaDatos
                                                m.id_miembro != obj.id_miembro &&
                                                m.id_sede == miembro.id_sede))
                 {
-                    mensaje = "El número de miembro ya pertenece a otro miembro.";
+                    mensaje = "El número de miembro ya pertenece a " + obj.nombre_miembro + obj.apellidos_miembro + " (Recomendamos utilizar el botón de 'Asignar Nº Miembro').";
                     return false;
                 }
 
