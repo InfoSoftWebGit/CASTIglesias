@@ -27,6 +27,7 @@ namespace CapaPresentaciónAdmin.Controllers
         private readonly CN_Ministerio _cnMinisterio;
         private readonly CN_Paises _cnPaises;
         private readonly CN_Culto _cnCulto;
+        private readonly CN_ZonaDiscipulado _cnZonaDiscipulado;
 
         // Constructor con inyección de dependencias
         public MantenedorController(CN_Miembros negocioMiembros,
@@ -39,6 +40,7 @@ namespace CapaPresentaciónAdmin.Controllers
             CN_Ministerio cnMinisterio,
             CN_Paises cnPaises,
             CN_Culto cnCulto,
+            CN_ZonaDiscipulado cnZonaDiscipulado,
             CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos)
         {
             _cnMiembros = negocioMiembros;
@@ -51,6 +53,7 @@ namespace CapaPresentaciónAdmin.Controllers
             _cnMinisterio = cnMinisterio;
             _cnPaises = cnPaises;
             _cnCulto = cnCulto;
+            _cnZonaDiscipulado = cnZonaDiscipulado;
         }
         // ------------------------------------------------------------------------------------------------
         #endregion
@@ -65,6 +68,7 @@ namespace CapaPresentaciónAdmin.Controllers
             try
             {
                 int sedeID = ObtenerIdSedeUsuario(); // 👈 Obtener sedeID
+                _cnZonaDiscipulado.AsegurarZonasPorDefecto(sedeID); // Las 6 zonas por defecto siempre presentes
                 var oListaZonas = _cnZonas.ListarZonas(sedeID); // 👈 Pasar sedeID
                 return Json(new { data = oListaZonas });
             }

@@ -19,5 +19,10 @@ namespace CapaEntidad
         public string? descripcion { get; set; }
 
         public int ID_sede { get; set; }
+
+        // 'general' para zonas creadas por el usuario; 'hombres', 'mujeres' o 'ninos'
+        // identifican las zonas por defecto de la aplicación.
+        [Column("Tipo")]
+        public string tipo { get; set; } = "general";
     }
 }

@@ -70,6 +70,8 @@ builder.Services.AddScoped<CD_ConfigJovenes>();
 builder.Services.AddScoped<CN_ConfigJovenes>();
 builder.Services.AddScoped<CD_Jovenes>();
 builder.Services.AddScoped<CN_Jovenes>();
+builder.Services.AddScoped<CD_ZonaDiscipulado>();
+builder.Services.AddScoped<CN_ZonaDiscipulado>();
 
 builder.Services.AddScoped<CD_Gasto>();
 builder.Services.AddScoped<CN_Gasto>();

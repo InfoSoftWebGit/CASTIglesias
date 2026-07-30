@@ -129,15 +129,21 @@
                     { data: "nombre_lider" },
                     { data: "descripcion", render: d => `<span class="celda-truncada" title="${d ?? ''}">${d ?? ''}</span>` },
                     {
-                        defaultContent: `
+                        data: null,
+                        render: function (data, type, row) {
+                            // Las zonas por defecto de la aplicación (tipo != 'general') no se pueden eliminar.
+                            const esPorDefecto = row.tipo && row.tipo !== 'general';
+                            return `
                             <div class="d-flex justify-content-center gap-2">
                                 <button type="button" class="btn btn-primary btn-sm btn-editarZona">
                                     <i class="fas fa-pen"></i>
                                 </button>
+                                ${esPorDefecto ? '' : `
                                 <button type="button" class="btn btn-danger btn-sm btn-eliminarZona">
                                     <i class="fas fa-trash"></i>
-                                </button>
-                            </div>`,
+                                </button>`}
+                            </div>`;
+                        },
                         orderable: false,
                         searchable: false,
                         width: "100px"
@@ -207,6 +213,7 @@
             if (json) {
                 // Modo Edición
                 $("#txtid").val(json.iD_zona);
+                $("#txtid").data("tipo", json.tipo || 'general');
                 $("#txtNombreZona").val(json.nombre_zona);
                 $("#txtNombreLider").val(json.nombre_lider);
                 $("#txtDescripcion").val(json.descripcion);
@@ -214,6 +221,7 @@
             } else {
                 // Modo Nuevo Registro
                 $("#txtid").val(0);
+                $("#txtid").data("tipo", 'general');
                 $("#txtNombreZona").val("");
                 $("#txtNombreLider").val("");
                 $("#txtDescripcion").val("");
@@ -232,7 +240,8 @@
                 iD_zona: parseInt($("#txtid").val()) || 0,
                 nombre_zona: $("#txtNombreZona").val().trim(),
                 nombre_lider: $("#txtNombreLider").val().trim(),
-                descripcion: $("#txtDescripcion").val().trim()
+                descripcion: $("#txtDescripcion").val().trim(),
+                tipo: $("#txtid").data("tipo") || 'general'
             };
 
             if (Zona.nombre_zona === "" || Zona.nombre_lider === "") {

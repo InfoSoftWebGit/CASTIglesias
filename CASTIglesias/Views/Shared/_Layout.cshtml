@@ -224,7 +224,7 @@
                             </div>
                         }
                         <!-- BLOQUE DISCIPULADO -->
-                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Miembros)
+                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Hombres || permisosMiembro.Mujeres || permisosMiembro.Ninos || permisosMiembro.Miembros)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDiscipulado" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
@@ -252,6 +252,27 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
                                             Jóvenes
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Hombres)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Hombres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-person"></i></div>
+                                            Hombres
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Mujeres)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Mujeres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-person-dress"></i></div>
+                                            Mujeres
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ninos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Ninos", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-child"></i></div>
+                                            Niños
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)

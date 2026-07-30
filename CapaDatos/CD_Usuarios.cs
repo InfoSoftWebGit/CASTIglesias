@@ -49,6 +49,9 @@ namespace CapaDatos
                 Visitantes = true, VisitantesCrearEditar = true, VisitantesEliminar = true,
                 Simpatizantes = true, SimpatizantesCrearEditar = true, SimpatizantesEliminar = true,
                 Proceso = true, ProcesoCrearEditar = true, ProcesoEliminar = true,
+                Hombres = true, HombresCrearEditar = true, HombresEliminar = true,
+                Mujeres = true, MujeresCrearEditar = true, MujeresEliminar = true,
+                Ninos = true, NinosCrearEditar = true, NinosEliminar = true,
                 Ajustes = true, AjustesCrearEditar = true, AjustesEliminar = true,
                 ID_usuario = ID_usuario
             };
@@ -170,6 +173,18 @@ namespace CapaDatos
                     permisoExistente.Jovenes = objPermisosDTO.Jovenes;
                     permisoExistente.JovenesCrearEditar = objPermisosDTO.JovenesCrearEditar;
                     permisoExistente.JovenesEliminar = objPermisosDTO.JovenesEliminar;
+
+                    permisoExistente.Hombres = objPermisosDTO.Hombres;
+                    permisoExistente.HombresCrearEditar = objPermisosDTO.HombresCrearEditar;
+                    permisoExistente.HombresEliminar = objPermisosDTO.HombresEliminar;
+
+                    permisoExistente.Mujeres = objPermisosDTO.Mujeres;
+                    permisoExistente.MujeresCrearEditar = objPermisosDTO.MujeresCrearEditar;
+                    permisoExistente.MujeresEliminar = objPermisosDTO.MujeresEliminar;
+
+                    permisoExistente.Ninos = objPermisosDTO.Ninos;
+                    permisoExistente.NinosCrearEditar = objPermisosDTO.NinosCrearEditar;
+                    permisoExistente.NinosEliminar = objPermisosDTO.NinosEliminar;
 
                     permisoExistente.Gastos = objPermisosDTO.Gastos;
                     permisoExistente.GastosCrearEditar = objPermisosDTO.GastosCrearEditar;

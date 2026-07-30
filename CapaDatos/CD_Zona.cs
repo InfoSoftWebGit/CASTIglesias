@@ -158,6 +158,13 @@ namespace CapaDatos
                 }
                 // Si sedeID es 1000, el AdminGlobal puede eliminar la zona de cualquier sede.
 
+                // Las zonas por defecto de la aplicación (Hombres, Mujeres, Niños) no se pueden eliminar.
+                if (!string.IsNullOrEmpty(z.tipo) && z.tipo != "general")
+                {
+                    mensaje = "Esta zona viene por defecto en la aplicación y no se puede eliminar.";
+                    return false;
+                }
+
                 _context.Zona.Remove(z);
                 _context.SaveChanges();
                 mensaje = "Zona eliminada";

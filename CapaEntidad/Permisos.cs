@@ -74,6 +74,18 @@ namespace CapaEntidad
         public bool JovenesCrearEditar { get; set; }
         public bool JovenesEliminar { get; set; }
 
+        public bool Hombres { get; set; }
+        public bool HombresCrearEditar { get; set; }
+        public bool HombresEliminar { get; set; }
+
+        public bool Mujeres { get; set; }
+        public bool MujeresCrearEditar { get; set; }
+        public bool MujeresEliminar { get; set; }
+
+        public bool Ninos { get; set; }
+        public bool NinosCrearEditar { get; set; }
+        public bool NinosEliminar { get; set; }
+
         public bool Gastos { get; set; }
         public bool GastosCrearEditar { get; set; }
         public bool GastosEliminar { get; set; }

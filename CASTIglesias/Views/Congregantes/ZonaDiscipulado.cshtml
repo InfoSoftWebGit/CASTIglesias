@@ -1,0 +1,313 @@
+@using CapaEntidad
+@{
+    var titulo = ViewBag.TituloZona as string ?? "Zona";
+    var icono = ViewBag.IconoZona as string ?? "fas fa-users";
+    var tipo = ViewBag.TipoZona as string ?? "";
+    var zona = ViewBag.ZonaDiscipulado as Zona;
+    var grupos = ViewBag.GruposZona as List<Grupos> ?? new List<Grupos>();
+    bool esSedeGlobal = ViewBag.EsSedeGlobal as bool? ?? false;
+
+    ViewBag.Title = titulo;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item active">@titulo</li>
+</ol>
+
+@if (esSedeGlobal)
+{
+    <div class="alert alert-info d-flex align-items-center mb-4">
+        <i class="fas fa-info-circle me-2"></i>
+        <span>Estás viendo los miembros de todas las sedes. Selecciona una sede específica para añadir miembros a esta zona.</span>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="@icono me-1"></i> Lista de @titulo
+            @if (!string.IsNullOrWhiteSpace(zona?.nombre_lider))
+            {
+                <span>&nbsp;<span class="badge bg-secondary">Líder: @zona.nombre_lider</span></span>
+            }
+        </span>
+        @if (zona != null)
+        {
+            <button type="button" class="btn btn-success btn-sm" onclick="abrirModalMiembroZona()">
+                <i class="fas fa-plus me-1"></i> Añadir miembro
+            </button>
+        }
+    </div>
+    <div class="table-responsive">
+        <table id="tablaMiembrosZona" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellidos</th>
+                    <th>Teléfono</th>
+                    <th>Edad</th>
+                    <th>Grupo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL CAMBIAR GRUPO -->
+<div class="modal fade" id="FormModalEditarGrupo" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> Cambiar grupo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="hdnIdZgm" value="0" />
+                <div class="mb-3">
+                    <label class="form-label">Miembro</label>
+                    <input type="text" id="txtNombreMiembroEditar" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Grupo</label>
+                    <select id="cboGrupoEditar" class="form-select">
+                        <option value="0">— Sin grupo —</option>
+                        @foreach (var g in grupos)
+                        {
+                            <option value="@g.ID_grupo">@g.Descripcion</option>
+                        }
+                    </select>
+                </div>
+                <div id="mensajeErrorEditar" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCambioGrupo()">
+                    <i class="fas fa-save me-1"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL AÑADIR MIEMBRO -->
+<div class="modal fade" id="FormModalMiembroZona" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title">Añadir miembro a @titulo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Buscar miembro <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarMiembroZona" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <input type="hidden" id="hdnIdMiembroZona" value="0" />
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="form-label">Edad</label>
+                        <input type="text" id="txtEdadMiembroZona" class="form-control" readonly />
+                    </div>
+                    <div class="col-sm-8">
+                        <label class="form-label">Teléfono</label>
+                        <input type="text" id="txtTelefonoMiembroZona" class="form-control" readonly />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Grupo</label>
+                        <select id="cboGrupoMiembroZona" class="form-select">
+                            <option value="0">— Sin grupo —</option>
+                            @foreach (var g in grupos)
+                            {
+                                <option value="@g.ID_grupo">@g.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div id="mensajeErrorMiembroZona" class="alert alert-danger d-none"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarMiembroZona" onclick="guardarMiembroZona()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
+
+    <script>
+        const tipoZona = '@tipo';
+        const tituloZona = '@titulo';
+
+        let tablaMiembrosZona;
+
+        $(document).ready(function () {
+            tablaMiembrosZona = $("#tablaMiembrosZona").DataTable({
+                responsive: true,
+                ordering: false,
+                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+                initComplete: function () {
+                    $(this.api().table().header()).css({ 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' });
+                },
+                ajax: {
+                    url: '@Url.Action("ListarMiembrosZonaDiscipulado", "Congregantes")',
+                    type: "GET",
+                    dataType: "json",
+                    data: { tipo: tipoZona },
+                    dataSrc: "data"
+                },
+                columns: [
+                    { data: "nombre_miembro", defaultContent: "" },
+                    { data: "apellidos_miembro", defaultContent: "" },
+                    { data: "telefono_movil", defaultContent: '<span class="text-muted">—</span>' },
+                    {
+                        data: "edad",
+                        defaultContent: '<span class="text-muted">—</span>',
+                        render: function (d) { return d != null ? d + ' años' : '<span class="text-muted">—</span>'; }
+                    },
+                    { data: "nombre_grupo", defaultContent: '<span class="text-muted">—</span>' },
+                    {
+                        defaultContent: `
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-warning btn-sm btn-editarGrupo" title="Cambiar grupo">
+                                    <i class="fas fa-users-cog"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembroZona" title="Quitar de la zona">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </div>`,
+                        orderable: false,
+                        searchable: false,
+                        width: "100px"
+                    }
+                ]
+            });
+
+            $("#tablaMiembrosZona tbody").on("click", ".btn-editarGrupo", function () {
+                const data = tablaMiembrosZona.row($(this).closest("tr")).data();
+                abrirEditarGrupo(data);
+            });
+
+            $("#tablaMiembrosZona tbody").on("click", ".btn-eliminarMiembroZona", function () {
+                const data = tablaMiembrosZona.row($(this).closest("tr")).data();
+                Swal.fire({
+                    title: "¿Quitar de la zona?",
+                    text: `Se eliminará a "${data.nombre_miembro} ${data.apellidos_miembro}" de la zona de ${tituloZona}. Sus otros datos no se verán afectados.`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Sí, quitar",
+                    cancelButtonText: "Cancelar"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $.post('@Url.Action("EliminarMiembroZonaDiscipulado", "Congregantes")', { idZgm: data.id_zgm }, function (res) {
+                            if (res.resultado) {
+                                tablaMiembrosZona.ajax.reload();
+                                Swal.fire("Eliminado", res.mensaje, "success");
+                            } else {
+                                Swal.fire("Error", res.mensaje, "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Autocomplete búsqueda de miembros
+            $("#txtBuscarMiembroZona").autocomplete({
+                appendTo: "#FormModalMiembroZona .modal-body",
+                source: function (req, resp) {
+                    $.get('@Url.Action("BuscarMiembros", "Congregantes")', { term: req.term }, function (res) {
+                        const items = (res.data || []).map(function (m) {
+                            return {
+                                label: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                                value: (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || ''),
+                                id: m.id_miembro,
+                                edad: m.edad,
+                                telefono: m.telefono_movil
+                            };
+                        });
+                        resp(items);
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#hdnIdMiembroZona").val(ui.item.id);
+                    $("#txtEdadMiembroZona").val(ui.item.edad != null ? ui.item.edad : '');
+                    $("#txtTelefonoMiembroZona").val(ui.item.telefono || '');
+                }
+            });
+        });
+
+        function abrirModalMiembroZona() {
+            $("#hdnIdMiembroZona").val(0);
+            $("#txtBuscarMiembroZona").val('');
+            $("#txtEdadMiembroZona").val('');
+            $("#txtTelefonoMiembroZona").val('');
+            $("#mensajeErrorMiembroZona").addClass("d-none").text('');
+            new bootstrap.Modal(document.getElementById("FormModalMiembroZona")).show();
+        }
+
+        function abrirEditarGrupo(data) {
+            $("#hdnIdZgm").val(data.id_zgm);
+            $("#txtNombreMiembroEditar").val((data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || ''));
+            $("#cboGrupoEditar").val(data.id_grupo > 0 ? data.id_grupo : 0);
+            $("#mensajeErrorEditar").addClass("d-none").text('');
+            new bootstrap.Modal(document.getElementById("FormModalEditarGrupo")).show();
+        }
+
+        function guardarCambioGrupo() {
+            const idZgm = parseInt($("#hdnIdZgm").val()) || 0;
+            const idGrupo = parseInt($("#cboGrupoEditar").val()) || 0;
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+            $.post('@Url.Action("CambiarGrupoZonaDiscipulado", "Congregantes")', { idZgm, idGrupo }, function (res) {
+                $(".modal-body").LoadingOverlay("hide");
+                if (res.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById("FormModalEditarGrupo")).hide();
+                    tablaMiembrosZona.ajax.reload();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 3000, timerProgressBar: true });
+                } else {
+                    $("#mensajeErrorEditar").removeClass("d-none").text(res.mensaje);
+                }
+            }).fail(function () {
+                $(".modal-body").LoadingOverlay("hide");
+                $("#mensajeErrorEditar").removeClass("d-none").text("Error en la solicitud.");
+            });
+        }
+
+        function guardarMiembroZona() {
+            const idMiembro = parseInt($("#hdnIdMiembroZona").val()) || 0;
+            if (idMiembro === 0) {
+                $("#mensajeErrorMiembroZona").removeClass("d-none").text("Selecciona un miembro de la lista.");
+                return;
+            }
+
+            const idGrupo = parseInt($("#cboGrupoMiembroZona").val()) || 0;
+            $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
+            $.post('@Url.Action("AgregarMiembroZonaDiscipulado", "Congregantes")', { tipo: tipoZona, idMiembro, idGrupo }, function (res) {
+                $(".modal-body").LoadingOverlay("hide");
+                if (res.resultado && res.resultado !== 0) {
+                    bootstrap.Modal.getInstance(document.getElementById("FormModalMiembroZona")).hide();
+                    tablaMiembrosZona.ajax.reload();
+                    Swal.fire("Guardado", res.mensaje, "success");
+                } else {
+                    $("#mensajeErrorMiembroZona").removeClass("d-none").text(res.mensaje);
+                }
+            }).fail(function () {
+                $(".modal-body").LoadingOverlay("hide");
+                $("#mensajeErrorMiembroZona").removeClass("d-none").text("Error en la solicitud.");
+            });
+        }
+    </script>
+}

@@ -22,6 +22,7 @@ namespace CASTIglesias.Controllers
         CN_Matrimonio cnMatrimonio,
         CN_Jovenes cnJovenes,
         CN_ConfigJovenes cnConfigJovenes,
+        CN_ZonaDiscipulado cnZonaDiscipulado,
         CN_Permisos negocioPermisos) : BaseController(cnSedes, negocioPermisos)
 
     {
@@ -40,6 +41,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Matrimonio _cnMatrimonio = cnMatrimonio;
         private readonly CN_Jovenes _cnJovenes = cnJovenes;
         private readonly CN_ConfigJovenes _cnConfigJovenes = cnConfigJovenes;
+        private readonly CN_ZonaDiscipulado _cnZonaDiscipulado = cnZonaDiscipulado;
         #endregion Constructor
         // GET: Congregamtes
         #region Miembros
@@ -1245,6 +1247,113 @@ namespace CASTIglesias.Controllers
             }
         }
         #endregion Jovenes
+
+        #region Zonas de Discipulado (Hombres, Mujeres, Niños)
+
+        // Título e icono de cada zona de discipulado por defecto.
+        private static readonly Dictionary<string, (string Titulo, string Icono)> ZonasDiscipulado = new()
+        {
+            ["hombres"] = ("Hombres", "fas fa-person"),
+            ["mujeres"] = ("Mujeres", "fas fa-person-dress"),
+            ["ninos"] = ("Niños", "fas fa-child")
+        };
+
+        public IActionResult Hombres() => VistaZonaDiscipulado("hombres");
+        public IActionResult Mujeres() => VistaZonaDiscipulado("mujeres");
+        public IActionResult Ninos() => VistaZonaDiscipulado("ninos");
+
+        private IActionResult VistaZonaDiscipulado(string tipo)
+        {
+            var (titulo, icono) = ZonasDiscipulado[tipo];
+            ViewBag.TipoZona = tipo;
+            ViewBag.TituloZona = titulo;
+            ViewBag.IconoZona = icono;
+
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                ViewBag.EsSedeGlobal = sedeID == 1000;
+
+                // Crea la zona por defecto de la sede si aún no existe (null en la vista global).
+                var zona = _cnZonaDiscipulado.ObtenerZona(sedeID, tipo);
+                ViewBag.ZonaDiscipulado = zona;
+                ViewBag.GruposZona = zona != null
+                    ? _cnGrupos.ListarGrupos(sedeID).Where(g => g.ID_zona == zona.ID_zona).ToList()
+                    : new List<CapaEntidad.Grupos>();
+            }
+            catch (Exception)
+            {
+                ViewBag.EsSedeGlobal = false;
+                ViewBag.ZonaDiscipulado = null;
+                ViewBag.GruposZona = new List<CapaEntidad.Grupos>();
+            }
+            return View("ZonaDiscipulado");
+        }
+
+        [HttpGet]
+        public JsonResult ListarMiembrosZonaDiscipulado(string tipo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnZonaDiscipulado.ListarMiembrosZona(sedeID, tipo ?? string.Empty);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AgregarMiembroZonaDiscipulado(string tipo, int idMiembro, int idGrupo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                int resultado = _cnZonaDiscipulado.AgregarMiembroZona(idMiembro, idGrupo, sedeID, tipo ?? string.Empty, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = 0, mensaje = $"Error interno: {ErrorHelper.Mensaje(ex)}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult EliminarMiembroZonaDiscipulado(int idZgm)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnZonaDiscipulado.EliminarMiembroZona(idZgm, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult CambiarGrupoZonaDiscipulado(int idZgm, int idGrupo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                string mensaje;
+                bool resultado = _cnZonaDiscipulado.EditarGrupoMiembroZona(idZgm, idGrupo, sedeID, out mensaje);
+                return Json(new { resultado, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { resultado = false, mensaje = $"Error interno: {ErrorHelper.Mensaje(ex)}" });
+            }
+        }
+
+        #endregion Zonas de Discipulado (Hombres, Mujeres, Niños)
 
         #region Matrimonios
         public IActionResult Matrimonios() => View();
