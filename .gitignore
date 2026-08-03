@@ -8,6 +8,7 @@ appsettings*.json
 
 **/launchsettings.json
 
+*.md
 # data ignore
 *.csv
 *.xlsx
