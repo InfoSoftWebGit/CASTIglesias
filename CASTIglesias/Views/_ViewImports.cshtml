@@ -1,4 +1,22 @@
-﻿@using CASTIglesias
+@using CASTIglesias
 @using CASTIglesias.Models
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
+@* ─────────────────────────────────────────────────────────────────────────────
+   Localización (multi-idioma ES/EN).
+
+   "L" queda disponible en TODAS las vistas sin declararlo en cada una. Uso:
+
+       <button>@L["Guardar"]</button>
+
+   La clave es el texto en español; si no hay traducción para el idioma activo,
+   el localizador devuelve la propia clave y la vista sigue viéndose en español.
+
+   Se usa IHtmlLocalizer y no IStringLocalizer porque no escapa el HTML del
+   resultado, lo que permite incluir etiquetas dentro de una traducción.
+   Contrapartida: para meter un texto traducido dentro de JavaScript hay que
+   serializarlo con Json.Serialize(L["..."].Value), nunca interpolarlo directo,
+   o las comillas y los acentos romperán el script.
+   ───────────────────────────────────────────────────────────────────────────── *@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L

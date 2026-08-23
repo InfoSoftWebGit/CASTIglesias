@@ -1,8 +1,21 @@
 ﻿@using Microsoft.AspNetCore.Http.Extensions
 @using CapaEntidad
+@using System.Globalization
+
+@{
+    // Idioma de interfaz activo en esta petición. Lo resuelve el middleware de
+    // localización a partir de la cookie que escribe AccesoController.CambiarIdioma.
+    // TwoLetterISOLanguageName devuelve "es" o "en", que es la forma en la que se
+    // declaran los idiomas en IdiomasSoportados.
+    var idiomaActual = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+    // Ruta actual (incluida la query string) para que al cambiar de idioma el
+    // usuario vuelva exactamente a la pantalla donde estaba y no al inicio.
+    var urlRetorno = Context.Request.GetEncodedPathAndQuery();
+}
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="@idiomaActual">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -161,8 +174,30 @@
                     <i class="fas fa-user fa-fw"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="opcionesUsuario">
+                    @* Selector de idioma.
+
+                       Los nombres de los idiomas NO se traducen: se muestran siempre
+                       en su propia lengua ("Español", "English"). Quien no entiende
+                       la interfaz actual necesita reconocer la suya de un vistazo.
+
+                       Cada enlace lleva la ruta actual como returnUrl para volver a
+                       la misma pantalla tras recargar en el nuevo idioma. *@
+                    <li><h6 class="dropdown-header">@L["Idioma"]</h6></li>
+                    @foreach (var codigo in IdiomasSoportados.Codigos)
+                    {
+                        <li>
+                            <a class="dropdown-item @(codigo == idiomaActual ? "active" : "")"
+                               href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = urlRetorno })">
+                                @IdiomasSoportados.Nombres[codigo]
+                                @if (codigo == idiomaActual)
+                                {
+                                    <i class="fas fa-check ms-2"></i>
+                                }
+                            </a>
+                        </li>
+                    }
                     <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item" href="@Url.Action("CerrarSesion", "Acceso")">Cerrar sesión</a></li>
+                    <li><a class="dropdown-item" href="@Url.Action("CerrarSesion", "Acceso")">@L["Cerrar sesión"]</a></li>
                 </ul>
             </li>
         </ul>
@@ -175,7 +210,7 @@
                     <div class="nav">
                         <a class="nav-link" href="@Url.Action("Index", "Home")">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
-                            Dashboard
+                            @L["Dashboard"]
                         </a>
 
                         @{
@@ -187,7 +222,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
-                                Congregantes
+                                @L["Congregantes"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseCongregantes" data-bs-parent="#sidenavAccordion">
@@ -196,28 +231,28 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Visitantes", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-street-view">></i></div>
-                                            Visitantes
+                                            @L["Visitantes"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Simpatizantes)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Simpatizantes", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-handshake"></i></div>
-                                            Simpatizantes
+                                            @L["Simpatizantes"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Proceso)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Proceso", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-forward"></i></div>
-                                            En proceso
+                                            @L["En proceso"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Miembros", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
-                                            Miembros
+                                            @L["Miembros"]
                                         </a>
                                     }
                                 </nav>
@@ -228,7 +263,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDiscipulado" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                                Discipulado
+                                @L["Discipulado"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseDiscipulado" data-bs-parent="#sidenavAccordion">
@@ -237,57 +272,57 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fa fa-heart"></i></div>
-                                            Familias
+                                            @L["Familias"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Matrimonios)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Matrimonios", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-ring"></i></div>
-                                            Matrimonios
+                                            @L["Matrimonios"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Jovenes)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
-                                            Jóvenes
+                                            @L["Jóvenes"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Hombres)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Hombres", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-person"></i></div>
-                                            Hombres
+                                            @L["Hombres"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Mujeres)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Mujeres", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-person-dress"></i></div>
-                                            Mujeres
+                                            @L["Mujeres"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Ninos)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Ninos", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-child"></i></div>
-                                            Niños
+                                            @L["Niños"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Miembros)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Lideres", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
-                                            Líderes
+                                            @L["Líderes"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Seguimiento", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
-                                            Seguimiento
+                                            @L["Seguimiento"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("DetallesSeguimiento", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-search"></i></div>
-                                            Detalle de seguimiento
+                                            @L["Detalle de seguimiento"]
                                         </a>
                                     }
                                 </nav>
@@ -298,7 +333,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMantenimiento" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
-                                Organización Pastoral
+                                @L["Organización Pastoral"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseMantenimiento" data-bs-parent="#sidenavAccordion">
@@ -307,30 +342,30 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Zonas", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            Zonas
+                                            @L["Zonas"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Grupos)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Grupos", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
-                                            Grupos
+                                            @L["Grupos"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Ministerio)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Ministerios", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
-                                            Ministerios
+                                            @L["Ministerios"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseServicios" aria-expanded="false">
                                             <div class="sb-nav-link-icon"><i class="fas fa-hands-helping"></i></div>
-                                            Servicios
+                                            @L["Servicios"]
                                             <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                                         </a>
                                         <div class="collapse" id="collapseServicios">
                                             <nav class="sb-sidenav-menu-nested nav" id="serviciosSubmenu" data-url-servicios="@Url.Action("Servicios", "Mantenedor")" data-url-listar="@Url.Action("ListarMinisterios", "Mantenedor")">
-                                                <span class="nav-link collapsed-sub-item text-white-50" id="serviciosCargando" style="font-size: 0.85rem;">Cargando…</span>
+                                                <span class="nav-link collapsed-sub-item text-white-50" id="serviciosCargando" style="font-size: 0.85rem;">@L["Cargando…"]</span>
                                             </nav>
                                         </div>
                                     }
@@ -343,7 +378,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseEconomia" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
-                                Finanzas
+                                @L["Finanzas"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseEconomia" data-bs-parent="#sidenavAccordion">
@@ -352,21 +387,21 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Economia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
-                                            Diezmos
+                                            @L["Diezmos"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Conceptos)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Conceptos", "Economia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                            Conceptos
+                                            @L["Conceptos"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Gastos)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "Economia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                                            Gastos
+                                            @L["Gastos"]
                                         </a>
                                     }
                                 </nav>
@@ -378,7 +413,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAsistencia" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
-                                Control
+                                @L["Control"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseAsistencia" data-bs-parent="#sidenavAccordion">
@@ -387,26 +422,26 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Asistencia", "Asistencia")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
-                                            Asistencia
+                                            @L["Asistencia"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Ajustes)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Cultos", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
-                                            Cultos y Servicios
+                                            @L["Cultos y Servicios"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Calendarios", "Calendario")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
-                                            Calendario de Servicios
+                                            @L["Calendario de Servicios"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "CalendarioAnual")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-calendar"></i></div>
-                                            Calendario Anual
+                                            @L["Calendario Anual"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "Sala")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-door-open"></i></div>
-                                            Salas
+                                            @L["Salas"]
                                         </a>
                                     }
                                 </nav>
@@ -416,7 +451,7 @@
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAjustes" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
-                                Configuración de la aplicación
+                                @L["Configuración de la aplicación"]
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
                             </a>
                             <div class="collapse" id="collapseAjustes" data-bs-parent="#sidenavAccordion">
@@ -425,22 +460,22 @@
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Usuarios", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fa-solid fa-handshake"></i></div>
-                                            Usuarios
+                                            @L["Usuarios"]
                                         </a>
                                     }
                                     @if (tieneAccesoTotal || permisosMiembro.Ajustes)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
-                                            Diezmos y Miembros
+                                            @L["Diezmos y Miembros"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
-                                            Jóvenes
+                                            @L["Jóvenes"]
                                         </a>
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Servicios", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
-                                            Servicios
+                                            @L["Servicios"]
                                         </a>
                                     }
                                 </nav>
@@ -450,7 +485,10 @@
                     
                 </div>
                 <div class="sb-sidenav-footer">
-                    <div class="small">Logged in as:</div>
+                    @* Este texto estaba en inglés en el código original (resto de la
+                       plantilla SB Admin). Ahora la clave es el español y la
+                       traducción al inglés vuelve a ser la original. *@
+                    <div class="small">@L["Sesión iniciada como:"]</div>
                     <div class="fw-bold">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
 
                     @if (User.HasClaim("Multisede", "true") || User.IsInRole("AdminGlobal") || User.IsInRole("PastorGeneral"))
@@ -462,7 +500,9 @@
                                     aria-expanded="false"
                                     style="padding-left: 0; padding-right: 0;">
                                 <i class="fas fa-church fa-fw me-1 text-white-50"></i>
-                                Sede: @ViewBag.NombreSedeActual
+                                @* Solo se traduce la etiqueta; el nombre de la sede es
+                                   dato del cliente y se muestra siempre tal cual. *@
+                                @L["Sede"]: @ViewBag.NombreSedeActual
                             </button>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownSede">
                                 @if (ViewBag.ListaSedes != null)
@@ -480,7 +520,7 @@
                                 }
                                 else
                                 {
-                                    <li><span class="dropdown-item disabled">No hay sedes disponibles.</span></li>
+                                    <li><span class="dropdown-item disabled">@L["No hay sedes disponibles."]</span></li>
                                 }
                             </ul>
                         </div>
@@ -499,8 +539,8 @@
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">© Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados.</div>
-                        <div>Soporte: <a href="mailto:soporte@congrega.es">soporte@congrega.es</a></div>
+                        <div class="text-muted">@L["© Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados."]</div>
+                        <div>@L["Soporte"]: <a href="mailto:soporte@congrega.es">soporte@congrega.es</a></div>
                     </div>
                 </div>
             </footer>
@@ -513,6 +553,18 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Textos traducidos que necesita el JavaScript de esta página.
+        //
+        // Se serializan con Json.Serialize y NUNCA se interpolan directamente:
+        // los acentos, las comillas y los apóstrofes de una traducción romperían
+        // el script si se escribiesen en crudo dentro de las comillas.
+        const T = {
+            sinMinisterios:   @Json.Serialize(L["Sin ministerios"].Value),
+            errorCambiarSede: @Json.Serialize(L["Error al cambiar de sede"].Value),
+            desconocido:      @Json.Serialize(L["Desconocido"].Value),
+            errorConexionSede:@Json.Serialize(L["Error de conexión al cambiar de sede. Inténtalo de nuevo."].Value)
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
             // Sidebar toggle
             const sidebarToggle = document.getElementById('sidebarToggle');
@@ -555,7 +607,8 @@
 
                     if (ministerios.length === 0) {
                         serviciosSubmenu.insertAdjacentHTML('beforeend',
-                            '<span class="nav-link collapsed-sub-item text-white-50" style="font-size: 0.85rem;">Sin ministerios</span>');
+                            '<span class="nav-link collapsed-sub-item text-white-50" style="font-size: 0.85rem;">' +
+                            $('<div>').text(T.sinMinisterios).html() + '</span>');
                         return;
                     }
 
@@ -617,10 +670,10 @@
                     if (response.success && response.redirectUrl)
                         window.location.href = response.redirectUrl;
                     else
-                        alert("Error al cambiar de sede: " + (response.message || "Desconocido"));
+                        alert(T.errorCambiarSede + ": " + (response.message || T.desconocido));
                 },
                 error: function () {
-                    alert("Error de conexión al cambiar de sede. Inténtalo de nuevo.");
+                    alert(T.errorConexionSede);
                 }
             });
         }
