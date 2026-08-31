@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Traducciones al inglés de la interfaz.
+
+    CONVENCIÓN: la clave (atributo "name") es el texto en ESPAÑOL tal cual aparece
+    en la vista, y el valor es su traducción al inglés. No existe un archivo
+    SharedResource.es.resx: cuando el localizador no encuentra una clave devuelve
+    la propia clave, es decir el español original. Eso permite traducir la
+    aplicación vista por vista sin que nada quede en blanco.
+
+    IMPORTANTE: este archivo NO debe tener Custom Tool (ResXFileCodeGenerator) en
+    las propiedades de Visual Studio. Si se activa, VS intenta generar una clase
+    con una propiedad por clave y falla, porque las claves llevan espacios,
+    acentos y signos de puntuación.
+
+    El glosario acordado está en Documentacion/i18n-glosario-y-plan.md.
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- ══ UI genérica ══════════════════════════════════════════════════════ -->
+  <data name="Guardar" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Cerrar" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Cancelar" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Acciones" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Cerrar sesión" xml:space="preserve">
+    <value>Sign out</value>
+  </data>
+  <data name="Idioma" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Sesión iniciada como:" xml:space="preserve">
+    <value>Logged in as:</value>
+  </data>
+  <data name="Cargando…" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Ojo: usa el caracter de puntos suspensivos (…), no tres puntos seguidos. Son claves distintas.</comment>
+  </data>
+  <data name="Desconocido" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Soporte" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="© Desarrollado por Tiago y Ruben Lezcano. Todos los derechos reservados." xml:space="preserve">
+    <value>© Developed by Tiago and Ruben Lezcano. All rights reserved.</value>
+  </data>
+  <!-- ══ Menú lateral: Congregantes ═══════════════════════════════════════ -->
+  <data name="Congregantes" xml:space="preserve">
+    <value>Congregants</value>
+  </data>
+  <data name="Visitantes" xml:space="preserve">
+    <value>Visitors</value>
+  </data>
+  <data name="Simpatizantes" xml:space="preserve">
+    <value>Regular Attendees</value>
+    <comment>NO traducir como "Sympathizers": en inglés tiene connotación política.</comment>
+  </data>
+  <data name="En proceso" xml:space="preserve">
+    <value>In Process</value>
+    <comment>Congregantes en proceso de membresía. El estado individual es "Membership Candidate".</comment>
+  </data>
+  <data name="Miembros" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <!-- ══ Menú lateral: Discipulado ════════════════════════════════════════ -->
+  <data name="Discipulado" xml:space="preserve">
+    <value>Discipleship</value>
+  </data>
+  <data name="Familias" xml:space="preserve">
+    <value>Families</value>
+  </data>
+  <data name="Matrimonios" xml:space="preserve">
+    <value>Couples</value>
+    <comment>Es el ministerio de parejas, no un registro de bodas. Nunca "Marriages".</comment>
+  </data>
+  <data name="Jóvenes" xml:space="preserve">
+    <value>Youth</value>
+  </data>
+  <data name="Hombres" xml:space="preserve">
+    <value>Men</value>
+  </data>
+  <data name="Mujeres" xml:space="preserve">
+    <value>Women</value>
+  </data>
+  <data name="Niños" xml:space="preserve">
+    <value>Children</value>
+  </data>
+  <data name="Líderes" xml:space="preserve">
+    <value>Leaders</value>
+  </data>
+  <data name="Seguimiento" xml:space="preserve">
+    <value>Follow-up</value>
+  </data>
+  <data name="Detalle de seguimiento" xml:space="preserve">
+    <value>Follow-up Detail</value>
+  </data>
+  <!-- ══ Menú lateral: Organización Pastoral ══════════════════════════════ -->
+  <data name="Organización Pastoral" xml:space="preserve">
+    <value>Pastoral Structure</value>
+  </data>
+  <data name="Zonas" xml:space="preserve">
+    <value>Zones</value>
+  </data>
+  <data name="Grupos" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Ministerios" xml:space="preserve">
+    <value>Ministries</value>
+  </data>
+  <data name="Servicios" xml:space="preserve">
+    <value>Services</value>
+  </data>
+  <data name="Sin ministerios" xml:space="preserve">
+    <value>No ministries</value>
+  </data>
+  <!-- ══ Menú lateral: Finanzas ═══════════════════════════════════════════ -->
+  <data name="Finanzas" xml:space="preserve">
+    <value>Finances</value>
+  </data>
+  <data name="Diezmos" xml:space="preserve">
+    <value>Tithes</value>
+    <comment>Diezmo es literalmente Tithe. No usar "Giving", que es el término genérico de donaciones.</comment>
+  </data>
+  <data name="Conceptos" xml:space="preserve">
+    <value>Giving Categories</value>
+    <comment>NO traducir como "Concepts": no significa nada en contabilidad inglesa.</comment>
+  </data>
+  <data name="Gastos" xml:space="preserve">
+    <value>Expenses</value>
+  </data>
+  <!-- ══ Menú lateral: Control ════════════════════════════════════════════ -->
+  <data name="Control" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Asistencia" xml:space="preserve">
+    <value>Attendance</value>
+  </data>
+  <data name="Cultos y Servicios" xml:space="preserve">
+    <value>Services</value>
+    <comment>Culto y Servicio comparten traducción por decisión de glosario: en los listados siempre aparece el día concreto.</comment>
+  </data>
+  <data name="Calendario de Servicios" xml:space="preserve">
+    <value>Services Calendar</value>
+  </data>
+  <data name="Calendario Anual" xml:space="preserve">
+    <value>Annual Calendar</value>
+  </data>
+  <data name="Salas" xml:space="preserve">
+    <value>Rooms</value>
+  </data>
+  <!-- ══ Menú lateral: Configuración ══════════════════════════════════════ -->
+  <data name="Configuración de la aplicación" xml:space="preserve">
+    <value>Application Settings</value>
+  </data>
+  <data name="Usuarios" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Diezmos y Miembros" xml:space="preserve">
+    <value>Tithes and Members</value>
+    <comment>Pantalla de ajustes con los prefijos del número de diezmo y del número de miembro. No es un informe de diezmos por miembro.</comment>
+  </data>
+  <!-- ══ Sedes ═══════════════════════════════════════════════════════════ -->
+  <data name="Sede" xml:space="preserve">
+    <value>Campus</value>
+  </data>
+  <data name="No hay sedes disponibles." xml:space="preserve">
+    <value>No campuses available.</value>
+  </data>
+  <data name="Error al cambiar de sede" xml:space="preserve">
+    <value>Error switching campus</value>
+  </data>
+  <data name="Error de conexión al cambiar de sede. Inténtalo de nuevo." xml:space="preserve">
+    <value>Connection error while switching campus. Please try again.</value>
+  </data>
+</root>

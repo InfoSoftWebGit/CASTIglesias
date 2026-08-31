@@ -1,12 +1,15 @@
 ﻿using CapaNegocio;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Security.Claims;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic; // Necesario para List<Claim>
 using CapaEntidad; // Para el tipo Usuario
+using CASTIglesias.Models; // Para IdiomasSoportados
 
 namespace CASTIglesias.Controllers
 {
@@ -170,6 +173,66 @@ namespace CASTIglesias.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
+        }
+
+        /// <summary>
+        /// Cambia el idioma de la interfaz y devuelve al usuario a la página desde
+        /// la que lo solicitó. La preferencia se guarda en una cookie que lee el
+        /// CookieRequestCultureProvider configurado en Program.cs.
+        /// </summary>
+        /// <param name="lang">Código del idioma solicitado ("es" o "en").</param>
+        /// <param name="returnUrl">Ruta local a la que volver tras el cambio.</param>
+        /// <remarks>
+        /// Es un GET a propósito, para poder engancharlo como enlace normal en el
+        /// desplegable del menú (igual que CerrarSesion). No usa POST porque no
+        /// modifica datos: solo ajusta una preferencia de visualización, de modo
+        /// que un CSRF aquí no tendría más efecto que ver la web en otro idioma.
+        ///
+        /// La preferencia es por navegador, no por usuario. Cuando se añada la
+        /// columna de idioma en la tabla de usuarios, bastará con leerla al hacer
+        /// login y escribir esta misma cookie; el resto no cambia.
+        /// </remarks>
+        public IActionResult CambiarIdioma(string lang, string? returnUrl = null)
+        {
+            // Lista blanca: el valor llega desde la URL y acaba construyendo un
+            // CultureInfo, así que no se acepta nada fuera de los idiomas declarados.
+            if (!IdiomasSoportados.EsValido(lang))
+            {
+                lang = IdiomasSoportados.PorDefecto;
+            }
+
+            // Se escriben las dos culturas por separado, igual que en Program.cs:
+            // la de formato queda invariante para no alterar el enlace de decimales,
+            // y solo cambia la de interfaz.
+            Response.Cookies.Append(
+                CookieRequestCultureProvider.DefaultCookieName,
+                CookieRequestCultureProvider.MakeCookieValue(
+                    new RequestCulture(
+                        culture:   CultureInfo.InvariantCulture,
+                        uiCulture: new CultureInfo(lang))),
+                new CookieOptions
+                {
+                    Expires  = DateTimeOffset.UtcNow.AddYears(1),
+
+                    // Cookie funcional: se marca como esencial para que no la
+                    // elimine una futura política de consentimiento de cookies.
+                    IsEssential = true,
+
+                    // Solo la lee el servidor; ningún script necesita acceder a ella.
+                    HttpOnly = true,
+
+                    SameSite = SameSiteMode.Lax
+                });
+
+            // Url.IsLocalUrl evita el open redirect: returnUrl viene de la query
+            // string y sin esta comprobación se podría enlazar el cambio de idioma
+            // a un salto hacia un dominio externo.
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

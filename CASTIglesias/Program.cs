@@ -1,5 +1,6 @@
 ﻿using CapaDatos;
 using CapaNegocio;
+using CASTIglesias.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,18 @@ using System.Globalization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+//
+// AddViewLocalization habilita la inyección de IHtmlLocalizer en las vistas
+// (ver Views/_ViewImports.cshtml). AddDataAnnotationsLocalization traduce los
+// mensajes de los atributos de validación de las entidades.
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
+
+// Localización: los .resx viven en la carpeta Resources del proyecto web.
+// La clase marcadora SharedResource está en la raíz del proyecto a propósito;
+// el porqué está documentado en SharedResource.cs.
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 // Dependencias de negocio y datos
 builder.Services.AddScoped<CD_Usuarios>();
@@ -118,14 +130,52 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-// Forzar InvariantCulture en el binding de formularios (evita que el punto
-// sea interpretado como separador de miles en sistemas con cultura es-ES)
-app.UseRequestLocalization(new RequestLocalizationOptions
+// ── Localización de las peticiones (multi-idioma ES/EN) ────────────────────
+//
+// Aquí conviven dos culturas que hacen cosas distintas y NO deben igualarse:
+//
+//   Culture   -> formato de números y fechas al enlazar formularios.
+//                Se fuerza a InvariantCulture. Si se dejase variar, en un
+//                sistema con cultura es-ES el punto se interpretaría como
+//                separador de miles y un diezmo de 10.50 se guardaría como 1050.
+//
+//   UICulture -> idioma con el que el .resx resuelve los textos.
+//                Es la única que cambia entre "es" y "en".
+//
+// El mecanismo que lo hace posible: "en" no figura en SupportedCultures, así
+// que el middleware lo descarta como cultura de formato y cae al valor por
+// defecto (invariante), pero sí lo acepta como UICulture porque está en
+// SupportedUICultures. Resultado: cambia el idioma sin tocar el formato numérico.
+var opcionesLocalizacion = new RequestLocalizationOptions
 {
-    DefaultRequestCulture = new RequestCulture(CultureInfo.InvariantCulture),
-    SupportedCultures    = new[] { CultureInfo.InvariantCulture },
-    SupportedUICultures  = new[] { CultureInfo.InvariantCulture }
-});
+    DefaultRequestCulture = new RequestCulture(
+        culture:   CultureInfo.InvariantCulture,
+        uiCulture: new CultureInfo(IdiomasSoportados.PorDefecto)),
+    SupportedCultures   = new[] { CultureInfo.InvariantCulture },
+    SupportedUICultures = IdiomasSoportados.Culturas
+};
+
+// Se retira el proveedor que lee la cabecera Accept-Language del navegador.
+//
+// Durante la migración solo una parte de las vistas está traducida, así que un
+// usuario español con el navegador configurado en inglés vería la aplicación a
+// medio traducir sin haber pedido nada. Con este proveedor fuera, el idioma solo
+// cambia cuando se elige explícitamente en el selector.
+//
+// Si en el futuro se quiere autodetección, basta con eliminar este bloque.
+var proveedorNavegador = opcionesLocalizacion.RequestCultureProviders
+    .OfType<AcceptLanguageHeaderRequestCultureProvider>()
+    .FirstOrDefault();
+
+if (proveedorNavegador != null)
+{
+    opcionesLocalizacion.RequestCultureProviders.Remove(proveedorNavegador);
+}
+
+// Quedan activos, por orden de prioridad:
+//   1. QueryStringRequestCultureProvider -> ?culture=&ui-culture=, útil para probar.
+//   2. CookieRequestCultureProvider      -> la cookie que escribe AccesoController.CambiarIdioma.
+app.UseRequestLocalization(opcionesLocalizacion);
 
 app.UseRouting();
 
