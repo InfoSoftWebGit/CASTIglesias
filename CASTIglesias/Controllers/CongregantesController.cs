@@ -263,6 +263,46 @@ namespace CASTIglesias.Controllers
             catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
             catch (Exception) { return Json(new { resultado = 0, error = true }); }
         }
+
+        [HttpGet]
+        public JsonResult ContadorFamilias()
+        {
+            try { return Json(new { resultado = _cnFamilias.ContadorFamilias(ObtenerIdSedeUsuario()) }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorMatrimonios()
+        {
+            try { return Json(new { resultado = _cnMatrimonio.ContadorMatrimonios(ObtenerIdSedeUsuario()) }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorMujeresActivas()
+        {
+            try { return Json(new { resultado = _cnMiembros.ContadorMujeresActivas(ObtenerIdSedeUsuario()) }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorNinos()
+        {
+            try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "ninos") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
+        public JsonResult ContadorLideresActivos()
+        {
+            try { return Json(new { resultado = _cnLideres.ContadorLideresActivos(ObtenerIdSedeUsuario()) }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
         #endregion CONTADORES
 
         #region MIEMBROS CON ZONAS, GRUPOS Y MINISTERIOS

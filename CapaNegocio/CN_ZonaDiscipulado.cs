@@ -42,6 +42,14 @@ namespace CapaNegocio
             return _capaDatos.ListarMiembrosZona(sedeID, tipo);
         }
 
+        public int ContadorMiembrosZona(int sedeID, string tipo)
+        {
+            if (!EsTipoValido(tipo))
+                return 0;
+
+            return _capaDatos.ContadorMiembrosZona(sedeID, tipo);
+        }
+
         public int AgregarMiembroZona(int idMiembro, int idGrupo, int sedeID, string tipo, out string mensaje)
         {
             if (!EsTipoValido(tipo))

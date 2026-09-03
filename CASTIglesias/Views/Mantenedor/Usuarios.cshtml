@@ -1,6 +1,6 @@
 ﻿@using System.Text.Json
 @{
-    ViewBag.Title = "Usuarios";
+    ViewBag.Title = L["Usuarios"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -11,32 +11,32 @@
     var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
 }
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a href="index.html">Resumen</a></li>
-    <li class="breadcrumb-item active">Usuarios</li>
+    <li class="breadcrumb-item"><a href="index.html">@L["Resumen"]</a></li>
+    <li class="breadcrumb-item active">@L["Usuarios"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-users me-1"></i> Lista de Usuarios
+        <i class="fas fa-users me-1"></i> @L["Lista de Usuarios"]
     </div>
 
     <div class="table-responsive">
         <div class="row">
             <div class="col-12 mb-2">
-                <button type="button" class="btn btn-success" onclick="abrirModalUsuarios(null)">Añadir nuevo usuario</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalUsuarios(null)">@L["Añadir nuevo usuario"]</button>
             </div>
         </div>
         <hr />
         <table id="tablaUsuarios" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Correo electrónico</th>
-                    <th>Activo</th>
-                    <th>Sede</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellido"]</th>
+                    <th>@L["Correo electrónico"]</th>
+                    <th>@L["Activo"]</th>
+                    <th>@L["Sede"]</th>
+                    <th>@L["Rol"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -48,171 +48,174 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del usuario</h1>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">@L["Datos del usuario"]</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body g-2">
                 <input id="txtid" type="hidden" value="0" />
                 <input id="txtID_sede" type="hidden" value="0" /> @* 🔑 Campo oculto para ID de Sede *@
                 <div class="row g-2">
                     <div class="col-sm-6 mb-2 position-relative">
-                        <label for="txtNombres" class="form-label">Nombres</label>
-                        <input type="text" class="form-control" id="txtNombres" autocomplete="off" placeholder="Buscar miembro…">
+                        <label for="txtNombres" class="form-label">@L["Nombres"]</label>
+                        <input type="text" class="form-control" id="txtNombres" autocomplete="off" placeholder="@L["Buscar miembro…"]">
                         <ul id="autocompleteNombres" class="list-group position-absolute w-100" style="z-index:9999;display:none;max-height:200px;overflow-y:auto;"></ul>
                     </div>
                     <div class="col-sm-6 mb-2">
-                        <label for="txtApellido" class="form-label">Apellido</label>
+                        <label for="txtApellido" class="form-label">@L["Apellido"]</label>
                         <input type="text" class="form-control" id="txtApellido" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-2">
-                        <label for="txtCorreo_electronico" class="form-label">Correo</label>
+                        <label for="txtCorreo_electronico" class="form-label">@L["Correo"]</label>
                         <input type="text" class="form-control" id="txtCorreo_electronico" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-2">
-                        <label for="txtContrasenia" class="form-label">Contraseña</label>
+                        <label for="txtContrasenia" class="form-label">@L["Contraseña"]</label>
                         <input type="password" class="form-control" id="txtContrasenia" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-2">
-                        <label for="cboActivo" class="form-label">Activo</label>
+                        <label for="cboActivo" class="form-label">@L["Activo"]</label>
                         <select id="cboActivo" class="form-select">
-                            <option value="" disabled selected>Selecciona un valor</option>
-                            <option value="1">Sí</option>
-                            <option value="0">No</option>
+                            <option value="" disabled selected>@L["Selecciona un valor"]</option>
+                            <option value="1">@L["Sí"]</option>
+                            <option value="0">@L["No"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6 mb-2">
-                        <label for="cboRol" class="form-label">Rol</label>
+                        <label for="cboRol" class="form-label">@L["Rol"]</label>
                         <select id="cboRol" class="form-select">
-                            <option value="" disabled selected>Selecciona un rol</option>
-                            <option value="3">PastorSede</option>
-                            <option value="4">Miembro</option>
+                            @* El value es el id numérico, no el nombre del rol, así que el
+                               texto visible es libre y se puede traducir. El nombre que
+                               viaja al servidor lo compone el mapa ROLES del script. *@
+                            <option value="" disabled selected>@L["Selecciona un rol"]</option>
+                            <option value="3">@L["Pastor de Sede"]</option>
+                            <option value="4">@L["Miembro"]</option>
                         </select>
                     </div>
                     <div class="row mt-3" id="contenedorPermisos" style="display: none;">
                         <div class="col-12">
-                            <h5>Permisos Específicos <small class="text-muted fs-6">(Solo para Rol Miembro)</small></h5>
+                            <h5>@L["Permisos Específicos"] <small class="text-muted fs-6">@L["(Solo para Rol Miembro)"]</small></h5>
                             <hr class="mt-0" />
                             <div class="table-responsive">
                                 <table class="table table-sm table-bordered align-middle mb-0">
                                     <thead class="table-dark">
                                         <tr>
-                                            <th>Módulo</th>
-                                            <th class="text-center">Ver</th>
-                                            <th class="text-center">Crear y Editar</th>
-                                            <th class="text-center">Eliminar</th>
+                                            <th>@L["Módulo"]</th>
+                                            <th class="text-center">@L["Ver"]</th>
+                                            <th class="text-center">@L["Crear y Editar"]</th>
+                                            <th class="text-center">@L["Eliminar"]</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Usuarios</td>
+                                            <td>@L["Usuarios"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkUsuarios" data-modulo="Usuarios"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkUsuariosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkUsuariosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Miembros</td>
+                                            <td>@L["Miembros"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMiembros" data-modulo="Miembros"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMiembrosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMiembrosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Visitantes</td>
+                                            <td>@L["Visitantes"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkVisitantes" data-modulo="Visitantes"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkVisitantesCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkVisitantesEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Simpatizantes</td>
+                                            <td>@L["Simpatizantes"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkSimpatizantes" data-modulo="Simpatizantes"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkSimpatizantesCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkSimpatizantesEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Proceso</td>
+                                            <td>@L["Proceso"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkProceso" data-modulo="Proceso"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkProcesoCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkProcesoEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Familias</td>
+                                            <td>@L["Familias"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkFamilias" data-modulo="Familias"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkFamiliasCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkFamiliasEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Matrimonios</td>
+                                            <td>@L["Matrimonios"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMatrimonios" data-modulo="Matrimonios"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMatrimoniosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMatrimoniosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Jóvenes</td>
+                                            <td>@L["Jóvenes"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkJovenes" data-modulo="Jovenes"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkJovenesCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkJovenesEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Hombres</td>
+                                            <td>@L["Hombres"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkHombres" data-modulo="Hombres"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkHombresCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkHombresEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Mujeres</td>
+                                            <td>@L["Mujeres"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMujeres" data-modulo="Mujeres"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMujeresCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMujeresEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Niños</td>
+                                            <td>@L["Niños"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkNinos" data-modulo="Ninos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkNinosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkNinosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Grupos</td>
+                                            <td>@L["Grupos"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkGrupos" data-modulo="Grupos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkGruposCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkGruposEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Zonas</td>
+                                            <td>@L["Zonas"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkZonas" data-modulo="Zonas"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkZonasCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkZonasEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Ministerio</td>
+                                            <td>@L["Ministerio"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkMinisterio" data-modulo="Ministerio"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkMinisterioCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkMinisterioEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Diezmos</td>
+                                            <td>@L["Diezmos"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkDiezmos" data-modulo="Diezmos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkDiezmosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkDiezmosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Conceptos</td>
+                                            <td>@L["Conceptos"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkConceptos" data-modulo="Conceptos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkConceptosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkConceptosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Gastos</td>
+                                            <td>@L["Gastos"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkGastos" data-modulo="Gastos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkGastosCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkGastosEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Asistencia</td>
+                                            <td>@L["Asistencia"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkAsistencia" data-modulo="Asistencia"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkAsistenciaCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkAsistenciaEliminar" disabled></td>
                                         </tr>
                                         <tr>
-                                            <td>Configuración de la aplicación</td>
+                                            <td>@L["Configuración de la aplicación"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkAjustes" data-modulo="Ajustes"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkAjustesCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkAjustesEliminar" disabled></td>
@@ -234,8 +237,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarUsuario()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarUsuario()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -249,6 +252,25 @@
     
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            eliminado:             @Json.Serialize(L["Eliminado"].Value),
+            eliminarUsuario:       @Json.Serialize(L["¿Desea eliminar al usuario"].Value),
+            error:                 @Json.Serialize(L["Error"].Value),
+            estasSeguro:           @Json.Serialize(L["¿Estás seguro?"].Value),
+            no:                    @Json.Serialize(L["No"].Value),
+            noSeEncontroIdUsuario: @Json.Serialize(L["No se encontró el ID del usuario para eliminar"].Value),
+            noSeObtuvoUsuario:     @Json.Serialize(L["No se pudo obtener la información del usuario a eliminar."].Value),
+            passwordObligatoria:   @Json.Serialize(L["La contraseña es obligatoria para nuevos usuarios."].Value),
+            rolInvalido:           @Json.Serialize(L["Debe seleccionar un Rol válido."].Value),
+            si:                    @Json.Serialize(L["Sí"].Value),
+            siEliminar:            @Json.Serialize(L["Sí, eliminar"].Value)
+        });
+
         var tabladata;
         var filaSeleccionada;
 
@@ -276,6 +298,11 @@
             "PastorSede": 3,
             "Miembro": 4
         };
+
+        // Los mapas ROLES y ROL_TO_ID de arriba NO se tocan: sus cadenas son el
+        // valor que se guarda en la columna Rol y con el que el servidor hace
+        // IsInRole(). Para pintar el rol se usa tDato(), definido en el layout,
+        // que traduce el valor almacenado sin modificarlo.
 
         // Función para obtener la data de la fila (maneja DataTables responsive)
         function getFilaData(button) {
@@ -418,11 +445,11 @@
                     {
                         data: "activo",
                         render: valor => valor
-                            ? '<span class="badge bg-success">Sí</span>'
+                            ? '<span class="badge bg-success">' + T.si + '</span>'
                             : '<span class="badge bg-danger">No</span>'
                     },
                     { data: "nombre_sede" },
-                    { data: "rol" },
+                    { data: "rol", render: function (valor) { return tDato(valor); } },
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
@@ -439,7 +466,7 @@
                         width: "100px"
                     }
                 ],
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+                language: window.dtLang ? { url: window.dtLang } : {}
             });
 
             $("#tablaUsuarios tbody").on("click", ".btn-editarUsuario", function () {
@@ -455,8 +482,8 @@
             $("#tablaUsuarios tbody").on("click", ".btn-eliminarUsuario", function () {
                 var fila = getFilaData(this);
                 if (!fila.data || fila.data.iD_usuario === undefined) {
-                    console.error("No se encontró el ID del usuario para eliminar", fila.data);
-                    Swal.fire("Error", "No se pudo obtener la información del usuario a eliminar.", "error");
+                    console.error(T.noSeEncontroIdUsuario, fila.data);
+                    Swal.fire(T.error, T.noSeObtuvoUsuario, "error");
                     return;
                 }
                 const trAEliminar = fila.tr;
@@ -464,14 +491,14 @@
 
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `¿Desea eliminar al usuario ${nombre_usuario} ${apellido_usuario}?`,
+                    title: T.estasSeguro,
+                    text: `${T.eliminarUsuario} ${nombre_usuario} ${apellido_usuario}?`,
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#3085d6",
                     cancelButtonColor: "#d33",
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siEliminar,
+                    cancelButtonText: T.no
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.post('@Url.Action("EliminarUsuario", "Mantenedor")',
@@ -480,13 +507,13 @@
                                 if (resp.resultado) {
                                     tabladata.row(trAEliminar).remove().draw(false);
                                     filaSeleccionada = null;
-                                    Swal.fire("Eliminado", "El usuario fue eliminado", "success");
+                                    Swal.fire(T.eliminado, "El usuario fue eliminado", "success");
                                 } else {
-                                    Swal.fire("Error", resp.mensaje, "error");
+                                    Swal.fire(T.error, resp.mensaje, "error");
                                 }
                             }).fail(function(xhr, status, error) {
                                 console.error(xhr.responseText);
-                                Swal.fire("Error", "No se pudo eliminar el usuario: " + error, "error");
+                                Swal.fire(T.error, "No se pudo eliminar el usuario: " + error, "error");
                             });
                     }
                     filaSeleccionada = null;
@@ -573,7 +600,7 @@
                     error: function (xhr, status, error) {
                         $(".modal-body").LoadingOverlay("hide");
                         console.error("Error al obtener permisos:", error);
-                        Swal.fire("Error", "No se pudieron cargar los permisos del usuario. " + (xhr.responseJSON?.mensaje || ""), "error");
+                        Swal.fire(T.error, "No se pudieron cargar los permisos del usuario. " + (xhr.responseJSON?.mensaje || ""), "error");
                     }
                 });
             }
@@ -594,12 +621,12 @@
             }
 
             if (iD_usuario === 0 && contrasenia === "") {
-                $("#mensajeError").text("La contraseña es obligatoria para nuevos usuarios.").show();
+                $("#mensajeError").text(T.passwordObligatoria).show();
                 return;
             }
 
              if (isNaN(rolID) || !ROLES[rolID]) {
-                $("#mensajeError").text("Debe seleccionar un Rol válido.").show();
+                $("#mensajeError").text(T.rolInvalido).show();
                 return;
             }
 

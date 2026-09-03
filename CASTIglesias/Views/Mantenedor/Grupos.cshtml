@@ -1,33 +1,33 @@
-@{
-    ViewBag.Title = "Grupos";
+﻿@{
+    ViewBag.Title = L["Grupos"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 <style>.ui-autocomplete { z-index: 9999 !important; }</style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Grupos</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Grupos"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-users me-1"></i> Lista de Grupos
+        <i class="fas fa-users me-1"></i> @L["Lista de Grupos"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalGrupos()">Añadir nuevo grupo</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalGrupos()">@L["Añadir nuevo grupo"]</button>
             </div>
         </div>
 
         <table id="tablaGrupos" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Zona</th>
-                    <th>Descripción</th>
-                    <th>Encargados</th>
-                    <th>Acciones</th>
+                    <th>@L["Zona"]</th>
+                    <th>@L["Descripción"]</th>
+                    <th>@L["Encargados"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -39,31 +39,31 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="exampleModalLabel">Datos del nuevo grupo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="exampleModalLabel">@L["Datos del nuevo grupo"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtid" type="hidden" value="0" />
                 <div class="row g-2">
                     <div class="col-sm-12">
-                        <label class="form-label">Zona</label>
+                        <label class="form-label">@L["Zona"]</label>
                         <select id="cboZona" class="form-select">
-                            <option value="0" disabled selected>Selecciona una zona</option>
+                            <option value="0" disabled selected>@L["Selecciona una zona"]</option>
                         </select>
                     </div>
                     <div class="col-sm-12">
-                        <label class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripción del grupo" autocomplete="off" />
+                        <label class="form-label">@L["Descripción"]</label>
+                        <input type="text" class="form-control" id="txtDescripcion" placeholder="@L["Descripción del grupo"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-12">
-                        <label class="form-label">Encargados</label>
-                        <input type="text" class="form-control mb-2" id="txtBuscarEncargado" placeholder="Busca un miembro para añadir…" />
+                        <label class="form-label">@L["Encargados"]</label>
+                        <input type="text" class="form-control mb-2" id="txtBuscarEncargado" placeholder="@L["Busca un miembro para añadir…"]" />
                         <div id="contenedorEncargados" class="border rounded p-2" style="min-height:48px; background:#f8f9fa; display:none;">
                             <table class="table table-sm mb-0" id="tablaEncargadosModal">
                                 <tbody id="tbodyEncargados"></tbody>
                             </table>
                         </div>
-                        <small class="text-muted">Escribe al menos 2 letras para buscar. Pulsa sobre el nombre para añadirlo.</small>
+                        <small class="text-muted">@L["Escribe al menos 2 letras para buscar. Pulsa sobre el nombre para añadirlo."]</small>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -73,8 +73,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarGrupo()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarGrupo()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -88,6 +88,20 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            descripcionGrupoVacia: @Json.Serialize(L["La descripción del grupo no puede estar vacía."].Value),
+            eliminarGrupo:         @Json.Serialize(L["¿Desea eliminar este grupo?"].Value),
+            error:                 @Json.Serialize(L["Error"].Value),
+            estasSeguro:           @Json.Serialize(L["¿Estás seguro?"].Value),
+            no:                    @Json.Serialize(L["No"].Value),
+            si:                    @Json.Serialize(L["Sí"].Value)
+        });
+
         const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
         let encargadosList = []; // array de nombres seleccionados
         let tabladata;
@@ -189,9 +203,7 @@
                         }
                     });
                 },
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $('#tablaGrupos thead').css({
                         'background-color': '#1E3A8A',
@@ -212,12 +224,12 @@
                 const data = tabladata.row(fila).data();
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "¿Desea eliminar este grupo?",
+                    title: T.estasSeguro,
+                    text: T.eliminarGrupo,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.si,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -228,11 +240,11 @@
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo eliminar", "error");
+                                Swal.fire(T.error, "No se pudo eliminar", "error");
                             }
                         });
                     }
@@ -280,7 +292,7 @@
             const descripcion = $("#txtDescripcion").val().trim();
 
             if (descripcion === "") {
-                $("#mensajeError").removeClass("d-none").text("La descripción del grupo no puede estar vacía.");
+                $("#mensajeError").removeClass("d-none").text(T.descripcionGrupoVacia);
                 return;
             }
 

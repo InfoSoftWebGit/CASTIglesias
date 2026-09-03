@@ -36,6 +36,22 @@ namespace CapaDatos
             }
         }
 
+        public int ContadorMatrimonios(int sedeID)
+        {
+            try
+            {
+                var query = _context.Matrimonios.AsQueryable();
+                if (sedeID != 1000)
+                    query = query.Where(m => m.ID_sede == sedeID);
+
+                return query.Count();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
         public int RegistrarMatrimonio(Matrimonio obj, out string mensaje)
         {
             mensaje = string.Empty;

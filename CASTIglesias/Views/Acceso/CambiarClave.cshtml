@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = null;
 }
 
@@ -7,7 +7,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cambiar contraseña - Congrega</title>
+    <title>@L["Cambiar contraseña - Congrega"]</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -142,29 +142,29 @@
                 <div class="login-logo">
                     <span class="brand">Congrega</span><span class="sub">CRM</span>
                 </div>
-                <div class="login-subtitle">Cambiar contraseña</div>
+                <div class="login-subtitle">@L["Cambiar contraseña"]</div>
             </div>
             <div class="login-card-body">
                 <p class="hint-text">
                     <i class="fas fa-info-circle me-1 text-secondary"></i>
-                    Introduce tu contraseña actual y elige una nueva para actualizar tu acceso.
+                    @L["Introduce tu contraseña actual y elige una nueva para actualizar tu acceso."]
                 </p>
                 <form asp-controller="Acceso" asp-action="CambiarClave" method="post">
                     <input type="hidden" name="idusuario" value="@ViewBag.ID_usuario" />
 
                     <div class="form-floating mb-3">
                         <input class="form-control" type="password" id="inputClaveActual" name="claveactual" placeholder=" " required />
-                        <label for="inputClaveActual">Contraseña actual</label>
+                        <label for="inputClaveActual">@L["Contraseña actual"]</label>
                     </div>
 
                     <div class="form-floating mb-3">
                         <input class="form-control" type="password" id="inputNuevaClave" name="nuevaclave" placeholder=" " required />
-                        <label for="inputNuevaClave">Nueva contraseña</label>
+                        <label for="inputNuevaClave">@L["Nueva contraseña"]</label>
                     </div>
 
                     <div class="form-floating mb-3">
                         <input class="form-control" type="password" id="inputConfirmarClave" name="confirmarclave" placeholder=" " required />
-                        <label for="inputConfirmarClave">Confirmar nueva contraseña</label>
+                        <label for="inputConfirmarClave">@L["Confirmar nueva contraseña"]</label>
                     </div>
 
                     @if (!string.IsNullOrEmpty(ViewBag.Error as string))
@@ -176,10 +176,10 @@
 
                     <div class="d-flex align-items-center justify-content-between mt-4">
                         <a class="link-back" asp-controller="Acceso" asp-action="Login">
-                            <i class="fas fa-arrow-left me-1"></i> Volver
+                            <i class="fas fa-arrow-left me-1"></i> @L["Volver"]
                         </a>
                         <button type="submit" class="btn btn-login">
-                            <i class="fas fa-key me-1"></i> Cambiar contraseña
+                            <i class="fas fa-key me-1"></i> @L["Cambiar contraseña"]
                         </button>
                     </div>
                 </form>
@@ -189,7 +189,7 @@
 
     <footer>
         &copy; @DateTime.Now.Year Congrega &nbsp;&middot;&nbsp;
-        <a href="#">Política de privacidad</a>&nbsp;&middot;&nbsp;<a href="#">Términos y condiciones</a>
+        <a href="#">@L["Política de privacidad"]</a>&nbsp;&middot;&nbsp;<a href="#">@L["Términos y condiciones"]</a>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

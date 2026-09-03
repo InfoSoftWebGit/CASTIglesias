@@ -55,5 +55,25 @@ namespace CASTIglesias.Models
         /// <returns>true si el código está soportado.</returns>
         public static bool EsValido(string? codigo) =>
             !string.IsNullOrWhiteSpace(codigo) && Codigos.Contains(codigo);
+
+        /// <summary>
+        /// Código del idioma de interfaz activo en la petición actual ("es" o "en").
+        /// Atajo para no repetir CultureInfo.CurrentUICulture en cada vista.
+        /// </summary>
+        public static string Actual => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+        /// <summary>
+        /// URL del paquete de traducciones de DataTables para el idioma activo.
+        ///
+        /// DataTables trae sus textos ("Search:", "Showing X of Y", "No data
+        /// available") embebidos en inglés, así que en inglés se devuelve cadena
+        /// vacía y la vista debe omitir la opción "language" por completo. Cargar
+        /// en-GB.json funcionaría, pero es una petición de red innecesaria.
+        /// </summary>
+        /// <returns>URL del JSON de idioma, o cadena vacía si no hace falta ninguno.</returns>
+        public static string UrlIdiomaDataTables() =>
+            Actual == "es"
+                ? "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
+                : string.Empty;
     }
 }

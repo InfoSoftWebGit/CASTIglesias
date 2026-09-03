@@ -1,6 +1,6 @@
-@using CapaEntidad
+﻿@using CapaEntidad
 @{
-    ViewBag.Title = "Jóvenes";
+    ViewBag.Title = L["Jóvenes"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var config = ViewBag.ConfigJovenes as ConfigJovenes ?? new ConfigJovenes { edad_minima = 14, edad_maxima = 24 };
@@ -10,27 +10,26 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Jóvenes</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Jóvenes"]</li>
 </ol>
 
 @if (zonaSinConfigurar)
 {
     <div class="alert alert-warning d-flex align-items-center mb-4">
         <i class="fas fa-exclamation-triangle me-2"></i>
-        <span>No hay una zona de jóvenes configurada. Ve a <a href="@Url.Action("Jovenes", "Ajustes")"><strong>Ajustes → Jóvenes</strong></a> para configurar el rango de edad y la zona.</span>
+        <span>@L["No hay una zona de jóvenes configurada. Ve a"] <a href="@Url.Action("Jovenes", "Ajustes")"><strong>@L["Ajustes → Jóvenes"]</strong></a> @L["para configurar el rango de edad y la zona."]</span>
     </div>
 }
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-user-friends me-1"></i> Lista de Jóvenes
-            &nbsp;<span class="badge bg-secondary">Rango: @config.edad_minima – @config.edad_maxima años</span>
+        <span><i class="fas fa-user-friends me-1"></i> @L["Lista de Jóvenes &nbsp;"]<span class="badge bg-secondary">Rango: @config.edad_minima – @config.edad_maxima años</span>
         </span>
         @if (!zonaSinConfigurar)
         {
             <button type="button" class="btn btn-success btn-sm" onclick="abrirModalJoven()">
-                <i class="fas fa-plus me-1"></i> Añadir joven
+                <i class="fas fa-plus me-1"></i> @L["Añadir joven"]
             </button>
         }
     </div>
@@ -38,12 +37,12 @@
         <table id="tablaJovenes" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Teléfono</th>
-                    <th>Edad</th>
-                    <th>Grupo</th>
-                    <th>Acciones</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellidos"]</th>
+                    <th>@L["Teléfono"]</th>
+                    <th>@L["Edad"]</th>
+                    <th>@L["Grupo"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -55,18 +54,18 @@
 <div class="card">
     <div class="card-header text-warning" style="background-color:#1E3A8A;">
         <i class="fas fa-hourglass-end me-1"></i>
-        Próximos a salir del rango
+        @L["Próximos a salir del rango"]
         <span class="badge bg-warning text-dark ms-2">Edad entre @(config.edad_maxima - 1) y @config.edad_maxima años</span>
     </div>
     <div class="table-responsive">
         <table id="tablaProximos" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Teléfono</th>
-                    <th>Edad</th>
-                    <th>Grupo</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellidos"]</th>
+                    <th>@L["Teléfono"]</th>
+                    <th>@L["Edad"]</th>
+                    <th>@L["Grupo"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -79,19 +78,19 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> Cambiar grupo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> @L["Cambiar grupo"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hdnIdZgm" value="0" />
                 <div class="mb-3">
-                    <label class="form-label">Joven</label>
+                    <label class="form-label">@L["Joven"]</label>
                     <input type="text" id="txtNombreJovenEditar" class="form-control" readonly />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Grupo</label>
+                    <label class="form-label">@L["Grupo"]</label>
                     <select id="cboGrupoEditar" class="form-select">
-                        <option value="0">— Sin grupo —</option>
+                        <option value="0">@L["— Sin grupo —"]</option>
                         @foreach (var g in grupos)
                         {
                             <option value="@g.ID_grupo">@g.Descripcion</option>
@@ -101,9 +100,9 @@
                 <div id="mensajeErrorEditar" class="alert alert-danger d-none"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarCambioGrupo()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -115,22 +114,22 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title">Añadir joven</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title">@L["Añadir joven"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">Buscar miembro <span class="text-danger">*</span></label>
-                        <input type="text" id="txtBuscarJoven" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <label class="form-label">@L["Buscar miembro"] <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarJoven" class="form-control" placeholder="@L["Escribe el nombre…"]" autocomplete="off" />
                         <input type="hidden" id="hdnIdMiembroJoven" value="0" />
                     </div>
                     <div class="col-sm-4">
-                        <label class="form-label">Edad</label>
+                        <label class="form-label">@L["Edad"]</label>
                         <input type="text" id="txtEdadJoven" class="form-control" readonly />
                     </div>
                     <div class="col-sm-8">
-                        <label class="form-label">Teléfono</label>
+                        <label class="form-label">@L["Teléfono"]</label>
                         <input type="text" id="txtTelefonoJoven" class="form-control" readonly />
                     </div>
                     <div id="alertaEdadJoven" class="col-12 d-none">
@@ -140,9 +139,9 @@
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Grupo</label>
+                        <label class="form-label">@L["Grupo"]</label>
                         <select id="cboGrupoJoven" class="form-select">
-                            <option value="0">— Sin grupo —</option>
+                            <option value="0">@L["— Sin grupo —"]</option>
                             @foreach (var g in grupos)
                             {
                                 <option value="@g.ID_grupo">@g.Descripcion</option>
@@ -157,8 +156,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btnGuardarJoven" onclick="guardarJoven()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarJoven" onclick="guardarJoven()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -172,6 +171,25 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            avisoRangoEdad:      @Json.Serialize(L["Este miembro tiene {0} años, fuera del rango configurado ({1}–{2}). Se pedirá confirmación al guardar."].Value),
+            confirmaRangoEdad:   @Json.Serialize(L["Este miembro tiene {0} años y está fuera del rango de jóvenes ({1}–{2}). ¿Deseas añadirlo igualmente?"].Value),
+            quitarDeZonaJovenes: @Json.Serialize(L["Se eliminará a \"{0}\" de la zona de jóvenes. Sus otros datos no se verán afectados."].Value),
+            cancelar:         @Json.Serialize(L["Cancelar"].Value),
+            eliminado:        @Json.Serialize(L["Eliminado"].Value),
+            error:            @Json.Serialize(L["Error"].Value),
+            guardado:         @Json.Serialize(L["Guardado"].Value),
+            quitarDeJovenes:  @Json.Serialize(L["Quitar de jóvenes"].Value),
+            quitarDeJovenesQ: @Json.Serialize(L["¿Quitar de jóvenes?"].Value),
+            siAnadir:         @Json.Serialize(L["Sí, añadir"].Value),
+            siQuitar:         @Json.Serialize(L["Sí, quitar"].Value)
+        });
+
         const edadMinima = @config.edad_minima;
         const edadMaxima = @config.edad_maxima;
         let edadFueraRango = false;
@@ -179,7 +197,7 @@
         const dtOptions = {
             responsive: true,
             ordering: false,
-            language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+            language: window.dtLang ? { url: window.dtLang } : {},
             initComplete: function () {
                 $(this.api().table().header()).css({ 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' });
             }
@@ -216,7 +234,7 @@
                                 <button type="button" class="btn btn-warning btn-sm btn-editarGrupo" title="Cambiar grupo">
                                     <i class="fas fa-users-cog"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarJoven" title="Quitar de jóvenes">
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarJoven" title=T.quitarDeJovenes>
                                     <i class="fas fa-user-minus"></i>
                                 </button>
                             </div>`,
@@ -246,21 +264,21 @@
             $("#tablaJovenes tbody").on("click", ".btn-eliminarJoven", function () {
                 const data = tablaJovenes.row($(this).closest("tr")).data();
                 Swal.fire({
-                    title: "¿Quitar de jóvenes?",
-                    text: `Se eliminará a "${data.nombre_miembro} ${data.apellidos_miembro}" de la zona de jóvenes. Sus otros datos no se verán afectados.`,
+                    title: T.quitarDeJovenesQ,
+                    text: fmt(T.quitarDeZonaJovenes, `${data.nombre_miembro} ${data.apellidos_miembro}`),
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, quitar",
-                    cancelButtonText: "Cancelar"
+                    confirmButtonText: T.siQuitar,
+                    cancelButtonText: T.cancelar
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.post('@Url.Action("EliminarJoven", "Congregantes")', { idZgm: data.id_zgm }, function (res) {
                             if (res.resultado) {
                                 tablaJovenes.ajax.reload();
                                 tablaProximos.ajax.reload();
-                                Swal.fire("Eliminado", res.mensaje, "success");
+                                Swal.fire(T.eliminado, res.mensaje, "success");
                             } else {
-                                Swal.fire("Error", res.mensaje, "error");
+                                Swal.fire(T.error, res.mensaje, "error");
                             }
                         });
                     }
@@ -302,7 +320,7 @@
                 return;
             }
             if (edad < edadMinima || edad > edadMaxima) {
-                $("#textoAlertaEdad").text(`Este miembro tiene ${edad} años, fuera del rango configurado (${edadMinima}–${edadMaxima}). Se pedirá confirmación al guardar.`);
+                $("#textoAlertaEdad").text(fmt(T.avisoRangoEdad, edad, edadMinima, edadMaxima));
                 alerta.removeClass("d-none");
                 edadFueraRango = true;
             } else {
@@ -368,7 +386,7 @@
                         bootstrap.Modal.getInstance(document.getElementById("FormModalJoven")).hide();
                         tablaJovenes.ajax.reload();
                         tablaProximos.ajax.reload();
-                        Swal.fire("Guardado", res.mensaje, "success");
+                        Swal.fire(T.guardado, res.mensaje, "success");
                     } else {
                         $("#mensajeErrorJoven").removeClass("d-none").text(res.mensaje);
                     }
@@ -382,11 +400,11 @@
                 const edad = parseInt($("#txtEdadJoven").val());
                 Swal.fire({
                     title: "Edad fuera del rango",
-                    text: `Este miembro tiene ${edad} años y está fuera del rango de jóvenes (${edadMinima}–${edadMaxima}). ¿Deseas añadirlo igualmente?`,
+                    text: fmt(T.confirmaRangoEdad, edad, edadMinima, edadMaxima),
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, añadir",
-                    cancelButtonText: "Cancelar"
+                    confirmButtonText: T.siAnadir,
+                    cancelButtonText: T.cancelar
                 }).then(result => {
                     if (result.isConfirmed) doGuardar();
                 });

@@ -151,6 +151,29 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Cuenta las miembros mujeres activas. Si sedeID es 1000 (Admin Global), cuenta todas. Si es != 1000, filtra por sede.
+        /// </summary>
+        public int ContadorMujeresActivas(int sedeID)
+        {
+            try
+            {
+                var consultaBase = _context.Miembros.AsQueryable();
+
+                if (sedeID != 1000)
+                {
+                    consultaBase = consultaBase.Where(m => m.id_sede == sedeID);
+                }
+
+                return consultaBase.Count(m => m.sexo == "Mujer" && m.miembro_activo == "Si");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ContadorMujeresActivas EF Core: {ErrorHelper.Mensaje(ex)}");
+                return 0;
+            }
+        }
+
         public int ContadorPorEstado(int sedeID, string estado)
         {
             try

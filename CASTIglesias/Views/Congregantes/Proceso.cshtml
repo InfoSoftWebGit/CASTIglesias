@@ -1,6 +1,6 @@
 ﻿@using System.Text.Json
 @{
-    ViewBag.Title = "Usuarios";
+    ViewBag.Title = L["Usuarios"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     // 🔑 Uso de los ViewBag del controlador
@@ -12,26 +12,26 @@
 
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a href="index.html">Resumen</a></li>
-    <li class="breadcrumb-item active">Miembros en proceso</li>
+    <li class="breadcrumb-item"><a href="index.html">@L["Resumen"]</a></li>
+    <li class="breadcrumb-item active">@L["Miembros en proceso"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-users me-1"></i> Lista de miembros en proceso
-        <span class="badge bg-success ms-2 fs-6 align-middle" id="badgeEstadoListado">Activos</span>
+        <i class="fas fa-users me-1"></i> @L["Lista de miembros en proceso"]
+        <span class="badge bg-success ms-2 fs-6 align-middle" id="badgeEstadoListado">@L["Activos"]</span>
     </div>
 
     <div class="table-responsive">
         @* <div class="row">
             <div class="col-12 mb-2">
-                <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">Añadir nuevo miembro</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">@L["Añadir nuevo miembro"]</button>
             </div>
         </div> *@
         <div class="row">
             <div class="col-12 mb-2 text-end">
                 <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
-                    <i class="fas fa-user-slash"></i> Ver bajas
+                    <i class="fas fa-user-slash"></i> @L["Ver bajas"]
                 </button>
             </div>
         </div>
@@ -40,14 +40,14 @@
         <table id="tablaMiembros" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Número Miembro</th>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Correo electrónico</th>
-                    <th>Teléfono</th>
-                    <th>Edad</th>
-                    <th>Sexo</th>
-                    <th>Sede</th>
+                    <th>@L["Número Miembro"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellidos"]</th>
+                    <th>@L["Correo electrónico"]</th>
+                    <th>@L["Teléfono"]</th>
+                    <th>@L["Edad"]</th>
+                    <th>@L["Sexo"]</th>
+                    <th>@L["Sede"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -60,69 +60,69 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Datos del nuevo miembro</h1>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">@L["Datos del nuevo miembro"]</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
 
             @*--------------APARTADO DE INFORMACIÓN BÁSICA-------------------*@
             <div class="modal-body g-3">
                 <input id="txtid" type="hidden" value="0" />
                 <input id="txtID_sede" type="hidden" value="0" />
-                <label for="txtNumeroMiembro" class="form-label">Número de Miembro</label>
+                <label for="txtNumeroMiembro" class="form-label">@L["Número de Miembro"]</label>
                 <div class="input-group mb-2">
                     <span class="input-group-text" id="prefijoNumeroMiembro" style="display:none;"></span>
-                    <input id="txtNumeroMiembro" type="number" class="form-control" placeholder="Número de miembro" />
+                    <input id="txtNumeroMiembro" type="number" class="form-control" placeholder="@L["Número de miembro"]" />
                     <button type="button" class="btn btn-outline-secondary" onclick="asignarNumeroMiembro()">
-                        <i class="fas fa-hashtag"></i> Asignar Nº Miembro
+                        <i class="fas fa-hashtag"></i> @L["Asignar Nº Miembro"]
                     </button>
                 </div>
-                <label for="txtDiezmoIndividual" class="form-label">Diezmo individual</label>
+                <label for="txtDiezmoIndividual" class="form-label">@L["Diezmo individual"]</label>
                 <div class="input-group mb-2">
                     <input id="txtDiezmoIndividual" type="text" class="form-control" />
                     <button type="button" class="btn btn-outline-secondary" onclick="agregarDiezmoIndividual()">
-                        <i class="fas fa-user"></i> Agregar Diezmo Individual
+                        <i class="fas fa-user"></i> @L["Agregar Diezmo Individual"]
                     </button>
                 </div>
-                <label for="txtDiezmoFamiliar" class="form-label">Diezmo familiar</label>
+                <label for="txtDiezmoFamiliar" class="form-label">@L["Diezmo familiar"]</label>
                 <div class="input-group mb-2">
-                    <input id="txtDiezmoFamiliar" type="text" class="form-control" placeholder="Diezmo familiar" />
+                    <input id="txtDiezmoFamiliar" type="text" class="form-control" placeholder="@L["Diezmo familiar"]" />
                     <button type="button" class="btn btn-outline-secondary" onclick="agregarDiezmoFamiliar()">
-                        <i class="fas fa-users"></i> Agregar Diezmo Familiar
+                        <i class="fas fa-users"></i> @L["Agregar Diezmo Familiar"]
                     </button>
                 </div>
 
-                <h5>Información principal</h5>
+                <h5>@L["Información principal"]</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="txtNombres" class="form-label">Nombres</label>
+                        <label for="txtNombres" class="form-label">@L["Nombres"]</label>
                         <input type="text" class="form-control" id="txtNombres" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtApellido" class="form-label">Apellido</label>
+                        <label for="txtApellido" class="form-label">@L["Apellido"]</label>
                         <input type="text" class="form-control" id="txtApellido" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtCorreo_electronico" class="form-label">Correo</label>
+                        <label for="txtCorreo_electronico" class="form-label">@L["Correo"]</label>
                         <input type="email" class="form-control" id="txtCorreo_electronico" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtTelefonoMovil" class="form-label">Teléfono móvil</label>
+                        <label for="txtTelefonoMovil" class="form-label">@L["Teléfono móvil"]</label>
                         <input type="number" class="form-control" id="txtTelefonoMovil" autocomplete="off">
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtTelefonoFijo" class="form-label">Teléfono fijo</label>
+                        <label for="txtTelefonoFijo" class="form-label">@L["Teléfono fijo"]</label>
                         <input type="number" class="form-control" id="txtTelefonoFijo" autocomplete="off">
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="txtEdad" class="form-label">Edad</label>
+                        <label for="txtEdad" class="form-label">@L["Edad"]</label>
                         <input type="number" class="form-control" id="txtEdad" autocomplete="off">
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="cboSexo" class="form-label">Sexo</label>
+                        <label for="cboSexo" class="form-label">@L["Sexo"]</label>
                         <select id="cboSexo" class="form-select">
-                            <option value="" disabled selected>Selecciona un valor</option>
-                            <option value="Hombre">Hombre</option>
-                            <option value="Mujer">Mujer</option>
+                            <option value="" disabled selected>@L["Selecciona un valor"]</option>
+                            <option value="Hombre">@L["Hombre"]</option>
+                            <option value="Mujer">@L["Mujer"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6">
@@ -134,16 +134,16 @@
 
                 @*--------------APARTADO DE DIRECCIONES-------------------*@
                 <hr />
-                <h5>Dirección</h5>
+                <h5>@L["Dirección"]</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="txtDireccion" class="form-label">Dirección</label>
+                        <label for="txtDireccion" class="form-label">@L["Dirección"]</label>
                         <input type="text" class="form-control" id="txtDireccion">
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="cboProvincia" class="form-label">Provincia</label>
+                        <label for="cboProvincia" class="form-label">@L["Provincia"]</label>
                         <select id="cboProvincia" class="form-select">
-                            <option value="0" disabled selected>Selecciona una provincia</option>
+                            <option value="0" disabled selected>@L["Selecciona una provincia"]</option>
                             @if (ViewBag.ListaProvincias != null)
                             {
                                 foreach (var p in ViewBag.ListaProvincias)
@@ -154,14 +154,14 @@
                         </select>
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="cboMunicipio" class="form-label">Municipio</label>
+                        <label for="cboMunicipio" class="form-label">@L["Municipio"]</label>
                         <select id="cboMunicipio" class="form-select">
-                            <option value="" disabled selected>Selecciona un Municipio</option>
+                            <option value="" disabled selected>@L["Selecciona un municipio"]</option>
                             @* Las opciones se cargan dinámicamente por JS/AJAX *@
                         </select>
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="txtCP" class="form-label">Código Postal</label>
+                        <label for="txtCP" class="form-label">@L["Código Postal"]</label>
                         <input type="number" class="form-control" id="txtCP">
                     </div>
                 </div>
@@ -170,35 +170,35 @@
 
                 @*--------------APARTADO DE FECHAS-------------------*@
 
-                <h5>Fechas Específicas</h5>
+                <h5>@L["Fechas Específicas"]</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="txtFechaLlegada" class="form-label">Fecha de Llegada a la Iglesia</label>
+                        <label for="txtFechaLlegada" class="form-label">@L["Fecha de Llegada a la Iglesia"]</label>
                         <input type="date" class="form-control" id="txtFechaLlegada">
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="txtFechaCumpleanos" class="form-label">Fecha de Cumpleaños</label>
+                        <label for="txtFechaCumpleanos" class="form-label">@L["Fecha de Cumpleaños"]</label>
                         <input type="date" class="form-control" id="txtFechaCumpleanos">
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="txtFechaBoda" class="form-label">Fecha de Boda</label>
+                        <label for="txtFechaBoda" class="form-label">@L["Fecha de Boda"]</label>
                         <input type="date" class="form-control" id="txtFechaBoda">
                     </div>
                     <div class="col-sm-4 mb-3 ms-auto">
-                        <label class="form-label d-block invisible">Bautizado</label>
+                        <label class="form-label d-block invisible">@L["Bautizado"]</label>
                         <div class="form-check form-switch d-inline-flex align-items-center py-2 px-3 rounded" style="background:#e3f2fd;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkBautizado">
-                            <label class="form-check-label fw-semibold text-primary ms-2" for="checkBautizado">Bautizado</label>
+                            <label class="form-check-label fw-semibold text-primary ms-2" for="checkBautizado">@L["Bautizado"]</label>
                         </div>
                     </div>
                     <div id="divBautismoFields" class="col-12" style="display:none;">
                         <div class="row mt-2">
                             <div class="col-sm-6 mb-3">
-                                <label for="txtFechaBautismo" class="form-label">Fecha de Bautismo</label>
+                                <label for="txtFechaBautismo" class="form-label">@L["Fecha de Bautismo"]</label>
                                 <input type="date" class="form-control" id="txtFechaBautismo">
                             </div>
                             <div class="col-sm-6 mb-3">
-                                <label for="txtLugarBautismo" class="form-label">Lugar de bautismo</label>
+                                <label for="txtLugarBautismo" class="form-label">@L["Lugar de bautismo"]</label>
                                 <input type="text" class="form-control" id="txtLugarBautismo">
                             </div>
                         </div>
@@ -208,83 +208,83 @@
                 @*--------------FIN APARTADO DE FECHAS-------------------*@
                 @*--------------APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
 
-                <h5>Información Adicional</h5>
+                <h5>@L["Información Adicional"]</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="cboPaisNacimiento" class="form-label">País de nacimiento</label>
+                        <label for="cboPaisNacimiento" class="form-label">@L["País de nacimiento"]</label>
                         <select id="cboPaisNacimiento" class="form-select">
-                            <option value="">Selecciona un país</option>
+                            <option value="">@L["Selecciona un país"]</option>
                         </select>
                     </div>
                     <div class="col-sm-4 mb-3">
-                        <label for="cboEstadoCivil" class="form-label">Estado civil</label>
+                        <label for="cboEstadoCivil" class="form-label">@L["Estado civil"]</label>
                         <select id="cboEstadoCivil" class="form-select">
-                            <option value="" disabled selected>Selecciona un valor</option>
-                            <option value="Soltero/a">Soltero/a</option>
-                            <option value="Casado/a">Casado/a</option>
-                            <option value="Viudo/a">Viudo/a</option>
-                            <option value="Divorciado/a">Divorciado/a</option>
-                            <option value="Separado/a">Separado/a</option>
-                            <option value="Unión de hecho/a">Unión de hecho/a</option>
+                            <option value="" disabled selected>@L["Selecciona un valor"]</option>
+                            <option value="Soltero/a">@L["Soltero/a"]</option>
+                            <option value="Casado/a">@L["Casado/a"]</option>
+                            <option value="Viudo/a">@L["Viudo/a"]</option>
+                            <option value="Divorciado/a">@L["Divorciado/a"]</option>
+                            <option value="Separado/a">@L["Separado/a"]</option>
+                            <option value="Unión de hecho/a">@L["Unión de hecho/a"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="cboResponsable" class="form-label">Responsable</label>
+                        <label for="cboResponsable" class="form-label">@L["Responsable"]</label>
                         <select class="form-select" id="cboResponsable">
-                            <option value="">-- Sin responsable --</option>
+                            <option value="">@L["-- Sin responsable --"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtObservaciones" class="form-label">Observaciones</label>
+                        <label for="txtObservaciones" class="form-label">@L["Observaciones"]</label>
                         <textarea class="form-control" id="txtObservaciones" rows="3" maxlength="200"></textarea>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtNumeroHijos" class="form-label">Número de hijos</label>
-                        <input id="txtNumeroHijos" type="number" class="form-control" placeholder="Número de hijos" />
+                        <label for="txtNumeroHijos" class="form-label">@L["Número de hijos"]</label>
+                        <input id="txtNumeroHijos" type="number" class="form-control" placeholder="@L["Número de hijos"]" />
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
 
                 @*--------------APARTADO DE ESTADO Y CONFIGURACIÓN-------------------*@
                 <hr />
-                <h5><i class="fas fa-sliders-h me-1"></i> Estado y configuración</h5>
+                <h5><i class="fas fa-sliders-h me-1"></i> @L["Estado y configuración"]</h5>
                 <div class="row g-2 mb-3">
                     <div class="col-sm-4">
                         <div class="form-check form-switch py-2 px-3 rounded" style="background:#e8f5e9;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkMiembroActivo">
-                            <label class="form-check-label fw-semibold text-success" for="checkMiembroActivo">Miembro activo</label>
+                            <label class="form-check-label fw-semibold text-success" for="checkMiembroActivo">@L["Miembro activo"]</label>
                         </div>
                     </div>
                     <div class="col-sm-8" id="divFechaBaja" style="display:none;">
-                        <label for="txtFechaBaja" class="form-label text-muted small mb-1">Fecha de Baja (Retiro)</label>
+                        <label for="txtFechaBaja" class="form-label text-muted small mb-1">@L["Fecha de Baja (Retiro)"]</label>
                         <input type="date" class="form-control form-control-sm" id="txtFechaBaja">
                     </div>
                     <div class="col-sm-4">
                         <div class="form-check form-switch py-2 px-3 rounded" style="background:#e3f2fd;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkAlumno_vyf">
-                            <label class="form-check-label fw-semibold text-primary" for="checkAlumno_vyf">Alumno VyF</label>
+                            <label class="form-check-label fw-semibold text-primary" for="checkAlumno_vyf">@L["Alumno VyF"]</label>
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-check form-switch py-2 px-3 rounded" style="background:#fff3e0;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkCurso_acabado">
-                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkCurso_acabado">Curso acabado</label>
+                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkCurso_acabado">@L["Curso acabado"]</label>
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-check form-switch py-2 px-3 rounded" style="background:#fff3e0;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkExcluir_directorio">
-                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkExcluir_directorio">Excluir directorio</label>
+                            <label class="form-check-label fw-semibold" style="color:#e65100;" for="checkExcluir_directorio">@L["Excluir directorio"]</label>
                         </div>
                     </div>
                     <div class="col-sm-4">
                         <div class="form-check form-switch py-2 px-3 rounded" style="background:#ffebee;">
                             <input class="form-check-input" type="checkbox" role="switch" id="checkFallecido">
-                            <label class="form-check-label fw-semibold text-danger" for="checkFallecido">Fallecido</label>
+                            <label class="form-check-label fw-semibold text-danger" for="checkFallecido">@L["Fallecido"]</label>
                         </div>
                     </div>
                     <div class="col-sm-8" id="divFechaFallecimiento" style="display:none;">
-                        <label for="txtFechaFallecimiento" class="form-label text-muted small mb-1">Fecha de fallecimiento</label>
+                        <label for="txtFechaFallecimiento" class="form-label text-muted small mb-1">@L["Fecha de fallecimiento"]</label>
                         <input type="date" class="form-control form-control-sm" id="txtFechaFallecimiento">
                     </div>
                 </div>
@@ -292,68 +292,68 @@
 
                 @*--------------APARTADO DE FAMILIA-------------------*@
                 <hr />
-                <h5>Familia</h5>
+                <h5>@L["Familia"]</h5>
                 <div class="row">
                     <div class="col-sm-6 mb-3">
-                        <label for="cboGrupoFamiliar" class="form-label">Grupo familiar</label>
+                        <label for="cboGrupoFamiliar" class="form-label">@L["Grupo familiar"]</label>
                         <select id="cboGrupoFamiliar" class="form-select">
-                            <option value="">— Sin asignar —</option>
+                            <option value="">@L["— Sin asignar —"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6 mb-3" id="divInfoFamilia" style="display:none;">
-                        <label class="form-label">Datos de la familia</label>
+                        <label class="form-label">@L["Datos de la familia"]</label>
                         <div class="border rounded p-2 bg-light small">
-                            <div><strong>Dirección:</strong> <span id="lblFamiliaDireccion">—</span></div>
-                            <div><strong>Municipio:</strong> <span id="lblFamiliaMunicipio">—</span></div>
-                            <div><strong>Provincia:</strong> <span id="lblFamiliaProvincia">—</span></div>
-                            <div><strong>CP:</strong> <span id="lblFamiliaCP">—</span></div>
+                            <div><strong>@L["Dirección:"]</strong> <span id="lblFamiliaDireccion">—</span></div>
+                            <div><strong>@L["Municipio:"]</strong> <span id="lblFamiliaMunicipio">—</span></div>
+                            <div><strong>@L["Provincia:"]</strong> <span id="lblFamiliaProvincia">—</span></div>
+                            <div><strong>@L["CP:"]</strong> <span id="lblFamiliaCP">—</span></div>
                         </div>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="txtRelacionCon" class="form-label">Relación con</label>
+                        <label for="txtRelacionCon" class="form-label">@L["Relación con"]</label>
                         <div id="divRelacionCon" class="position-relative">
-                            <input type="text" class="form-control" id="txtRelacionCon" autocomplete="off" placeholder="Escribe un nombre para buscar...">
+                            <input type="text" class="form-control" id="txtRelacionCon" autocomplete="off" placeholder="@L["Escribe un nombre para buscar..."]">
                             <div id="dropdownRelacionCon" class="list-group position-absolute w-100 shadow" style="display:none; z-index:9999; max-height:200px; overflow-y:auto;"></div>
                         </div>
                     </div>
                     <div class="col-sm-6 mb-3">
-                        <label for="cboTipoRelacionFamiliar" class="form-label">Rol en la familia</label>
+                        <label for="cboTipoRelacionFamiliar" class="form-label">@L["Rol en la familia"]</label>
                         <select id="cboTipoRelacionFamiliar" class="form-select">
-                            <option value="">— Sin especificar —</option>
-                            <optgroup label="1er grado">
-                                <option value="Padre">Padre</option>
-                                <option value="Madre">Madre</option>
-                                <option value="Hijo">Hijo</option>
-                                <option value="Hija">Hija</option>
-                                <option value="Hermano">Hermano</option>
-                                <option value="Hermana">Hermana</option>
-                                <option value="Conyuge">Cónyuge</option>
+                            <option value="">@L["— Sin especificar —"]</option>
+                            <optgroup label="@L["1er grado"]">
+                                <option value="Padre">@L["Padre"]</option>
+                                <option value="Madre">@L["Madre"]</option>
+                                <option value="Hijo">@L["Hijo"]</option>
+                                <option value="Hija">@L["Hija"]</option>
+                                <option value="Hermano">@L["Hermano"]</option>
+                                <option value="Hermana">@L["Hermana"]</option>
+                                <option value="Conyuge">@L["Cónyuge"]</option>
                             </optgroup>
-                            <optgroup label="2do grado">
-                                <option value="Abuelo">Abuelo</option>
-                                <option value="Abuela">Abuela</option>
-                                <option value="Nieto">Nieto</option>
-                                <option value="Nieta">Nieta</option>
-                                <option value="Tio">Tío</option>
-                                <option value="Tia">Tía</option>
-                                <option value="Sobrino">Sobrino</option>
-                                <option value="Sobrina">Sobrina</option>
-                                <option value="Medio_hermano">Medio hermano</option>
-                                <option value="Medio_hermana">Medio hermana</option>
+                            <optgroup label="@L["2do grado"]">
+                                <option value="Abuelo">@L["Abuelo"]</option>
+                                <option value="Abuela">@L["Abuela"]</option>
+                                <option value="Nieto">@L["Nieto"]</option>
+                                <option value="Nieta">@L["Nieta"]</option>
+                                <option value="Tio">@L["Tío"]</option>
+                                <option value="Tia">@L["Tía"]</option>
+                                <option value="Sobrino">@L["Sobrino"]</option>
+                                <option value="Sobrina">@L["Sobrina"]</option>
+                                <option value="Medio_hermano">@L["Medio hermano"]</option>
+                                <option value="Medio_hermana">@L["Media hermana"]</option>
                             </optgroup>
-                            <option value="Otro">Otro</option>
+                            <option value="Otro">@L["Otro"]</option>
                         </select>
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE FAMILIA-------------------*@
                 @*--------------APARTADO DE PRIVACIDAD-------------------*@
                 <hr />
-                <h5><i class="fas fa-shield-alt me-1"></i> Privacidad</h5>
+                <h5><i class="fas fa-shield-alt me-1"></i> @L["Privacidad"]</h5>
                 <div class="p-3 rounded mb-3" style="background:#f3e5f5; border-left:4px solid #7b1fa2;">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="chkAceptaLOPD">
                         <label class="form-check-label fw-semibold" style="color:#6a1b9a;" for="chkAceptaLOPD">
-                            <i class="fas fa-lock me-1"></i> Acepta la Ley Orgánica de Protección de Datos (LOPD)
+                            <i class="fas fa-lock me-1"></i> @L["Acepta la Ley Orgánica de Protección de Datos (LOPD)"]
                         </label>
                     </div>
                 </div>
@@ -377,8 +377,8 @@
                 </div>
 
                 <div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                    <button type="button" class="btn btn-primary" onclick="GuardarMiembro()">@L["Guardar"]</button>
                 </div>
 
             </div>
@@ -389,30 +389,30 @@
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title">Asignar Zonas / Grupos / Ministerios</h5>
+                <h5 class="modal-title">@L["Asignar Zonas / Grupos / Ministerios"]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="idMiembroZGM">
-                <p class="text-muted small mb-3">Cada fila es un registro independiente. Un miembro puede tener varias filas con distintas combinaciones de zona, grupo y ministerio.</p>
+                <p class="text-muted small mb-3">@L["Cada fila es un registro independiente. Un miembro puede tener varias filas con distintas combinaciones de zona, grupo y ministerio."]</p>
                 <table class="table table-bordered table-sm align-middle" id="tablaZGM">
                     <thead class="table-dark">
                         <tr>
-                            <th>Zona</th>
-                            <th>Grupo</th>
-                            <th>Ministerio</th>
+                            <th>@L["Zona"]</th>
+                            <th>@L["Grupo"]</th>
+                            <th>@L["Ministerio"]</th>
                             <th style="width:50px;"></th>
                         </tr>
                     </thead>
                     <tbody id="bodyZGM"></tbody>
                 </table>
                 <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="agregarFilaZGM()">
-                    <i class="fas fa-plus"></i> Añadir fila
+                    <i class="fas fa-plus"></i> @L["Añadir fila"]
                 </button>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-success" id="btnGuardarZGM">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-success" id="btnGuardarZGM">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -425,6 +425,70 @@
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se serializan con Json.Serialize y nunca se interpolan en crudo: los
+        // acentos, las comillas y los signos de apertura romperían el script.
+        //
+        // Se AMPLÍA window.T (declarado ya en el layout) en lugar de declarar un
+        // "const T" propio: layout y vista comparten ámbito global, y una segunda
+        // declaración const lanza SyntaxError y tumba todo este bloque <script>.
+        window.T = Object.assign(window.T || {}, {
+            numeroAsignadoFmt: @Json.Serialize(L["Nº asignado: {0}"].Value),
+            numeroDeMiembro:   @Json.Serialize(L["Nº de miembro: {0}."].Value),
+            hombre:              @Json.Serialize(L["Hombre"].Value),
+            mujer:               @Json.Serialize(L["Mujer"].Value),
+            verActivos:          @Json.Serialize(L["Ver activos"].Value),
+            verBajas:            @Json.Serialize(L["Ver bajas"].Value),
+            activos:             @Json.Serialize(L["Activos"].Value),
+            bajas:               @Json.Serialize(L["Bajas"].Value),
+            estasSeguro:         @Json.Serialize(L["¿Estás seguro?"].Value),
+            deseaEliminarMiembro:@Json.Serialize(L["Desea eliminar al miembro"].Value),
+            siEliminar:          @Json.Serialize(L["Sí, eliminar"].Value),
+            no:                  @Json.Serialize(L["No"].Value),
+            cancelar:            @Json.Serialize(L["Cancelar"].Value),
+            eliminado:           @Json.Serialize(L["Eliminado"].Value),
+            miembroEliminado:    @Json.Serialize(L["El miembro ha sido eliminado."].Value),
+            error:               @Json.Serialize(L["Error"].Value),
+            aviso:               @Json.Serialize(L["Aviso"].Value),
+            atencion:            @Json.Serialize(L["Atención"].Value),
+            exito:               @Json.Serialize(L["Éxito"].Value),
+            perfecto:            @Json.Serialize(L["Perfecto"].Value),
+            guardado:            @Json.Serialize(L["Guardado"].Value),
+            noSePudoEliminar:    @Json.Serialize(L["No se pudo eliminar al miembro"].Value),
+            miembroGuardado:     @Json.Serialize(L["Miembro guardado correctamente"].Value),
+            errorAlGuardar:      @Json.Serialize(L["Ocurrió un problema al guardar el miembro."].Value),
+            seleccionaMunicipio: @Json.Serialize(L["Selecciona un municipio"].Value),
+            seleccionaPais:      @Json.Serialize(L["Selecciona un país"].Value),
+            cargando:            @Json.Serialize(L["Cargando..."].Value),
+            sinZona:             @Json.Serialize(L["— Sin zona —"].Value),
+            sinGrupo:            @Json.Serialize(L["— Sin grupo —"].Value),
+            sinMinisterio:       @Json.Serialize(L["— Sin ministerio —"].Value),
+            sinAsignar:          @Json.Serialize(L["— Sin asignar —"].Value),
+            noSeCargaronZGM:     @Json.Serialize(L["No se pudo cargar las opciones de ZGM."].Value),
+            filasVacias:         @Json.Serialize(L["Hay filas sin ninguna zona, grupo ni ministerio. Elimínalas o completa la selección."].Value),
+            asignacionesGuardadas:@Json.Serialize(L["Asignaciones guardadas correctamente."].Value),
+            noSeGuardo:          @Json.Serialize(L["No se pudo guardar la información."].Value),
+            numeroAsignado:      @Json.Serialize(L["Nº asignado"].Value),
+            noSeObtuvoNumero:    @Json.Serialize(L["No se pudo obtener el siguiente número."].Value),
+            primeroAsignaNumero: @Json.Serialize(L["Primero asigna un número de miembro."].Value),
+            primeroGuardaMiembro:@Json.Serialize(L["Primero debes guardar el miembro antes de retroceder su estado."].Value),
+            primeroGuardaAvanzar:@Json.Serialize(L["Primero debes guardar el miembro antes de avanzar su estado."].Value),
+            retrocederEstado:    @Json.Serialize(L["¿Retroceder estado?"].Value),
+            retrocederTexto:     @Json.Serialize(L["Esto cambiará el estado del miembro al anterior."].Value),
+            siRetroceder:        @Json.Serialize(L["Sí, retroceder"].Value),
+            estadoRetrocedido:   @Json.Serialize(L["El estado fue retrocedido."].Value),
+            noSeRetrocedio:      @Json.Serialize(L["No se pudo retroceder el estado."].Value),
+            avanzarEstado:       @Json.Serialize(L["¿Avanzar estado?"].Value),
+            avanzarTexto:        @Json.Serialize(L["Esto cambiará el estado del miembro al siguiente."].Value),
+            siAvanzar:           @Json.Serialize(L["Sí, avanzar"].Value),
+            estadoAvanzado:      @Json.Serialize(L["El estado fue avanzado."].Value),
+            noSeAvanzo:          @Json.Serialize(L["No se pudo avanzar el estado."].Value),
+            avanzarAMiembroTexto:@Json.Serialize(L["Se guardarán los cambios y el miembro pasará al estado Miembro. Si no tiene número de miembro, se le asignará automáticamente el siguiente disponible."].Value),
+            camposObligatorios:  @Json.Serialize(L["Campos obligatorios"].Value),
+            camposObligatoriosTexto:@Json.Serialize(L["Nombre y apellido son obligatorios."].Value)
+        });
+
         var tabladata;
         var filaSeleccionada;
 
@@ -483,8 +547,8 @@
                     {
                         data: "sexo",
                         render: function (valor) {
-                            if (valor === "Hombre") return '<span class="badge bg-primary">Hombre</span>';
-                            if (valor === "Mujer")  return '<span class="badge bg-warning text-dark">Mujer</span>';
+                            if (valor === "Hombre") return '<span class="badge bg-primary">' + T.hombre + '</span>';
+                            if (valor === "Mujer")  return '<span class="badge bg-warning text-dark">' + T.mujer + '</span>';
                             return '<span class="badge bg-secondary">N/M</span>';
                         }
                     },
@@ -508,7 +572,7 @@
                         className: "text-center align-middle"
                     }
                 ],
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+                language: window.dtLang ? { url: window.dtLang } : {}
             });
 
             // Alternar entre el listado de activos (por defecto) y el de bajas
@@ -526,7 +590,7 @@
                 $("#badgeEstadoListado")
                     .toggleClass("bg-success", !mostrandoBajas)
                     .toggleClass("bg-danger", mostrandoBajas)
-                    .text(mostrandoBajas ? "Bajas" : "Activos");
+                    .text(mostrandoBajas ? T.bajas : T.activos);
 
                 tabladata.ajax.url('@Url.Action("ListarMiembrosProceso", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
             });
@@ -551,12 +615,12 @@
                 const data = tabladata.row(fila).data();
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `Desea eliminar al miembro ${data.nombre_miembro} ${data.apellidos_miembro}?`,
+                    title: T.estasSeguro,
+                    text: `${T.deseaEliminarMiembro} ${data.nombre_miembro} ${data.apellidos_miembro}?`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siEliminar,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -566,13 +630,13 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
-                                    Swal.fire("Eliminado!", "El miembro ha sido eliminado.", "success");
+                                    Swal.fire(T.eliminado, T.miembroEliminado, "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo eliminar al miembro", "error");
+                                Swal.fire(T.error, T.noSePudoEliminar, "error");
                             }
                         });
                     }
@@ -812,7 +876,7 @@
                         }
                         $("#FormModalMiembros").modal("hide");
                         tabladata.ajax.reload(null, false);
-                        Swal.fire("Éxito", "Miembro guardado correctamente", "success");
+                        Swal.fire(T.exito, T.miembroGuardado, "success");
                     } else {
                         $("#mensajeError").text(res.mensaje).show();
                     }
@@ -820,7 +884,7 @@
                 error: function (err) {
                     $.LoadingOverlay("hide");
                     console.error("Error en GuardarMiembro:", err);
-                    Swal.fire("Error", "Ocurrió un problema al guardar el miembro.", "error");
+                    Swal.fire(T.error, T.errorAlGuardar, "error");
                 }
             });
             };
@@ -956,7 +1020,7 @@
                 $('#modalZonagrupoministerioMiembro').modal('show');
             }).fail(function () {
                 $.LoadingOverlay("hide");
-                Swal.fire("Error", "No se pudo cargar las opciones de ZGM.", "error");
+                Swal.fire(T.error, T.noSeCargaronZGM, "error");
             });
         }
 
@@ -980,7 +1044,7 @@
             });
 
             if (hayFilaVacia) {
-                Swal.fire("Atención", "Hay filas sin ninguna zona, grupo ni ministerio. Elimínalas o completa la selección.", "warning");
+                Swal.fire(T.atencion, T.filasVacias, "warning");
                 return;
             }
 
@@ -993,15 +1057,15 @@
                 success: function (resp) {
                     $.LoadingOverlay("hide");
                     if (resp.resultado) {
-                        Swal.fire("Guardado", "Asignaciones guardadas correctamente.", "success");
+                        Swal.fire(T.guardado, T.asignacionesGuardadas, "success");
                         $('#modalZonagrupoministerioMiembro').modal('hide');
                     } else {
-                        Swal.fire("Error", resp.mensaje, "error");
+                        Swal.fire(T.error, resp.mensaje, "error");
                     }
                 },
                 error: function () {
                     $.LoadingOverlay("hide");
-                    Swal.fire("Error", "No se pudo guardar la información.", "error");
+                    Swal.fire(T.error, T.noSeGuardo, "error");
                 }
             });
         });
@@ -1040,17 +1104,17 @@
             const idMiembro = parseInt($("#txtid").val());
 
             if (!idMiembro || idMiembro === 0) {
-                Swal.fire("Aviso", "Primero debes guardar el miembro antes de avanzar su estado.", "warning");
+                Swal.fire(T.aviso, T.primeroGuardaAvanzar, "warning");
                 return;
             }
 
             Swal.fire({
-                title: "¿Avanzar estado?",
-                text: "Se guardarán los cambios y el miembro pasará al estado Miembro. Si no tiene número de miembro, se le asignará automáticamente el siguiente disponible.",
+                title: T.avanzarEstado,
+                text: T.avanzarAMiembroTexto,
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonText: "Sí, avanzar",
-                cancelButtonText: "Cancelar"
+                confirmButtonText: T.siAvanzar,
+                cancelButtonText: T.cancelar
             }).then(result => {
                 if (result.isConfirmed) {
                     // Primero se guardan los cambios del formulario y, si todo va bien, se avanza el estado
@@ -1065,15 +1129,15 @@
                                 if (res.success) {
                                     $("#FormModalMiembros").modal("hide");
                                     tabladata.ajax.reload(null, false);
-                                    const numero = res.data && res.data.numero_miembro ? ` Nº de miembro: ${formatearNumeroMiembro(res.data.numero_miembro)}.` : "";
-                                    Swal.fire("Perfecto", `Los cambios se guardaron y el estado fue avanzado.${numero}`, "success");
+                                    const numero = res.data && res.data.numero_miembro ? " " + fmt(T.numeroDeMiembro, formatearNumeroMiembro(res.data.numero_miembro)) : "";
+                                    Swal.fire(T.perfecto, `Los cambios se guardaron y el estado fue avanzado.${numero}`, "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
                                 $.LoadingOverlay("hide");
-                                Swal.fire("Error", "No se pudo avanzar el estado.", "error");
+                                Swal.fire(T.error, T.noSeAvanzo, "error");
                             }
                         });
                     });
@@ -1085,17 +1149,17 @@
             const idMiembro = parseInt($("#txtid").val());
 
             if (!idMiembro || idMiembro === 0) {
-                Swal.fire("Aviso", "Primero debes guardar el miembro antes de retroceder su estado.", "warning");
+                Swal.fire(T.aviso, T.primeroGuardaMiembro, "warning");
                 return;
             }
 
             Swal.fire({
-                title: "¿Retroceder estado?",
-                text: "Esto cambiará el estado del miembro al anterior.",
+                title: T.retrocederEstado,
+                text: T.retrocederTexto,
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonText: "Sí, retroceder",
-                cancelButtonText: "Cancelar"
+                confirmButtonText: T.siRetroceder,
+                cancelButtonText: T.cancelar
             }).then(result => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -1106,15 +1170,15 @@
                         success: function (res) {
                             $.LoadingOverlay("hide");
                             if (res.success) {
-                                Swal.fire("Perfecto", "El estado fue retrocedido.", "success");
+                                Swal.fire(T.perfecto, T.estadoRetrocedido, "success");
                                 tabladata.ajax.reload(null, false);
                             } else {
-                                Swal.fire("Error", res.mensaje, "error");
+                                Swal.fire(T.error, res.mensaje, "error");
                             }
                         },
                         error: function () {
                             $.LoadingOverlay("hide");
-                            Swal.fire("Error", "No se pudo retroceder el estado.", "error");
+                            Swal.fire(T.error, T.noSeRetrocedio, "error");
                         }
                     });
                 }
@@ -1159,16 +1223,16 @@
                         $("#txtNumeroMiembro").val(res.numero);
                         Swal.fire({
                             toast: true, position: 'top-end', icon: 'success',
-                            title: `Nº asignado: ${res.formateado}`,
+                            title: fmt(T.numeroAsignadoFmt, res.formateado),
                             showConfirmButton: false, timer: 2500, timerProgressBar: true
                         });
                     } else {
-                        Swal.fire("Error", res.mensaje, "error");
+                        Swal.fire(T.error, res.mensaje, "error");
                     }
                 },
                 error: function () {
                     $.LoadingOverlay("hide");
-                    Swal.fire("Error", "No se pudo obtener el siguiente número.", "error");
+                    Swal.fire(T.error, T.noSeObtuvoNumero, "error");
                 }
             });
         }
@@ -1176,7 +1240,7 @@
         function agregarDiezmoIndividual() {
             const num = parseInt($("#txtNumeroMiembro").val()) || 0;
             if (!num) {
-                Swal.fire("Aviso", "Primero asigna un número de miembro.", "warning");
+                Swal.fire(T.aviso, T.primeroAsignaNumero, "warning");
                 return;
             }
             $("#txtDiezmoIndividual").val(configDiezmo.prefijo_individual + String(num).padStart(4, '0'));
@@ -1185,7 +1249,7 @@
         function agregarDiezmoFamiliar() {
             const num = parseInt($("#txtNumeroMiembro").val()) || 0;
             if (!num) {
-                Swal.fire("Aviso", "Primero asigna un número de miembro.", "warning");
+                Swal.fire(T.aviso, T.primeroAsignaNumero, "warning");
                 return;
             }
             $("#txtDiezmoFamiliar").val(configDiezmo.prefijo_familiar + String(num).padStart(4, '0'));

@@ -1,25 +1,29 @@
 ﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = L["Error"].Value;
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+@* Esta vista venía entera en inglés desde la plantilla original de ASP.NET, así
+   que un usuario español que provocaba un error veía el mensaje en inglés. Se
+   reescribe en español (el idioma de las claves) y el .resx devuelve el inglés
+   cuando corresponde. *@
+
+<h1 class="text-danger">@L["Se ha producido un error."]</h1>
+<h2 class="text-danger">@L["Ha ocurrido un problema al procesar tu solicitud."]</h2>
 
 @if (Model.ShowRequestId)
 {
     <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        <strong>@L["Identificador de la petición:"]</strong> <code>@Model.RequestId</code>
     </p>
 }
 
-<h3>Development Mode</h3>
+<h3>@L["Modo de desarrollo"]</h3>
 <p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+    @L["Cambiar al entorno de desarrollo mostrará información más detallada sobre el error."]
 </p>
 <p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
+    <strong>@L["El entorno de desarrollo no debe habilitarse en aplicaciones publicadas."]</strong>
+    @L["Puede exponer a los usuarios información sensible procedente de las excepciones."]
+    @L["Para depurar en local, activa el entorno de desarrollo asignando el valor Development a la variable de entorno ASPNETCORE_ENVIRONMENT y reiniciando la aplicación."]
 </p>

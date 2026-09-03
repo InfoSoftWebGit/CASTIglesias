@@ -15,6 +15,9 @@ namespace CapaNegocio
         public List<MatrimonioDTO> ListarMatrimonios(int sedeID)
             => _capaDatos.ListarMatrimonios(sedeID);
 
+        public int ContadorMatrimonios(int sedeID)
+            => _capaDatos.ContadorMatrimonios(sedeID);
+
         public int RegistrarMatrimonio(Matrimonio obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;

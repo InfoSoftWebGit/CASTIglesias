@@ -1,12 +1,14 @@
-@{
+﻿@{
     Layout = null;
 }
 <!DOCTYPE html>
-<html lang="es">
+@* Esta vista no usa el layout, así que declara su propio lang. Sin esto, un
+   navegador o un buscador leería la página en inglés como si fuese española. *@
+<html lang="@IdiomasSoportados.Actual">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Congrega CRM — Software de Gestión para Iglesias</title>
+    <title>@L["Congrega CRM — Software de Gestión para Iglesias"]</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
@@ -61,6 +63,36 @@
             transition: background 0.2s, transform 0.15s;
         }
         .btn-nav-login:hover { background: #009e89; transform: translateY(-1px); }
+
+        /* ── Selector de idioma ──
+           Conmutador de dos posiciones en vez de desplegable: con solo dos
+           idiomas, un desplegable esconde la mitad de las opciones y obliga a
+           dos clics. Así ambas están a la vista y se cambia de una. */
+        .lang-switch {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        .lang-switch a {
+            display: block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: rgba(255,255,255,0.72);
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .lang-switch a:hover { color: white; background: rgba(255,255,255,0.10); }
+        .lang-switch a.activo {
+            background: var(--teal);
+            color: white;
+        }
 
         /* ── HERO ── */
         .hero-section {
@@ -557,14 +589,26 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
             <ul class="navbar-nav mx-auto gap-1">
-                <li class="nav-item"><a class="nav-link" href="#inicio">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link" href="#caracteristicas">Características</a></li>
-                <li class="nav-item"><a class="nav-link" href="#como-funciona">Cómo funciona</a></li>
-                <li class="nav-item"><a class="nav-link" href="#precios">Precios</a></li>
-                <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
+                <li class="nav-item"><a class="nav-link" href="#inicio">@L["Inicio"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="#caracteristicas">@L["Características"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="#como-funciona">@L["Cómo funciona"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="#precios">@L["Precios"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contacto">@L["Contacto"]</a></li>
             </ul>
+            @* Selector de idioma. Los códigos no se traducen: quien no entiende
+               la página necesita reconocer el suyo de un vistazo. El title sí,
+               para los lectores de pantalla. *@
+            <div class="lang-switch ms-lg-3" role="group" aria-label="@L["Idioma"]">
+                @foreach (var codigo in IdiomasSoportados.Codigos)
+                {
+                    <a href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = "/" })"
+                       class="@(codigo == IdiomasSoportados.Actual ? "activo" : "")"
+                       title="@IdiomasSoportados.Nombres[codigo]"
+                       hreflang="@codigo">@codigo.ToUpperInvariant()</a>
+                }
+            </div>
             <a href="/Login" class="btn btn-nav-login ms-lg-3">
-                <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
+                <i class="fas fa-sign-in-alt me-2"></i>@L["Iniciar sesión"]
             </a>
         </div>
     </div>
@@ -608,37 +652,36 @@
             <!-- ── LEFT: copy ── -->
             <div class="col-lg-5">
                 <div class="hero-badge">
-                    Software diseñado para iglesias
+                    @L["Software diseñado para iglesias"]
                 </div>
                 <h1 class="hero-title">
-                    Gestiona tu iglesia<br>de forma <span>inteligente</span>
+                    @L["Gestiona tu iglesia"]<br>@L["de forma"] <span>inteligente</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Congrega es el CRM pensado para comunidades de fe. Controla congregantes,
-                    grupos, finanzas, asistencia y mucho más desde una sola plataforma.
+                    @L["Congrega es el CRM pensado para comunidades de fe. Controla congregantes, grupos, finanzas, asistencia y mucho más desde una sola plataforma."]
                 </p>
 
                 <!-- Trust pills -->
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
-                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> Multi-sede
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> @L["Multi-sede"]
                     </span>
                     <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
-                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> 100% en la nube
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> @L["100% en la nube"]
                     </span>
                     <span style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.75);border-radius:20px;padding:4px 13px;font-size:0.78rem;font-weight:600;">
-                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> Soporte incluido
+                        <i class="fas fa-check-circle me-1" style="color:var(--teal);"></i> @L["Soporte incluido"]
                     </span>
                 </div>
 
                 <div class="d-flex gap-3 flex-wrap">
                     <a href="/Login" class="btn btn-lg px-4 py-3"
                        style="background:var(--teal);color:white;border-radius:10px;font-weight:700;box-shadow:0 6px 24px rgba(0,191,165,0.35);">
-                        <i class="fas fa-sign-in-alt me-2"></i>Acceder a la app
+                        <i class="fas fa-sign-in-alt me-2"></i>@L["Acceder a la app"]
                     </a>
                     <a href="#caracteristicas" class="btn btn-outline-light btn-lg px-4 py-3"
                        style="border-radius:10px;font-weight:600;">
-                        Ver características
+                        @L["Ver características"]
                     </a>
                 </div>
             </div>
@@ -650,7 +693,7 @@
                         <div class="mockup-dot" style="background:#FF5F57;"></div>
                         <div class="mockup-dot" style="background:#FFBD2E;"></div>
                         <div class="mockup-dot" style="background:#28CA41;"></div>
-                        <span class="mockup-topbar-title">Congrega CRM — Panel de administración</span>
+                        <span class="mockup-topbar-title">@L["Congrega CRM — Panel de administración"]</span>
                     </div>
                     <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4500">
                         <div class="carousel-indicators" style="bottom:-2px;">
@@ -668,23 +711,23 @@
                                     <div class="slide-icon-box" style="background:rgba(59,130,246,0.18);">
                                         <i class="fas fa-chart-line" style="color:#3B82F6;"></i>
                                     </div>
-                                    <div class="slide-title">Dashboard en tiempo real</div>
-                                    <div class="slide-desc">Visualiza el estado de tu iglesia de un vistazo con gráficas y KPIs siempre actualizados.</div>
+                                    <div class="slide-title">@L["Dashboard en tiempo real"]</div>
+                                    <div class="slide-desc">@L["Visualiza el estado de tu iglesia de un vistazo con gráficas y KPIs siempre actualizados."]</div>
                                     <div class="mockup-kpi-grid">
                                         <div class="mockup-kpi">
-                                            <div class="kpi-label">Miembros activos</div>
+                                            <div class="kpi-label">@L["Miembros activos"]</div>
                                             <div class="kpi-value" style="color:#3B82F6;">248</div>
                                         </div>
                                         <div class="mockup-kpi">
-                                            <div class="kpi-label">Visitantes</div>
+                                            <div class="kpi-label">@L["Visitantes"]</div>
                                             <div class="kpi-value" style="color:#00BFA5;">34</div>
                                         </div>
                                         <div class="mockup-kpi">
-                                            <div class="kpi-label">Diezmos (mes)</div>
+                                            <div class="kpi-label">@L["Diezmos (mes)"]</div>
                                             <div class="kpi-value" style="color:#F59E0B;">3.240 €</div>
                                         </div>
                                         <div class="mockup-kpi">
-                                            <div class="kpi-label">Asistencia (dom.)</div>
+                                            <div class="kpi-label">@L["Asistencia (dom.)"]</div>
                                             <div class="kpi-value" style="color:#10B981;">192</div>
                                         </div>
                                     </div>
@@ -697,12 +740,12 @@
                                     <div class="slide-icon-box" style="background:rgba(0,191,165,0.18);">
                                         <i class="fas fa-users" style="color:#00BFA5;"></i>
                                     </div>
-                                    <div class="slide-title">Gestión de congregantes</div>
-                                    <div class="slide-desc">Registro completo de miembros, simpatizantes y visitantes con ficha detallada por persona.</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Datos personales, contacto y familia</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Estados: miembro, simpatizante, visitante, en proceso</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Búsqueda avanzada y filtros por sede</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Historial de cambios y observaciones</div>
+                                    <div class="slide-title">@L["Gestión de congregantes"]</div>
+                                    <div class="slide-desc">@L["Registro completo de miembros, simpatizantes y visitantes con ficha detallada por persona."]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Datos personales, contacto y familia"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Estados: miembro, simpatizante, visitante, en proceso"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Búsqueda avanzada y filtros por sede"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Historial de cambios y observaciones"]</div>
                                 </div>
                             </div>
 
@@ -712,12 +755,12 @@
                                     <div class="slide-icon-box" style="background:rgba(245,158,11,0.18);">
                                         <i class="fas fa-sitemap" style="color:#F59E0B;"></i>
                                     </div>
-                                    <div class="slide-title">Grupos, Zonas y Ministerios</div>
-                                    <div class="slide-desc">Organiza tu comunidad con total flexibilidad según la estructura de tu iglesia.</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Creación de grupos por zona o ministerio</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Asignación de líderes y encargados</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Listados de miembros por agrupación</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Vista de estructura jerárquica</div>
+                                    <div class="slide-title">@L["Grupos, Zonas y Ministerios"]</div>
+                                    <div class="slide-desc">@L["Organiza tu comunidad con total flexibilidad según la estructura de tu iglesia."]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Creación de grupos por zona o ministerio"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Asignación de líderes y encargados"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Listados de miembros por agrupación"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Vista de estructura jerárquica"]</div>
                                 </div>
                             </div>
 
@@ -727,12 +770,12 @@
                                     <div class="slide-icon-box" style="background:rgba(16,185,129,0.18);">
                                         <i class="fas fa-hand-holding-usd" style="color:#10B981;"></i>
                                     </div>
-                                    <div class="slide-title">Control económico</div>
-                                    <div class="slide-desc">Registra y controla diezmos, ofrendas y conceptos financieros con gráficas detalladas.</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Diezmos y ofrendas por miembro y concepto</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Gráficas comparativas mensuales y anuales</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Exportación de informes a Excel</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Configuración de conceptos personalizados</div>
+                                    <div class="slide-title">@L["Control económico"]</div>
+                                    <div class="slide-desc">@L["Registra y controla diezmos, ofrendas y conceptos financieros con gráficas detalladas."]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Diezmos y ofrendas por miembro y concepto"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Gráficas comparativas mensuales y anuales"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Exportación de informes a Excel"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Configuración de conceptos personalizados"]</div>
                                 </div>
                             </div>
 
@@ -742,12 +785,12 @@
                                     <div class="slide-icon-box" style="background:rgba(139,92,246,0.18);">
                                         <i class="fas fa-clipboard-list" style="color:#8B5CF6;"></i>
                                     </div>
-                                    <div class="slide-title">Seguimiento pastoral</div>
-                                    <div class="slide-desc">Acompañamiento integral con registro de visitas, llamadas y consejerías por congregante.</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Registro de visitas, llamadas y consejerías</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Persona a cargo de cada seguimiento</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Historial completo por congregante</div>
-                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> Notas y observaciones privadas</div>
+                                    <div class="slide-title">@L["Seguimiento pastoral"]</div>
+                                    <div class="slide-desc">@L["Acompañamiento integral con registro de visitas, llamadas y consejerías por congregante."]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Registro de visitas, llamadas y consejerías"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Persona a cargo de cada seguimiento"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Historial completo por congregante"]</div>
+                                    <div class="slide-feature"><i class="fas fa-check-circle"></i> @L["Notas y observaciones privadas"]</div>
                                 </div>
                             </div>
                         </div>
@@ -773,19 +816,19 @@
         <div class="row g-4 text-center justify-content-center">
             <div class="col-6 col-md-3">
                 <div class="stat-number">6+</div>
-                <div class="stat-label">Módulos integrados</div>
+                <div class="stat-label">@L["Módulos integrados"]</div>
             </div>
             <div class="col-6 col-md-3">
-                <div class="stat-number">Multi-sede</div>
-                <div class="stat-label">Gestión centralizada</div>
+                <div class="stat-number">@L["Multi-sede"]</div>
+                <div class="stat-label">@L["Gestión centralizada"]</div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-number">100%</div>
-                <div class="stat-label">En la nube</div>
+                <div class="stat-label">@L["En la nube"]</div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-number">24/7</div>
-                <div class="stat-label">Disponibilidad</div>
+                <div class="stat-label">@L["Disponibilidad"]</div>
             </div>
         </div>
     </div>
@@ -795,10 +838,10 @@
 <section id="caracteristicas" class="py-5" style="background:#fff;">
     <div class="container py-4">
         <div class="text-center mb-5">
-            <div class="section-badge">Características</div>
-            <h2 class="section-title mt-2">Todo lo que tu iglesia necesita</h2>
+            <div class="section-badge">@L["Características"]</div>
+            <h2 class="section-title mt-2">@L["Todo lo que tu iglesia necesita"]</h2>
             <p class="section-subtitle mt-3">
-                Módulos completos diseñados específicamente para la gestión pastoral y administrativa de tu comunidad.
+                @L["Módulos completos diseñados específicamente para la gestión pastoral y administrativa de tu comunidad."]
             </p>
         </div>
         <div class="row g-4">
@@ -807,8 +850,8 @@
                     <div class="feature-icon" style="background:rgba(59,130,246,0.1);">
                         <i class="fas fa-users" style="color:#3B82F6;"></i>
                     </div>
-                    <h5>Congregantes</h5>
-                    <p>Registro completo de miembros, simpatizantes y visitantes con fichas detalladas, historial y búsqueda avanzada.</p>
+                    <h5>@L["Congregantes"]</h5>
+                    <p>@L["Registro completo de miembros, simpatizantes y visitantes con fichas detalladas, historial y búsqueda avanzada."]</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -816,8 +859,8 @@
                     <div class="feature-icon" style="background:rgba(0,191,165,0.1);">
                         <i class="fas fa-sitemap" style="color:#00BFA5;"></i>
                     </div>
-                    <h5>Grupos y Zonas</h5>
-                    <p>Organiza la congregación en grupos, zonas y ministerios. Asigna líderes y controla la estructura de tu iglesia.</p>
+                    <h5>@L["Grupos y Zonas"]</h5>
+                    <p>@L["Organiza la congregación en grupos, zonas y ministerios. Asigna líderes y controla la estructura de tu iglesia."]</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -825,8 +868,8 @@
                     <div class="feature-icon" style="background:rgba(245,158,11,0.1);">
                         <i class="fas fa-calendar-check" style="color:#F59E0B;"></i>
                     </div>
-                    <h5>Asistencia al Culto</h5>
-                    <p>Registro de asistencia por sesión con conteo de adultos, niños e invitados. Gráficas históricas comparativas.</p>
+                    <h5>@L["Asistencia al Culto"]</h5>
+                    <p>@L["Registro de asistencia por sesión con conteo de adultos, niños e invitados. Gráficas históricas comparativas."]</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -834,8 +877,8 @@
                     <div class="feature-icon" style="background:rgba(16,185,129,0.1);">
                         <i class="fas fa-hand-holding-usd" style="color:#10B981;"></i>
                     </div>
-                    <h5>Economía</h5>
-                    <p>Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación a Excel.</p>
+                    <h5>@L["Economía"]</h5>
+                    <p>@L["Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación a Excel."]</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -843,8 +886,8 @@
                     <div class="feature-icon" style="background:rgba(139,92,246,0.1);">
                         <i class="fas fa-clipboard-list" style="color:#8B5CF6;"></i>
                     </div>
-                    <h5>Seguimiento Pastoral</h5>
-                    <p>Registro de visitas, llamadas y consejerías por congregante. Historial completo del acompañamiento pastoral.</p>
+                    <h5>@L["Seguimiento Pastoral"]</h5>
+                    <p>@L["Registro de visitas, llamadas y consejerías por congregante. Historial completo del acompañamiento pastoral."]</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-4">
@@ -852,8 +895,8 @@
                     <div class="feature-icon" style="background:rgba(30,58,138,0.1);">
                         <i class="fas fa-building" style="color:#1E3A8A;"></i>
                     </div>
-                    <h5>Multi-sede</h5>
-                    <p>Gestiona múltiples sedes desde un único acceso de administrador global. Cada sede accede solo a sus datos.</p>
+                    <h5>@L["Multi-sede"]</h5>
+                    <p>@L["Gestiona múltiples sedes desde un único acceso de administrador global. Cada sede accede solo a sus datos."]</p>
                 </div>
             </div>
         </div>
@@ -864,10 +907,10 @@
 <section id="como-funciona" class="py-5 how-section">
     <div class="container py-4">
         <div class="text-center mb-5">
-            <div class="section-badge">Cómo funciona</div>
-            <h2 class="section-title mt-2">En marcha en tres pasos</h2>
+            <div class="section-badge">@L["Cómo funciona"]</div>
+            <h2 class="section-title mt-2">@L["En marcha en tres pasos"]</h2>
             <p class="section-subtitle mt-3">
-                Sin instalaciones complicadas. En menos de un día tienes tu iglesia digitalizada y tu equipo trabajando.
+                @L["Sin instalaciones complicadas. En menos de un día tienes tu iglesia digitalizada y tu equipo trabajando."]
             </p>
         </div>
         <div class="row g-0 justify-content-center">
@@ -879,8 +922,8 @@
                 </div>
                 <div class="step-num">1</div>
                 <div class="step-card">
-                    <h5>Solicita tu acceso</h5>
-                    <p>Rellena el formulario de contacto y te enviamos tus credenciales en menos de 24 horas. Sin tarjeta, sin permanencia.</p>
+                    <h5>@L["Solicita tu acceso"]</h5>
+                    <p>@L["Rellena el formulario de contacto y te enviamos tus credenciales en menos de 24 horas. Sin tarjeta, sin permanencia."]</p>
                 </div>
                 <!-- connector -->
                 <div class="step-connector d-none d-md-block"></div>
@@ -893,8 +936,8 @@
                 </div>
                 <div class="step-num">2</div>
                 <div class="step-card">
-                    <h5>Configura tu iglesia</h5>
-                    <p>Crea tu sede, define zonas y grupos, y activa los módulos que necesitas. Te acompañamos durante todo el proceso.</p>
+                    <h5>@L["Configura tu iglesia"]</h5>
+                    <p>@L["Crea tu sede, define zonas y grupos, y activa los módulos que necesitas. Te acompañamos durante todo el proceso."]</p>
                 </div>
                 <div class="step-connector d-none d-md-block"></div>
             </div>
@@ -906,8 +949,8 @@
                 </div>
                 <div class="step-num">3</div>
                 <div class="step-card">
-                    <h5>Gestiona tu comunidad</h5>
-                    <p>Empieza a registrar congregantes, tomar asistencia y controlar finanzas. Todo desde cualquier dispositivo.</p>
+                    <h5>@L["Gestiona tu comunidad"]</h5>
+                    <p>@L["Empieza a registrar congregantes, tomar asistencia y controlar finanzas. Todo desde cualquier dispositivo."]</p>
                 </div>
             </div>
 
@@ -923,20 +966,19 @@
             <!-- Text -->
             <div class="col-lg-5">
                 <div class="mod-badge" style="background:rgba(59,130,246,0.1);color:#2563EB;">
-                    <i class="fas fa-users"></i> Congregantes
+                    <i class="fas fa-users"></i> @L["Congregantes"]
                 </div>
-                <h2 class="alt-title">Conoce a cada persona de tu iglesia</h2>
+                <h2 class="alt-title">@L["Conoce a cada persona de tu iglesia"]</h2>
                 <p class="alt-desc">
-                    Ficha completa por congregante: datos personales, familia, contacto, estado espiritual,
-                    zona, grupo y observaciones privadas. Todo en un solo lugar.
+                    @L["Ficha completa por congregante: datos personales, familia, contacto, estado espiritual, zona, grupo y observaciones privadas. Todo en un solo lugar."]
                 </p>
                 <div class="alt-feature">
                     <div class="alt-feature-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;">
                         <i class="fas fa-id-card"></i>
                     </div>
                     <div>
-                        <strong>Ficha personal completa</strong>
-                        <span>Nombre, fecha de nacimiento, teléfono, correo, dirección y foto de perfil.</span>
+                        <strong>@L["Ficha personal completa"]</strong>
+                        <span>@L["Nombre, fecha de nacimiento, teléfono, correo, dirección y foto de perfil."]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -944,8 +986,8 @@
                         <i class="fas fa-filter"></i>
                     </div>
                     <div>
-                        <strong>Búsqueda y filtros avanzados</strong>
-                        <span>Filtra por estado, zona, grupo, sede o cualquier combinación de criterios.</span>
+                        <strong>@L["Búsqueda y filtros avanzados"]</strong>
+                        <span>@L["Filtra por estado, zona, grupo, sede o cualquier combinación de criterios."]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -953,8 +995,8 @@
                         <i class="fas fa-history"></i>
                     </div>
                     <div>
-                        <strong>Historial y cambios de estado</strong>
-                        <span>Registra la evolución espiritual: visitante → simpatizante → miembro.</span>
+                        <strong>@L["Historial y cambios de estado"]</strong>
+                        <span>@L["Registra la evolución espiritual: visitante → simpatizante → miembro."]</span>
                     </div>
                 </div>
             </div>
@@ -966,50 +1008,50 @@
                         <div class="ap-dot" style="background:#FF5F57;"></div>
                         <div class="ap-dot" style="background:#FFBD2E;"></div>
                         <div class="ap-dot" style="background:#28CA41;"></div>
-                        <span class="ap-title" style="color:white;">Congregantes — Listado</span>
+                        <span class="ap-title" style="color:white;">@L["Congregantes — Listado"]</span>
                     </div>
                     <div class="ap-body">
                         <!-- Search bar mockup -->
                         <div style="background:white;border:1.5px solid #E2E8F4;border-radius:8px;padding:8px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
                             <i class="fas fa-search" style="color:#94A3B8;font-size:0.82rem;"></i>
-                            <span style="color:#94A3B8;font-size:0.83rem;">Buscar congregante...</span>
-                            <span style="margin-left:auto;background:#EEF2FF;color:#4F46E5;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:6px;">Filtros</span>
+                            <span style="color:#94A3B8;font-size:0.83rem;">@L["Buscar congregante..."]</span>
+                            <span style="margin-left:auto;background:#EEF2FF;color:#4F46E5;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:6px;">@L["Filtros"]</span>
                         </div>
                         <!-- Member rows -->
                         <div class="member-row">
-                            <div class="member-avatar" style="background:#3B82F6;">MA</div>
+                            <div class="member-avatar" style="background:#3B82F6;">@L["MA"]</div>
                             <div>
-                                <div class="member-name">María Alonso García</div>
-                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Norte · Grupo Jóvenes</div>
+                                <div class="member-name">@L["María Alonso García"]</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> @L["Zona Norte · Grupo Jóvenes"]</div>
                             </div>
-                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">Miembro</span>
+                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">@L["Miembro"]</span>
                         </div>
                         <div class="member-row">
-                            <div class="member-avatar" style="background:#10B981;">JR</div>
+                            <div class="member-avatar" style="background:#10B981;">@L["JR"]</div>
                             <div>
-                                <div class="member-name">Juan Rodríguez Pérez</div>
-                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Sur · Ministerio Alabanza</div>
+                                <div class="member-name">@L["Juan Rodríguez Pérez"]</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> @L["Zona Sur · Ministerio Alabanza"]</div>
                             </div>
-                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">Miembro</span>
+                            <span class="member-badge" style="background:#DCFCE7;color:#166534;">@L["Miembro"]</span>
                         </div>
                         <div class="member-row">
-                            <div class="member-avatar" style="background:#F59E0B;">LM</div>
+                            <div class="member-avatar" style="background:#F59E0B;">@L["LM"]</div>
                             <div>
-                                <div class="member-name">Laura Martínez Ruiz</div>
-                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Centro · Sin grupo</div>
+                                <div class="member-name">@L["Laura Martínez Ruiz"]</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> @L["Zona Centro · Sin grupo"]</div>
                             </div>
-                            <span class="member-badge" style="background:#FEF9C3;color:#854D0E;">Simpatizante</span>
+                            <span class="member-badge" style="background:#FEF9C3;color:#854D0E;">@L["Simpatizante"]</span>
                         </div>
                         <div class="member-row">
-                            <div class="member-avatar" style="background:#8B5CF6;">CS</div>
+                            <div class="member-avatar" style="background:#8B5CF6;">@L["CS"]</div>
                             <div>
-                                <div class="member-name">Carlos Sánchez López</div>
-                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> Zona Norte · Sin asignar</div>
+                                <div class="member-name">@L["Carlos Sánchez López"]</div>
+                                <div class="member-meta"><i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i> @L["Zona Norte · Sin asignar"]</div>
                             </div>
-                            <span class="member-badge" style="background:#E0F2FE;color:#0369A1;">Visitante</span>
+                            <span class="member-badge" style="background:#E0F2FE;color:#0369A1;">@L["Visitante"]</span>
                         </div>
                         <div style="text-align:center;margin-top:12px;">
-                            <span style="font-size:0.78rem;color:#94A3B8;">Mostrando 4 de 248 congregantes</span>
+                            <span style="font-size:0.78rem;color:#94A3B8;">@L["Mostrando 4 de 248 congregantes"]</span>
                         </div>
                     </div>
                 </div>
@@ -1027,20 +1069,19 @@
             <!-- Text -->
             <div class="col-lg-5">
                 <div class="mod-badge" style="background:rgba(16,185,129,0.1);color:#059669;">
-                    <i class="fas fa-hand-holding-usd"></i> Economía
+                    <i class="fas fa-hand-holding-usd"></i> @L["Economía"]
                 </div>
-                <h2 class="alt-title">Control total de las finanzas de tu iglesia</h2>
+                <h2 class="alt-title">@L["Control total de las finanzas de tu iglesia"]</h2>
                 <p class="alt-desc">
-                    Registra diezmos, ofrendas y cualquier concepto económico. Genera gráficas comparativas
-                    y exporta informes en Excel para rendición de cuentas.
+                    @L["Registra diezmos, ofrendas y cualquier concepto económico. Genera gráficas comparativas y exporta informes en Excel para rendición de cuentas."]
                 </p>
                 <div class="alt-feature">
                     <div class="alt-feature-icon" style="background:rgba(16,185,129,0.1);color:#10B981;">
                         <i class="fas fa-tags"></i>
                     </div>
                     <div>
-                        <strong>Conceptos personalizados</strong>
-                        <span>Configura tus propios conceptos: diezmo, ofrenda, misiones, fondo pastoral…</span>
+                        <strong>@L["Conceptos personalizados"]</strong>
+                        <span>@L["Configura tus propios conceptos: diezmo, ofrenda, misiones, fondo pastoral…"]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -1048,8 +1089,8 @@
                         <i class="fas fa-chart-bar"></i>
                     </div>
                     <div>
-                        <strong>Gráficas mensuales y anuales</strong>
-                        <span>Visualiza la evolución de cada concepto y compara períodos fácilmente.</span>
+                        <strong>@L["Gráficas mensuales y anuales"]</strong>
+                        <span>@L["Visualiza la evolución de cada concepto y compara períodos fácilmente."]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -1057,8 +1098,8 @@
                         <i class="fas fa-file-excel"></i>
                     </div>
                     <div>
-                        <strong>Exportación a Excel</strong>
-                        <span>Descarga informes detallados para presentarlos en las reuniones de liderazgo.</span>
+                        <strong>@L["Exportación a Excel"]</strong>
+                        <span>@L["Descarga informes detallados para presentarlos en las reuniones de liderazgo."]</span>
                     </div>
                 </div>
             </div>
@@ -1070,32 +1111,32 @@
                         <div class="ap-dot" style="background:#FF5F57;"></div>
                         <div class="ap-dot" style="background:#FFBD2E;"></div>
                         <div class="ap-dot" style="background:#28CA41;"></div>
-                        <span class="ap-title" style="color:white;">Economía — Diezmos por Concepto · 2025</span>
+                        <span class="ap-title" style="color:white;">@L["Economía — Diezmos por Concepto · 2025"]</span>
                     </div>
                     <div class="ap-body">
                         <!-- Month selector bar -->
                         <div style="display:flex;gap:6px;margin-bottom:16px;overflow:hidden;">
-                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Ene</span>
-                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Feb</span>
-                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Mar</span>
-                            <span style="background:#1E3A8A;color:white;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Abr</span>
-                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">May</span>
-                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">Jun</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["Ene"]</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["Feb"]</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["Mar"]</span>
+                            <span style="background:#1E3A8A;color:white;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["Abr"]</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["May"]</span>
+                            <span style="background:#EEF2FF;color:#4F46E5;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:6px;">@L["Jun"]</span>
                         </div>
                         <!-- Finance rows -->
                         <div class="fin-row">
                             <div class="fin-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;"><i class="fas fa-cross"></i></div>
-                            <span class="fin-label">Diezmo General</span>
+                            <span class="fin-label">@L["Diezmo General"]</span>
                             <span class="fin-amount" style="color:#3B82F6;">2.100 €</span>
                         </div>
                         <div class="fin-row">
                             <div class="fin-icon" style="background:rgba(16,185,129,0.1);color:#10B981;"><i class="fas fa-heart"></i></div>
-                            <span class="fin-label">Ofrenda</span>
+                            <span class="fin-label">@L["Ofrenda"]</span>
                             <span class="fin-amount" style="color:#10B981;">640 €</span>
                         </div>
                         <div class="fin-row">
                             <div class="fin-icon" style="background:rgba(245,158,11,0.1);color:#F59E0B;"><i class="fas fa-globe"></i></div>
-                            <span class="fin-label">Misiones</span>
+                            <span class="fin-label">@L["Misiones"]</span>
                             <span class="fin-amount" style="color:#F59E0B;">500 €</span>
                         </div>
                         <!-- Mini bar chart -->
@@ -1108,7 +1149,7 @@
                             <div class="fin-bar" style="height:65%;background:rgba(59,130,246,0.6);"></div>
                         </div>
                         <div style="text-align:right;margin-top:10px;">
-                            <span style="font-size:0.78rem;color:#94A3B8;">Total mes: </span>
+                            <span style="font-size:0.78rem;color:#94A3B8;">@L["Total mes:"] </span>
                             <span style="font-size:0.9rem;font-weight:800;color:#1E3A8A;">3.240 €</span>
                         </div>
                     </div>
@@ -1127,20 +1168,19 @@
             <!-- Text -->
             <div class="col-lg-5">
                 <div class="mod-badge" style="background:rgba(139,92,246,0.1);color:#7C3AED;">
-                    <i class="fas fa-clipboard-list"></i> Seguimiento Pastoral
+                    <i class="fas fa-clipboard-list"></i> @L["Seguimiento Pastoral"]
                 </div>
-                <h2 class="alt-title">Acompaña a cada persona en su camino de fe</h2>
+                <h2 class="alt-title">@L["Acompaña a cada persona en su camino de fe"]</h2>
                 <p class="alt-desc">
-                    Registra cada visita, llamada o consejería de forma privada. El líder asignado
-                    puede consultar el historial completo para dar continuidad al cuidado pastoral.
+                    @L["Registra cada visita, llamada o consejería de forma privada. El líder asignado puede consultar el historial completo para dar continuidad al cuidado pastoral."]
                 </p>
                 <div class="alt-feature">
                     <div class="alt-feature-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6;">
                         <i class="fas fa-phone-alt"></i>
                     </div>
                     <div>
-                        <strong>Tipos de seguimiento</strong>
-                        <span>Visita domiciliaria, llamada telefónica, consejería, oración o mensaje.</span>
+                        <strong>@L["Tipos de seguimiento"]</strong>
+                        <span>@L["Visita domiciliaria, llamada telefónica, consejería, oración o mensaje."]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -1148,8 +1188,8 @@
                         <i class="fas fa-user-tie"></i>
                     </div>
                     <div>
-                        <strong>Responsable asignado</strong>
-                        <span>Cada seguimiento queda asociado al líder o pastor que lo realizó.</span>
+                        <strong>@L["Responsable asignado"]</strong>
+                        <span>@L["Cada seguimiento queda asociado al líder o pastor que lo realizó."]</span>
                     </div>
                 </div>
                 <div class="alt-feature">
@@ -1157,8 +1197,8 @@
                         <i class="fas fa-lock"></i>
                     </div>
                     <div>
-                        <strong>Notas privadas y seguras</strong>
-                        <span>Las observaciones son internas y solo visibles para el equipo autorizado.</span>
+                        <strong>@L["Notas privadas y seguras"]</strong>
+                        <span>@L["Las observaciones son internas y solo visibles para el equipo autorizado."]</span>
                     </div>
                 </div>
             </div>
@@ -1170,15 +1210,15 @@
                         <div class="ap-dot" style="background:#FF5F57;"></div>
                         <div class="ap-dot" style="background:#FFBD2E;"></div>
                         <div class="ap-dot" style="background:#28CA41;"></div>
-                        <span class="ap-title" style="color:white;">Seguimiento — Carlos Sánchez López</span>
+                        <span class="ap-title" style="color:white;">@L["Seguimiento — Carlos Sánchez López"]</span>
                     </div>
                     <div class="ap-body">
                         <!-- Header -->
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-                            <div style="width:42px;height:42px;border-radius:50%;background:#8B5CF6;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.9rem;">CS</div>
+                            <div style="width:42px;height:42px;border-radius:50%;background:#8B5CF6;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.9rem;">@L["CS"]</div>
                             <div>
-                                <div style="font-weight:700;font-size:0.9rem;color:#1F2937;">Carlos Sánchez López</div>
-                                <div style="font-size:0.75rem;color:#94A3B8;">Visitante · Zona Norte</div>
+                                <div style="font-weight:700;font-size:0.9rem;color:#1F2937;">@L["Carlos Sánchez López"]</div>
+                                <div style="font-size:0.75rem;color:#94A3B8;">@L["Visitante · Zona Norte"]</div>
                             </div>
                             <span style="margin-left:auto;background:#EDE9FE;color:#6D28D9;font-size:0.7rem;font-weight:700;padding:4px 10px;border-radius:6px;">3 seguimientos</span>
                         </div>
@@ -1189,8 +1229,8 @@
                                 <div class="tl-line"></div>
                             </div>
                             <div class="tl-content">
-                                <div class="tl-type">Consejería</div>
-                                <div class="tl-person">Pastor Juan — <span style="font-style:italic;color:#6B7280;">"Necesita apoyo en su situación familiar..."</span></div>
+                                <div class="tl-type">@L["Consejería"]</div>
+                                <div class="tl-person">@L["Pastor Juan —"] <span style="font-style:italic;color:#6B7280;">@L["\"Necesita apoyo en su situación familiar...\""]</span></div>
                                 <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 18 Jun 2025</div>
                             </div>
                         </div>
@@ -1200,8 +1240,8 @@
                                 <div class="tl-line"></div>
                             </div>
                             <div class="tl-content">
-                                <div class="tl-type">Llamada telefónica</div>
-                                <div class="tl-person">Líder María — <span style="font-style:italic;color:#6B7280;">"Animo y seguimiento semanal acordado."</span></div>
+                                <div class="tl-type">@L["Llamada telefónica"]</div>
+                                <div class="tl-person">@L["Líder María —"] <span style="font-style:italic;color:#6B7280;">@L["\"Animo y seguimiento semanal acordado.\""]</span></div>
                                 <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 10 Jun 2025</div>
                             </div>
                         </div>
@@ -1210,8 +1250,8 @@
                                 <div class="tl-dot" style="background:#10B981;"><i class="fas fa-home" style="font-size:0.7rem;"></i></div>
                             </div>
                             <div class="tl-content">
-                                <div class="tl-type">Visita domiciliaria</div>
-                                <div class="tl-person">Pastor Juan — <span style="font-style:italic;color:#6B7280;">"Primera visita, muy receptivo."</span></div>
+                                <div class="tl-type">@L["Visita domiciliaria"]</div>
+                                <div class="tl-person">@L["Pastor Juan —"] <span style="font-style:italic;color:#6B7280;">"Primera visita, muy receptivo."</span></div>
                                 <div class="tl-date"><i class="fas fa-calendar" style="font-size:0.65rem;"></i> 2 Jun 2025</div>
                             </div>
                         </div>
@@ -1227,10 +1267,10 @@
 <section class="py-5 testimonial-section">
     <div class="container py-4">
         <div class="text-center mb-5">
-            <div class="section-badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);">Testimonios</div>
-            <h2 class="section-title mt-2" style="color:white;">Lo que dicen nuestros pastores</h2>
+            <div class="section-badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.8);">@L["Testimonios"]</div>
+            <h2 class="section-title mt-2" style="color:white;">@L["Lo que dicen nuestros pastores"]</h2>
             <p class="section-subtitle mt-3" style="color:rgba(255,255,255,0.55);">
-                Iglesias de distintos tamaños confían en Congrega CRM para organizar y cuidar a sus congregaciones.
+                @L["Iglesias de distintos tamaños confían en Congrega CRM para organizar y cuidar a sus congregaciones."]
             </p>
         </div>
         <div class="row g-4">
@@ -1239,15 +1279,13 @@
                 <div class="testimonial-card">
                     <div class="t-stars">★★★★★</div>
                     <p class="t-quote">
-                        "Antes llevábamos el registro de miembros en hojas de Excel que nadie actualizaba.
-                        Con Congrega lo cambiamos todo: ahora sabemos exactamente quién viene, quién necesita
-                        atención y cuánto estamos recibiendo cada mes. Es una bendición para nuestro equipo."
+                        @L["\"Antes llevábamos el registro de miembros en hojas de Excel que nadie actualizaba. Con Congrega lo cambiamos todo: ahora sabemos exactamente quién viene, quién necesita atención y cuánto estamos recibiendo cada mes. Es una bendición para nuestro equipo.\""]
                     </p>
                     <div class="t-author">
-                        <div class="t-avatar" style="background:#3B82F6;">PR</div>
+                        <div class="t-avatar" style="background:#3B82F6;">@L["PR"]</div>
                         <div>
-                            <div class="t-name">Pastor Roberto Fernández</div>
-                            <div class="t-role">Iglesia Evangélica Betania · Madrid</div>
+                            <div class="t-name">@L["Pastor Roberto Fernández"]</div>
+                            <div class="t-role">@L["Iglesia Evangélica Betania · Madrid"]</div>
                         </div>
                     </div>
                 </div>
@@ -1257,15 +1295,13 @@
                 <div class="testimonial-card">
                     <div class="t-stars">★★★★★</div>
                     <p class="t-quote">
-                        "El módulo de seguimiento pastoral ha transformado nuestra forma de cuidar a las personas.
-                        Podemos ver el historial completo de cada congregante y el equipo de líderes sabe
-                        exactamente qué acciones tomar. La comunicación interna mejoró enormemente."
+                        @L["\"El módulo de seguimiento pastoral ha transformado nuestra forma de cuidar a las personas. Podemos ver el historial completo de cada congregante y el equipo de líderes sabe exactamente qué acciones tomar. La comunicación interna mejoró enormemente.\""]
                     </p>
                     <div class="t-author">
-                        <div class="t-avatar" style="background:#10B981;">ES</div>
+                        <div class="t-avatar" style="background:#10B981;">@L["ES"]</div>
                         <div>
-                            <div class="t-name">Evangelista Sara Molina</div>
-                            <div class="t-role">Comunidad de Fe Ágape · Barcelona</div>
+                            <div class="t-name">@L["Evangelista Sara Molina"]</div>
+                            <div class="t-role">@L["Comunidad de Fe Ágape · Barcelona"]</div>
                         </div>
                     </div>
                 </div>
@@ -1275,15 +1311,13 @@
                 <div class="testimonial-card">
                     <div class="t-stars">★★★★★</div>
                     <p class="t-quote">
-                        "Gestionamos tres sedes desde un solo panel. Antes era imposible tener una visión
-                        global; ahora el pastor principal ve en tiempo real el estado de cada congregación.
-                        El soporte del equipo de Congrega es también excelente: siempre disponibles."
+                        @L["\"Gestionamos tres sedes desde un solo panel. Antes era imposible tener una visión global; ahora el pastor principal ve en tiempo real el estado de cada congregación. El soporte del equipo de Congrega es también excelente: siempre disponibles.\""]
                     </p>
                     <div class="t-author">
-                        <div class="t-avatar" style="background:#F59E0B;">AD</div>
+                        <div class="t-avatar" style="background:#F59E0B;">@L["AD"]</div>
                         <div>
-                            <div class="t-name">Apóstol David Herrera</div>
-                            <div class="t-role">Red de Iglesias Roca Viva · Sevilla</div>
+                            <div class="t-name">@L["Apóstol David Herrera"]</div>
+                            <div class="t-role">@L["Red de Iglesias Roca Viva · Sevilla"]</div>
                         </div>
                     </div>
                 </div>
@@ -1297,10 +1331,10 @@
 <section id="precios" class="py-5 pricing-section">
     <div class="container py-4">
         <div class="text-center mb-5">
-            <div class="section-badge">Planes</div>
-            <h2 class="section-title mt-2">Elige el plan que mejor se adapta</h2>
+            <div class="section-badge">@L["Planes"]</div>
+            <h2 class="section-title mt-2">@L["Elige el plan que mejor se adapta"]</h2>
             <p class="section-subtitle mt-3">
-                Planes flexibles para iglesias de cualquier tamaño. Sin permanencia, cancela cuando quieras.
+                @L["Planes flexibles para iglesias de cualquier tamaño. Sin permanencia, cancela cuando quieras."]
             </p>
         </div>
         <div class="row g-4 align-items-center justify-content-center">
@@ -1309,39 +1343,39 @@
             <div class="col-md-6 col-lg-4">
                 <div class="pricing-card">
                     <div class="plan-name">
-                        <i class="fas fa-leaf me-2" style="color:#10B981;"></i>Miembro S+
+                        <i class="fas fa-leaf me-2" style="color:#10B981;"></i>@L["Miembro S+"]
                     </div>
                     <div class="plan-price"><sup>€</sup>17,99 <span class="period">/mes</span></div>
                     <div class="plan-desc">
-                        Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización.
+                        @L["Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización."]
                     </div>
                     <hr />
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Acceso a <strong>3 módulos</strong> a elegir</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Hasta <strong>1 sede</strong></span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>15 horas</strong> de soporte incluidas</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-outline">Contratar S+</a>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Acceso a"] <strong>@L["3 módulos"]</strong> a elegir</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>15 horas</strong> @L["de soporte incluidas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar S+"]</a>
                 </div>
             </div>
 
             <!-- Miembro P+ (popular) -->
             <div class="col-md-6 col-lg-4">
                 <div class="pricing-card popular">
-                    <div class="popular-badge"><i class="fas fa-fire me-1"></i> Más popular</div>
+                    <div class="popular-badge"><i class="fas fa-fire me-1"></i> @L["Más popular"]</div>
                     <div class="plan-name">
-                        <i class="fas fa-rocket me-2" style="color:#3B82F6;"></i>Miembro P+
+                        <i class="fas fa-rocket me-2" style="color:#3B82F6;"></i>@L["Miembro P+"]
                     </div>
                     <div class="plan-price"><sup>€</sup>22,99 <span class="period">/mes</span></div>
                     <div class="plan-desc">
-                        La opción más elegida. Acceso ampliado para iglesias en crecimiento que necesitan mayor flexibilidad.
+                        @L["La opción más elegida. Acceso ampliado para iglesias en crecimiento que necesitan mayor flexibilidad."]
                     </div>
                     <hr />
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Acceso a <strong>5 módulos</strong> a elegir</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Hasta <strong>1 sede</strong></span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>30 horas</strong> de soporte incluidas</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Dashboard con gráficas avanzadas</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-primary">Contratar P+</a>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Acceso a"] <strong>@L["5 módulos"]</strong> a elegir</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>30 horas</strong> @L["de soporte incluidas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Dashboard con gráficas avanzadas"]</span></div>
+                    <a href="#contacto" class="btn btn-plan btn-plan-primary">@L["Contratar P+"]</a>
                 </div>
             </div>
 
@@ -1349,32 +1383,32 @@
             <div class="col-md-6 col-lg-4">
                 <div class="pricing-card">
                     <div class="plan-name">
-                        <i class="fas fa-crown me-2" style="color:#F59E0B;"></i>Miembro Max+
+                        <i class="fas fa-crown me-2" style="color:#F59E0B;"></i>@L["Miembro Max+"]
                     </div>
                     <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#92680a;border-radius:20px;padding:3px 12px;font-size:0.77rem;font-weight:700;margin-bottom:10px;">
-                        <i class="fas fa-cross"></i> Especial para Pastores
+                        <i class="fas fa-cross"></i> @L["Especial para Pastores"]
                     </div>
                     <div class="plan-price"><sup>€</sup>39,99 <span class="period">/mes</span></div>
                     <div class="plan-desc">
-                        El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación.
+                        @L["El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación."]
                     </div>
                     <hr />
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>Acceso completo</strong> a todos los módulos</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>Multi-sede</strong> incluido</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>45 horas</strong> de soporte incluidas</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Actualizaciones automáticas</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Soporte prioritario</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>Personalización de módulos</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-outline">Contratar Max+</a>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Multi-sede"]</strong> incluido</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>45 horas</strong> @L["de soporte incluidas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Soporte prioritario"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Personalización de módulos"]</span></div>
+                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar Max+"]</a>
                 </div>
             </div>
 
         </div>
         <p class="text-center text-muted mt-4" style="font-size:0.87rem;">
             <i class="fas fa-info-circle me-1"></i>
-            ¿Necesitas una solución personalizada?
-            <a href="#contacto" style="color:var(--primary);text-decoration:none;font-weight:600;">Contáctanos</a>
-            y te preparamos una oferta a medida.
+            @L["¿Necesitas una solución personalizada?"]
+            <a href="#contacto" style="color:var(--primary);text-decoration:none;font-weight:600;">@L["Contáctanos"]</a>
+            @L["y te preparamos una oferta a medida."]
         </p>
     </div>
 </section>
@@ -1385,11 +1419,10 @@
         <div class="row g-5 align-items-start">
 
             <div class="col-lg-4">
-                <div class="section-badge">Contacto</div>
-                <h2 class="section-title mt-2">¿Hablamos?</h2>
+                <div class="section-badge">@L["Contacto"]</div>
+                <h2 class="section-title mt-2">@L["¿Hablamos?"]</h2>
                 <p style="color:var(--text-light);line-height:1.7;margin-top:1rem;font-size:0.96rem;">
-                    Completa el formulario y nos pondremos en contacto contigo en menos de 24 horas
-                    para ayudarte a encontrar el plan que mejor se adapte a tu iglesia.
+                    @L["Completa el formulario y nos pondremos en contacto contigo en menos de 24 horas para ayudarte a encontrar el plan que mejor se adapte a tu iglesia."]
                 </p>
                 <div class="mt-4 d-flex flex-column gap-3">
                     <div class="d-flex align-items-center gap-3">
@@ -1397,7 +1430,7 @@
                             <i class="fas fa-envelope" style="color:var(--primary);"></i>
                         </div>
                         <div>
-                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Soporte</div>
+                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">@L["Soporte"]</div>
                             <div style="font-weight:600;color:var(--text);font-size:0.95rem;">soporte@congrega.es</div>
                         </div>
                     </div>
@@ -1406,8 +1439,8 @@
                             <i class="fas fa-clock" style="color:var(--primary);"></i>
                         </div>
                         <div>
-                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Horario</div>
-                            <div style="font-weight:600;color:var(--text);font-size:0.95rem;">Lun – Vie, 9:00 – 18:00</div>
+                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">@L["Horario"]</div>
+                            <div style="font-weight:600;color:var(--text);font-size:0.95rem;">@L["Lun – Vie, 9:00 – 18:00"]</div>
                         </div>
                     </div>
                 </div>
@@ -1418,41 +1451,41 @@
                     <form id="frmContacto" onsubmit="enviarContacto(event)" novalidate>
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <label class="form-label">Nombre <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cNombre" placeholder="Tu nombre" required />
+                                <label class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cNombre" placeholder="@L["Tu nombre"]" required />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cApellidos" placeholder="Tus apellidos" required />
+                                <label class="form-label">@L["Apellidos"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cApellidos" placeholder="@L["Tus apellidos"]" required />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Teléfono</label>
+                                <label class="form-label">@L["Teléfono"]</label>
                                 <input type="tel" class="form-control" id="cTelefono" placeholder="+34 600 000 000" />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                                <label class="form-label">@L["Correo electrónico"] <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="cEmail" placeholder="correo@ejemplo.com" required />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">País <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cPais" placeholder="España" required />
+                                <label class="form-label">@L["País"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cPais" placeholder="@L["España"]" required />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Ciudad <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cCiudad" placeholder="Madrid" required />
+                                <label class="form-label">@L["Ciudad"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cCiudad" placeholder="@L["Madrid"]" required />
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Nombre de la iglesia <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cIglesia" placeholder="Iglesia..." required />
+                                <label class="form-label">@L["Nombre de la iglesia"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cIglesia" placeholder="@L["Iglesia..."]" required />
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Mensaje <span class="text-danger">*</span></label>
+                                <label class="form-label">@L["Mensaje"] <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="cMensaje" rows="4"
-                                          placeholder="Cuéntanos sobre tu iglesia y qué módulos te interesan..." required></textarea>
+                                          placeholder="@L["Cuéntanos sobre tu iglesia y qué módulos te interesan..."]" required></textarea>
                             </div>
                             <div class="col-12 d-flex justify-content-end">
                                 <button type="submit" class="btn btn-contact">
-                                    <i class="fas fa-paper-plane me-2"></i>Enviar mensaje
+                                    <i class="fas fa-paper-plane me-2"></i>@L["Enviar mensaje"]
                                 </button>
                             </div>
                         </div>
@@ -1472,35 +1505,35 @@
                     <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
                 </div>
                 <p style="font-size:0.87rem;line-height:1.65;max-width:290px;">
-                    Software de gestión integral diseñado para iglesias y comunidades de fe.
+                    @L["Software de gestión integral diseñado para iglesias y comunidades de fe."]
                 </p>
             </div>
             <div class="col-md-2">
-                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">Producto</div>
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Producto"]</div>
                 <div class="d-flex flex-column gap-2">
-                    <a href="#caracteristicas">Características</a>
-                    <a href="#como-funciona">Cómo funciona</a>
-                    <a href="#precios">Precios</a>
-                    <a href="#contacto">Contacto</a>
+                    <a href="#caracteristicas">@L["Características"]</a>
+                    <a href="#como-funciona">@L["Cómo funciona"]</a>
+                    <a href="#precios">@L["Precios"]</a>
+                    <a href="#contacto">@L["Contacto"]</a>
                 </div>
             </div>
             <div class="col-md-3">
-                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">Acceso</div>
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Acceso"]</div>
                 <div class="d-flex flex-column gap-2">
-                    <a href="/Login">Iniciar sesión</a>
+                    <a href="/Login">@L["Iniciar sesión"]</a>
                 </div>
             </div>
             <div class="col-md-3">
-                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">Soporte</div>
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Soporte"]</div>
                 <div style="font-size:0.87rem;">soporte@congrega.es</div>
-                <div style="font-size:0.87rem;margin-top:5px;">Lun – Vie · 9:00 – 18:00</div>
+                <div style="font-size:0.87rem;margin-top:5px;">@L["Lun – Vie · 9:00 – 18:00"]</div>
             </div>
         </div>
         <hr class="footer-divider" />
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
              style="font-size:0.84rem;">
-            <span>© 2025 Congrega CRM. Todos los derechos reservados.</span>
-            <span>Desarrollado con <i class="fas fa-heart" style="color:#ef4444;"></i> para la iglesia</span>
+            <span>@L["© 2025 Congrega CRM. Todos los derechos reservados."]</span>
+            <span>@L["Desarrollado con"] <i class="fas fa-heart" style="color:#ef4444;"></i> @L["para la iglesia"]</span>
         </div>
     </div>
 </footer>

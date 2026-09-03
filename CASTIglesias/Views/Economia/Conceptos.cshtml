@@ -1,31 +1,31 @@
 ﻿@{
-    ViewData["Title"] = "Conceptos";
+    ViewData["Title"] = L["Conceptos"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Conceptos</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Conceptos"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-tags me-1"></i> Lista de Conceptos
+        <i class="fas fa-tags me-1"></i> @L["Lista de Conceptos"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalConcepto()">Añadir nuevo concepto</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalConcepto()">@L["Añadir nuevo concepto"]</button>
             </div>
         </div>
         <hr />
         <table id="tablaConceptos" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombre del Concepto</th>
-                    <th>Sede</th>
-                    <th style="width: 100px;">Acciones</th>
+                    <th>@L["Nombre del Concepto"]</th>
+                    <th>@L["Sede"]</th>
+                    <th style="width: 100px;">@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -52,8 +52,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="exampleModalLabel">Datos del Concepto</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="exampleModalLabel">@L["Datos del Concepto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtidConcepto" type="hidden" value="0" />
@@ -61,8 +61,8 @@
 
                 <div class="row g-2">
                     <div class="col-sm-12">
-                        <label class="form-label">Nombre del Concepto<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombreConcepto" placeholder="Ej: Diezmo, Ofrenda, Primicia" autocomplete="off" />
+                        <label class="form-label">@L["Nombre del Concepto"]<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreConcepto" placeholder="@L["Ej: Diezmo, Ofrenda, Primicia"]" autocomplete="off" />
                     </div>
 
                     <div class="col-sm-6">
@@ -77,8 +77,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarConcepto()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarConcepto()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -91,6 +91,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            adminGlobalConcepto: @Json.Serialize(L["El Administrador Global no puede crear conceptos sin seleccionar una sede. Use la opción de cambio de sede."].Value),
+            conceptoVacio:       @Json.Serialize(L["El nombre del concepto no puede ser vacío."].Value),
+            eliminado:           @Json.Serialize(L["Eliminado"].Value),
+            eliminarConcepto:    @Json.Serialize(L["¿Desea eliminar el concepto:"].Value),
+            error:               @Json.Serialize(L["Error"].Value),
+            errorEliminacion:    @Json.Serialize(L["Error en la solicitud de eliminación."].Value),
+            estasSeguro:         @Json.Serialize(L["¿Estás seguro?"].Value),
+            no:                  @Json.Serialize(L["No"].Value),
+            restriccionAcceso:   @Json.Serialize(L["Restricción de Acceso"].Value),
+            siEliminar:          @Json.Serialize(L["Sí, eliminar"].Value)
+        });
+
         let tabladata;
         let filaSeleccionada;
 
@@ -147,9 +165,7 @@
                         width: "100px"
                     }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                }
+                language: window.dtLang ? { url: window.dtLang } : {}
             });
 
             // Eventos para Editar
@@ -167,12 +183,12 @@
                 if (!fila.data) return;
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `¿Desea eliminar el concepto: ${fila.data.nombre_concepto}?`,
+                    title: T.estasSeguro,
+                    text: `${T.eliminarConcepto} ${fila.data.nombre_concepto}?`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siEliminar,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -183,13 +199,13 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila.tr).remove().draw(false);
-                                    Swal.fire("Eliminado", "El concepto fue eliminado correctamente.", "success");
+                                    Swal.fire(T.eliminado, "El concepto fue eliminado correctamente.", "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje || "No se pudo eliminar el concepto.", "error");
+                                    Swal.fire(T.error, res.mensaje || "No se pudo eliminar el concepto.", "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "Error en la solicitud de eliminación.", "error");
+                                Swal.fire(T.error, T.errorEliminacion, "error");
                             }
                         });
                     }
@@ -204,7 +220,7 @@
 
             // 🔑 Restricción: Si el usuario es Admin Global, no puede crear/editar conceptos sin selector.
             if (!json && LOGGED_IN_SEDE_ID === ID_ADMIN_GLOBAL) {
-                Swal.fire("Restricción de Acceso", "El Administrador Global no puede crear conceptos sin seleccionar una sede. Use la opción de cambio de sede.", "warning");
+                Swal.fire(T.restriccionAcceso, T.adminGlobalConcepto, "warning");
                 return;
             }
 
@@ -236,7 +252,7 @@
             };
 
             if (Concepto.nombre_concepto === "") {
-                $("#mensajeErrorConcepto").removeClass("d-none").text("El nombre del concepto no puede ser vacío.");
+                $("#mensajeErrorConcepto").removeClass("d-none").text(T.conceptoVacio);
                 return;
             } else {
                 $("#mensajeErrorConcepto").addClass("d-none");

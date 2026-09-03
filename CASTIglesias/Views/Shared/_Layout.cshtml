@@ -553,16 +553,72 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Textos traducidos que necesita el JavaScript de esta página.
+        // Diccionario global de textos traducidos para el JavaScript.
         //
         // Se serializan con Json.Serialize y NUNCA se interpolan directamente:
         // los acentos, las comillas y los apóstrofes de una traducción romperían
         // el script si se escribiesen en crudo dentro de las comillas.
-        const T = {
+        //
+        // IMPORTANTE: se usa Object.assign sobre window.T y NO "const T = {...}".
+        // El layout y cada vista escriben en el mismo ámbito global, así que dos
+        // declaraciones "const T" provocan un SyntaxError que aborta el bloque
+        // <script> completo de la vista, y esta deja de funcionar por entero.
+        // Cada vista debe ampliar este objeto con la misma fórmula, nunca
+        // redeclararlo.
+        window.T = Object.assign(window.T || {}, {
             sinMinisterios:   @Json.Serialize(L["Sin ministerios"].Value),
             errorCambiarSede: @Json.Serialize(L["Error al cambiar de sede"].Value),
             desconocido:      @Json.Serialize(L["Desconocido"].Value),
             errorConexionSede:@Json.Serialize(L["Error de conexión al cambiar de sede. Inténtalo de nuevo."].Value)
+        });
+
+        // ── Traducción de datos de catálogo ──────────────────────────────────
+        //
+        // Hay valores que viven en la BBDD pero NO los escribe la iglesia: los
+        // crea la propia aplicación (las zonas que se auto-aprovisionan, los
+        // roles de usuario). Son un conjunto cerrado y conocido, así que se
+        // pueden traducir sin tocar el dato almacenado.
+        //
+        // La regla: el valor guardado NUNCA cambia; se traduce solo al pintarlo.
+        // Si el valor no está en la tabla, se devuelve tal cual, que es lo que
+        // debe pasar con las zonas y grupos que cada iglesia crea a su gusto.
+        window.TDATOS = {
+            // Zonas de discipulado creadas por defecto
+            "Hombres":        @Json.Serialize(L["Hombres"].Value),
+            "Mujeres":        @Json.Serialize(L["Mujeres"].Value),
+            "Niños":          @Json.Serialize(L["Niños"].Value),
+            "Jóvenes":        @Json.Serialize(L["Jóvenes"].Value),
+            // Roles de usuario (columna Rol)
+            "AdminGlobal":    @Json.Serialize(L["Administrador Global"].Value),
+            "PastorGeneral":  @Json.Serialize(L["Pastor General"].Value),
+            "PastorSede":     @Json.Serialize(L["Pastor de Sede"].Value),
+            "Miembro":        @Json.Serialize(L["Miembro"].Value)
+        };
+
+        window.tDato = function (valor) {
+            return (valor != null && window.TDATOS[valor]) || valor;
+        };
+
+        // Paquete de idioma de DataTables para el idioma activo.
+        //
+        // En inglés vale cadena vacía: DataTables ya trae sus textos ("Search",
+        // "Previous", "Next", "Showing X of Y") en inglés, así que no hay que
+        // cargar nada. Las vistas lo usan como:
+        //     language: window.dtLang ? { url: window.dtLang } : {}
+        window.dtLang = @Json.Serialize(IdiomasSoportados.UrlIdiomaDataTables());
+
+        // Rellena los marcadores {0}, {1}... de un texto traducido.
+        //
+        // Existe para no trocear las frases con datos intercalados. Partir
+        // "Este miembro tiene 15 años" en tres cachos obliga al inglés a seguir
+        // el orden de palabras del español, que a menudo no coincide. Con
+        // marcadores, cada idioma coloca el dato donde le corresponde.
+        //
+        // Uso: fmt(T.mensaje, edad, minimo, maximo)
+        window.fmt = function (plantilla, ...valores) {
+            return valores.reduce(
+                (texto, valor, i) => texto.split('{' + i + '}').join(valor),
+                plantilla);
         };
 
         document.addEventListener('DOMContentLoaded', function () {

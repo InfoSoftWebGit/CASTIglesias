@@ -24,6 +24,9 @@ namespace CapaNegocio
         }
         //////////////////////////FIN MÉTODO LISTAR FAMILIAS /////////////////////////////////
 
+        public int ContadorFamilias(int sedeID)
+            => _capaDatos.ContadorFamilias(sedeID);
+
         /// <summary>
         /// Método de Registrar Familia.
         /// </summary>

@@ -237,4 +237,1140 @@
   <data name="Error de conexión al cambiar de sede. Inténtalo de nuevo." xml:space="preserve">
     <value>Connection error while switching campus. Please try again.</value>
   </data>
+  <data name="Sede Desconocida" xml:space="preserve">
+    <value>Unknown Campus</value>
+  </data>
+  <!-- ══ Datos personales ═════════════════════════════════════════════════ -->
+  <data name="Nombre" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="Nombres" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="Apellido" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="Apellidos" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="Correo" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Correo electrónico" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Teléfono" xml:space="preserve">
+    <value>Phone</value>
+  </data>
+  <data name="Teléfono móvil" xml:space="preserve">
+    <value>Mobile</value>
+  </data>
+  <data name="Teléfono fijo" xml:space="preserve">
+    <value>Landline</value>
+  </data>
+  <data name="Edad" xml:space="preserve">
+    <value>Age</value>
+  </data>
+  <data name="Sexo" xml:space="preserve">
+    <value>Gender</value>
+  </data>
+  <data name="Hombre" xml:space="preserve">
+    <value>Male</value>
+    <comment>Valor del campo Sexo. El plural "Hombres" es el grupo ministerial y se traduce como "Men".</comment>
+  </data>
+  <data name="Mujer" xml:space="preserve">
+    <value>Female</value>
+    <comment>Valor del campo Sexo. El plural "Mujeres" es el grupo ministerial y se traduce como "Women".</comment>
+  </data>
+  <data name="Observaciones" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="País de nacimiento" xml:space="preserve">
+    <value>Country of Birth</value>
+  </data>
+  <data name="Número de hijos" xml:space="preserve">
+    <value>Number of Children</value>
+  </data>
+  <!-- ══ Dirección ════════════════════════════════════════════════════════ -->
+  <data name="Dirección" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Provincia" xml:space="preserve">
+    <value>Province</value>
+  </data>
+  <data name="Municipio" xml:space="preserve">
+    <value>Municipality</value>
+  </data>
+  <data name="Código Postal" xml:space="preserve">
+    <value>Postal Code</value>
+  </data>
+  <data name="CP" xml:space="preserve">
+    <value>Postal Code</value>
+  </data>
+  <!-- ══ Estado civil (los value del select NO se traducen) ═══════════════ -->
+  <data name="Estado civil" xml:space="preserve">
+    <value>Marital Status</value>
+  </data>
+  <data name="Soltero/a" xml:space="preserve">
+    <value>Single</value>
+  </data>
+  <data name="Casado/a" xml:space="preserve">
+    <value>Married</value>
+  </data>
+  <data name="Viudo/a" xml:space="preserve">
+    <value>Widowed</value>
+  </data>
+  <data name="Divorciado/a" xml:space="preserve">
+    <value>Divorced</value>
+  </data>
+  <data name="Separado/a" xml:space="preserve">
+    <value>Separated</value>
+  </data>
+  <data name="Unión de hecho/a" xml:space="preserve">
+    <value>Domestic Partnership</value>
+  </data>
+  <!-- ══ Fechas y bautismo ════════════════════════════════════════════════ -->
+  <data name="Fechas Específicas" xml:space="preserve">
+    <value>Key Dates</value>
+  </data>
+  <data name="Fecha de Llegada a la Iglesia" xml:space="preserve">
+    <value>First Attended</value>
+  </data>
+  <data name="Fecha de Cumpleaños" xml:space="preserve">
+    <value>Date of Birth</value>
+  </data>
+  <data name="Fecha de Boda" xml:space="preserve">
+    <value>Wedding Date</value>
+  </data>
+  <data name="Bautizado" xml:space="preserve">
+    <value>Baptized</value>
+  </data>
+  <data name="Fecha de Bautismo" xml:space="preserve">
+    <value>Baptism Date</value>
+  </data>
+  <data name="Lugar de bautismo" xml:space="preserve">
+    <value>Place of Baptism</value>
+  </data>
+  <!-- ══ Estado del miembro ═══════════════════════════════════════════════ -->
+  <data name="Estado y configuración" xml:space="preserve">
+    <value>Status and Settings</value>
+  </data>
+  <data name="Miembro activo" xml:space="preserve">
+    <value>Active Member</value>
+  </data>
+  <data name="Fecha de Baja (Retiro)" xml:space="preserve">
+    <value>Inactive Since</value>
+  </data>
+  <data name="Alumno VyF" xml:space="preserve">
+    <value>VyF Student</value>
+    <comment>VyF es el nombre propio del curso; no se traduce la sigla.</comment>
+  </data>
+  <data name="Curso acabado" xml:space="preserve">
+    <value>Course Completed</value>
+  </data>
+  <data name="Excluir directorio" xml:space="preserve">
+    <value>Exclude from Directory</value>
+  </data>
+  <data name="Fallecido" xml:space="preserve">
+    <value>Deceased</value>
+  </data>
+  <data name="Fecha de fallecimiento" xml:space="preserve">
+    <value>Date of Death</value>
+  </data>
+  <data name="Activos" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Bajas" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Ver bajas" xml:space="preserve">
+    <value>View inactive</value>
+  </data>
+  <data name="Ver activos" xml:space="preserve">
+    <value>View active</value>
+  </data>
+  <data name="Retroceder Estado" xml:space="preserve">
+    <value>Revert Status</value>
+  </data>
+  <!-- ══ Familia (los value del select NO se traducen) ════════════════════ -->
+  <data name="Familia" xml:space="preserve">
+    <value>Family</value>
+  </data>
+  <data name="Grupo familiar" xml:space="preserve">
+    <value>Household</value>
+  </data>
+  <data name="Datos de la familia" xml:space="preserve">
+    <value>Family Details</value>
+  </data>
+  <data name="Relación con" xml:space="preserve">
+    <value>Related To</value>
+  </data>
+  <data name="Rol en la familia" xml:space="preserve">
+    <value>Family Role</value>
+  </data>
+  <data name="1er grado" xml:space="preserve">
+    <value>1st degree</value>
+  </data>
+  <data name="2do grado" xml:space="preserve">
+    <value>2nd degree</value>
+  </data>
+  <data name="Padre" xml:space="preserve">
+    <value>Father</value>
+  </data>
+  <data name="Madre" xml:space="preserve">
+    <value>Mother</value>
+  </data>
+  <data name="Hijo" xml:space="preserve">
+    <value>Son</value>
+  </data>
+  <data name="Hija" xml:space="preserve">
+    <value>Daughter</value>
+  </data>
+  <data name="Hermano" xml:space="preserve">
+    <value>Brother</value>
+  </data>
+  <data name="Hermana" xml:space="preserve">
+    <value>Sister</value>
+  </data>
+  <data name="Cónyuge" xml:space="preserve">
+    <value>Spouse</value>
+  </data>
+  <data name="Abuelo" xml:space="preserve">
+    <value>Grandfather</value>
+  </data>
+  <data name="Abuela" xml:space="preserve">
+    <value>Grandmother</value>
+  </data>
+  <data name="Nieto" xml:space="preserve">
+    <value>Grandson</value>
+  </data>
+  <data name="Nieta" xml:space="preserve">
+    <value>Granddaughter</value>
+  </data>
+  <data name="Tío" xml:space="preserve">
+    <value>Uncle</value>
+  </data>
+  <data name="Tía" xml:space="preserve">
+    <value>Aunt</value>
+  </data>
+  <data name="Sobrino" xml:space="preserve">
+    <value>Nephew</value>
+  </data>
+  <data name="Sobrina" xml:space="preserve">
+    <value>Niece</value>
+  </data>
+  <data name="Medio hermano" xml:space="preserve">
+    <value>Half-brother</value>
+  </data>
+  <data name="Media hermana" xml:space="preserve">
+    <value>Half-sister</value>
+    <comment>El español decía "Medio hermana", errata corregida al traducir. El value del option sigue siendo Medio_hermana.</comment>
+  </data>
+  <data name="Otro" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <!-- ══ Miembros: listado y modal ════════════════════════════════════════ -->
+  <data name="Resumen" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Lista de Miembros" xml:space="preserve">
+    <value>Member List</value>
+  </data>
+  <data name="Número Miembro" xml:space="preserve">
+    <value>Member ID</value>
+  </data>
+  <data name="Número de Miembro" xml:space="preserve">
+    <value>Member ID</value>
+  </data>
+  <data name="Número de miembro" xml:space="preserve">
+    <value>Member ID</value>
+  </data>
+  <data name="Datos del nuevo miembro" xml:space="preserve">
+    <value>New member details</value>
+  </data>
+  <data name="Añadir nuevo miembro" xml:space="preserve">
+    <value>Add new member</value>
+  </data>
+  <data name="Añadir nuevo visitante" xml:space="preserve">
+    <value>Add new visitor</value>
+  </data>
+  <data name="Asignar Nº Miembro" xml:space="preserve">
+    <value>Assign Member ID</value>
+  </data>
+  <data name="Diezmo individual" xml:space="preserve">
+    <value>Individual Tithe</value>
+  </data>
+  <data name="Diezmo familiar" xml:space="preserve">
+    <value>Family Tithe</value>
+  </data>
+  <data name="Agregar Diezmo Individual" xml:space="preserve">
+    <value>Add Individual Tithe</value>
+  </data>
+  <data name="Agregar Diezmo Familiar" xml:space="preserve">
+    <value>Add Family Tithe</value>
+  </data>
+  <data name="Información principal" xml:space="preserve">
+    <value>Main Information</value>
+  </data>
+  <data name="Información Adicional" xml:space="preserve">
+    <value>Additional Information</value>
+  </data>
+  <data name="Responsable" xml:space="preserve">
+    <value>Assigned Leader</value>
+  </data>
+  <data name="-- Sin responsable --" xml:space="preserve">
+    <value>-- Unassigned --</value>
+  </data>
+  <data name="Privacidad" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Acepta la Ley Orgánica de Protección de Datos (LOPD)" xml:space="preserve">
+    <value>Accepts the Spanish Data Protection Act (LOPD)</value>
+  </data>
+  <!-- ══ Zonas / Grupos / Ministerios ═════════════════════════════════════ -->
+  <data name="Zona" xml:space="preserve">
+    <value>Zone</value>
+  </data>
+  <data name="Grupo" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Ministerio" xml:space="preserve">
+    <value>Ministry</value>
+  </data>
+  <data name="Asignar Zonas / Grupos / Ministerios" xml:space="preserve">
+    <value>Assign Zones / Groups / Ministries</value>
+  </data>
+  <data name="Cada fila es un registro independiente. Un miembro puede tener varias filas con distintas combinaciones de zona, grupo y ministerio." xml:space="preserve">
+    <value>Each row is a separate record. A member can have several rows with different combinations of zone, group and ministry.</value>
+  </data>
+  <data name="Añadir fila" xml:space="preserve">
+    <value>Add row</value>
+  </data>
+  <data name="— Sin zona —" xml:space="preserve">
+    <value>— No zone —</value>
+  </data>
+  <data name="— Sin ministerio —" xml:space="preserve">
+    <value>— No ministry —</value>
+  </data>
+  <data name="— Sin asignar —" xml:space="preserve">
+    <value>— Unassigned —</value>
+  </data>
+  <data name="— Sin grupo —" xml:space="preserve">
+    <value>— No group —</value>
+  </data>
+  <data name="— Sin especificar —" xml:space="preserve">
+    <value>— Not specified —</value>
+  </data>
+  <!-- ══ Selectores y estados de carga ════════════════════════════════════ -->
+  <data name="Selecciona un valor" xml:space="preserve">
+    <value>Select a value</value>
+  </data>
+  <data name="Selecciona una provincia" xml:space="preserve">
+    <value>Select a province</value>
+  </data>
+  <data name="Selecciona un municipio" xml:space="preserve">
+    <value>Select a municipality</value>
+  </data>
+  <data name="Selecciona un país" xml:space="preserve">
+    <value>Select a country</value>
+  </data>
+  <data name="Escribe un nombre para buscar..." xml:space="preserve">
+    <value>Type a name to search...</value>
+  </data>
+  <data name="Cargando..." xml:space="preserve">
+    <value>Loading...</value>
+    <comment>Variante con tres puntos. Distinta de "Cargando…" con puntos suspensivos.</comment>
+  </data>
+  <!-- ══ Mensajes de confirmación y error ═════════════════════════════════ -->
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Aviso" xml:space="preserve">
+    <value>Notice</value>
+  </data>
+  <data name="Atención" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Éxito" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="Perfecto" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Guardado" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="Eliminado" xml:space="preserve">
+    <value>Deleted</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="¿Estás seguro?" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="Desea eliminar al miembro" xml:space="preserve">
+    <value>Do you want to delete the member</value>
+    <comment>Se concatena con el nombre del miembro y un signo de interrogación en el JS.</comment>
+  </data>
+  <data name="Sí, eliminar" xml:space="preserve">
+    <value>Yes, delete</value>
+  </data>
+  <data name="El miembro ha sido eliminado." xml:space="preserve">
+    <value>The member has been deleted.</value>
+  </data>
+  <data name="No se pudo eliminar al miembro" xml:space="preserve">
+    <value>The member could not be deleted</value>
+  </data>
+  <data name="Miembro guardado correctamente" xml:space="preserve">
+    <value>Member saved successfully</value>
+  </data>
+  <data name="Ocurrió un problema al guardar el miembro." xml:space="preserve">
+    <value>Something went wrong while saving the member.</value>
+  </data>
+  <data name="No se pudo cargar las opciones de ZGM." xml:space="preserve">
+    <value>Zone, group and ministry options could not be loaded.</value>
+  </data>
+  <data name="Hay filas sin ninguna zona, grupo ni ministerio. Elimínalas o completa la selección." xml:space="preserve">
+    <value>There are rows with no zone, group or ministry. Remove them or complete the selection.</value>
+  </data>
+  <data name="Asignaciones guardadas correctamente." xml:space="preserve">
+    <value>Assignments saved successfully.</value>
+  </data>
+  <data name="No se pudo guardar la información." xml:space="preserve">
+    <value>The information could not be saved.</value>
+  </data>
+  <data name="Nº asignado" xml:space="preserve">
+    <value>ID assigned</value>
+  </data>
+  <data name="No se pudo obtener el siguiente número." xml:space="preserve">
+    <value>The next number could not be retrieved.</value>
+  </data>
+  <data name="Primero asigna un número de miembro." xml:space="preserve">
+    <value>Assign a member ID first.</value>
+  </data>
+  <data name="Primero debes guardar el miembro antes de retroceder su estado." xml:space="preserve">
+    <value>You must save the member before reverting its status.</value>
+  </data>
+  <data name="¿Retroceder estado?" xml:space="preserve">
+    <value>Revert status?</value>
+  </data>
+  <data name="Esto cambiará el estado del miembro al anterior." xml:space="preserve">
+    <value>This will change the member back to the previous status.</value>
+  </data>
+  <data name="Sí, retroceder" xml:space="preserve">
+    <value>Yes, revert</value>
+  </data>
+  <data name="El estado fue retrocedido." xml:space="preserve">
+    <value>The status was reverted.</value>
+  </data>
+  <data name="No se pudo retroceder el estado." xml:space="preserve">
+    <value>The status could not be reverted.</value>
+  </data>
+  <!-- ══ Avance de estado del congregante ═════════════════════════════════ -->
+  <data name="¿Avanzar estado?" xml:space="preserve">
+    <value>Advance status?</value>
+  </data>
+  <data name="Esto cambiará el estado del miembro al siguiente." xml:space="preserve">
+    <value>This will move the member to the next status.</value>
+  </data>
+  <data name="Sí, avanzar" xml:space="preserve">
+    <value>Yes, advance</value>
+  </data>
+  <data name="El estado fue avanzado." xml:space="preserve">
+    <value>The status was advanced.</value>
+  </data>
+  <data name="No se pudo avanzar el estado." xml:space="preserve">
+    <value>The status could not be advanced.</value>
+  </data>
+  <data name="Primero debes guardar el miembro antes de avanzar su estado." xml:space="preserve">
+    <value>You must save the member before advancing its status.</value>
+  </data>
+  <data name="Se guardarán los cambios y el miembro pasará al estado Miembro. Si no tiene número de miembro, se le asignará automáticamente el siguiente disponible." xml:space="preserve">
+    <value>Changes will be saved and the person will become a Member. If they have no member ID, the next available one will be assigned automatically.</value>
+  </data>
+  <data name="Campos obligatorios" xml:space="preserve">
+    <value>Required fields</value>
+  </data>
+  <data name="Nombre y apellido son obligatorios." xml:space="preserve">
+    <value>First name and last name are required.</value>
+  </data>
+  <!-- ══ Meses ════════════════════════════════════════════════════════════ -->
+  <data name="Enero" xml:space="preserve"><value>January</value></data>
+  <data name="Febrero" xml:space="preserve"><value>February</value></data>
+  <data name="Marzo" xml:space="preserve"><value>March</value></data>
+  <data name="Abril" xml:space="preserve"><value>April</value></data>
+  <data name="Mayo" xml:space="preserve"><value>May</value></data>
+  <data name="Junio" xml:space="preserve"><value>June</value></data>
+  <data name="Julio" xml:space="preserve"><value>July</value></data>
+  <data name="Agosto" xml:space="preserve"><value>August</value></data>
+  <data name="Septiembre" xml:space="preserve"><value>September</value></data>
+  <data name="Octubre" xml:space="preserve"><value>October</value></data>
+  <data name="Noviembre" xml:space="preserve"><value>November</value></data>
+  <data name="Diciembre" xml:space="preserve"><value>December</value></data>
+  <!-- ══ Días y turnos ════════════════════════════════════════════════════ -->
+  <data name="Lunes" xml:space="preserve"><value>Monday</value></data>
+  <data name="Martes" xml:space="preserve"><value>Tuesday</value></data>
+  <data name="Miércoles" xml:space="preserve"><value>Wednesday</value></data>
+  <data name="Jueves" xml:space="preserve"><value>Thursday</value></data>
+  <data name="Viernes" xml:space="preserve"><value>Friday</value></data>
+  <data name="Sábado" xml:space="preserve"><value>Saturday</value></data>
+  <data name="Domingo" xml:space="preserve"><value>Sunday</value></data>
+  <data name="Mañana" xml:space="preserve">
+    <value>Morning</value>
+    <comment>Turno del día, no el adverbio "mañana" de fecha.</comment>
+  </data>
+  <data name="Tarde" xml:space="preserve"><value>Afternoon</value></data>
+  <data name="Noche" xml:space="preserve"><value>Evening</value></data>
+  <data name="Día" xml:space="preserve"><value>Day</value></data>
+  <data name="Mes" xml:space="preserve"><value>Month</value></data>
+  <data name="Año" xml:space="preserve"><value>Year</value></data>
+  <data name="Día de la semana" xml:space="preserve"><value>Day of week</value></data>
+  <data name="Día específico" xml:space="preserve"><value>Specific day</value></data>
+  <data name="Mes completo" xml:space="preserve"><value>Full month</value></data>
+  <data name="Año completo" xml:space="preserve"><value>Full year</value></data>
+  <data name="Turno" xml:space="preserve"><value>Shift</value></data>
+  <data name="Periodicidad" xml:space="preserve"><value>Frequency</value></data>
+  <data name="Fecha" xml:space="preserve"><value>Date</value></data>
+  <data name="Fecha de inicio" xml:space="preserve"><value>Start date</value></data>
+  <data name="Fecha de registro" xml:space="preserve"><value>Registration date</value></data>
+  <data name="Hora inicio" xml:space="preserve"><value>Start time</value></data>
+  <data name="Hora fin" xml:space="preserve"><value>End time</value></data>
+  <data name="Desde" xml:space="preserve"><value>From</value></data>
+  <data name="Hasta" xml:space="preserve"><value>To</value></data>
+  <!-- ══ Acciones ═════════════════════════════════════════════════════════ -->
+  <data name="Eliminar" xml:space="preserve"><value>Delete</value></data>
+  <data name="Ver" xml:space="preserve"><value>View</value></data>
+  <data name="Vista" xml:space="preserve"><value>View</value></data>
+  <data name="Todos" xml:space="preserve"><value>All</value></data>
+  <data name="Sí" xml:space="preserve"><value>Yes</value></data>
+  <data name="Añadir gasto" xml:space="preserve"><value>Add expense</value></data>
+  <data name="Añadir joven" xml:space="preserve"><value>Add youth</value></data>
+  <data name="Añadir matrimonio" xml:space="preserve"><value>Add couple</value></data>
+  <data name="Añadir miembro a esta familia" xml:space="preserve"><value>Add member to this family</value></data>
+  <data name="Añadir nueva Zona" xml:space="preserve"><value>Add new zone</value></data>
+  <data name="Añadir nueva asistencia" xml:space="preserve"><value>Add new attendance</value></data>
+  <data name="Añadir nueva familia" xml:space="preserve"><value>Add new family</value></data>
+  <data name="Añadir nuevo Ministerio" xml:space="preserve"><value>Add new ministry</value></data>
+  <data name="Añadir nuevo concepto" xml:space="preserve"><value>Add new giving category</value></data>
+  <data name="Añadir nuevo diezmo" xml:space="preserve"><value>Add new tithe</value></data>
+  <data name="Añadir nuevo grupo" xml:space="preserve"><value>Add new group</value></data>
+  <data name="Añadir nuevo usuario" xml:space="preserve"><value>Add new user</value></data>
+  <data name="Asignar miembro al ministerio" xml:space="preserve"><value>Assign member to ministry</value></data>
+  <!-- ══ Búsquedas y marcadores de posición ═══════════════════════════════ -->
+  <data name="Buscar miembro" xml:space="preserve"><value>Search member</value></data>
+  <data name="Buscar miembro…" xml:space="preserve"><value>Search member…</value></data>
+  <data name="Buscar grupo..." xml:space="preserve"><value>Search group...</value></data>
+  <data name="Buscar líder..." xml:space="preserve"><value>Search leader...</value></data>
+  <data name="Buscar ministerio..." xml:space="preserve"><value>Search ministry...</value></data>
+  <data name="Buscar zona..." xml:space="preserve"><value>Search zone...</value></data>
+  <data name="Buscar por nombre..." xml:space="preserve"><value>Search by name...</value></data>
+  <data name="Busca por nombre o apellidos…" xml:space="preserve"><value>Search by first or last name…</value></data>
+  <data name="Busca un miembro para añadir…" xml:space="preserve"><value>Search for a member to add…</value></data>
+  <data name="Busca un miembro…" xml:space="preserve"><value>Search for a member…</value></data>
+  <data name="Escriba al menos 2 caracteres..." xml:space="preserve"><value>Type at least 2 characters...</value></data>
+  <data name="Escribe el nombre…" xml:space="preserve"><value>Type the name…</value></data>
+  <data name="Escribe nombre o apellidos..." xml:space="preserve"><value>Type first or last name...</value></data>
+  <data name="Calle, número..." xml:space="preserve"><value>Street, number...</value></data>
+  <data name="Máx. 255 caracteres..." xml:space="preserve"><value>Max. 255 characters...</value></data>
+  <data name="Se rellena al seleccionar..." xml:space="preserve"><value>Filled in on selection...</value></data>
+  <data name="Opcional…" xml:space="preserve"><value>Optional…</value></data>
+  <data name="Ej: 14" xml:space="preserve"><value>E.g. 14</value></data>
+  <data name="Ej: 24" xml:space="preserve"><value>E.g. 24</value></data>
+  <data name="Ej: 198" xml:space="preserve"><value>E.g. 198</value></data>
+  <data name="Ej: Culto Dominical" xml:space="preserve"><value>E.g. Sunday Service</value></data>
+  <data name="Ej: Diezmo, Ofrenda, Primicia" xml:space="preserve"><value>E.g. Tithe, Offering, Firstfruits</value></data>
+  <data name="Ej: F, FAM, VFF..." xml:space="preserve"><value>E.g. F, FAM, VFF...</value></data>
+  <data name="Ej: M, IND, VFF..." xml:space="preserve"><value>E.g. M, IND, VFF...</value></data>
+  <data name="Ej: M, MBR..." xml:space="preserve"><value>E.g. M, MBR...</value></data>
+  <data name="Ej: Factura de luz de noviembre…" xml:space="preserve"><value>E.g. November electricity bill…</value></data>
+  <data name="Ej: Guitarrista" xml:space="preserve"><value>E.g. Guitarist</value></data>
+  <data name="Ej: Retiro de Jóvenes, Culto de Navidad…" xml:space="preserve"><value>E.g. Youth Retreat, Christmas Service…</value></data>
+  <data name="Ej: Rubén y Sady" xml:space="preserve"><value>E.g. Rubén and Sady</value></data>
+  <data name="Ej: Sala 1, Templo, Aula…" xml:space="preserve"><value>E.g. Room 1, Sanctuary, Classroom…</value></data>
+  <!-- ══ Selectores ═══════════════════════════════════════════════════════ -->
+  <data name="-- Selecciona un rol --" xml:space="preserve"><value>-- Select a role --</value></data>
+  <data name="-- Selecciona un tipo --" xml:space="preserve"><value>-- Select a type --</value></data>
+  <data name="Selecciona un rol" xml:space="preserve"><value>Select a role</value></data>
+  <data name="Selecciona una zona" xml:space="preserve"><value>Select a zone</value></data>
+  <data name="— Selecciona —" xml:space="preserve"><value>— Select —</value></data>
+  <data name="— Selecciona un culto —" xml:space="preserve"><value>— Select a service —</value></data>
+  <data name="— Selecciona un servicio —" xml:space="preserve"><value>— Select a service —</value></data>
+  <data name="— Sin sala —" xml:space="preserve"><value>— No room —</value></data>
+  <data name="— Sin seguidor —" xml:space="preserve"><value>— No follow-up couple —</value></data>
+  <data name="— Sin zona configurada —" xml:space="preserve"><value>— No zone configured —</value></data>
+  <!-- ══ Campos y cabeceras ═══════════════════════════════════════════════ -->
+  <data name="Descripción" xml:space="preserve"><value>Description</value></data>
+  <data name="Descripción del grupo" xml:space="preserve"><value>Group description</value></data>
+  <data name="Estado" xml:space="preserve"><value>Status</value></data>
+  <data name="Activo" xml:space="preserve"><value>Active</value></data>
+  <data name="Tipo" xml:space="preserve"><value>Type</value></data>
+  <data name="Tipo cuenta" xml:space="preserve"><value>Account type</value></data>
+  <data name="Tipo de calendario" xml:space="preserve"><value>Calendar type</value></data>
+  <data name="Tipo de relación" xml:space="preserve"><value>Relationship type</value></data>
+  <data name="Rol" xml:space="preserve"><value>Role</value></data>
+  <data name="Rol / Función" xml:space="preserve"><value>Role / Function</value></data>
+  <data name="Rol en familia" xml:space="preserve"><value>Family role</value></data>
+  <data name="Rol requerido" xml:space="preserve"><value>Required role</value></data>
+  <data name="Color" xml:space="preserve"><value>Color</value></data>
+  <data name="Cantidad" xml:space="preserve"><value>Amount</value></data>
+  <data name="Cantidad de integrantes" xml:space="preserve"><value>Number of members</value></data>
+  <data name="Cantidad necesaria" xml:space="preserve"><value>Required amount</value></data>
+  <data name="Nº Pago" xml:space="preserve"><value>Payment no.</value></data>
+  <data name="Concepto" xml:space="preserve"><value>Giving Category</value></data>
+  <data name="Nombre del Concepto" xml:space="preserve"><value>Giving category name</value></data>
+  <data name="Miembro" xml:space="preserve"><value>Member</value></data>
+  <data name="Miembro a cargo" xml:space="preserve"><value>Member in charge</value></data>
+  <data name="Persona a cargo" xml:space="preserve"><value>Person in charge</value></data>
+  <data name="Encargados" xml:space="preserve">
+    <value>Coordinators</value>
+    <comment>Quienes dirigen un grupo. Distinto de "Responsable" (Assigned Leader), que es quien atiende a un congregante.</comment>
+  </data>
+  <data name="Nombre del miembro" xml:space="preserve"><value>Member name</value></data>
+  <data name="Apellidos del miembro" xml:space="preserve"><value>Member last name</value></data>
+  <data name="Información del miembro" xml:space="preserve"><value>Member information</value></data>
+  <data name="Nombre Familia" xml:space="preserve"><value>Family name</value></data>
+  <data name="Nombre familiar" xml:space="preserve"><value>Family name</value></data>
+  <data name="Nombre Zona" xml:space="preserve"><value>Zone name</value></data>
+  <data name="Nombre Ministerio" xml:space="preserve"><value>Ministry name</value></data>
+  <data name="Nombre ministerio" xml:space="preserve"><value>Ministry name</value></data>
+  <data name="Nombre del líder" xml:space="preserve"><value>Leader name</value></data>
+  <data name="Nombre del culto / servicio" xml:space="preserve"><value>Service name</value></data>
+  <data name="Culto / Servicio" xml:space="preserve"><value>Service</value></data>
+  <data name="Servicio / Culto" xml:space="preserve"><value>Service</value></data>
+  <data name="Módulo" xml:space="preserve"><value>Module</value></data>
+  <data name="Acceso app" xml:space="preserve"><value>App access</value></data>
+  <data name="Crear y Editar" xml:space="preserve"><value>Create and Edit</value></data>
+  <!-- ══ Salas y calendario ═══════════════════════════════════════════════ -->
+  <data name="Sala" xml:space="preserve"><value>Room</value></data>
+  <data name="Nueva sala" xml:space="preserve"><value>New room</value></data>
+  <data name="Libre" xml:space="preserve"><value>Available</value></data>
+  <data name="Reservado" xml:space="preserve"><value>Booked</value></data>
+  <data name="Reservas futuras" xml:space="preserve"><value>Upcoming bookings</value></data>
+  <data name="Fecha reserva" xml:space="preserve"><value>Booking date</value></data>
+  <data name="Fecha y hora de reserva" xml:space="preserve"><value>Booking date and time</value></data>
+  <data name="Zona que reserva" xml:space="preserve"><value>Booking zone</value></data>
+  <data name="Zona responsable" xml:space="preserve">
+    <value>Zone on Duty</value>
+    <comment>Turno rotativo, no un cargo.</comment>
+  </data>
+  <data name="Zona organizadora" xml:space="preserve"><value>Organizing zone</value></data>
+  <data name="Zona destinada" xml:space="preserve"><value>Assigned zone</value></data>
+  <data name="Zona de jóvenes" xml:space="preserve"><value>Youth zone</value></data>
+  <data name="Evento" xml:space="preserve"><value>Event</value></data>
+  <data name="Nuevo evento" xml:space="preserve"><value>New event</value></data>
+  <data name="Bloques horarios" xml:space="preserve"><value>Time blocks</value></data>
+  <data name="Especial" xml:space="preserve"><value>Special</value></data>
+  <!-- ══ Seguimiento y discipulado ════════════════════════════════════════ -->
+  <data name="Nuevo seguimiento" xml:space="preserve"><value>New follow-up</value></data>
+  <data name="Datos del seguimiento" xml:space="preserve"><value>Follow-up details</value></data>
+  <data name="Llamada" xml:space="preserve"><value>Call</value></data>
+  <data name="Visita" xml:space="preserve"><value>Visit</value></data>
+  <data name="Oración" xml:space="preserve"><value>Prayer</value></data>
+  <data name="Consejería" xml:space="preserve"><value>Counseling</value></data>
+  <data name="Asignación pastoral" xml:space="preserve"><value>Pastoral assignment</value></data>
+  <data name="Nuevo líder" xml:space="preserve"><value>New leader</value></data>
+  <data name="Joven" xml:space="preserve"><value>Youth</value></data>
+  <data name="Edad mínima" xml:space="preserve"><value>Minimum age</value></data>
+  <data name="Edad máxima" xml:space="preserve"><value>Maximum age</value></data>
+  <data name="Nuevo matrimonio" xml:space="preserve"><value>New couple</value></data>
+  <data name="Seguidor" xml:space="preserve">
+    <value>Follow-up Couple</value>
+    <comment>La pareja que acompaña a esta. Consistente con Seguimiento = Follow-up.</comment>
+  </data>
+  <!-- ══ Pantallas de datos ═══════════════════════════════════════════════ -->
+  <data name="Datos de la Asistencia" xml:space="preserve"><value>Attendance details</value></data>
+  <data name="Datos de la Zona" xml:space="preserve"><value>Zone details</value></data>
+  <data name="Datos de la nueva familia" xml:space="preserve"><value>New family details</value></data>
+  <data name="Datos del Concepto" xml:space="preserve"><value>Giving category details</value></data>
+  <data name="Datos del nuevo Concepto" xml:space="preserve"><value>New giving category details</value></data>
+  <data name="Datos del culto" xml:space="preserve"><value>Service details</value></data>
+  <data name="Datos del ministerio" xml:space="preserve"><value>Ministry details</value></data>
+  <data name="Datos del nuevo grupo" xml:space="preserve"><value>New group details</value></data>
+  <data name="Datos del usuario" xml:space="preserve"><value>User details</value></data>
+  <!-- ══ Economía ═════════════════════════════════════════════════════════ -->
+  <data name="Devuelto" xml:space="preserve"><value>Refunded</value></data>
+  <data name="¿Devuelto al miembro?" xml:space="preserve"><value>Refunded to the member?</value></data>
+  <data name="Cuenta Congregacional" xml:space="preserve"><value>Congregational Account</value></data>
+  <data name="Cuenta Propia" xml:space="preserve"><value>Own Account</value></data>
+  <data name="Prefijo Diezmo Individual" xml:space="preserve"><value>Individual Tithe Prefix</value></data>
+  <data name="Prefijo Diezmo Familiar" xml:space="preserve"><value>Family Tithe Prefix</value></data>
+  <data name="Prefijo Número de Miembro" xml:space="preserve"><value>Member ID Prefix</value></data>
+  <data name="Configuración de Diezmos y Miembros" xml:space="preserve"><value>Tithes and Members Settings</value></data>
+  <data name="Configuración de Jóvenes" xml:space="preserve"><value>Youth Settings</value></data>
+  <data name="Configuración de Servicios" xml:space="preserve"><value>Services Settings</value></data>
+  <!-- ══ Acceso ═══════════════════════════════════════════════════════════ -->
+  <data name="Contraseña" xml:space="preserve"><value>Password</value></data>
+  <data name="Contraseña actual" xml:space="preserve"><value>Current password</value></data>
+  <data name="Nueva contraseña" xml:space="preserve"><value>New password</value></data>
+  <data name="Confirmar nueva contraseña" xml:space="preserve"><value>Confirm new password</value></data>
+  <data name="Bienvenido a Congrega!" xml:space="preserve"><value>Welcome to Congrega!</value></data>
+  <!-- ══ Totales del panel ════════════════════════════════════════════════ -->
+  <data name="Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Total de Miembros" xml:space="preserve"><value>Total Members</value></data>
+  <data name="Total de Miembros de Baja" xml:space="preserve"><value>Total Inactive Members</value></data>
+  <data name="Total de Visitantes" xml:space="preserve"><value>Total Visitors</value></data>
+  <data name="Total de Simpatizantes" xml:space="preserve"><value>Total Regular Attendees</value></data>
+  <data name="Total En Proceso" xml:space="preserve"><value>Total In Process</value></data>
+  <data name="Total de Familias" xml:space="preserve"><value>Total Families</value></data>
+  <data name="Total de Matrimonios" xml:space="preserve"><value>Total Marriages</value></data>
+  <data name="Total de Mujeres" xml:space="preserve"><value>Total Women</value></data>
+  <data name="Total de Niños" xml:space="preserve"><value>Total Children</value></data>
+  <data name="Total de Líderes" xml:space="preserve"><value>Total Leaders</value></data>
+  <data name="Total de asistidos" xml:space="preserve"><value>Total attended</value></data>
+  <!-- ══ Confirmaciones genéricas ═════════════════════════════════════════ -->
+  <data name="Sí, quitar" xml:space="preserve"><value>Yes, remove</value></data>
+  <data name="Sí, añadir" xml:space="preserve"><value>Yes, add</value></data>
+  <data name="Error de conexión." xml:space="preserve"><value>Connection error.</value></data>
+  <data name="Error de conexión con el servidor." xml:space="preserve"><value>Server connection error.</value></data>
+  <data name="Error en la solicitud de eliminación." xml:space="preserve"><value>Error in the delete request.</value></data>
+  <data name="Restricción" xml:space="preserve"><value>Restriction</value></data>
+  <data name="Restricción de Acceso" xml:space="preserve"><value>Access Restriction</value></data>
+  <!-- ══ Asistencia ═══════════════════════════════════════════════════════ -->
+  <data name="¿Eliminar asistencia?" xml:space="preserve"><value>Delete attendance?</value></data>
+  <data name="¿Desea eliminar el registro con ID" xml:space="preserve">
+    <value>Do you want to delete the record with ID</value>
+    <comment>Se concatena con el ID y un signo de interrogación en el JS.</comment>
+  </data>
+  <!-- ══ Familias ═════════════════════════════════════════════════════════ -->
+  <data name="Guarda la familia antes de añadir miembros." xml:space="preserve"><value>Save the family before adding members.</value></data>
+  <data name="Selecciona el tipo de relación familiar." xml:space="preserve"><value>Select the family relationship type.</value></data>
+  <data name="¿Desea eliminar a esta familia?" xml:space="preserve"><value>Do you want to delete this family?</value></data>
+  <data name="¿Quitar miembro?" xml:space="preserve"><value>Remove member?</value></data>
+  <data name="¿Desea desvincular a" xml:space="preserve">
+    <value>Do you want to unlink</value>
+    <comment>Se concatena con el nombre y "de esta familia?" en el JS.</comment>
+  </data>
+  <data name="de esta familia?" xml:space="preserve"><value>from this family?</value></data>
+  <!-- ══ Jóvenes y zonas de discipulado ═══════════════════════════════════ -->
+  <data name="Quitar de jóvenes" xml:space="preserve"><value>Remove from youth</value></data>
+  <data name="¿Quitar de jóvenes?" xml:space="preserve"><value>Remove from youth?</value></data>
+  <data name="¿Quitar de la zona?" xml:space="preserve"><value>Remove from zone?</value></data>
+  <data name="Introduce valores numéricos válidos para el rango de edad." xml:space="preserve"><value>Enter valid numeric values for the age range.</value></data>
+  <data name="La edad mínima debe ser menor que la edad máxima." xml:space="preserve"><value>The minimum age must be lower than the maximum age.</value></data>
+  <data name="No se pudo guardar la configuración." xml:space="preserve"><value>The settings could not be saved.</value></data>
+  <!-- ══ Conceptos ════════════════════════════════════════════════════════ -->
+  <data name="El nombre del concepto no puede ser vacío." xml:space="preserve"><value>The giving category name cannot be empty.</value></data>
+  <data name="El Administrador Global no puede crear conceptos sin seleccionar una sede. Use la opción de cambio de sede." xml:space="preserve"><value>The Global Administrator cannot create giving categories without selecting a campus. Use the campus switcher.</value></data>
+  <data name="¿Desea eliminar el concepto:" xml:space="preserve"><value>Do you want to delete the giving category:</value></data>
+  <!-- ══ Diezmos ══════════════════════════════════════════════════════════ -->
+  <data name="Anónimo" xml:space="preserve"><value>Anonymous</value></data>
+  <data name="El concepto y la cantidad deben ser válidos (no cero o vacíos)." xml:space="preserve"><value>The giving category and amount must be valid (not zero or empty).</value></data>
+  <data name="Para un miembro no anónimo, debe seleccionar un miembro de la lista de sugerencias o usar el campo Número de Miembro." xml:space="preserve"><value>For a non-anonymous member you must pick a member from the suggestions or use the Member ID field.</value></data>
+  <data name="¿Desea eliminar este diezmo?" xml:space="preserve"><value>Do you want to delete this tithe?</value></data>
+  <data name="no es un número de miembro válido." xml:space="preserve"><value>is not a valid member ID.</value></data>
+  <data name="No se encontró un miembro con el Número de Miembro" xml:space="preserve"><value>No member found with Member ID</value></data>
+  <!-- ══ Gastos ═══════════════════════════════════════════════════════════ -->
+  <data name="La razón del gasto no puede estar vacía." xml:space="preserve"><value>The expense reason cannot be empty.</value></data>
+  <data name="Razón…" xml:space="preserve"><value>Reason…</value></data>
+  <data name="Se eliminará esta línea del detalle de pago." xml:space="preserve"><value>This line will be removed from the payment detail.</value></data>
+  <data name="¿Eliminar gasto?" xml:space="preserve"><value>Delete expense?</value></data>
+  <data name="¿Eliminar línea?" xml:space="preserve"><value>Delete line?</value></data>
+  <!-- ══ Grupos, zonas y ministerios ══════════════════════════════════════ -->
+  <data name="La descripción del grupo no puede estar vacía." xml:space="preserve"><value>The group description cannot be empty.</value></data>
+  <data name="¿Desea eliminar este grupo?" xml:space="preserve"><value>Do you want to delete this group?</value></data>
+  <data name="Nombre de ministerio y líder no pueden ser vacíos." xml:space="preserve"><value>Ministry name and leader cannot be empty.</value></data>
+  <data name="Nombre de zona y líder no pueden ser vacíos." xml:space="preserve"><value>Zone name and leader cannot be empty.</value></data>
+  <data name="¿Desea eliminar la Zona:" xml:space="preserve"><value>Do you want to delete the zone:</value></data>
+  <data name="Añadir miembro al ministerio" xml:space="preserve"><value>Add member to ministry</value></data>
+  <data name="Selecciona un miembro de la lista de búsqueda." xml:space="preserve"><value>Select a member from the search list.</value></data>
+  <data name="Sin roles configurados todavía." xml:space="preserve"><value>No roles configured yet.</value></data>
+  <data name="sin rol" xml:space="preserve"><value>no role</value></data>
+  <!-- ══ Usuarios ═════════════════════════════════════════════════════════ -->
+  <data name="Debe seleccionar un Rol válido." xml:space="preserve"><value>You must select a valid role.</value></data>
+  <data name="La contraseña es obligatoria para nuevos usuarios." xml:space="preserve"><value>A password is required for new users.</value></data>
+  <data name="No se encontró el ID del usuario para eliminar" xml:space="preserve"><value>The user ID to delete was not found</value></data>
+  <data name="No se pudo obtener la información del usuario a eliminar." xml:space="preserve"><value>The user information to delete could not be retrieved.</value></data>
+  <data name="¿Desea eliminar al usuario" xml:space="preserve"><value>Do you want to delete the user</value></data>
+  <!-- ══ Salas ════════════════════════════════════════════════════════════ -->
+  <data name="¿Deseas eliminar la sala" xml:space="preserve"><value>Do you want to delete the room</value></data>
+  <data name="Período" xml:space="preserve"><value>Period</value></data>
+  <!-- ══ Mensajes con datos intercalados ══════════════════════════════════
+       Los marcadores {0}, {1}... los rellena window.fmt() en el navegador.
+       Se mantiene la frase entera como clave para que el inglés pueda colocar
+       el dato donde le corresponda, en vez de heredar el orden del español. -->
+  <data name="Este miembro tiene {0} años y está fuera del rango de jóvenes ({1}–{2}). ¿Deseas añadirlo igualmente?" xml:space="preserve">
+    <value>This member is {0} and outside the youth age range ({1}–{2}). Do you want to add them anyway?</value>
+  </data>
+  <data name="Este miembro tiene {0} años, fuera del rango configurado ({1}–{2}). Se pedirá confirmación al guardar." xml:space="preserve">
+    <value>This member is {0}, outside the configured range ({1}–{2}). You will be asked to confirm when saving.</value>
+  </data>
+  <data name="Se eliminará a &quot;{0}&quot; de la zona de jóvenes. Sus otros datos no se verán afectados." xml:space="preserve">
+    <value>"{0}" will be removed from the youth zone. Their other data will not be affected.</value>
+  </data>
+  <data name="Se eliminará a &quot;{0}&quot; de la zona de {1}. Sus otros datos no se verán afectados." xml:space="preserve">
+    <value>"{0}" will be removed from the {1} zone. Their other data will not be affected.</value>
+  </data>
+  <data name="¿Desea eliminar el matrimonio &quot;{0}&quot;?" xml:space="preserve">
+    <value>Do you want to delete the couple "{0}"?</value>
+  </data>
+  <data name="¿Quitar a {0} ({1})?" xml:space="preserve">
+    <value>Remove {0} ({1})?</value>
+  </data>
+  <data name="El valor &quot;{0}&quot; no es un número de miembro válido." xml:space="preserve">
+    <value>"{0}" is not a valid member ID.</value>
+  </data>
+  <data name="No se encontró un miembro con el Número de Miembro {0}." xml:space="preserve">
+    <value>No member found with Member ID {0}.</value>
+  </data>
+  <data name="Se eliminará el gasto nº {0} de {1} € ({2})." xml:space="preserve">
+    <value>Expense no. {0} for €{1} ({2}) will be deleted.</value>
+  </data>
+  <data name="Nº de miembro: {0}." xml:space="preserve">
+    <value>Member ID: {0}.</value>
+  </data>
+  <data name="Nº asignado: {0}" xml:space="preserve">
+    <value>ID assigned: {0}</value>
+  </data>
+  <data name="Ministra" xml:space="preserve">
+    <value>Ministers</value>
+    <comment>PENDIENTE DE CONFIRMAR: cabecera de la tabla de Servicios. Se interpretó como "quién ministra". Si designa otra cosa, corregir aquí.</comment>
+  </data>
+  <!-- ══ Añadido en el barrido completo de vistas ═════════════════════ -->
+  <data name="&quot;Animo y seguimiento semanal acordado.&quot;" xml:space="preserve"><value>"Encouragement and weekly follow-up agreed."</value></data>
+  <data name="&quot;Necesita apoyo en su situación familiar...&quot;" xml:space="preserve"><value>"Needs support with their family situation..."</value></data>
+  <data name="(Solo para Rol Miembro)" xml:space="preserve"><value>(Member role only)</value></data>
+  <data name="(Sí = puede dirigir el servicio de alabanza)" xml:space="preserve"><value>(Yes = can lead the worship service)</value></data>
+  <data name="(si ocupa varios días)" xml:space="preserve"><value>(if it spans several days)</value></data>
+  <data name="**Donante Anónimo**" xml:space="preserve"><value>**Anonymous Donor**</value></data>
+  <data name="100% en la nube" xml:space="preserve"><value>100% cloud-based</value></data>
+  <data name="3 módulos" xml:space="preserve"><value>3 modules</value></data>
+  <data name="5 módulos" xml:space="preserve"><value>5 modules</value></data>
+  <data name="Abr" xml:space="preserve"><value>Apr</value></data>
+  <data name="Acceder a la app" xml:space="preserve"><value>Go to the app</value></data>
+  <data name="Acceso" xml:space="preserve"><value>Access</value></data>
+  <data name="Acceso a" xml:space="preserve"><value>Access to</value></data>
+  <data name="Acceso completo" xml:space="preserve"><value>Full access</value></data>
+  <data name="Acompaña a cada persona en su camino de fe" xml:space="preserve"><value>Walk with each person on their journey of faith</value></data>
+  <data name="Acompañamiento integral con registro de visitas, llamadas y consejerías por congregante." xml:space="preserve"><value>Complete care with a record of visits, calls and counselling per congregant.</value></data>
+  <data name="Actualizaciones automáticas" xml:space="preserve"><value>Automatic updates</value></data>
+  <data name="Actualizar" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Adultos" xml:space="preserve"><value>Adults</value></data>
+  <data name="Agregar a Google Calendar" xml:space="preserve"><value>Add to Google Calendar</value></data>
+  <data name="Ajustes" xml:space="preserve"><value>Settings</value></data>
+  <data name="Ajustes → Jóvenes" xml:space="preserve"><value>Settings → Youth</value></data>
+  <data name="Alabanza" xml:space="preserve"><value>Worship</value></data>
+  <data name="Alabanza:" xml:space="preserve"><value>Worship:</value></data>
+  <data name="Apellido del miembro" xml:space="preserve"><value>Member last name</value></data>
+  <data name="Asignación de líderes y encargados" xml:space="preserve"><value>Assign leaders and coordinators</value></data>
+  <data name="Asistencia (dom.)" xml:space="preserve"><value>Attendance (Sun.)</value></data>
+  <data name="Asistencia al Culto" xml:space="preserve"><value>Service Attendance</value></data>
+  <data name="Audiovisuales" xml:space="preserve"><value>Audiovisual</value></data>
+  <data name="Audiovisuales:" xml:space="preserve"><value>Audiovisual:</value></data>
+  <data name="Ayuda" xml:space="preserve"><value>Help</value></data>
+  <data name="Añadir" xml:space="preserve"><value>Add</value></data>
+  <data name="Añadir bloque" xml:space="preserve"><value>Add block</value></data>
+  <data name="Añadir miembro" xml:space="preserve"><value>Add member</value></data>
+  <data name="Añadir nuevo culto" xml:space="preserve"><value>Add new service</value></data>
+  <data name="Bienvenida" xml:space="preserve"><value>Welcome</value></data>
+  <data name="Bloque N:" xml:space="preserve"><value>Block N:</value></data>
+  <data name="Busca un miembro para ver su historial de seguimiento." xml:space="preserve"><value>Search for a member to see their follow-up history.</value></data>
+  <data name="Buscar" xml:space="preserve"><value>Search</value></data>
+  <data name="Buscar congregante..." xml:space="preserve"><value>Search congregant...</value></data>
+  <data name="Buscar miembro" xml:space="preserve"><value>Search member</value></data>
+  <data name="Búsqueda avanzada y filtros por sede" xml:space="preserve"><value>Advanced search and filters by campus</value></data>
+  <data name="Búsqueda y filtros avanzados" xml:space="preserve"><value>Advanced search and filters</value></data>
+  <data name="CP:" xml:space="preserve"><value>Postal code:</value></data>
+  <data name="Cada seguimiento queda asociado al líder o pastor que lo realizó." xml:space="preserve"><value>Each follow-up is linked to the leader or pastor who carried it out.</value></data>
+  <data name="Calendario" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Calendarios" xml:space="preserve"><value>Calendars</value></data>
+  <data name="Cambiar al entorno de desarrollo mostrará información más detallada sobre el error." xml:space="preserve"><value>Switching to the Development environment will show more detailed information about the error.</value></data>
+  <data name="Cambiar contraseña" xml:space="preserve"><value>Change password</value></data>
+  <data name="Cambiar contraseña - Congrega" xml:space="preserve"><value>Change password - Congrega</value></data>
+  <data name="Cambiar grupo" xml:space="preserve"><value>Change group</value></data>
+  <data name="Cantidad (€)" xml:space="preserve"><value>Amount (€)</value></data>
+  <data name="Cantidad&amp;nbsp;(€)" xml:space="preserve"><value>Amount&amp;nbsp;(€)</value></data>
+  <data name="Características" xml:space="preserve"><value>Features</value></data>
+  <data name="Ciudad" xml:space="preserve"><value>City</value></data>
+  <data name="Completa el formulario y nos pondremos en contacto contigo en menos de 24 horas para ayudarte a encontrar el plan que mejor se adapte a tu iglesia." xml:space="preserve"><value>Fill in the form and we will get in touch within 24 hours to help you find the plan that best fits your church.</value></data>
+  <data name="Conceptos personalizados" xml:space="preserve"><value>Custom categories</value></data>
+  <data name="Configura tu iglesia" xml:space="preserve"><value>Set up your church</value></data>
+  <data name="Configura tus propios conceptos: diezmo, ofrenda, misiones, fondo pastoral…" xml:space="preserve"><value>Set up your own categories: tithe, offering, missions, pastoral fund…</value></data>
+  <data name="Configuración de conceptos personalizados" xml:space="preserve"><value>Custom category setup</value></data>
+  <data name="Configuración de la aplicación → Cultos y Servicios" xml:space="preserve"><value>Application Settings → Services</value></data>
+  <data name="Configuración de la aplicación → Servicios" xml:space="preserve"><value>Application Settings → Services</value></data>
+  <data name="Configuración del calendario" xml:space="preserve"><value>Calendar Settings</value></data>
+  <data name="Congrega CRM — Panel de administración" xml:space="preserve"><value>Congrega CRM — Admin panel</value></data>
+  <data name="Congrega CRM — Software de Gestión para Iglesias" xml:space="preserve"><value>Congrega CRM — Church Management Software</value></data>
+  <data name="Congrega es el CRM pensado para comunidades de fe. Controla congregantes, grupos, finanzas, asistencia y mucho más desde una sola plataforma." xml:space="preserve"><value>Congrega is the CRM built for faith communities. Manage congregants, groups, finances, attendance and much more from a single platform.</value></data>
+  <data name="Congregantes — Listado" xml:space="preserve"><value>Congregants — List</value></data>
+  <data name="Conoce a cada persona de tu iglesia" xml:space="preserve"><value>Know every person in your church</value></data>
+  <data name="Contacto" xml:space="preserve"><value>Contact</value></data>
+  <data name="Contratar Max+" xml:space="preserve"><value>Get Max+</value></data>
+  <data name="Contratar P+" xml:space="preserve"><value>Get P+</value></data>
+  <data name="Contratar S+" xml:space="preserve"><value>Get S+</value></data>
+  <data name="Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación a Excel." xml:space="preserve"><value>Track tithes and offerings by category and member. Monthly and yearly charts. Excel export.</value></data>
+  <data name="Control económico" xml:space="preserve"><value>Financial control</value></data>
+  <data name="Control total de las finanzas de tu iglesia" xml:space="preserve"><value>Full control of your church finances</value></data>
+  <data name="Contáctanos" xml:space="preserve"><value>Contact us</value></data>
+  <data name="Crea tu sede, define zonas y grupos, y activa los módulos que necesitas. Te acompañamos durante todo el proceso." xml:space="preserve"><value>Create your campus, define zones and groups, and enable the modules you need. We guide you through the whole process.</value></data>
+  <data name="Creación de grupos por zona o ministerio" xml:space="preserve"><value>Create groups by zone or ministry</value></data>
+  <data name="Cuéntanos sobre tu iglesia y qué módulos te interesan..." xml:space="preserve"><value>Tell us about your church and which modules interest you...</value></data>
+  <data name="Cómo funciona" xml:space="preserve"><value>How it works</value></data>
+  <data name="Dashboard con gráficas avanzadas" xml:space="preserve"><value>Dashboard with advanced charts</value></data>
+  <data name="Dashboard en tiempo real" xml:space="preserve"><value>Real-time dashboard</value></data>
+  <data name="Datos" xml:space="preserve"><value>Data</value></data>
+  <data name="Datos personales, contacto y familia" xml:space="preserve"><value>Personal details, contact and family</value></data>
+  <data name="Define el prefijo que se añadirá antes del número al generar identificadores de diezmo. Por ejemplo, con prefijo" xml:space="preserve"><value>Sets the prefix added before the number when generating tithe identifiers. For example, with prefix</value></data>
+  <data name="Define el prefijo que se mostrará delante del número de miembro. El número se sigue guardando sin prefijo; este solo se aplica al visualizarlo. Por ejemplo, con prefijo" xml:space="preserve"><value>Sets the prefix shown before the member ID. The number is still stored without it; the prefix only applies on screen. For example, with prefix</value></data>
+  <data name="Define el rango de edad que conforma la zona de jóvenes y selecciona qué zona representa al grupo juvenil. Los miembros con edad fuera del rango generarán una alerta al intentar añadirlos." xml:space="preserve"><value>Sets the age range for the youth zone and selects which zone represents the youth group. Members outside the range will trigger an alert when you try to add them.</value></data>
+  <data name="Desarrollado con" xml:space="preserve"><value>Built with</value></data>
+  <data name="Descarga informes detallados para presentarlos en las reuniones de liderazgo." xml:space="preserve"><value>Download detailed reports to present at leadership meetings.</value></data>
+  <data name="Descargar archivo .ics (compatible con Outlook, Apple Calendar…)" xml:space="preserve"><value>Download .ics file (works with Outlook, Apple Calendar…)</value></data>
+  <data name="Detalle &amp;mdash;" xml:space="preserve"><value>Detail &amp;mdash;</value></data>
+  <data name="Diezmo General" xml:space="preserve"><value>General Tithe</value></data>
+  <data name="Diezmos (mes)" xml:space="preserve"><value>Tithes (month)</value></data>
+  <data name="Diezmos por Concepto" xml:space="preserve"><value>Tithes by Giving Category</value></data>
+  <data name="Diezmos y ofrendas por miembro y concepto" xml:space="preserve"><value>Tithes and offerings by member and category</value></data>
+  <data name="Dirección:" xml:space="preserve"><value>Address:</value></data>
+  <data name="Disponibilidad" xml:space="preserve"><value>Availability</value></data>
+  <data name="Economía" xml:space="preserve"><value>Finances</value></data>
+  <data name="Economía — Diezmos por Concepto · 2025" xml:space="preserve"><value>Finances — Tithes by Category · 2025</value></data>
+  <data name="El autocomplete del campo &quot;Rol&quot; te sugiere roles ya usados en otros servicios." xml:space="preserve"><value>The "Role" field suggests roles already used in other services.</value></data>
+  <data name="El entorno de desarrollo no debe habilitarse en aplicaciones publicadas." xml:space="preserve"><value>The Development environment should not be enabled for deployed applications.</value></data>
+  <data name="El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación." xml:space="preserve"><value>The complete plan for pastors and leaders who need full visibility and control of their congregation.</value></data>
+  <data name="Elige el plan que mejor se adapta" xml:space="preserve"><value>Choose the plan that fits best</value></data>
+  <data name="Eliminar" xml:space="preserve"><value>Delete</value></data>
+  <data name="Empieza a escribir para ver sugerencias." xml:space="preserve"><value>Start typing to see suggestions.</value></data>
+  <data name="Empieza a registrar congregantes, tomar asistencia y controlar finanzas. Todo desde cualquier dispositivo." xml:space="preserve"><value>Start registering congregants, taking attendance and tracking finances. All from any device.</value></data>
+  <data name="En la nube" xml:space="preserve"><value>In the cloud</value></data>
+  <data name="En marcha en tres pasos" xml:space="preserve"><value>Up and running in three steps</value></data>
+  <data name="Ene" xml:space="preserve"><value>Jan</value></data>
+  <data name="Enviar" xml:space="preserve"><value>Send</value></data>
+  <data name="Enviar mensaje" xml:space="preserve"><value>Send message</value></data>
+  <data name="Escribe al menos 2 letras para buscar. Pulsa sobre el nombre para añadirlo." xml:space="preserve"><value>Type at least 2 letters to search. Click a name to add it.</value></data>
+  <data name="Escribe el nombre de ambos cónyuges." xml:space="preserve"><value>Type both spouses' names.</value></data>
+  <data name="España" xml:space="preserve"><value>Spain</value></data>
+  <data name="Especial para Pastores" xml:space="preserve"><value>Special for Pastors</value></data>
+  <data name="Estados: miembro, simpatizante, visitante, en proceso" xml:space="preserve"><value>Statuses: member, regular attendee, visitor, in process</value></data>
+  <data name="Estás viendo los miembros de todas las sedes. Selecciona una sede específica para añadir miembros a esta zona." xml:space="preserve"><value>You are viewing members from all campuses. Select a specific campus to add members to this zone.</value></data>
+  <data name="Excel Combinado" xml:space="preserve"><value>Combined Excel</value></data>
+  <data name="Exportación a Excel" xml:space="preserve"><value>Excel export</value></data>
+  <data name="Exportación de informes a Excel" xml:space="preserve"><value>Export reports to Excel</value></data>
+  <data name="Exportar solo este culto" xml:space="preserve"><value>Export this service only</value></data>
+  <data name="Exportar todos los cultos en un Excel combinado" xml:space="preserve"><value>Export all services to a combined Excel file</value></data>
+  <data name="Feb" xml:space="preserve"><value>Feb</value></data>
+  <data name="Fecha del gasto" xml:space="preserve"><value>Expense date</value></data>
+  <data name="Fecha del seguimiento" xml:space="preserve"><value>Follow-up date</value></data>
+  <data name="Fecha fin" xml:space="preserve"><value>End date</value></data>
+  <data name="Fecha inicio" xml:space="preserve"><value>Start date</value></data>
+  <data name="Ficha completa por congregante: datos personales, familia, contacto, estado espiritual, zona, grupo y observaciones privadas. Todo en un solo lugar." xml:space="preserve"><value>A complete profile per congregant: personal details, family, contact, spiritual status, zone, group and private notes. All in one place.</value></data>
+  <data name="Ficha personal completa" xml:space="preserve"><value>Complete personal profile</value></data>
+  <data name="Filtra por estado, zona, grupo, sede o cualquier combinación de criterios." xml:space="preserve"><value>Filter by status, zone, group, campus or any combination of criteria.</value></data>
+  <data name="Filtros" xml:space="preserve"><value>Filters</value></data>
+  <data name="General:" xml:space="preserve"><value>General:</value></data>
+  <data name="Generar calendario" xml:space="preserve"><value>Generate calendar</value></data>
+  <data name="Gestiona múltiples sedes desde un único acceso de administrador global. Cada sede accede solo a sus datos." xml:space="preserve"><value>Manage multiple campuses from a single global administrator account. Each campus only sees its own data.</value></data>
+  <data name="Gestiona tu comunidad" xml:space="preserve"><value>Manage your community</value></data>
+  <data name="Gestiona tu iglesia" xml:space="preserve"><value>Manage your church</value></data>
+  <data name="Gestión centralizada" xml:space="preserve"><value>Centralised management</value></data>
+  <data name="Gestión de Salas" xml:space="preserve"><value>Room Management</value></data>
+  <data name="Gestión de congregantes" xml:space="preserve"><value>Congregant management</value></data>
+  <data name="Gestión de líderes" xml:space="preserve"><value>Leader Management</value></data>
+  <data name="Gestión para tu congregación" xml:space="preserve"><value>Management for your congregation</value></data>
+  <data name="Grupos y Zonas" xml:space="preserve"><value>Groups and Zones</value></data>
+  <data name="Grupos, Zonas y Ministerios" xml:space="preserve"><value>Groups, Zones and Ministries</value></data>
+  <data name="Gráficas comparativas mensuales y anuales" xml:space="preserve"><value>Comparative monthly and yearly charts</value></data>
+  <data name="Gráficas mensuales y anuales" xml:space="preserve"><value>Monthly and yearly charts</value></data>
+  <data name="Guarda la familia primero para poder gestionar los miembros." xml:space="preserve"><value>Save the family first to manage its members.</value></data>
+  <data name="Guardar" xml:space="preserve"><value>Save</value></data>
+  <data name="Guardar configuración" xml:space="preserve"><value>Save settings</value></data>
+  <data name="Ha ocurrido un problema al procesar tu solicitud." xml:space="preserve"><value>A problem occurred while processing your request.</value></data>
+  <data name="Historial completo por congregante" xml:space="preserve"><value>Complete history per congregant</value></data>
+  <data name="Historial de cambios y observaciones" xml:space="preserve"><value>Change history and notes</value></data>
+  <data name="Historial y cambios de estado" xml:space="preserve"><value>History and status changes</value></data>
+  <data name="Horario" xml:space="preserve"><value>Schedule</value></data>
+  <data name="Identificador de la petición:" xml:space="preserve"><value>Request ID:</value></data>
+  <data name="Iglesia..." xml:space="preserve"><value>Church...</value></data>
+  <data name="Iglesias de distintos tamaños confían en Congrega CRM para organizar y cuidar a sus congregaciones." xml:space="preserve"><value>Churches of all sizes trust Congrega CRM to organise and care for their congregations.</value></data>
+  <data name="Indica si este líder dispone de acceso al sistema." xml:space="preserve"><value>Indicates whether this leader has access to the system.</value></data>
+  <data name="Información" xml:space="preserve"><value>Information</value></data>
+  <data name="Iniciar sesión" xml:space="preserve"><value>Sign in</value></data>
+  <data name="Iniciar sesión - Congrega" xml:space="preserve"><value>Sign in - Congrega</value></data>
+  <data name="Inicio" xml:space="preserve"><value>Home</value></data>
+  <data name="Introduce tu contraseña actual y elige una nueva para actualizar tu acceso." xml:space="preserve"><value>Enter your current password and choose a new one to update your access.</value></data>
+  <data name="Introduce tu correo electrónico y te enviaremos una clave de acceso temporal." xml:space="preserve"><value>Enter your email and we will send you a temporary access key.</value></data>
+  <data name="Invitados/Visita" xml:space="preserve"><value>Guests/Visits</value></data>
+  <data name="Jun" xml:space="preserve"><value>Jun</value></data>
+  <data name="La opción más elegida. Acceso ampliado para iglesias en crecimiento que necesitan mayor flexibilidad." xml:space="preserve"><value>The most popular choice. Expanded access for growing churches that need more flexibility.</value></data>
+  <data name="Las observaciones son internas y solo visibles para el equipo autorizado." xml:space="preserve"><value>Notes are internal and visible only to authorised staff.</value></data>
+  <data name="Las personas se distribuyen de forma equitativa. Si hay 2 pianistas y el culto necesita 1, se alternarán." xml:space="preserve"><value>People are distributed evenly. If there are 2 pianists and the service needs 1, they will alternate.</value></data>
+  <data name="Lista de Asistencias" xml:space="preserve"><value>Attendance List</value></data>
+  <data name="Lista de Conceptos" xml:space="preserve"><value>Giving Category List</value></data>
+  <data name="Lista de Cultos y Servicios" xml:space="preserve"><value>Service List</value></data>
+  <data name="Lista de Diezmos" xml:space="preserve"><value>Tithe List</value></data>
+  <data name="Lista de Familias" xml:space="preserve"><value>Family List</value></data>
+  <data name="Lista de Grupos" xml:space="preserve"><value>Group List</value></data>
+  <data name="Lista de Jóvenes &amp;nbsp;" xml:space="preserve"><value>Youth List &amp;nbsp;</value></data>
+  <data name="Lista de Matrimonios" xml:space="preserve"><value>Couple List</value></data>
+  <data name="Lista de Ministerios" xml:space="preserve"><value>Ministry List</value></data>
+  <data name="Lista de Usuarios" xml:space="preserve"><value>User List</value></data>
+  <data name="Lista de Zonas" xml:space="preserve"><value>Zone List</value></data>
+  <data name="Lista de miembros en proceso" xml:space="preserve"><value>Membership Process List</value></data>
+  <data name="Lista de simpatizantes" xml:space="preserve"><value>Regular Attendee List</value></data>
+  <data name="Lista de visitantes" xml:space="preserve"><value>Visitor List</value></data>
+  <data name="Listados de miembros por agrupación" xml:space="preserve"><value>Member listings by grouping</value></data>
+  <data name="Llamada telefónica" xml:space="preserve"><value>Phone call</value></data>
+  <data name="Lo que dicen nuestros pastores" xml:space="preserve"><value>What our pastors say</value></data>
+  <data name="Los cultos y sus bloques se gestionan desde" xml:space="preserve"><value>Services and their blocks are managed from</value></data>
+  <data name="Los miembros deben tener asignado su rol en sus fichas de ministerio." xml:space="preserve"><value>Members must have their role assigned in their ministry records.</value></data>
+  <data name="Los roles del culto se configuran en" xml:space="preserve"><value>Service roles are set up in</value></data>
+  <data name="Lun – Vie · 9:00 – 18:00" xml:space="preserve"><value>Mon – Fri · 9:00 – 18:00</value></data>
+  <data name="Lun – Vie, 9:00 – 18:00" xml:space="preserve"><value>Mon – Fri, 9:00 – 18:00</value></data>
+  <data name="Líder María —" xml:space="preserve"><value>Leader María —</value></data>
+  <data name="Mar" xml:space="preserve"><value>Mar</value></data>
+  <data name="Marca el campo" xml:space="preserve"><value>Tick the field</value></data>
+  <data name="May" xml:space="preserve"><value>May</value></data>
+  <data name="Mensaje" xml:space="preserve"><value>Message</value></data>
+  <data name="Mensual" xml:space="preserve"><value>Monthly</value></data>
+  <data name="Miembro Max+" xml:space="preserve"><value>Max+ Member</value></data>
+  <data name="Miembro P+" xml:space="preserve"><value>P+ Member</value></data>
+  <data name="Miembro S+" xml:space="preserve"><value>S+ Member</value></data>
+  <data name="Miembro que registra" xml:space="preserve"><value>Recorded by</value></data>
+  <data name="Miembros activos" xml:space="preserve"><value>Active members</value></data>
+  <data name="Miembros del ministerio:" xml:space="preserve"><value>Ministry members:</value></data>
+  <data name="Miembros en proceso" xml:space="preserve"><value>Members in process</value></data>
+  <data name="Ministra (Alabanza):" xml:space="preserve"><value>Ministers (Worship):</value></data>
+  <data name="Misiones" xml:space="preserve"><value>Missions</value></data>
+  <data name="Modo de desarrollo" xml:space="preserve"><value>Development Mode</value></data>
+  <data name="Mostrando 4 de 248 congregantes" xml:space="preserve"><value>Showing 4 of 248 congregants</value></data>
+  <data name="Multi-sede" xml:space="preserve"><value>Multi-campus</value></data>
+  <data name="Municipio:" xml:space="preserve"><value>Municipality:</value></data>
+  <data name="Más popular" xml:space="preserve"><value>Most popular</value></data>
+  <data name="Máximo 10 caracteres." xml:space="preserve"><value>Maximum 10 characters.</value></data>
+  <data name="Módulos completos diseñados específicamente para la gestión pastoral y administrativa de tu comunidad." xml:space="preserve"><value>Complete modules designed specifically for the pastoral and administrative management of your community.</value></data>
+  <data name="Módulos integrados" xml:space="preserve"><value>Integrated modules</value></data>
+  <data name="Ningún miembro seleccionado" xml:space="preserve"><value>No member selected</value></data>
+  <data name="No hay miembros asignados a esta familia." xml:space="preserve"><value>No members assigned to this family.</value></data>
+  <data name="No hay registros de asistencia para el período seleccionado." xml:space="preserve"><value>No attendance records for the selected period.</value></data>
+  <data name="No hay registros de diezmos para el período seleccionado." xml:space="preserve"><value>No tithe records for the selected period.</value></data>
+  <data name="No hay registros de gastos para el período seleccionado." xml:space="preserve"><value>No expense records for the selected period.</value></data>
+  <data name="No hay una zona de jóvenes configurada. Ve a" xml:space="preserve"><value>No youth zone has been configured. Go to</value></data>
+  <data name="Nombre de la iglesia" xml:space="preserve"><value>Church name</value></data>
+  <data name="Nombre de la sala" xml:space="preserve"><value>Room name</value></data>
+  <data name="Nombre del evento" xml:space="preserve"><value>Event name</value></data>
+  <data name="Nombre, fecha de nacimiento, teléfono, correo, dirección y foto de perfil." xml:space="preserve"><value>Name, date of birth, phone, email, address and profile photo.</value></data>
+  <data name="Notas privadas y seguras" xml:space="preserve"><value>Private, secure notes</value></data>
+  <data name="Notas y observaciones privadas" xml:space="preserve"><value>Private notes and remarks</value></data>
+  <data name="Nueva línea" xml:space="preserve"><value>New line</value></data>
+  <data name="Nuevos" xml:space="preserve"><value>New</value></data>
+  <data name="Numeración de Diezmos" xml:space="preserve"><value>Tithe Numbering</value></data>
+  <data name="Numeración de Miembros" xml:space="preserve"><value>Member Numbering</value></data>
+  <data name="Ofrenda" xml:space="preserve"><value>Offering</value></data>
+  <data name="Organiza la congregación en grupos, zonas y ministerios. Asigna líderes y controla la estructura de tu iglesia." xml:space="preserve"><value>Organise the congregation into groups, zones and ministries. Assign leaders and manage your church structure.</value></data>
+  <data name="Organiza tu comunidad con total flexibilidad según la estructura de tu iglesia." xml:space="preserve"><value>Organise your community with full flexibility, matching your church's structure.</value></data>
+  <data name="PDF / Imprimir" xml:space="preserve"><value>PDF / Print</value></data>
+  <data name="Para depurar en local, activa el entorno de desarrollo asignando el valor Development a la variable de entorno ASPNETCORE_ENVIRONMENT y reiniciando la aplicación." xml:space="preserve"><value>For local debugging, enable the Development environment by setting the ASPNETCORE_ENVIRONMENT environment variable to Development and restarting the app.</value></data>
+  <data name="Pareja que les hace seguimiento." xml:space="preserve"><value>Couple that follows up with them.</value></data>
+  <data name="Pastor Juan —" xml:space="preserve"><value>Pastor Juan —</value></data>
+  <data name="País" xml:space="preserve"><value>Country</value></data>
+  <data name="Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización." xml:space="preserve"><value>Perfect for small communities taking their first steps into digital management.</value></data>
+  <data name="Permisos Específicos" xml:space="preserve"><value>Specific Permissions</value></data>
+  <data name="Persona a cargo de cada seguimiento" xml:space="preserve"><value>Person in charge of each follow-up</value></data>
+  <data name="Personalización de módulos" xml:space="preserve"><value>Module customisation</value></data>
+  <data name="Planes" xml:space="preserve"><value>Plans</value></data>
+  <data name="Planes flexibles para iglesias de cualquier tamaño. Sin permanencia, cancela cuando quieras." xml:space="preserve"><value>Flexible plans for churches of any size. No lock-in, cancel whenever you want.</value></data>
+  <data name="Política de privacidad" xml:space="preserve"><value>Privacy policy</value></data>
+  <data name="Precios" xml:space="preserve"><value>Pricing</value></data>
+  <data name="Proceso" xml:space="preserve"><value>In Process</value></data>
+  <data name="Producto" xml:space="preserve"><value>Product</value></data>
+  <data name="Provincia:" xml:space="preserve"><value>Province:</value></data>
+  <data name="Próximos a salir del rango" xml:space="preserve"><value>About to leave the range</value></data>
+  <data name="Puede exponer a los usuarios información sensible procedente de las excepciones." xml:space="preserve"><value>It can expose sensitive information from exceptions to end users.</value></data>
+  <data name="Razón" xml:space="preserve"><value>Reason</value></data>
+  <data name="Razón / Descripción" xml:space="preserve"><value>Reason / Description</value></data>
+  <data name="Recuperar acceso" xml:space="preserve"><value>Recover access</value></data>
+  <data name="Recuperar contraseña - Congrega" xml:space="preserve"><value>Reset password - Congrega</value></data>
+  <data name="Registra cada visita, llamada o consejería de forma privada. El líder asignado puede consultar el historial completo para dar continuidad al cuidado pastoral." xml:space="preserve"><value>Record each visit, call or counselling session privately. The assigned leader can review the full history to give continuity to pastoral care.</value></data>
+  <data name="Registra diezmos, ofrendas y cualquier concepto económico. Genera gráficas comparativas y exporta informes en Excel para rendición de cuentas." xml:space="preserve"><value>Record tithes, offerings and any financial category. Generate comparative charts and export Excel reports for accountability.</value></data>
+  <data name="Registra la evolución espiritual: visitante → simpatizante → miembro." xml:space="preserve"><value>Track spiritual growth: visitor → regular attendee → member.</value></data>
+  <data name="Registra y controla diezmos, ofrendas y conceptos financieros con gráficas detalladas." xml:space="preserve"><value>Record and track tithes, offerings and financial categories with detailed charts.</value></data>
+  <data name="Registro completo de miembros, simpatizantes y visitantes con ficha detallada por persona." xml:space="preserve"><value>Full record of members, regular attendees and visitors with a detailed profile for each person.</value></data>
+  <data name="Registro completo de miembros, simpatizantes y visitantes con fichas detalladas, historial y búsqueda avanzada." xml:space="preserve"><value>Full record of members, regular attendees and visitors with detailed profiles, history and advanced search.</value></data>
+  <data name="Registro de Gastos" xml:space="preserve"><value>Expense Register</value></data>
+  <data name="Registro de asistencia por sesión con conteo de adultos, niños e invitados. Gráficas históricas comparativas." xml:space="preserve"><value>Attendance recorded per session with counts of adults, children and guests. Comparative historical charts.</value></data>
+  <data name="Registro de visitas, llamadas y consejerías" xml:space="preserve"><value>Record of visits, calls and counselling</value></data>
+  <data name="Registro de visitas, llamadas y consejerías por congregante. Historial completo del acompañamiento pastoral." xml:space="preserve"><value>Record of visits, calls and counselling per congregant. Complete history of pastoral care.</value></data>
+  <data name="Rellena el formulario de contacto y te enviamos tus credenciales en menos de 24 horas. Sin tarjeta, sin permanencia." xml:space="preserve"><value>Fill in the contact form and we will send your credentials within 24 hours. No card, no lock-in.</value></data>
+  <data name="Requisito previo:" xml:space="preserve"><value>Prerequisite:</value></data>
+  <data name="Responsable asignado" xml:space="preserve"><value>Assigned leader</value></data>
+  <data name="Roles requeridos por servicio" xml:space="preserve"><value>Roles required per service</value></data>
+  <data name="Rotación automática:" xml:space="preserve"><value>Automatic rotation:</value></data>
+  <data name="Se ha producido un error." xml:space="preserve"><value>An error has occurred.</value></data>
+  <data name="Seguimiento Pastoral" xml:space="preserve"><value>Pastoral Follow-up</value></data>
+  <data name="Seguimiento de congregantes" xml:space="preserve"><value>Congregant follow-up</value></data>
+  <data name="Seguimiento pastoral" xml:space="preserve"><value>Pastoral follow-up</value></data>
+  <data name="Seguimiento — Carlos Sánchez López" xml:space="preserve"><value>Follow-up — Carlos Sánchez López</value></data>
+  <data name="Seguridad y Bienvenida" xml:space="preserve"><value>Security and Welcome</value></data>
+  <data name="Seguridad y Bienvenida:" xml:space="preserve"><value>Security and Welcome:</value></data>
+  <data name="Selecciona la zona que representa al grupo de jóvenes. Los miembros asignados a esta zona aparecerán en la vista de Jóvenes." xml:space="preserve"><value>Select the zone that represents the youth group. Members assigned to this zone will appear in the Youth view.</value></data>
+  <data name="Selecciona un culto o servicio y define cuántas personas necesitas en cada rol, pudiendo especificarlo a nivel general o por bloque horario." xml:space="preserve"><value>Pick a service and set how many people you need in each role, either overall or per time block.</value></data>
+  <data name="Selecciona un gasto de la tabla superior para ver su detalle de pago" xml:space="preserve"><value>Select an expense from the table above to see its payment detail</value></data>
+  <data name="Selecciona un servicio para ver o editar sus roles." xml:space="preserve"><value>Select a service to view or edit its roles.</value></data>
+  <data name="Semanal" xml:space="preserve"><value>Weekly</value></data>
+  <data name="Servicios - " xml:space="preserve"><value>Services - </value></data>
+  <data name="Simpatizante" xml:space="preserve"><value>Regular Attendee</value></data>
+  <data name="Sin bloques horarios. Pulsa &quot;Añadir bloque&quot; para definir el horario." xml:space="preserve"><value>No time blocks. Click "Add block" to define the schedule.</value></data>
+  <data name="Sin instalaciones complicadas. En menos de un día tienes tu iglesia digitalizada y tu equipo trabajando." xml:space="preserve"><value>No complicated setup. In under a day your church is digitised and your team is working.</value></data>
+  <data name="Sin líneas de detalle. Pulsa &quot;Nueva línea&quot; para añadir." xml:space="preserve"><value>No detail lines. Click "New line" to add one.</value></data>
+  <data name="Software de gestión integral diseñado para iglesias y comunidades de fe." xml:space="preserve"><value>Comprehensive management software designed for churches and faith communities.</value></data>
+  <data name="Software diseñado para iglesias" xml:space="preserve"><value>Software built for churches</value></data>
+  <data name="Solicita tu acceso" xml:space="preserve"><value>Request access</value></data>
+  <data name="Soporte incluido" xml:space="preserve"><value>Support included</value></data>
+  <data name="Soporte prioritario" xml:space="preserve"><value>Priority support</value></data>
+  <data name="Testimonios" xml:space="preserve"><value>Testimonials</value></data>
+  <data name="Tiene usuario en la aplicación" xml:space="preserve"><value>Has an app account</value></data>
+  <data name="Tipo de cuenta" xml:space="preserve"><value>Account type</value></data>
+  <data name="Tipo de seguimiento" xml:space="preserve"><value>Follow-up type</value></data>
+  <data name="Tipos de calendario:" xml:space="preserve"><value>Calendar types:</value></data>
+  <data name="Tipos de seguimiento" xml:space="preserve"><value>Follow-up types</value></data>
+  <data name="Todo lo que tu iglesia necesita" xml:space="preserve"><value>Everything your church needs</value></data>
+  <data name="Total mes:" xml:space="preserve"><value>Month total:</value></data>
+  <data name="Trimestral" xml:space="preserve"><value>Quarterly</value></data>
+  <data name="Tu nombre" xml:space="preserve"><value>Your first name</value></data>
+  <data name="Turno del culto" xml:space="preserve"><value>Service shift</value></data>
+  <data name="Tus apellidos" xml:space="preserve"><value>Your last name</value></data>
+  <data name="Términos y condiciones" xml:space="preserve"><value>Terms and conditions</value></data>
+  <data name="Ver características" xml:space="preserve"><value>See features</value></data>
+  <data name="Visita domiciliaria" xml:space="preserve"><value>Home visit</value></data>
+  <data name="Visita domiciliaria, llamada telefónica, consejería, oración o mensaje." xml:space="preserve"><value>Home visit, phone call, counselling, prayer or message.</value></data>
+  <data name="Visitante" xml:space="preserve"><value>Visitor</value></data>
+  <data name="Visitante · Zona Norte" xml:space="preserve"><value>Visitor · North Zone</value></data>
+  <data name="Vista de estructura jerárquica" xml:space="preserve"><value>Hierarchical structure view</value></data>
+  <data name="Visualiza el estado de tu iglesia de un vistazo con gráficas y KPIs siempre actualizados." xml:space="preserve"><value>See the state of your church at a glance with always up-to-date charts and KPIs.</value></data>
+  <data name="Visualiza la evolución de cada concepto y compara períodos fácilmente." xml:space="preserve"><value>See how each category evolves and compare periods easily.</value></data>
+  <data name="Volver" xml:space="preserve"><value>Back</value></data>
+  <data name="Zona Centro · Sin grupo" xml:space="preserve"><value>Central Zone · No group</value></data>
+  <data name="Zona Norte · Grupo Jóvenes" xml:space="preserve"><value>North Zone · Youth Group</value></data>
+  <data name="Zona Norte · Sin asignar" xml:space="preserve"><value>North Zone · Unassigned</value></data>
+  <data name="Zona Sur · Ministerio Alabanza" xml:space="preserve"><value>South Zone · Worship Ministry</value></data>
+  <data name="Zona de Jóvenes" xml:space="preserve"><value>Youth Zone</value></data>
+  <data name="a todos los módulos" xml:space="preserve"><value>to every module</value></data>
+  <data name="de forma" xml:space="preserve"><value>in a</value></data>
+  <data name="de soporte incluidas" xml:space="preserve"><value>of support included</value></data>
+  <data name="el miembro 25 se mostrará como" xml:space="preserve"><value>member 25 will be shown as</value></data>
+  <data name="el número quedará como" xml:space="preserve"><value>the number will read</value></data>
+  <data name="en la vista de Servicios del ministerio de Alabanza para que el miembro aparezca en la fila &quot;Ministra&quot;." xml:space="preserve"><value>in the Worship ministry's Services view so the member shows up in the "Ministers" row.</value></data>
+  <data name="para configurar el rango de edad y la zona." xml:space="preserve"><value>to set the age range and the zone.</value></data>
+  <data name="para la iglesia" xml:space="preserve"><value>for the church</value></data>
+  <data name="proyección, sonido, emisión." xml:space="preserve"><value>projection, sound, streaming.</value></data>
+  <data name="roles específicos para ese tramo horario." xml:space="preserve"><value>roles specific to that time slot.</value></data>
+  <data name="roles que aplican a todo el culto, sin importar el bloque." xml:space="preserve"><value>roles that apply to the whole service, regardless of the block.</value></data>
+  <data name="tabla transpuesta (fechas como columnas, instrumentos como filas). Requiere campo" xml:space="preserve"><value>transposed table (dates as columns, instruments as rows). Requires the field</value></data>
+  <data name="y te preparamos una oferta a medida." xml:space="preserve"><value>and we will prepare a tailored offer.</value></data>
+  <data name="© 2025 Congrega CRM. Todos los derechos reservados." xml:space="preserve"><value>© 2025 Congrega CRM. All rights reserved.</value></data>
+  <data name="¿Hablamos?" xml:space="preserve"><value>Shall we talk?</value></data>
+  <data name="¿Has olvidado tu contraseña?" xml:space="preserve"><value>Forgot your password?</value></data>
+  <data name="¿Necesitas una solución personalizada?" xml:space="preserve"><value>Need a custom solution?</value></data>
+  <data name="¿Puede ministrar?" xml:space="preserve"><value>Can they minister?</value></data>
+  <!-- ══ Testimonios de la landing ═════════════════════════════════════ -->
+  <data name="&quot;Antes llevábamos el registro de miembros en hojas de Excel que nadie actualizaba. Con Congrega lo cambiamos todo: ahora sabemos exactamente quién viene, quién necesita atención y cuánto estamos recibiendo cada mes. Es una bendición para nuestro equipo.&quot;" xml:space="preserve"><value>"We used to keep our member records in spreadsheets nobody kept up to date. Congrega changed everything: now we know exactly who attends, who needs care and how much we receive each month. It has been a blessing for our team."</value></data>
+  <data name="&quot;El módulo de seguimiento pastoral ha transformado nuestra forma de cuidar a las personas. Podemos ver el historial completo de cada congregante y el equipo de líderes sabe exactamente qué acciones tomar. La comunicación interna mejoró enormemente.&quot;" xml:space="preserve"><value>"The pastoral follow-up module has transformed the way we care for people. We can see each congregant's full history and our leadership team knows exactly what to do next. Internal communication improved enormously."</value></data>
+  <data name="&quot;Gestionamos tres sedes desde un solo panel. Antes era imposible tener una visión global; ahora el pastor principal ve en tiempo real el estado de cada congregación. El soporte del equipo de Congrega es también excelente: siempre disponibles.&quot;" xml:space="preserve"><value>"We run three campuses from a single dashboard. A global view used to be impossible; now the lead pastor sees the state of every congregation in real time. Support from the Congrega team is excellent too: always available."</value></data>
+  <!-- ══ Roles, tarjetas de zona y gráficas ═══════════════════════════ -->
+  <data name="Administrador Global" xml:space="preserve"><value>Global Administrator</value></data>
+  <data name="Pastor General" xml:space="preserve"><value>Lead Pastor</value></data>
+  <data name="Pastor de Sede" xml:space="preserve"><value>Campus Pastor</value></data>
+  <data name="Total en zona {0}" xml:space="preserve"><value>Total in {0} zone</value></data>
+  <data name="Invitados / Visitantes" xml:space="preserve"><value>Guests / Visitors</value></data>
 </root>

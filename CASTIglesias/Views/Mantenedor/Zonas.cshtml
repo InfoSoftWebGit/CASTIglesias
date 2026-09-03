@@ -1,5 +1,5 @@
 ﻿@{
-    ViewBag.Title = "Zonas";
+    ViewBag.Title = L["Zonas"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
@@ -10,28 +10,28 @@
 
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Zonas</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Zonas"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-sitemap me-1"></i> Lista de Zonas
+        <i class="fas fa-sitemap me-1"></i> @L["Lista de Zonas"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalZonas()">Añadir nueva Zona</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalZonas()">@L["Añadir nueva Zona"]</button>
             </div>
         </div>
 
         <table id="tablaZonas" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombre Zona</th>
-                    <th>Nombre del líder</th>
-                    <th>Descripción</th>
-                    <th style="width: 100px;">Acciones</th>
+                    <th>@L["Nombre Zona"]</th>
+                    <th>@L["Nombre del líder"]</th>
+                    <th>@L["Descripción"]</th>
+                    <th style="width: 100px;">@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -43,23 +43,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="exampleModalLabel">Datos de la Zona</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="exampleModalLabel">@L["Datos de la Zona"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtid" type="hidden" value="0" />
                 <div class="row g-2">
                     <div class="col-sm-6">
-                        <label class="form-label">Nombre Zona</label>
-                        <input type="text" class="form-control" id="txtNombreZona" placeholder="Nombre Zona" autocomplete="off" />
+                        <label class="form-label">@L["Nombre Zona"]</label>
+                        <input type="text" class="form-control" id="txtNombreZona" placeholder="@L["Nombre Zona"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Nombre del líder</label>
-                        <input type="text" class="form-control" id="txtNombreLider" placeholder="Busca un miembro…" />
+                        <label class="form-label">@L["Nombre del líder"]</label>
+                        <input type="text" class="form-control" id="txtNombreLider" placeholder="@L["Busca un miembro…"]" />
                     </div>
                     <div class="col-sm-12">
-                        <label class="form-label">Descripción</label>
-                        <input type="text" class="form-control" id="txtDescripcion" placeholder="Descripción" autocomplete="off" />
+                        <label class="form-label">@L["Descripción"]</label>
+                        <input type="text" class="form-control" id="txtDescripcion" placeholder="@L["Descripción"]" autocomplete="off" />
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -69,8 +69,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarZona()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarZona()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -84,6 +84,21 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            eliminarZona:     @Json.Serialize(L["¿Desea eliminar la Zona:"].Value),
+            error:            @Json.Serialize(L["Error"].Value),
+            errorEliminacion: @Json.Serialize(L["Error en la solicitud de eliminación."].Value),
+            estasSeguro:      @Json.Serialize(L["¿Estás seguro?"].Value),
+            no:               @Json.Serialize(L["No"].Value),
+            siEliminar:       @Json.Serialize(L["Sí, eliminar"].Value),
+            zonaLiderVacios:  @Json.Serialize(L["Nombre de zona y líder no pueden ser vacíos."].Value)
+        });
+
         const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
         let tabladata;
         let filaSeleccionada;
@@ -149,9 +164,7 @@
                         width: "100px"
                     }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $('#tablaZonas thead').css({
                         'background-color': '#1E3A8A',
@@ -176,12 +189,12 @@
                 if (!fila.data) return;
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `¿Desea eliminar la Zona: ${fila.data.nombre_zona}?`,
+                    title: T.estasSeguro,
+                    text: `${T.eliminarZona} ${fila.data.nombre_zona}?`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siEliminar,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -194,11 +207,11 @@
                                     tabladata.row(fila.tr).remove().draw(false);
                                     Swal.fire("Eliminada", "La Zona fue eliminada correctamente.", "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje || "No se pudo eliminar la Zona.", "error");
+                                    Swal.fire(T.error, res.mensaje || "No se pudo eliminar la Zona.", "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "Error en la solicitud de eliminación.", "error");
+                                Swal.fire(T.error, T.errorEliminacion, "error");
                             }
                         });
                     }
@@ -245,7 +258,7 @@
             };
 
             if (Zona.nombre_zona === "" || Zona.nombre_lider === "") {
-                $("#mensajeError").removeClass("d-none").text("Nombre de zona y líder no pueden ser vacíos.");
+                $("#mensajeError").removeClass("d-none").text(T.zonaLiderVacios);
                 return;
             }
 

@@ -1,5 +1,5 @@
-@{
-    ViewBag.Title = "Servicios - " + (ViewBag.NombreMinisterio as string);
+﻿@{
+    ViewBag.Title = L["Servicios - "].Value + (ViewBag.NombreMinisterio as string);
     Layout = "~/Views/Shared/_Layout.cshtml";
     var roles = ViewBag.Roles as string[] ?? new string[0];
     bool esAlabanza = ViewBag.EsAlabanza == true;
@@ -8,32 +8,32 @@
 <style>.ui-autocomplete { z-index: 9999 !important; }</style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Mantenedor" asp-action="Ministerios">Ministerios</a></li>
+    <li class="breadcrumb-item"><a asp-controller="Mantenedor" asp-action="Ministerios">@L["Ministerios"]</a></li>
     <li class="breadcrumb-item active">Servicios · @ViewBag.NombreMinisterio</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="@ViewBag.Icono me-1"></i> Miembros del ministerio: <strong>@ViewBag.NombreMinisterio</strong>
+        <i class="@ViewBag.Icono me-1"></i> @L["Miembros del ministerio:"] <strong>@ViewBag.NombreMinisterio</strong>
     </div>
     <div class="table-responsive p-3">
         <div class="mb-3">
             <button type="button" class="btn btn-success" onclick="abrirModalNuevo()">
-                <i class="fas fa-plus me-1"></i> Añadir miembro
+                <i class="fas fa-plus me-1"></i> @L["Añadir miembro"]
             </button>
         </div>
 
         <table id="tablaServicios" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Rol</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellidos"]</th>
+                    <th>@L["Rol"]</th>
                     @if (esAlabanza)
                     {
-                        <th>Ministra</th>
+                        <th>@L["Ministra"]</th>
                     }
-                    <th style="width: 100px;">Acciones</th>
+                    <th style="width: 100px;">@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -46,8 +46,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="tituloModalServicio">Asignar miembro al ministerio</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="tituloModalServicio">@L["Asignar miembro al ministerio"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="hdnIdAsignacion" type="hidden" value="0" />
@@ -55,14 +55,14 @@
 
                 <div class="row g-2">
                     <div class="col-12">
-                        <label class="form-label">Miembro</label>
+                        <label class="form-label">@L["Miembro"]</label>
                         <input type="text" class="form-control" id="txtNombreMiembro"
-                               placeholder="Busca por nombre o apellidos…" autocomplete="off" />
+                               placeholder="@L["Busca por nombre o apellidos…"]" autocomplete="off" />
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Rol</label>
+                        <label class="form-label">@L["Rol"]</label>
                         <select class="form-select" id="cmbRol">
-                            <option value="">-- Selecciona un rol --</option>
+                            <option value="">@L["-- Selecciona un rol --"]</option>
                             @foreach (var rol in roles)
                             {
                                 <option value="@rol">@rol</option>
@@ -73,14 +73,14 @@
                     {
                         <div class="col-12">
                             <label class="form-label">
-                                ¿Puede ministrar?
+                                @L["¿Puede ministrar?"]
                                 <small class="text-muted ms-1">
-                                    (Sí = puede dirigir el servicio de alabanza)
+                                    @L["(Sí = puede dirigir el servicio de alabanza)"]
                                 </small>
                             </label>
                             <select class="form-select" id="cmbEsMinistra">
-                                <option value="No">No</option>
-                                <option value="Si">Sí</option>
+                                <option value="No">@L["No"]</option>
+                                <option value="Si">@L["Sí"]</option>
                             </select>
                         </div>
                     }
@@ -92,8 +92,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarServicio()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarServicio()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -107,6 +107,24 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            quitarDeServicio: @Json.Serialize(L["¿Quitar a {0} ({1})?"].Value),
+            anadirMiembroMinisterio: @Json.Serialize(L["Añadir miembro al ministerio"].Value),
+            error:                   @Json.Serialize(L["Error"].Value),
+            errorConexion:           @Json.Serialize(L["Error de conexión."].Value),
+            estasSeguro:             @Json.Serialize(L["¿Estás seguro?"].Value),
+            no:                      @Json.Serialize(L["No"].Value),
+            seleccionaMiembroLista:  @Json.Serialize(L["Selecciona un miembro de la lista de búsqueda."].Value),
+            si:                      @Json.Serialize(L["Sí"].Value),
+            siQuitar:                @Json.Serialize(L["Sí, quitar"].Value),
+            sinRol:                  @Json.Serialize(L["sin rol"].Value)
+        });
+
         const idMinisterio   = @ViewBag.IdMinisterio;
         const esAlabanza     = @(esAlabanza ? "true" : "false");
         const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
@@ -147,7 +165,7 @@
                     data: "es_ministra",
                     defaultContent: "No",
                     render: v => v === "Si"
-                        ? '<span class="badge bg-success">Sí</span>'
+                        ? '<span class="badge bg-success">' + T.si + '</span>'
                         : '<span class="badge bg-secondary">No</span>'
                 });
             }
@@ -178,7 +196,7 @@
                     dataSrc: "data"
                 },
                 columns,
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $('#tablaServicios thead').css({
                         'background-color': '#1E3A8A',
@@ -200,12 +218,12 @@
                 if (!data) return;
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `¿Quitar a ${data.nombre_miembro} ${data.apellidos_miembro} (${data.rol_servicio || 'sin rol'})?`,
+                    title: T.estasSeguro,
+                    text: fmt(T.quitarDeServicio, `${data.nombre_miembro} ${data.apellidos_miembro}`, data.rol_servicio || T.sinRol),
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, quitar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siQuitar,
+                    cancelButtonText: T.no
                 }).then(res => {
                     if (!res.isConfirmed) return;
                     $.post('@Url.Action("EliminarMiembroServicio", "Mantenedor")',
@@ -215,7 +233,7 @@
                                 tabladata.row(tr).remove().draw(false);
                                 Swal.fire("Hecho", "Rol eliminado.", "success");
                             } else {
-                                Swal.fire("Error", r.mensaje || "No se pudo eliminar.", "error");
+                                Swal.fire(T.error, r.mensaje || "No se pudo eliminar.", "error");
                             }
                         }
                     );
@@ -225,7 +243,7 @@
 
         function abrirModalNuevo() {
             resetModal();
-            $("#tituloModalServicio").text("Añadir miembro al ministerio");
+            $("#tituloModalServicio").text(T.anadirMiembroMinisterio);
             $("#txtNombreMiembro").prop("disabled", false);
             new bootstrap.Modal(document.getElementById("FormModalServicio")).show();
         }
@@ -259,7 +277,7 @@
             const esMinistra   = esAlabanza ? ($("#cmbEsMinistra").val() || "No") : "No";
 
             if (idAsignacion === 0 && idMiembro <= 0) {
-                $("#mensajeError").removeClass("d-none").text("Selecciona un miembro de la lista de búsqueda.");
+                $("#mensajeError").removeClass("d-none").text(T.seleccionaMiembroLista);
                 return;
             }
             if (!rol) {
@@ -285,7 +303,7 @@
                 },
                 error: () => {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeError").removeClass("d-none").text("Error de conexión.");
+                    $("#mensajeError").removeClass("d-none").text(T.errorConexion);
                 }
             });
         }
