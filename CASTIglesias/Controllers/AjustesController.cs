@@ -14,6 +14,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Grupos _cnGrupos;
         private readonly CN_Culto _cnCulto;
         private readonly CN_RequerimientoCulto _cnRequerimiento;
+        private readonly CN_ZonaDiscipulado _cnZonaDiscipulado;
 
         public AjustesController(CN_ConfigDiezmo cnConfigDiezmo,
             CN_ConfigJovenes cnConfigJovenes,
@@ -21,6 +22,7 @@ namespace CASTIglesias.Controllers
             CN_Grupos cnGrupos,
             CN_Culto cnCulto,
             CN_RequerimientoCulto cnRequerimiento,
+            CN_ZonaDiscipulado cnZonaDiscipulado,
             CN_Sedes cnSedes,
             CN_Permisos cnPermisos) : base(cnSedes, cnPermisos)
         {
@@ -30,6 +32,7 @@ namespace CASTIglesias.Controllers
             _cnGrupos = cnGrupos;
             _cnCulto = cnCulto;
             _cnRequerimiento = cnRequerimiento;
+            _cnZonaDiscipulado = cnZonaDiscipulado;
         }
 
         #region Diezmos
@@ -82,8 +85,17 @@ namespace CASTIglesias.Controllers
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
+
+                // La zona de jóvenes viene por defecto con la aplicación; se asegura
+                // aquí por si la sede se creó antes de existir el aprovisionamiento.
+                _cnZonaDiscipulado.AsegurarZonasPorDefecto(sedeID);
+
                 var config = _cnConfigJovenes.ObtenerConfig(sedeID);
+
+                // Solo se ofrece la zona de tipo 'jovenes': en esta pantalla no tiene
+                // sentido poder elegir la de hombres, mujeres o cualquier otra.
                 var zonas = _cnZonas.ListarZonas(sedeID)
+                    .Where(z => z.tipo == "jovenes")
                     .Select(z => new { id = z.ID_zona, nombre = z.nombre_zona })
                     .ToList();
 

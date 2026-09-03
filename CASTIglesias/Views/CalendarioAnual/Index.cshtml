@@ -1,6 +1,6 @@
-@using CapaEntidad
+﻿@using CapaEntidad
 @{
-    ViewData["Title"] = "Calendario Anual";
+    ViewData["Title"] = L["Calendario Anual"].Value;
     var zonas = ViewBag.Zonas as List<Zona> ?? new List<Zona>();
     var salas = ViewBag.Salas as List<Sala> ?? new List<Sala>();
 }
@@ -28,11 +28,11 @@
 </style>
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Calendario Anual</h1>
+    <h1 class="mt-4">@L["Calendario Anual"]</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Inicio</a></li>
-        <li class="breadcrumb-item">Control</li>
-        <li class="breadcrumb-item active">Calendario Anual</li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">@L["Inicio"]</a></li>
+        <li class="breadcrumb-item">@L["Control"]</li>
+        <li class="breadcrumb-item active">@L["Calendario Anual"]</li>
     </ol>
 
     <div id="wrapCalendario">
@@ -45,36 +45,36 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background:#1E3A8A">
-                <h5 class="modal-title" id="tituloModalEvento">Nuevo evento</h5>
+                <h5 class="modal-title" id="tituloModalEvento">@L["Nuevo evento"]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hdnIdEvento" value="0" />
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label fw-semibold">Nombre del evento <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombreEvento" placeholder="Ej: Retiro de Jóvenes, Culto de Navidad…" />
+                        <label class="form-label fw-semibold">@L["Nombre del evento"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreEvento" placeholder="@L["Ej: Retiro de Jóvenes, Culto de Navidad…"]" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
+                        <label class="form-label fw-semibold">@L["Fecha inicio"] <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="txtFechaEvento" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Fecha fin <small class="text-muted fw-normal">(si ocupa varios días)</small></label>
+                        <label class="form-label fw-semibold">@L["Fecha fin"] <small class="text-muted fw-normal">@L["(si ocupa varios días)"]</small></label>
                         <input type="date" class="form-control" id="txtFechaFin" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Hora inicio</label>
+                        <label class="form-label fw-semibold">@L["Hora inicio"]</label>
                         <input type="time" class="form-control" id="txtHoraInicio" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Hora fin</label>
+                        <label class="form-label fw-semibold">@L["Hora fin"]</label>
                         <input type="time" class="form-control" id="txtHoraFin" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Zona organizadora</label>
+                        <label class="form-label fw-semibold">@L["Zona organizadora"]</label>
                         <select class="form-select" id="cmbZona">
-                            <option value="">— Sin zona —</option>
+                            <option value="">@L["— Sin zona —"]</option>
                             @foreach (var z in zonas)
                             {
                                 <option value="@z.ID_zona">@z.nombre_zona</option>
@@ -82,9 +82,9 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Sala</label>
+                        <label class="form-label fw-semibold">@L["Sala"]</label>
                         <select class="form-select" id="cmbSala">
-                            <option value="">— Sin sala —</option>
+                            <option value="">@L["— Sin sala —"]</option>
                             @foreach (var s in salas)
                             {
                                 <option value="@s.id_sala">@s.nombre_sala</option>
@@ -92,11 +92,11 @@
                         </select>
                     </div>
                     <div class="col-md-8">
-                        <label class="form-label fw-semibold">Descripción</label>
-                        <textarea class="form-control" id="txtDescripcion" rows="2" placeholder="Opcional…"></textarea>
+                        <label class="form-label fw-semibold">@L["Descripción"]</label>
+                        <textarea class="form-control" id="txtDescripcion" rows="2" placeholder="@L["Opcional…"]"></textarea>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold">Color</label>
+                        <label class="form-label fw-semibold">@L["Color"]</label>
                         <div class="d-flex flex-wrap gap-2 mt-1" id="colorPicker">
                             @{
                                 var colores = new[] {
@@ -124,21 +124,21 @@
             <div class="modal-footer d-flex justify-content-between flex-wrap gap-2">
                 <div class="d-flex gap-2">
                     <button class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
-                        <i class="fas fa-trash me-1"></i> Eliminar
+                        <i class="fas fa-trash me-1"></i> @L["Eliminar"]
                     </button>
                     <div class="d-none d-flex gap-2" id="grpExportEvento">
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="abrirGoogleCalendar()" title="Agregar a Google Calendar">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="abrirGoogleCalendar()" title="@L["Agregar a Google Calendar"]">
                             <i class="fab fa-google me-1"></i> Google Calendar
                         </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="descargarIcs()" title="Descargar archivo .ics (compatible con Outlook, Apple Calendar…)">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="descargarIcs()" title="@L["Descargar archivo .ics (compatible con Outlook, Apple Calendar…)"]">
                             <i class="fas fa-file-download me-1"></i> .ics
                         </button>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
                     <button class="btn btn-primary" onclick="guardarEvento()">
-                        <i class="fas fa-save me-1"></i> Guardar
+                        <i class="fas fa-save me-1"></i> @L["Guardar"]
                     </button>
                 </div>
             </div>

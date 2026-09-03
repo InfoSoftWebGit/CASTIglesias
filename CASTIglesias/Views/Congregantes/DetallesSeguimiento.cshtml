@@ -1,5 +1,5 @@
-@{
-    ViewBag.Title = "Detalle de seguimiento";
+﻿@{
+    ViewBag.Title = L["Detalle de seguimiento"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
@@ -23,23 +23,23 @@
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a href="#">Resumen</a></li>
-    <li class="breadcrumb-item active">Detalle de seguimiento</li>
+    <li class="breadcrumb-item"><a href="#">@L["Resumen"]</a></li>
+    <li class="breadcrumb-item active">@L["Detalle de seguimiento"]</li>
 </ol>
 
 <!-- PANEL FILTROS -->
 <div class="card mb-3">
     <div class="card-header" style="background-color: #1E3A8A; color: white;">
-        <i class="fas fa-search me-1"></i> Buscar miembro
+        <i class="fas fa-search me-1"></i> @L["Buscar miembro"]
     </div>
     <div class="card-body">
         <div class="row g-3 align-items-end">
             <!-- Miembro -->
             <div class="col-md-4">
-                <label class="form-label fw-semibold">Nombre del miembro</label>
+                <label class="form-label fw-semibold">@L["Nombre del miembro"]</label>
                 <div class="autocomplete-wrapper">
                     <input type="text" class="form-control" id="txtBuscarMiembro"
-                           autocomplete="off" placeholder="Escriba al menos 2 caracteres...">
+                           autocomplete="off" placeholder="@L["Escriba al menos 2 caracteres..."]">
                     <div id="dropdownBuscarMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
                 </div>
                 <input type="hidden" id="hiddenFiltroIdMiembro" value="0" />
@@ -47,18 +47,18 @@
 
             <!-- Tipo -->
             <div class="col-md-2">
-                <label class="form-label fw-semibold">Tipo</label>
+                <label class="form-label fw-semibold">@L["Tipo"]</label>
                 <select class="form-select" id="selectTipo">
-                    <option value="">Todos</option>
-                    <option value="Visita">Visita</option>
-                    <option value="Llamada">Llamada</option>
-                    <option value="Consejeria">Consejería</option>
+                    <option value="">@L["Todos"]</option>
+                    <option value="Visita">@L["Visita"]</option>
+                    <option value="Llamada">@L["Llamada"]</option>
+                    <option value="Consejeria">@L["Consejería"]</option>
                 </select>
             </div>
 
             <!-- Año -->
             <div class="col-md-2">
-                <label class="form-label fw-semibold">Año</label>
+                <label class="form-label fw-semibold">@L["Año"]</label>
                 <select class="form-select" id="selectAnio"></select>
             </div>
 
@@ -66,11 +66,11 @@
             <div class="col-md-3" id="panelFechasPersonalizadas" style="display:none;">
                 <div class="row g-2">
                     <div class="col-6">
-                        <label class="form-label fw-semibold">Desde</label>
+                        <label class="form-label fw-semibold">@L["Desde"]</label>
                         <input type="date" class="form-control" id="txtFiltroDesde">
                     </div>
                     <div class="col-6">
-                        <label class="form-label fw-semibold">Hasta</label>
+                        <label class="form-label fw-semibold">@L["Hasta"]</label>
                         <input type="date" class="form-control" id="txtFiltroHasta">
                     </div>
                 </div>
@@ -78,7 +78,7 @@
 
             <!-- Botón buscar -->
             <div class="col-md-1">
-                <button class="btn btn-primary w-100" onclick="aplicarFiltros()" title="Buscar">
+                <button class="btn btn-primary w-100" onclick="aplicarFiltros()" title="@L["Buscar"]">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -89,20 +89,20 @@
 <!-- TABLA DE DETALLES -->
 <div class="card">
     <div class="card-header" style="background-color: #1E3A8A; color:white;">
-        <i class="fas fa-user me-1"></i> <span id="lblMiembroSeleccionado">Ningún miembro seleccionado</span>
+        <i class="fas fa-user me-1"></i> <span id="lblMiembroSeleccionado">@L["Ningún miembro seleccionado"]</span>
     </div>
     <div class="table-responsive p-3">
         <div id="mensajeSinMiembro" class="text-center text-muted py-4">
             <i class="fas fa-search fa-2x mb-2 d-block"></i>
-            Busca un miembro para ver su historial de seguimiento.
+            @L["Busca un miembro para ver su historial de seguimiento."]
         </div>
         <table id="tablaDetalles" class="table table-bordered table-striped border-top" style="width:100%; display:none;">
             <thead>
                 <tr>
-                    <th>Tipo</th>
-                    <th>Fecha</th>
-                    <th>Persona a cargo</th>
-                    <th>Observaciones</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Persona a cargo"]</th>
+                    <th>@L["Observaciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -153,7 +153,7 @@
                 { data: 'observaciones', defaultContent: '' }
             ],
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+                url: window.dtLang || undefined,
                 emptyTable: 'No hay registros de seguimiento para este miembro.'
             },
             responsive: true,

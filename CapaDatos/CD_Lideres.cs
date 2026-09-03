@@ -51,6 +51,27 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Cuenta los líderes cuyo miembro asociado está activo. Si sedeID es 1000 (Admin Global), cuenta todos.
+        /// </summary>
+        public int ContadorLideresActivos(int sedeID)
+        {
+            try
+            {
+                var query = from l in _context.Lideres
+                            join m in _context.Miembros on l.ID_miembro equals m.id_miembro
+                            where m.miembro_activo == "Si"
+                                  && (sedeID == 1000 || l.ID_sede == sedeID)
+                            select l.ID;
+                return query.Count();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ContadorLideresActivos: {ErrorHelper.Mensaje(ex)}");
+                return 0;
+            }
+        }
+
         public int RegistrarLider(Lider obj, out string mensaje)
         {
             mensaje = string.Empty;

@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Diezmos";
+    ViewData["Title"] = L["Diezmos"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @* <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" /> *@
@@ -7,30 +7,30 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Diezmos</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Diezmos"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-users me-1"></i> Lista de Diezmos
+        <i class="fas fa-users me-1"></i> @L["Lista de Diezmos"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalDiezmos()">Añadir nuevo diezmo</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalDiezmos()">@L["Añadir nuevo diezmo"]</button>
             </div>
         </div>
         <hr />
         <table id="tablaDiezmos" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Fecha</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Concepto</th>
-                    <th>Cantidad</th>
-                    <th>Sede</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellido"]</th>
+                    <th>@L["Concepto"]</th>
+                    <th>@L["Cantidad"]</th>
+                    <th>@L["Sede"]</th>
                     <th></th>@* Acciones *@
                 </tr>
             </thead>
@@ -43,8 +43,8 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="exampleModalLabel">Datos del nuevo Concepto</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="exampleModalLabel">@L["Datos del nuevo Concepto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtid" type="hidden" value="0" />
@@ -55,34 +55,34 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="chkAnonimo">
                             <label class="form-check-label" for="chkAnonimo">
-                                **Donante Anónimo**
+                                @L["**Donante Anónimo**"]
                             </label>
                         </div>
                     </div>
                 </div>
                 <div class="row g-2">
                     <div class="col-sm-6">
-                        <label class="form-label">Número de Miembro</label>
-                        <input type="text" class="form-control" id="txtNumeroMiembro" placeholder="Ej: 198" autocomplete="off" />
+                        <label class="form-label">@L["Número de Miembro"]</label>
+                        <input type="text" class="form-control" id="txtNumeroMiembro" placeholder="@L["Ej: 198"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Fecha<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Fecha"]<span class="text-danger">*</span></label>
                         <input class="form-control" type="text" id="txtFecha" name="fecha" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Nombre del miembro<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Nombre" autocomplete="off" />
+                        <label class="form-label">@L["Nombre del miembro"]<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="@L["Nombre"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Apellido del miembro<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtApellidoMiembro" placeholder="Apellido" autocomplete="off" />
+                        <label class="form-label">@L["Apellido del miembro"]<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtApellidoMiembro" placeholder="@L["Apellido"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Concepto<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Concepto"]<span class="text-danger">*</span></label>
                         <select id="ddlConcepto" class="form-select"></select>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Cantidad<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Cantidad"]<span class="text-danger">*</span></label>
                         <input type="text" inputmode="decimal" class="form-control" id="txtCantidad" placeholder="0,00€" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
@@ -96,8 +96,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarDiezmo()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarDiezmo()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -125,6 +125,24 @@
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            miembroNoEncontrado:   @Json.Serialize(L["No se encontró un miembro con el Número de Miembro {0}."].Value),
+            numeroMiembroInvalido: @Json.Serialize(L["El valor \"{0}\" no es un número de miembro válido."].Value),
+            anonimo:                   @Json.Serialize(L["Anónimo"].Value),
+            conceptoCantidadInvalidos: @Json.Serialize(L["El concepto y la cantidad deben ser válidos (no cero o vacíos)."].Value),
+            eliminarDiezmo:            @Json.Serialize(L["¿Desea eliminar este diezmo?"].Value),
+            error:                     @Json.Serialize(L["Error"].Value),
+            estasSeguro:               @Json.Serialize(L["¿Estás seguro?"].Value),
+            miembroNoAnonimo:          @Json.Serialize(L["Para un miembro no anónimo, debe seleccionar un miembro de la lista de sugerencias o usar el campo Número de Miembro."].Value),
+            no:                        @Json.Serialize(L["No"].Value),
+            si:                        @Json.Serialize(L["Sí"].Value)
+        });
+
         let tabladata;
         let filaSeleccionada;
 
@@ -242,9 +260,7 @@
                         width: "100px"
                     }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                }
+                language: window.dtLang ? { url: window.dtLang } : {}
             });
 
             /// 🌟 IMPLEMENTACIÓN DE BÚSQUEDA por TEXTO (Nombre/Apellido) - Autocompletado
@@ -331,7 +347,7 @@
                     NUMERO_MIEMBRO_SELECCIONADO = 0;
                     $("#txtNombreMiembro").val("");
                     $("#txtApellidoMiembro").val("");
-                    $("#mensajeError").removeClass("d-none").text(`El valor "${busquedaID}" no es un número de miembro válido.`);
+                    $("#mensajeError").removeClass("d-none").text(fmt(T.numeroMiembroInvalido, busquedaID));
                     return;
                 }
 
@@ -359,7 +375,7 @@
                             $("#txtNombreMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
                             $("#txtApellidoMiembro").prop('readonly', false).removeClass('bg-secondary bg-opacity-10');
 
-                            $("#mensajeError").removeClass("d-none").text(`No se encontró un miembro con el Número de Miembro ${busquedaID}.`);
+                            $("#mensajeError").removeClass("d-none").text(fmt(T.miembroNoEncontrado, busquedaID));
                         }
                     },
                     error: function (xhr, status, error) {
@@ -431,12 +447,12 @@
                 const data = tabladata.row(fila).data();
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "¿Desea eliminar este diezmo?",
+                    title: T.estasSeguro,
+                    text: T.eliminarDiezmo,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.si,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -447,11 +463,11 @@
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo eliminar", "error");
+                                Swal.fire(T.error, "No se pudo eliminar", "error");
                             }
                         });
                     }
@@ -469,8 +485,8 @@
                     NUMERO_MIEMBRO_SELECCIONADO = 0; // 0 o NULL para el campo numero_miembro
                     // La siguiente línea sobrescribe el resetearCamposMiembro para poner '0' y bloquear.
                     $("#txtNumeroMiembro").val("0").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
-                    $("#txtNombreMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
-                    $("#txtApellidoMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtNombreMiembro").val(T.anonimo).prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtApellidoMiembro").val(T.anonimo).prop('readonly', true).addClass('bg-secondary bg-opacity-10');
                     $("#mensajeError").addClass("d-none");
                     // Aseguramos que el checkbox esté marcado
                     $(this).prop('checked', true);
@@ -496,7 +512,7 @@
                 $("#txtFecha").datepicker('setDate', fecha);
 
                 // Verificación robusta para el estado Anónimo
-                const esAnonimo = (json.numero_miembro === 0 || json.numero_miembro === null) && json.nombre_miembro === "Anónimo" && json.apellidos_miembro === "Anónimo";
+                const esAnonimo = (json.numero_miembro === 0 || json.numero_miembro === null) && json.nombre_miembro === T.anonimo && json.apellidos_miembro === T.anonimo;
 
                 if (esAnonimo) {
                     // SOLUCIÓN 1: Marcar el checkbox en modo edición
@@ -505,8 +521,8 @@
                     // Rellenar y Bloquear para Anónimo
                     NUMERO_MIEMBRO_SELECCIONADO = 0;
                     $("#txtNumeroMiembro").val("0").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
-                    $("#txtNombreMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
-                    $("#txtApellidoMiembro").val("Anónimo").prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtNombreMiembro").val(T.anonimo).prop('readonly', true).addClass('bg-secondary bg-opacity-10');
+                    $("#txtApellidoMiembro").val(T.anonimo).prop('readonly', true).addClass('bg-secondary bg-opacity-10');
                 } else {
                     // SOLUCIÓN 1: Desmarcar el checkbox si es un miembro real
                     $("#chkAnonimo").prop('checked', false);
@@ -567,13 +583,13 @@
 
             // Validación: La cantidad, el concepto y el nombre (si no es anónimo) no pueden ser vacíos o cero.
             if (Diezmo.cantidad_diezmo <= 0 || Diezmo.iD_concepto === 0) {
-                $("#mensajeError").removeClass("d-none").text("El concepto y la cantidad deben ser válidos (no cero o vacíos).");
+                $("#mensajeError").removeClass("d-none").text(T.conceptoCantidadInvalidos);
                 return;
             }
 
             // Si NO es anónimo y el número de miembro es 0, significa que no se seleccionó/buscó un miembro válido.
             if (!esAnonimo && Diezmo.numero_miembro === 0) {
-                $("#mensajeError").removeClass("d-none").text("Para un miembro no anónimo, debe seleccionar un miembro de la lista de sugerencias o usar el campo Número de Miembro.");
+                $("#mensajeError").removeClass("d-none").text(T.miembroNoAnonimo);
                 return;
             }
 

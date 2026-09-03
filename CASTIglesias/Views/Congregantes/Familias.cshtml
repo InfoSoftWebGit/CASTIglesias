@@ -1,34 +1,34 @@
-@{
-    ViewBag.Title = "Familias";
+﻿@{
+    ViewBag.Title = L["Familias"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Familias</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Familias"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-users me-1"></i> Lista de Familias
+        <i class="fas fa-users me-1"></i> @L["Lista de Familias"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalFamilias()">Añadir nueva familia</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalFamilias()">@L["Añadir nueva familia"]</button>
             </div>
         </div>
 
         <table id="tablaFamilias" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombre Familia</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
-                    <th>Municipio</th>
-                    <th>Acciones</th>
+                    <th>@L["Nombre Familia"]</th>
+                    <th>@L["Teléfono"]</th>
+                    <th>@L["Dirección"]</th>
+                    <th>@L["Municipio"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -40,8 +40,8 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="exampleModalLabel">Datos de la nueva familia</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="exampleModalLabel">@L["Datos de la nueva familia"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtid" type="hidden" value="0" />
@@ -49,12 +49,12 @@
                 <ul class="nav nav-tabs mb-3" id="familiasTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="tab-datos-btn" data-bs-toggle="tab" data-bs-target="#panelDatos" type="button" role="tab">
-                            <i class="fas fa-home me-1"></i> Datos
+                            <i class="fas fa-home me-1"></i> @L["Datos"]
                         </button>
                     </li>
                     <li class="nav-item" role="presentation" id="liTabMiembros" style="display:none;">
                         <button class="nav-link" id="tab-miembros-btn" data-bs-toggle="tab" data-bs-target="#panelMiembros" type="button" role="tab">
-                            <i class="fas fa-users me-1"></i> Miembros
+                            <i class="fas fa-users me-1"></i> @L["Miembros"]
                         </button>
                     </li>
                 </ul>
@@ -64,21 +64,21 @@
                     <div class="tab-pane fade show active" id="panelDatos" role="tabpanel">
                         <div class="row g-2">
                             <div class="col-sm-6">
-                                <label class="form-label">Nombre familiar</label>
-                                <input type="text" class="form-control" id="txtNombres" placeholder="Nombre Familia" autocomplete="off" />
+                                <label class="form-label">@L["Nombre familiar"]</label>
+                                <input type="text" class="form-control" id="txtNombres" placeholder="@L["Nombre Familia"]" autocomplete="off" />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Teléfono</label>
+                                <label class="form-label">@L["Teléfono"]</label>
                                 <input type="text" class="form-control" id="txtTelefono" placeholder="999555444" autocomplete="off" />
                             </div>
                             <div class="col-sm-12">
-                                <label class="form-label">Dirección</label>
-                                <input type="text" class="form-control" id="txtDireccion" placeholder="Calle, número..." autocomplete="off" />
+                                <label class="form-label">@L["Dirección"]</label>
+                                <input type="text" class="form-control" id="txtDireccion" placeholder="@L["Calle, número..."]" autocomplete="off" />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Provincia</label>
+                                <label class="form-label">@L["Provincia"]</label>
                                 <select id="cboProvincia" class="form-select">
-                                    <option value="0" disabled selected>Selecciona una provincia</option>
+                                    <option value="0" disabled selected>@L["Selecciona una provincia"]</option>
                                     @if (ViewBag.ListaProvincias != null)
                                     {
                                         foreach (var p in ViewBag.ListaProvincias)
@@ -89,17 +89,17 @@
                                 </select>
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label">Municipio</label>
+                                <label class="form-label">@L["Municipio"]</label>
                                 <select id="cboMunicipio" class="form-select" disabled>
-                                    <option disabled selected>Selecciona un municipio</option>
+                                    <option disabled selected>@L["Selecciona un municipio"]</option>
                                 </select>
                             </div>
                             <div class="col-sm-4">
-                                <label class="form-label">CP</label>
+                                <label class="form-label">@L["CP"]</label>
                                 <input type="number" class="form-control" id="txtCP" placeholder="28001" autocomplete="off" />
                             </div>
                             <div class="col-sm-4">
-                                <label class="form-label">Cantidad de integrantes</label>
+                                <label class="form-label">@L["Cantidad de integrantes"]</label>
                                 <input type="number" class="form-control" id="txtIntegrantes" placeholder="0" min="0" autocomplete="off" />
                             </div>
                         </div>
@@ -113,69 +113,69 @@
                     <!-- Tab Miembros -->
                     <div class="tab-pane fade" id="panelMiembros" role="tabpanel">
                         <div id="divSinGuardar" class="alert alert-info d-none">
-                            Guarda la familia primero para poder gestionar los miembros.
+                            @L["Guarda la familia primero para poder gestionar los miembros."]
                         </div>
 
                         <div id="divMiembros">
                             <table class="table table-sm table-bordered align-middle mb-3">
                                 <thead style="background-color:#1E3A8A; color:white; text-align:center;">
                                     <tr>
-                                        <th>Nombre</th>
-                                        <th>Apellidos</th>
-                                        <th>Rol en familia</th>
-                                        <th>Activo</th>
-                                        <th>Fallecido</th>
+                                        <th>@L["Nombre"]</th>
+                                        <th>@L["Apellidos"]</th>
+                                        <th>@L["Rol en familia"]</th>
+                                        <th>@L["Activo"]</th>
+                                        <th>@L["Fallecido"]</th>
                                         <th style="width:60px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="bodyMiembrosFamilia">
                                     <tr id="trSinMiembros">
-                                        <td colspan="6" class="text-center text-muted">No hay miembros asignados a esta familia.</td>
+                                        <td colspan="6" class="text-center text-muted">@L["No hay miembros asignados a esta familia."]</td>
                                     </tr>
                                 </tbody>
                             </table>
 
                             <hr />
-                            <h6 class="mb-2">Añadir miembro a esta familia</h6>
+                            <h6 class="mb-2">@L["Añadir miembro a esta familia"]</h6>
                             <div class="row g-2 align-items-end">
                                 <div class="col-sm-5 position-relative">
-                                    <label class="form-label">Buscar miembro</label>
+                                    <label class="form-label">@L["Buscar miembro"]</label>
                                     <input type="text" class="form-control" id="txtBuscarMiembro"
-                                           placeholder="Escribe nombre o apellidos..." autocomplete="off" />
+                                           placeholder="@L["Escribe nombre o apellidos..."]" autocomplete="off" />
                                     <div id="dropdownMiembros" class="list-group position-absolute shadow"
                                          style="z-index:9999; display:none; max-height:180px; overflow-y:auto; left:12px; right:12px; top:100%;"></div>
                                 </div>
                                 <div class="col-sm-4">
-                                    <label class="form-label">Tipo de relación</label>
+                                    <label class="form-label">@L["Tipo de relación"]</label>
                                     <select id="cboTipoRelacion" class="form-select">
-                                        <option value="">— Selecciona —</option>
-                                        <optgroup label="1er grado">
-                                            <option value="Padre">Padre</option>
-                                            <option value="Madre">Madre</option>
-                                            <option value="Hijo">Hijo</option>
-                                            <option value="Hija">Hija</option>
-                                            <option value="Hermano">Hermano</option>
-                                            <option value="Hermana">Hermana</option>
-                                            <option value="Conyuge">Cónyuge</option>
+                                        <option value="">@L["— Selecciona —"]</option>
+                                        <optgroup label="@L["1er grado"]">
+                                            <option value="Padre">@L["Padre"]</option>
+                                            <option value="Madre">@L["Madre"]</option>
+                                            <option value="Hijo">@L["Hijo"]</option>
+                                            <option value="Hija">@L["Hija"]</option>
+                                            <option value="Hermano">@L["Hermano"]</option>
+                                            <option value="Hermana">@L["Hermana"]</option>
+                                            <option value="Conyuge">@L["Cónyuge"]</option>
                                         </optgroup>
-                                        <optgroup label="2do grado">
-                                            <option value="Abuelo">Abuelo</option>
-                                            <option value="Abuela">Abuela</option>
-                                            <option value="Nieto">Nieto</option>
-                                            <option value="Nieta">Nieta</option>
-                                            <option value="Tio">Tío</option>
-                                            <option value="Tia">Tía</option>
-                                            <option value="Sobrino">Sobrino</option>
-                                            <option value="Sobrina">Sobrina</option>
-                                            <option value="Medio_hermano">Medio hermano</option>
-                                            <option value="Medio_hermana">Medio hermana</option>
+                                        <optgroup label="@L["2do grado"]">
+                                            <option value="Abuelo">@L["Abuelo"]</option>
+                                            <option value="Abuela">@L["Abuela"]</option>
+                                            <option value="Nieto">@L["Nieto"]</option>
+                                            <option value="Nieta">@L["Nieta"]</option>
+                                            <option value="Tio">@L["Tío"]</option>
+                                            <option value="Tia">@L["Tía"]</option>
+                                            <option value="Sobrino">@L["Sobrino"]</option>
+                                            <option value="Sobrina">@L["Sobrina"]</option>
+                                            <option value="Medio_hermano">@L["Medio hermano"]</option>
+                                            <option value="Medio_hermana">@L["Media hermana"]</option>
                                         </optgroup>
-                                        <option value="Otro">Otro</option>
+                                        <option value="Otro">@L["Otro"]</option>
                                     </select>
                                 </div>
                                 <div class="col-sm-3">
                                     <button type="button" class="btn btn-outline-primary w-100" onclick="asignarMiembroAFamilia()">
-                                        <i class="fas fa-plus me-1"></i> Añadir
+                                        <i class="fas fa-plus me-1"></i> @L["Añadir"]
                                     </button>
                                 </div>
                             </div>
@@ -187,8 +187,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btnGuardarFamilia" onclick="GuardarFamilia()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarFamilia" onclick="GuardarFamilia()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -201,6 +201,25 @@
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            deEstaFamilia:          @Json.Serialize(L["de esta familia?"].Value),
+            desvincularA:           @Json.Serialize(L["¿Desea desvincular a"].Value),
+            eliminarFamilia:        @Json.Serialize(L["¿Desea eliminar a esta familia?"].Value),
+            error:                  @Json.Serialize(L["Error"].Value),
+            estasSeguro:            @Json.Serialize(L["¿Estás seguro?"].Value),
+            guardaFamiliaPrimero:   @Json.Serialize(L["Guarda la familia antes de añadir miembros."].Value),
+            no:                     @Json.Serialize(L["No"].Value),
+            quitarMiembro:          @Json.Serialize(L["¿Quitar miembro?"].Value),
+            seleccionaTipoRelacion: @Json.Serialize(L["Selecciona el tipo de relación familiar."].Value),
+            si:                     @Json.Serialize(L["Sí"].Value),
+            siQuitar:               @Json.Serialize(L["Sí, quitar"].Value)
+        });
+
         let tabladata;
         let filaSeleccionada;
 
@@ -239,9 +258,7 @@
                         width: "100px"
                     }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $('#tablaFamilias thead').css({
                         'background-color': '#1E3A8A',
@@ -264,12 +281,12 @@
                 const data = tabladata.row(fila).data();
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: "¿Desea eliminar a esta familia?",
+                    title: T.estasSeguro,
+                    text: T.eliminarFamilia,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.si,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -280,11 +297,11 @@
                                 if (res.resultado) {
                                     tabladata.row(fila).remove().draw();
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo eliminar", "error");
+                                Swal.fire(T.error, "No se pudo eliminar", "error");
                             }
                         });
                     }
@@ -448,12 +465,12 @@
                 const nombre = fila.find("td:first").text() + " " + fila.find("td:eq(1)").text();
 
                 Swal.fire({
-                    title: "¿Quitar miembro?",
-                    text: `¿Desea desvincular a "${nombre.trim()}" de esta familia?`,
+                    title: T.quitarMiembro,
+                    text: `${T.desvincularA} \"${nombre.trim()}\" ${T.deEstaFamilia}`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, quitar",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.siQuitar,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -468,11 +485,11 @@
                                     }
                                     Swal.fire("Listo", res.mensaje, "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo quitar el miembro.", "error");
+                                Swal.fire(T.error, "No se pudo quitar el miembro.", "error");
                             }
                         });
                     }
@@ -539,7 +556,7 @@
             $("#mensajeErrorMiembro").addClass("d-none").text("");
 
             if (idFamilia === 0) {
-                $("#mensajeErrorMiembro").removeClass("d-none").text("Guarda la familia antes de añadir miembros.");
+                $("#mensajeErrorMiembro").removeClass("d-none").text(T.guardaFamiliaPrimero);
                 return;
             }
             if (idMiembro === 0) {
@@ -547,7 +564,7 @@
                 return;
             }
             if (!tipoRelacion) {
-                $("#mensajeErrorMiembro").removeClass("d-none").text("Selecciona el tipo de relación familiar.");
+                $("#mensajeErrorMiembro").removeClass("d-none").text(T.seleccionaTipoRelacion);
                 return;
             }
 

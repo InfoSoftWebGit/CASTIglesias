@@ -18,6 +18,11 @@ namespace CapaNegocio
             return _capaDatos.ListarLideres(sedeID);
         }
 
+        public int ContadorLideresActivos(int sedeID)
+        {
+            return _capaDatos.ContadorLideresActivos(sedeID);
+        }
+
         public int RegistrarLider(Lider obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;

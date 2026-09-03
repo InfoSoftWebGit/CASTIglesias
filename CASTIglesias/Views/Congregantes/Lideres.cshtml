@@ -1,5 +1,5 @@
-@{
-    ViewBag.Title = "Líderes";
+﻿@{
+    ViewBag.Title = L["Líderes"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var loggedInSedeID = ViewBag.sedeID ?? 0;
@@ -32,20 +32,20 @@
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a href="#">Resumen</a></li>
-    <li class="breadcrumb-item active">Líderes</li>
+    <li class="breadcrumb-item"><a href="#">@L["Resumen"]</a></li>
+    <li class="breadcrumb-item active">@L["Líderes"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-user-tie me-1"></i> Gestión de líderes
+        <i class="fas fa-user-tie me-1"></i> @L["Gestión de líderes"]
     </div>
 
     <div class="table-responsive p-3">
         <div class="row mb-2">
             <div class="col-12">
                 <button type="button" class="btn btn-success" onclick="abrirModal(null)">
-                    <i class="fas fa-plus me-1"></i> Nuevo líder
+                    <i class="fas fa-plus me-1"></i> @L["Nuevo líder"]
                 </button>
             </div>
         </div>
@@ -53,11 +53,11 @@
         <table id="tablaLideres" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Miembro</th>
-                    <th>Zona</th>
-                    <th>Grupo</th>
-                    <th>Ministerio</th>
-                    <th>Acceso app</th>
+                    <th>@L["Miembro"]</th>
+                    <th>@L["Zona"]</th>
+                    <th>@L["Grupo"]</th>
+                    <th>@L["Ministerio"]</th>
+                    <th>@L["Acceso app"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -71,64 +71,64 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="modalTitulo">Nuevo líder</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="modalTitulo">@L["Nuevo líder"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hiddenID" value="0" />
                 <input type="hidden" id="hiddenIdMiembro" value="0" />
 
                 <!-- MIEMBRO -->
-                <h6 class="mb-3">Información del miembro</h6>
+                <h6 class="mb-3">@L["Información del miembro"]</h6>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="form-label">Nombre del miembro <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Nombre del miembro"] <span class="text-danger">*</span></label>
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtNombreMiembro"
-                                   autocomplete="off" placeholder="Buscar por nombre...">
+                                   autocomplete="off" placeholder="@L["Buscar por nombre..."]">
                             <div id="dropdownNombreMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Apellidos</label>
+                        <label class="form-label">@L["Apellidos"]</label>
                         <input type="text" class="form-control" id="txtApellidosMiembro"
-                               autocomplete="off" placeholder="Se rellena al seleccionar..." readonly>
+                               autocomplete="off" placeholder="@L["Se rellena al seleccionar..."]" readonly>
                     </div>
                 </div>
 
                 <hr />
                 <!-- ZONA / GRUPO / MINISTERIO -->
-                <h6 class="mb-3">Asignación pastoral</h6>
+                <h6 class="mb-3">@L["Asignación pastoral"]</h6>
                 <div class="row g-3">
                     <!-- ZONA -->
                     <div class="col-sm-4">
-                        <label class="form-label">Zona</label>
+                        <label class="form-label">@L["Zona"]</label>
                         <input type="hidden" id="hiddenIdZona" value="0" />
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtZona"
-                                   autocomplete="off" placeholder="Buscar zona...">
+                                   autocomplete="off" placeholder="@L["Buscar zona..."]">
                             <div id="dropdownZona" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
 
                     <!-- GRUPO -->
                     <div class="col-sm-4">
-                        <label class="form-label">Grupo</label>
+                        <label class="form-label">@L["Grupo"]</label>
                         <input type="hidden" id="hiddenIdGrupo" value="0" />
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtGrupo"
-                                   autocomplete="off" placeholder="Buscar grupo...">
+                                   autocomplete="off" placeholder="@L["Buscar grupo..."]">
                             <div id="dropdownGrupo" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
 
                     <!-- MINISTERIO -->
                     <div class="col-sm-4">
-                        <label class="form-label">Ministerio</label>
+                        <label class="form-label">@L["Ministerio"]</label>
                         <input type="hidden" id="hiddenIdMinisterio" value="0" />
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtMinisterio"
-                                   autocomplete="off" placeholder="Buscar ministerio...">
+                                   autocomplete="off" placeholder="@L["Buscar ministerio..."]">
                             <div id="dropdownMinisterio" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
@@ -138,17 +138,17 @@
                         <div class="form-check form-switch mt-2">
                             <input class="form-check-input" type="checkbox" id="chkTieneUsuario" role="switch">
                             <label class="form-check-label" for="chkTieneUsuario">
-                                Tiene usuario en la aplicación
+                                @L["Tiene usuario en la aplicación"]
                             </label>
                         </div>
-                        <small class="text-muted">Indica si este líder dispone de acceso al sistema.</small>
+                        <small class="text-muted">@L["Indica si este líder dispone de acceso al sistema."]</small>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarLider()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -198,9 +198,7 @@
                     }
                 }
             ],
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
+            language: window.dtLang ? { url: window.dtLang } : {},
             responsive: true
         });
     });

@@ -159,6 +159,20 @@ namespace CapaDatos
             return query.ToList();
         }
 
+        /// <summary>
+        /// Cuenta los miembros de la zona del tipo indicado. Con sede 1000 cuenta
+        /// los de todas las sedes (uniendo por el tipo de zona).
+        /// </summary>
+        public int ContadorMiembrosZona(int sedeID, string tipo)
+        {
+            var query = from mzgm in _context.Miembros_Zona_Grupo_Ministerio
+                        join z in _context.Zona on mzgm.ID_zona equals z.ID_zona
+                        where z.tipo == tipo
+                              && (sedeID == 1000 || mzgm.ID_sede == sedeID)
+                        select mzgm.ID;
+            return query.Count();
+        }
+
         public bool YaEstaEnZona(int idMiembro, int idZona)
         {
             return _context.Miembros_Zona_Grupo_Ministerio

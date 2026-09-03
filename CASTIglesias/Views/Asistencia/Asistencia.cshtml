@@ -1,34 +1,34 @@
 ﻿@{
-    ViewData["Title"] = "Asistencia";
+    ViewData["Title"] = L["Asistencia"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 <style>.ui-autocomplete { z-index: 9999 !important; }</style>
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Asistencia</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Asistencia"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-handshake me-1"></i> Lista de Asistencias
+        <i class="fas fa-handshake me-1"></i> @L["Lista de Asistencias"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalAsistencia()">Añadir nueva asistencia</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalAsistencia()">@L["Añadir nueva asistencia"]</button>
             </div>
         </div>
         <hr />
         <table id="tablaAsistencias" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Turno</th>
-                    <th>Fecha</th>
-                    <th>Total de asistidos</th>
-                    <th>Miembro a cargo</th>
-                    <th>Fecha de registro</th>
-                    <th style="width: 100px;">Acciones</th>
+                    <th>@L["Turno"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Total de asistidos"]</th>
+                    <th>@L["Miembro a cargo"]</th>
+                    <th>@L["Fecha de registro"]</th>
+                    <th style="width: 100px;">@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -40,8 +40,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="modalLabel">Datos de la Asistencia</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="modalLabel">@L["Datos de la Asistencia"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtidAsistencia" type="hidden" value="0" />
@@ -49,39 +49,39 @@
 
                 <div class="row g-2">
                     <div class="col-sm-12">
-                        <label class="form-label">Turno del culto<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Turno del culto"]<span class="text-danger">*</span></label>
                         <select class="form-select" id="cboTurno">
-                            <option value="Mañana">Mañana</option>
-                            <option value="Tarde">Tarde</option>
-                            <option value="Noche">Noche</option>
-                            <option value="Oración">Oración</option>
-                            <option value="Especial">Especial</option>
+                            <option value="Mañana">@L["Mañana"]</option>
+                            <option value="Tarde">@L["Tarde"]</option>
+                            <option value="Noche">@L["Noche"]</option>
+                            <option value="Oración">@L["Oración"]</option>
+                            <option value="Especial">@L["Especial"]</option>
                         </select>
                     </div>
                     <div class="col-sm-12">
-                        <label class="form-label">Fecha<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Fecha"]<span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="txtFecha" autocomplete="off" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Adultos<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Adultos"]<span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="txtAdultos" min="0" value="0" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Niños<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Niños"]<span class="text-danger">*</span></label>
                         @* CORRECCIÓN HTML: Cambiado de txtNinos a txtNiños para la coherencia con JS *@
                         <input type="number" class="form-control" id="txtNiños" min="0" value="0" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Nuevos<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Nuevos"]<span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="txtNuevos" min="0" value="0" />
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Invitados/Visita<span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Invitados/Visita"]<span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="txtInvitados" min="0" value="0" />
                     </div>
                     <div class="col-sm-12">
-                        <label class="form-label">Miembro a cargo<span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="Busca un miembro…" autocomplete="off" />
+                        <label class="form-label">@L["Miembro a cargo"]<span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreMiembro" placeholder="@L["Busca un miembro…"]" autocomplete="off" />
                     </div>
                 </div>
 
@@ -92,8 +92,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="GuardarAsistencia()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="GuardarAsistencia()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -122,6 +122,25 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            cancelar:              @Json.Serialize(L["Cancelar"].Value),
+            eliminado:             @Json.Serialize(L["Eliminado"].Value),
+            eliminarAsistencia:    @Json.Serialize(L["¿Eliminar asistencia?"].Value),
+            error:                 @Json.Serialize(L["Error"].Value),
+            errorConexionServidor: @Json.Serialize(L["Error de conexión con el servidor."].Value),
+            errorEliminacion:      @Json.Serialize(L["Error en la solicitud de eliminación."].Value),
+            exito:                 @Json.Serialize(L["Éxito"].Value),
+            manana:                @Json.Serialize(L["Mañana"].Value),
+            registroConId:         @Json.Serialize(L["¿Desea eliminar el registro con ID"].Value),
+            restriccion:           @Json.Serialize(L["Restricción"].Value),
+            siEliminar:            @Json.Serialize(L["Sí, eliminar"].Value)
+        });
+
         const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
         let tabladata;
         let filaSeleccionada;
@@ -194,7 +213,7 @@
                         searchable: false
                     }
                 ],
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" }
+                language: window.dtLang ? { url: window.dtLang } : {}
             });
 
             $("#tablaAsistencias tbody").on("click", ".btn-editarAsistencia", function () {
@@ -213,12 +232,12 @@
             $("#mensajeErrorAsistencia").addClass("d-none").text("");
 
             if (!json && LOGGED_IN_SEDE_ID === ID_ADMIN_GLOBAL) {
-                Swal.fire("Restricción", "El Administrador Global debe seleccionar una sede.", "warning");
+                Swal.fire(T.restriccion, "El Administrador Global debe seleccionar una sede.", "warning");
                 return;
             }
 
             $("#txtidAsistencia").val(json ? json.idasistencia_culto : 0);
-            $("#cboTurno").val(json ? json.turno_culto : "Mañana");
+            $("#cboTurno").val(json ? json.turno_culto : T.manana);
 
             const fecha = (json && json.fecha_asistencia_culto) ? json.fecha_asistencia_culto.substring(0, 10) : new Date().toISOString().substring(0, 10);
             $("#txtFecha").val(fecha);
@@ -277,26 +296,26 @@
                     if (res.success) {
                         tabladata.ajax.reload(null, false);
                         $("#FormModalAsistencias").modal("hide");
-                        Swal.fire("Éxito", "Asistencia guardada correctamente.", "success");
+                        Swal.fire(T.exito, "Asistencia guardada correctamente.", "success");
                     } else {
                         $("#mensajeErrorAsistencia").removeClass("d-none").text(res.message || "Error al guardar.");
                     }
                 },
                 error: jqXHR => {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeErrorAsistencia").removeClass("d-none").text("Error de conexión con el servidor.");
+                    $("#mensajeErrorAsistencia").removeClass("d-none").text(T.errorConexionServidor);
                 }
             });
         }
 
         function EliminarAsistencia(idAsistencia, filaTabla) {
             Swal.fire({
-                title: "¿Eliminar asistencia?",
-                text: `¿Desea eliminar el registro con ID ${idAsistencia}?`,
+                title: T.eliminarAsistencia,
+                text: `${T.registroConId} ${idAsistencia}?`,
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Sí, eliminar",
-                cancelButtonText: "Cancelar"
+                confirmButtonText: T.siEliminar,
+                cancelButtonText: T.cancelar
             }).then(result => {
                 if (result.isConfirmed) {
                     $.ajax({
@@ -305,12 +324,12 @@
                         success: res => {
                             if (res.success) {
                                 tabladata.row(filaTabla).remove().draw(false);
-                                Swal.fire("Eliminado", "Asistencia eliminada correctamente.", "success");
+                                Swal.fire(T.eliminado, "Asistencia eliminada correctamente.", "success");
                             } else {
-                                Swal.fire("Error", res.message || "No se pudo eliminar.", "error");
+                                Swal.fire(T.error, res.message || "No se pudo eliminar.", "error");
                             }
                         },
-                        error: () => Swal.fire("Error", "Error en la solicitud de eliminación.", "error")
+                        error: () => Swal.fire(T.error, T.errorEliminacion, "error")
                     });
                 }
             });

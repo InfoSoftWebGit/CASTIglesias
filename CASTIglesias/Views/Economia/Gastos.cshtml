@@ -1,6 +1,6 @@
-@using CapaEntidad
+﻿@using CapaEntidad
 @{
-    ViewData["Title"] = "Gastos";
+    ViewData["Title"] = L["Gastos"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
     var zonas = ViewBag.Zonas as List<Zona> ?? new List<Zona>();
 }
@@ -16,29 +16,29 @@
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item">Finanzas</li>
-    <li class="breadcrumb-item active">Gastos</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item">@L["Finanzas"]</li>
+    <li class="breadcrumb-item active">@L["Gastos"]</li>
 </ol>
 
 <!-- ══ TABLA 1: GASTOS (cabecera) ══════════════════════════════════════ -->
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="fas fa-file-invoice-dollar me-1"></i> Registro de Gastos</span>
+        <span><i class="fas fa-file-invoice-dollar me-1"></i> @L["Registro de Gastos"]</span>
         <button type="button" class="btn btn-success btn-sm" onclick="abrirModalGasto()">
-            <i class="fas fa-plus me-1"></i> Añadir gasto
+            <i class="fas fa-plus me-1"></i> @L["Añadir gasto"]
         </button>
     </div>
     <div class="table-responsive">
         <table id="tablaGastos" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nº Pago</th>
-                    <th>Fecha</th>
-                    <th>Miembro</th>
-                    <th>Zona</th>
-                    <th>Tipo cuenta</th>
-                    <th>Acciones</th>
+                    <th>@L["Nº Pago"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Miembro"]</th>
+                    <th>@L["Zona"]</th>
+                    <th>@L["Tipo cuenta"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -50,7 +50,7 @@
 <div class="card mb-4" id="cardPlaceholder">
     <div class="card-body text-center text-muted py-4">
         <i class="fas fa-hand-point-up fa-2x mb-2 d-block"></i>
-        Selecciona un gasto de la tabla superior para ver su detalle de pago
+        @L["Selecciona un gasto de la tabla superior para ver su detalle de pago"]
     </div>
 </div>
 
@@ -59,29 +59,29 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <i class="fas fa-receipt me-1"></i>
-            Detalle &mdash; <strong id="lblGastoSel"></strong>
+            @L["Detalle &mdash;"] <strong id="lblGastoSel"></strong>
         </span>
         <button type="button" class="btn btn-success btn-sm" onclick="nuevaLinea()">
-            <i class="fas fa-plus me-1"></i> Nueva línea
+            <i class="fas fa-plus me-1"></i> @L["Nueva línea"]
         </button>
     </div>
     <div class="table-responsive">
         <table class="table table-bordered table-sm border-top mb-0" id="gridDetalle">
             <thead>
                 <tr>
-                    <th style="min-width:200px">Miembro <span class="text-warning">*</span></th>
-                    <th style="min-width:120px">Fecha <span class="text-warning">*</span></th>
-                    <th style="min-width:110px">Cantidad&nbsp;(€) <span class="text-warning">*</span></th>
-                    <th style="min-width:220px">Razón <span class="text-warning">*</span></th>
-                    <th style="min-width:170px">Tipo cuenta <span class="text-warning">*</span></th>
-                    <th style="min-width:100px">Devuelto</th>
+                    <th style="min-width:200px">@L["Miembro"] <span class="text-warning">*</span></th>
+                    <th style="min-width:120px">@L["Fecha"] <span class="text-warning">*</span></th>
+                    <th style="min-width:110px">@L["Cantidad&nbsp;(€)"] <span class="text-warning">*</span></th>
+                    <th style="min-width:220px">@L["Razón"] <span class="text-warning">*</span></th>
+                    <th style="min-width:170px">@L["Tipo cuenta"] <span class="text-warning">*</span></th>
+                    <th style="min-width:100px">@L["Devuelto"]</th>
                     <th style="width:90px"></th>
                 </tr>
             </thead>
             <tbody id="gridDetalleTbody"></tbody>
         </table>
         <div id="gridVacio" class="text-center text-muted py-3 d-none">
-            <i class="fas fa-inbox me-1"></i> Sin líneas de detalle. Pulsa "Nueva línea" para añadir.
+            <i class="fas fa-inbox me-1"></i> @L["Sin líneas de detalle. Pulsa \"Nueva línea\" para añadir."]
         </div>
     </div>
 </div>
@@ -91,29 +91,29 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="tituloModalGasto">Añadir gasto</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="tituloModalGasto">@L["Añadir gasto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hdnIdGasto" value="0" />
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Miembro que registra <span class="text-danger">*</span></label>
-                        <input type="text" id="txtBuscarMiembro" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <label class="form-label">@L["Miembro que registra"] <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarMiembro" class="form-control" placeholder="@L["Escribe el nombre…"]" autocomplete="off" />
                         <input type="hidden" id="hdnIdMiembro" value="0" />
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Fecha del gasto <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Fecha del gasto"] <span class="text-danger">*</span></label>
                         <input type="date" id="txtFechaGasto" class="form-control" />
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Cantidad (€) <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Cantidad (€)"] <span class="text-danger">*</span></label>
                         <input type="text" inputmode="decimal" id="txtCantidad" class="form-control" placeholder="0,00" />
                     </div>
                     <div class="col-md-8">
-                        <label class="form-label">Zona destinada</label>
+                        <label class="form-label">@L["Zona destinada"]</label>
                         <select id="cboZona" class="form-select">
-                            <option value="0">— Sin zona —</option>
+                            <option value="0">@L["— Sin zona —"]</option>
                             @foreach (var z in zonas)
                             {
                                 <option value="@z.ID_zona">@z.nombre_zona</option>
@@ -121,21 +121,21 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Razón / Descripción <span class="text-danger">*</span></label>
-                        <textarea id="txtRazon" class="form-control" rows="2" placeholder="Ej: Factura de luz de noviembre…"></textarea>
+                        <label class="form-label">@L["Razón / Descripción"] <span class="text-danger">*</span></label>
+                        <textarea id="txtRazon" class="form-control" rows="2" placeholder="@L["Ej: Factura de luz de noviembre…"]"></textarea>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Tipo de cuenta <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Tipo de cuenta"] <span class="text-danger">*</span></label>
                         <select id="cboTipoCuenta" class="form-select" onchange="toggleDevuelto()">
-                            <option value="Cuenta Congregacional">Cuenta Congregacional</option>
-                            <option value="Cuenta Propia">Cuenta Propia</option>
+                            <option value="Cuenta Congregacional">@L["Cuenta Congregacional"]</option>
+                            <option value="Cuenta Propia">@L["Cuenta Propia"]</option>
                         </select>
                     </div>
                     <div class="col-md-6" id="divDevuelto" style="display:none">
-                        <label class="form-label">¿Devuelto al miembro?</label>
+                        <label class="form-label">@L["¿Devuelto al miembro?"]</label>
                         <select id="cboDevuelto" class="form-select">
-                            <option value="No">No</option>
-                            <option value="Si">Sí</option>
+                            <option value="No">@L["No"]</option>
+                            <option value="Si">@L["Sí"]</option>
                         </select>
                     </div>
                 </div>
@@ -144,9 +144,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarGasto()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -161,6 +161,25 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            eliminarGastoDetalle: @Json.Serialize(L["Se eliminará el gasto nº {0} de {1} € ({2})."].Value),
+            cancelar:          @Json.Serialize(L["Cancelar"].Value),
+            eliminado:         @Json.Serialize(L["Eliminado"].Value),
+            eliminarGasto:     @Json.Serialize(L["¿Eliminar gasto?"].Value),
+            eliminarLinea:     @Json.Serialize(L["¿Eliminar línea?"].Value),
+            eliminarLineaPago: @Json.Serialize(L["Se eliminará esta línea del detalle de pago."].Value),
+            error:             @Json.Serialize(L["Error"].Value),
+            razon:             @Json.Serialize(L["Razón…"].Value),
+            razonGastoVacia:   @Json.Serialize(L["La razón del gasto no puede estar vacía."].Value),
+            si:                @Json.Serialize(L["Sí"].Value),
+            siEliminar:        @Json.Serialize(L["Sí, eliminar"].Value)
+        });
+
         const urlListarGastos    = '@Url.Action("ListarGastos",       "Economia")';
         const urlGuardarGasto    = '@Url.Action("GuardarGasto",       "Economia")';
         const urlEliminarGasto   = '@Url.Action("EliminarGasto",      "Economia")';
@@ -182,7 +201,7 @@
             tablaGastos = $("#tablaGastos").DataTable({
                 responsive: true,
                 ordering: false,
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 ajax: { url: urlListarGastos, type: "GET", dataType: "json", dataSrc: "data" },
                 initComplete: function () { $(this.api().table().header()).css(headerStyle); },
                 drawCallback: function () {
@@ -229,10 +248,10 @@
             $("#tablaGastos tbody").on("click", ".btn-eliminar-gasto", function () {
                 const d = tablaGastos.row($(this).closest("tr")).data();
                 Swal.fire({
-                    title: "¿Eliminar gasto?",
-                    text: `Se eliminará el gasto nº ${d.numero_pago} de ${parseFloat(d.cantidad).toFixed(2)} € (${d.nombre_miembro_completo}).`,
+                    title: T.eliminarGasto,
+                    text: fmt(T.eliminarGastoDetalle, d.numero_pago, parseFloat(d.cantidad).toFixed(2), d.nombre_miembro_completo),
                     icon: "warning", showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar", cancelButtonText: "Cancelar"
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.cancelar
                 }).then(r => {
                     if (r.isConfirmed)
                         $.post(urlEliminarGasto, { id: d.id_gasto }, res => {
@@ -244,9 +263,9 @@
                                     $('#cardPlaceholder').removeClass('d-none');
                                 }
                                 tablaGastos.ajax.reload();
-                                Swal.fire("Eliminado", res.mensaje, "success");
+                                Swal.fire(T.eliminado, res.mensaje, "success");
                             } else {
-                                Swal.fire("Error", res.mensaje, "error");
+                                Swal.fire(T.error, res.mensaje, "error");
                             }
                         });
                 });
@@ -272,10 +291,10 @@
                 const id = parseInt(tr.attr("data-id")) || 0;
                 if (id === 0) { tr.remove(); actualizarVacio(); return; }
                 Swal.fire({
-                    title: "¿Eliminar línea?",
-                    text: "Se eliminará esta línea del detalle de pago.",
+                    title: T.eliminarLinea,
+                    text: T.eliminarLineaPago,
                     icon: "warning", showCancelButton: true,
-                    confirmButtonText: "Sí, eliminar", cancelButtonText: "Cancelar"
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.cancelar
                 }).then(r => {
                     if (!r.isConfirmed) return;
                     $.post(urlEliminarDetalle, { id }, res => {
@@ -284,7 +303,7 @@
                             actualizarVacio();
                             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.mensaje, showConfirmButton: false, timer: 2500, timerProgressBar: true });
                         } else {
-                            Swal.fire("Error", res.mensaje, "error");
+                            Swal.fire(T.error, res.mensaje, "error");
                         }
                     });
                 });
@@ -360,7 +379,7 @@
 
             if (idMiembro === 0) { mostrarError("#mensajeErrorGasto", "Selecciona el miembro que registra el gasto."); return; }
             if (cantidad <= 0)   { mostrarError("#mensajeErrorGasto", "La cantidad debe ser mayor que cero."); return; }
-            if (!razon)          { mostrarError("#mensajeErrorGasto", "La razón del gasto no puede estar vacía."); return; }
+            if (!razon)          { mostrarError("#mensajeErrorGasto", T.razonGastoVacia); return; }
             if (!fecha)          { mostrarError("#mensajeErrorGasto", "La fecha del gasto es obligatoria."); return; }
 
             const payload = {
@@ -443,7 +462,7 @@
                 : '<span class="badge bg-primary">Cuenta Congregacional</span>';
 
             const devueltoDisplay = d.tipo_cuenta === 'Cuenta Propia'
-                ? (d.devuelto === 'Si' ? '<span class="badge bg-success">Sí</span>' : '<span class="badge bg-danger">No</span>')
+                ? (d.devuelto === 'Si' ? '<span class="badge bg-success">' + T.si + '</span>' : '<span class="badge bg-danger">No</span>')
                 : '<span class="text-muted">—</span>';
 
             const tr = $(`<tr data-id="${d.id_detalle}" data-id-miembro="${d.id_miembro}" data-numero-pago="${d.numero_pago}">
@@ -509,7 +528,7 @@
             tr.append($('<td>').append(inpCantidad, errCantidad));
 
             // Celda Razón
-            const inpRazon = $('<input type="text" placeholder="Razón…">').addClass('form-control form-control-sm inp-razon').val(d.razon || '');
+            const inpRazon = $('<input type="text" placeholder=T.razon>').addClass('form-control form-control-sm inp-razon').val(d.razon || '');
             const errRazon = $('<div class="invalid-feedback">').text('Razón obligatoria');
             tr.append($('<td>').append(inpRazon, errRazon));
 

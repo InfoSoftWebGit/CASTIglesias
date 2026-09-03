@@ -1,32 +1,32 @@
-@{
-    ViewBag.Title = "Matrimonios";
+﻿@{
+    ViewBag.Title = L["Matrimonios"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
-    <li class="breadcrumb-item active">Matrimonios</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Matrimonios"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-ring me-1"></i> Lista de Matrimonios
+        <i class="fas fa-ring me-1"></i> @L["Lista de Matrimonios"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">Añadir matrimonio</button>
+                <button type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">@L["Añadir matrimonio"]</button>
             </div>
         </div>
 
         <table id="tablaMatrimonios" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>Nombres</th>
-                    <th>Líderes</th>
-                    <th>Seguidor</th>
-                    <th>Acciones</th>
+                    <th>@L["Nombres"]</th>
+                    <th>@L["Líderes"]</th>
+                    <th>@L["Seguidor"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -39,31 +39,31 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="tituloModalMatrimonios">Nuevo matrimonio</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="tituloModalMatrimonios">@L["Nuevo matrimonio"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input id="txtIdMatrimonio" type="hidden" value="0" />
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Nombres"] <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="txtNombresMatrimonio"
-                               placeholder="Ej: Rubén y Sady" autocomplete="off" />
-                        <div class="form-text">Escribe el nombre de ambos cónyuges.</div>
+                               placeholder="@L["Ej: Rubén y Sady"]" autocomplete="off" />
+                        <div class="form-text">@L["Escribe el nombre de ambos cónyuges."]</div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Líderes</label>
+                        <label class="form-label">@L["Líderes"]</label>
                         <select id="cboLideres" class="form-select">
-                            <option value="No">No</option>
-                            <option value="Si">Sí</option>
+                            <option value="No">@L["No"]</option>
+                            <option value="Si">@L["Sí"]</option>
                         </select>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Seguidor</label>
+                        <label class="form-label">@L["Seguidor"]</label>
                         <select id="cboSeguidor" class="form-select">
-                            <option value="">— Sin seguidor —</option>
+                            <option value="">@L["— Sin seguidor —"]</option>
                         </select>
-                        <div class="form-text">Pareja que les hace seguimiento.</div>
+                        <div class="form-text">@L["Pareja que les hace seguimiento."]</div>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -73,8 +73,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" onclick="guardarMatrimonio()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarMatrimonio()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -87,6 +87,21 @@
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            eliminarMatrimonio: @Json.Serialize(L["¿Desea eliminar el matrimonio \"{0}\"?"].Value),
+            eliminado:   @Json.Serialize(L["Eliminado"].Value),
+            error:       @Json.Serialize(L["Error"].Value),
+            estasSeguro: @Json.Serialize(L["¿Estás seguro?"].Value),
+            guardado:    @Json.Serialize(L["Guardado"].Value),
+            no:          @Json.Serialize(L["No"].Value),
+            si:          @Json.Serialize(L["Sí"].Value)
+        });
+
         let tablaMatrimonios;
         let filaSeleccionada;
         let listaMatrimonios = [];
@@ -110,7 +125,7 @@
                         data: "lideres",
                         render: function (data) {
                             return data === "Si"
-                                ? '<span class="badge bg-success">Sí</span>'
+                                ? '<span class="badge bg-success">' + T.si + '</span>'
                                 : '<span class="badge bg-secondary">No</span>';
                         }
                     },
@@ -133,9 +148,7 @@
                         width: "100px"
                     }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json"
-                },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $('#tablaMatrimonios thead').css({
                         'background-color': '#1E3A8A',
@@ -156,12 +169,12 @@
                 const data = tablaMatrimonios.row(fila).data();
 
                 Swal.fire({
-                    title: "¿Estás seguro?",
-                    text: `¿Desea eliminar el matrimonio "${data.nombres}"?`,
+                    title: T.estasSeguro,
+                    text: fmt(T.eliminarMatrimonio, data.nombres),
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí",
-                    cancelButtonText: "No"
+                    confirmButtonText: T.si,
+                    cancelButtonText: T.no
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.ajax({
@@ -171,13 +184,13 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tablaMatrimonios.ajax.reload();
-                                    Swal.fire("Eliminado", res.mensaje, "success");
+                                    Swal.fire(T.eliminado, res.mensaje, "success");
                                 } else {
-                                    Swal.fire("Error", res.mensaje, "error");
+                                    Swal.fire(T.error, res.mensaje, "error");
                                 }
                             },
                             error: function () {
-                                Swal.fire("Error", "No se pudo eliminar.", "error");
+                                Swal.fire(T.error, "No se pudo eliminar.", "error");
                             }
                         });
                     }
@@ -245,7 +258,7 @@
                     if (res.resultado !== 0 && res.resultado !== false) {
                         bootstrap.Modal.getInstance(document.getElementById("FormModalMatrimonios")).hide();
                         tablaMatrimonios.ajax.reload();
-                        Swal.fire("Guardado", res.mensaje, "success");
+                        Swal.fire(T.guardado, res.mensaje, "success");
                     } else {
                         $("#mensajeErrorMatrimonio").removeClass("d-none").text(res.mensaje);
                     }

@@ -47,6 +47,32 @@ namespace CapaDatos
         }
 
         // ----------------------------------------------------
+        // ✅ ContadorFamilias
+        // ----------------------------------------------------
+        /// <summary>
+        /// Cuenta las familias. Si sedeID es 1000 (Admin Global), cuenta todas. Si es != 1000, filtra por sede.
+        /// </summary>
+        public int ContadorFamilias(int sedeID)
+        {
+            try
+            {
+                var consultaBase = _context.Familia.AsQueryable();
+
+                if (sedeID != 1000)
+                {
+                    consultaBase = consultaBase.Where(f => f.ID_sede == sedeID);
+                }
+
+                return consultaBase.Count();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ContadorFamilias EF Core: {ErrorHelper.Mensaje(ex)}");
+                return 0;
+            }
+        }
+
+        // ----------------------------------------------------
         // ✅ RegistrarFamilia
         // ----------------------------------------------------
         /// <summary>

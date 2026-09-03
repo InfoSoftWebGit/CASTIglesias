@@ -1,33 +1,33 @@
-@{
-    ViewBag.Title = "Cultos y Servicios";
+﻿@{
+    ViewBag.Title = L["Cultos y Servicios"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-    <li class="breadcrumb-item active">Cultos y Servicios</li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Inicio"]</a></li>
+    <li class="breadcrumb-item active">@L["Cultos y Servicios"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-church me-1"></i> Lista de Cultos y Servicios
+        <i class="fas fa-church me-1"></i> @L["Lista de Cultos y Servicios"]
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
                 <button type="button" class="btn btn-success" onclick="abrirModal(0)">
-                    <i class="fas fa-plus me-1"></i> Añadir nuevo culto
+                    <i class="fas fa-plus me-1"></i> @L["Añadir nuevo culto"]
                 </button>
             </div>
         </div>
         <table id="tablaCultos" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Día</th>
-                    <th>Bloques horarios</th>
-                    <th style="width:110px;">Acciones</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Día"]</th>
+                    <th>@L["Bloques horarios"]</th>
+                    <th style="width:110px;">@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -40,7 +40,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color:#1E3A8A;">
-                <h5 class="modal-title" id="modalCultoTitulo">Datos del culto</h5>
+                <h5 class="modal-title" id="modalCultoTitulo">@L["Datos del culto"]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -48,42 +48,42 @@
 
                 <div class="row g-3 mb-4">
                     <div class="col-sm-8">
-                        <label class="form-label">Nombre del culto / servicio</label>
-                        <input type="text" id="txtNombre" class="form-control" placeholder="Ej: Culto Dominical" autocomplete="off" />
+                        <label class="form-label">@L["Nombre del culto / servicio"]</label>
+                        <input type="text" id="txtNombre" class="form-control" placeholder="@L["Ej: Culto Dominical"]" autocomplete="off" />
                     </div>
                     <div class="col-sm-4">
-                        <label class="form-label">Día de la semana</label>
+                        <label class="form-label">@L["Día de la semana"]</label>
                         <select id="cboDia" class="form-select">
-                            <option value="1">Lunes</option>
-                            <option value="2">Martes</option>
-                            <option value="3">Miércoles</option>
-                            <option value="4">Jueves</option>
-                            <option value="5">Viernes</option>
-                            <option value="6">Sábado</option>
-                            <option value="7" selected>Domingo</option>
+                            <option value="1">@L["Lunes"]</option>
+                            <option value="2">@L["Martes"]</option>
+                            <option value="3">@L["Miércoles"]</option>
+                            <option value="4">@L["Jueves"]</option>
+                            <option value="5">@L["Viernes"]</option>
+                            <option value="6">@L["Sábado"]</option>
+                            <option value="7" selected>@L["Domingo"]</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label mb-0 fw-semibold">Bloques horarios</label>
+                    <label class="form-label mb-0 fw-semibold">@L["Bloques horarios"]</label>
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarBloque()">
-                        <i class="fas fa-plus me-1"></i> Añadir bloque
+                        <i class="fas fa-plus me-1"></i> @L["Añadir bloque"]
                     </button>
                 </div>
                 <div id="contenedorBloques">
                     <!-- filas de bloques se inyectan aquí -->
                 </div>
                 <div id="sinBloques" class="text-muted small text-center py-2">
-                    Sin bloques horarios. Pulsa "Añadir bloque" para definir el horario.
+                    @L["Sin bloques horarios. Pulsa \"Añadir bloque\" para definir el horario."]
                 </div>
 
                 <div id="mensajeError" class="alert alert-danger d-none mt-3"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarCulto()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -142,7 +142,7 @@
                     }
                 }
             ],
-            language: { url: 'https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json' }
+            language: window.dtLang ? { url: window.dtLang } : {}
         });
     });
 

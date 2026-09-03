@@ -374,11 +374,14 @@ namespace CASTIglesias.Controllers
                     from z in _context.Zona
                     join mzg in _context.Miembros_Zona_Grupo_Ministerio on z.ID_zona equals mzg.ID_zona
                     where sedeID == 1000 || z.ID_sede == sedeID
-                    group mzg by new { z.ID_zona, z.nombre_zona } into g
+                    // El tipo viaja a la vista para colocar cada tarjeta en su hueco fijo
+                    // del dashboard sin depender del nombre que le dé cada iglesia.
+                    group mzg by new { z.ID_zona, z.nombre_zona, z.tipo } into g
                     select new
                     {
                         ID_zona = g.Key.ID_zona,
                         nombre_zona = g.Key.nombre_zona,
+                        tipo = g.Key.tipo,
                         total_miembros = g.Count()
                     }
                 )

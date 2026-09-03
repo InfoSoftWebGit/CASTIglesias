@@ -1,13 +1,13 @@
-@{
-    ViewData["Title"] = "Configuración de Servicios";
+﻿@{
+    ViewData["Title"] = L["Configuración de Servicios"].Value;
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Configuración de Servicios</h1>
+    <h1 class="mt-4">@L["Configuración de Servicios"]</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
-        <li class="breadcrumb-item">Ajustes</li>
-        <li class="breadcrumb-item active">Servicios</li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">@L["Inicio"]</a></li>
+        <li class="breadcrumb-item">@L["Ajustes"]</li>
+        <li class="breadcrumb-item active">@L["Servicios"]</li>
     </ol>
 
     <div class="row">
@@ -15,18 +15,17 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-church me-1"></i>
-                    Roles requeridos por servicio
+                    @L["Roles requeridos por servicio"]
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">
-                        Selecciona un culto o servicio y define cuántas personas necesitas en cada rol,
-                        pudiendo especificarlo a nivel general o por bloque horario.
+                        @L["Selecciona un culto o servicio y define cuántas personas necesitas en cada rol, pudiendo especificarlo a nivel general o por bloque horario."]
                     </p>
 
                     <div class="mb-4">
-                        <label for="cboCulto" class="form-label fw-semibold">Servicio / Culto</label>
+                        <label for="cboCulto" class="form-label fw-semibold">@L["Servicio / Culto"]</label>
                         <select id="cboCulto" class="form-select">
-                            <option value="">— Selecciona un servicio —</option>
+                            <option value="">@L["— Selecciona un servicio —"]</option>
                         </select>
                     </div>
 
@@ -42,7 +41,7 @@
 
                     <div id="panelVacio" class="text-muted text-center py-4">
                         <i class="fas fa-hand-point-up fa-2x mb-2 d-block text-secondary"></i>
-                        Selecciona un servicio para ver o editar sus roles.
+                        @L["Selecciona un servicio para ver o editar sus roles."]
                     </div>
                 </div>
             </div>
@@ -51,13 +50,13 @@
         <div class="col-lg-3">
             <div class="card mb-4 border-info">
                 <div class="card-header bg-info text-white">
-                    <i class="fas fa-info-circle me-1"></i> Ayuda
+                    <i class="fas fa-info-circle me-1"></i> @L["Ayuda"]
                 </div>
                 <div class="card-body small text-muted">
-                    <p>Los cultos y sus bloques se gestionan desde <strong>Configuración de la aplicación → Cultos y Servicios</strong>.</p>
-                    <p><strong>General:</strong> roles que aplican a todo el culto, sin importar el bloque.</p>
-                    <p><strong>Bloque N:</strong> roles específicos para ese tramo horario.</p>
-                    <p>El autocomplete del campo "Rol" te sugiere roles ya usados en otros servicios.</p>
+                    <p>@L["Los cultos y sus bloques se gestionan desde"] <strong>@L["Configuración de la aplicación → Cultos y Servicios"]</strong>.</p>
+                    <p><strong>@L["General:"]</strong> @L["roles que aplican a todo el culto, sin importar el bloque."]</p>
+                    <p><strong>@L["Bloque N:"]</strong> @L["roles específicos para ese tramo horario."]</p>
+                    <p>@L["El autocomplete del campo \"Rol\" te sugiere roles ya usados en otros servicios."]</p>
                 </div>
             </div>
         </div>
@@ -69,27 +68,27 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color:#1E3A8A;">
-                <h5 class="modal-title" id="modalRolTitulo">Rol requerido</h5>
+                <h5 class="modal-title" id="modalRolTitulo">@L["Rol requerido"]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hidReqId"    value="0" />
                 <input type="hidden" id="hidBloqueId" value="" />
                 <div class="mb-3">
-                    <label class="form-label">Rol / Función</label>
-                    <input type="text" id="txtRolNombre" class="form-control" placeholder="Ej: Guitarrista" autocomplete="off" />
-                    <div class="form-text">Empieza a escribir para ver sugerencias.</div>
+                    <label class="form-label">@L["Rol / Función"]</label>
+                    <input type="text" id="txtRolNombre" class="form-control" placeholder="@L["Ej: Guitarrista"]" autocomplete="off" />
+                    <div class="form-text">@L["Empieza a escribir para ver sugerencias."]</div>
                 </div>
                 <div class="mb-2">
-                    <label class="form-label">Cantidad necesaria</label>
+                    <label class="form-label">@L["Cantidad necesaria"]</label>
                     <input type="number" id="txtCantidad" class="form-control" value="1" min="1" max="99" />
                 </div>
                 <div id="mensajeErrorRol" class="alert alert-danger d-none"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">@L["Cerrar"]</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="guardarRol()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -102,6 +101,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+        // Textos traducidos de esta vista. Se AMPLÍA window.T (ya declarado
+        // en el layout): un segundo "const T" lanzaría SyntaxError.
+        window.T = Object.assign(window.T || {}, {
+            sinRolesConfigurados: @Json.Serialize(L["Sin roles configurados todavía."].Value)
+        });
+
     const urlCultos      = '@Url.Action("ObtenerCultosParaAjustes", "Ajustes")';
     const urlListarReqs  = '@Url.Action("ListarRequerimientos",     "Ajustes")';
     const urlGuardarReq  = '@Url.Action("GuardarRequerimiento",     "Ajustes")';
@@ -238,7 +243,7 @@
 
     function renderTablaRoles(lista, tablaId) {
         if (lista.length === 0) {
-            return `<p class="text-muted text-center py-3" id="vacio-${tablaId}">Sin roles configurados todavía.</p>`;
+            return `<p class="text-muted text-center py-3" id="vacio-${tablaId}">${T.sinRolesConfigurados}</p>`;
         }
         let rows = lista.map(r => `
             <tr>

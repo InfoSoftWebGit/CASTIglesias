@@ -1,13 +1,13 @@
-@{
-    ViewData["Title"] = "Calendario de Servicios";
+﻿@{
+    ViewData["Title"] = L["Calendario de Servicios"].Value;
 }
 
 <div class="container-fluid px-4" id="paginaCalendario">
-    <h1 class="mt-4">Calendario de Servicios</h1>
+    <h1 class="mt-4">@L["Calendario de Servicios"]</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
-        <li class="breadcrumb-item">Control</li>
-        <li class="breadcrumb-item active">Calendarios</li>
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">@L["Inicio"]</a></li>
+        <li class="breadcrumb-item">@L["Control"]</li>
+        <li class="breadcrumb-item active">@L["Calendarios"]</li>
     </ol>
 
     <div class="row">
@@ -16,21 +16,21 @@
             <div class="card mb-4">
                 <div class="card-header">
                     <i class="fas fa-calendar-alt me-1"></i>
-                    Configuración del calendario
+                    @L["Configuración del calendario"]
                 </div>
                 <div class="card-body">
                     <div class="row g-4">
 
                         <!-- Tipo de calendario -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Tipo de calendario</label>
+                            <label class="form-label fw-semibold">@L["Tipo de calendario"]</label>
                             <div class="d-flex gap-4 flex-wrap">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="tipoCalendario"
                                            id="tipoSeguridad" value="1" checked />
                                     <label class="form-check-label" for="tipoSeguridad">
                                         <i class="fas fa-shield-alt me-1 text-warning"></i>
-                                        Seguridad y Bienvenida
+                                        @L["Seguridad y Bienvenida"]
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -38,7 +38,7 @@
                                            id="tipoAlabanza" value="2" />
                                     <label class="form-check-label" for="tipoAlabanza">
                                         <i class="fas fa-music me-1 text-success"></i>
-                                        Alabanza
+                                        @L["Alabanza"]
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -46,7 +46,7 @@
                                            id="tipoAudiovisuales" value="3" />
                                     <label class="form-check-label" for="tipoAudiovisuales">
                                         <i class="fas fa-video me-1 text-info"></i>
-                                        Audiovisuales
+                                        @L["Audiovisuales"]
                                     </label>
                                 </div>
                             </div>
@@ -54,35 +54,35 @@
 
                         <!-- Culto -->
                         <div class="col-md-6">
-                            <label for="cboCulto" class="form-label fw-semibold">Culto / Servicio</label>
+                            <label for="cboCulto" class="form-label fw-semibold">@L["Culto / Servicio"]</label>
                             <select id="cboCulto" class="form-select">
-                                <option value="">— Selecciona un culto —</option>
+                                <option value="">@L["— Selecciona un culto —"]</option>
                             </select>
                         </div>
 
                         <!-- Periodicidad -->
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Periodicidad</label>
+                            <label class="form-label fw-semibold">@L["Periodicidad"]</label>
                             <div class="d-flex gap-3 flex-wrap">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="periodicidad"
                                            id="perSemanal" value="semanal" />
                                     <label class="form-check-label" for="perSemanal">
-                                        Semanal <small class="text-muted">(4 semanas)</small>
+                                        @L["Semanal"] <small class="text-muted">(4 semanas)</small>
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="periodicidad"
                                            id="perMensual" value="mensual" checked />
                                     <label class="form-check-label" for="perMensual">
-                                        Mensual <small class="text-muted">(1 mes)</small>
+                                        @L["Mensual"] <small class="text-muted">(1 mes)</small>
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="periodicidad"
                                            id="perTrimestral" value="trimestral" />
                                     <label class="form-check-label" for="perTrimestral">
-                                        Trimestral <small class="text-muted">(3 meses)</small>
+                                        @L["Trimestral"] <small class="text-muted">(3 meses)</small>
                                     </label>
                                 </div>
                             </div>
@@ -90,7 +90,7 @@
 
                         <!-- Fecha de inicio -->
                         <div class="col-md-6">
-                            <label for="txtFechaInicio" class="form-label fw-semibold">Fecha de inicio</label>
+                            <label for="txtFechaInicio" class="form-label fw-semibold">@L["Fecha de inicio"]</label>
                             <input type="date" id="txtFechaInicio" class="form-control" />
                         </div>
 
@@ -99,7 +99,7 @@
                     <div class="mt-4">
                         <button class="btn btn-primary" id="btnGenerar" onclick="generarCalendario()">
                             <i class="fas fa-calendar-check me-1"></i>
-                            Generar calendario
+                            @L["Generar calendario"]
                         </button>
                     </div>
                 </div>
@@ -111,17 +111,17 @@
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <span>
                             <i class="fas fa-table me-1"></i>
-                            <span id="lblTituloCalendario">Calendario</span>
+                            <span id="lblTituloCalendario">@L["Calendario"]</span>
                         </span>
                         <div class="d-flex gap-2 no-print flex-wrap">
-                            <button class="btn btn-success btn-sm" onclick="exportarExcel()" title="Exportar solo este culto">
+                            <button class="btn btn-success btn-sm" onclick="exportarExcel()" title="@L["Exportar solo este culto"]">
                                 <i class="fas fa-file-excel me-1"></i> Excel
                             </button>
-                            <button class="btn btn-outline-success btn-sm" onclick="exportarExcelTodos()" title="Exportar todos los cultos en un Excel combinado">
-                                <i class="fas fa-file-excel me-1"></i> Excel Combinado
+                            <button class="btn btn-outline-success btn-sm" onclick="exportarExcelTodos()" title="@L["Exportar todos los cultos en un Excel combinado"]">
+                                <i class="fas fa-file-excel me-1"></i> @L["Excel Combinado"]
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="exportarPdf()">
-                                <i class="fas fa-file-pdf me-1"></i> PDF / Imprimir
+                                <i class="fas fa-file-pdf me-1"></i> @L["PDF / Imprimir"]
                             </button>
                         </div>
                     </div>
@@ -150,28 +150,28 @@
         <div class="col-lg-3 no-print">
             <div class="card mb-4 border-info">
                 <div class="card-header bg-info text-white">
-                    <i class="fas fa-info-circle me-1"></i> Ayuda
+                    <i class="fas fa-info-circle me-1"></i> @L["Ayuda"]
                 </div>
                 <div class="card-body small text-muted">
-                    <p><strong>Tipos de calendario:</strong></p>
+                    <p><strong>@L["Tipos de calendario:"]</strong></p>
                     <ul class="ps-3">
                         <li><i class="fas fa-shield-alt text-warning me-1"></i>
-                            <strong>Seguridad y Bienvenida:</strong> acomodadores, porteros, bienvenida.
+                            <strong>@L["Seguridad y Bienvenida:"]</strong> acomodadores, porteros, bienvenida.
                         </li>
                         <li><i class="fas fa-music text-success me-1"></i>
-                            <strong>Alabanza:</strong> tabla transpuesta (fechas como columnas, instrumentos como filas). Requiere campo <em>Ministra</em> configurado.
+                            <strong>@L["Alabanza:"]</strong> @L["tabla transpuesta (fechas como columnas, instrumentos como filas). Requiere campo"] <em>@L["Ministra"]</em> configurado.
                         </li>
                         <li><i class="fas fa-video text-info me-1"></i>
-                            <strong>Audiovisuales:</strong> proyección, sonido, emisión.
+                            <strong>@L["Audiovisuales:"]</strong> @L["proyección, sonido, emisión."]
                         </li>
                     </ul>
-                    <p><strong>Rotación automática:</strong><br>
-                       Las personas se distribuyen de forma equitativa. Si hay 2 pianistas y el culto necesita 1, se alternarán.</p>
-                    <p><strong>Requisito previo:</strong><br>
-                       Los roles del culto se configuran en <strong>Configuración de la aplicación → Servicios</strong>.<br>
-                       Los miembros deben tener asignado su rol en sus fichas de ministerio.</p>
-                    <p class="mb-0"><strong>Ministra (Alabanza):</strong><br>
-                       Marca el campo <em>¿Puede ministrar?</em> en la vista de Servicios del ministerio de Alabanza para que el miembro aparezca en la fila "Ministra".</p>
+                    <p><strong>@L["Rotación automática:"]</strong><br>
+                       @L["Las personas se distribuyen de forma equitativa. Si hay 2 pianistas y el culto necesita 1, se alternarán."]</p>
+                    <p><strong>@L["Requisito previo:"]</strong><br>
+                       @L["Los roles del culto se configuran en"] <strong>@L["Configuración de la aplicación → Servicios"]</strong>.<br>
+                       @L["Los miembros deben tener asignado su rol en sus fichas de ministerio."]</p>
+                    <p class="mb-0"><strong>@L["Ministra (Alabanza):"]</strong><br>
+                       @L["Marca el campo"] <em>@L["¿Puede ministrar?"]</em> @L["en la vista de Servicios del ministerio de Alabanza para que el miembro aparezca en la fila \"Ministra\"."]</p>
                 </div>
             </div>
         </div>
@@ -395,6 +395,12 @@
 </style>
 
 <script>
+        // Textos traducidos de esta vista. Se AMPLÍA window.T (ya declarado
+        // en el layout): un segundo "const T" lanzaría SyntaxError.
+        window.T = Object.assign(window.T || {}, {
+            periodo: @Json.Serialize(L["Período"].Value)
+        });
+
     const urlCultos               = '@Url.Action("ObtenerCultos",          "Calendario")';
     const urlGenerar              = '@Url.Action("GenerarCalendario",      "Calendario")';
     const urlExportarExcel        = '@Url.Action("ExportarExcel",          "Calendario")';
@@ -543,7 +549,7 @@
         const perMap = { semanal: 'Semanal', mensual: 'Mensual', trimestral: 'Trimestral' };
         const perLabel = perMap[cal.periodicidad] || cal.periodicidad;
         $('#subtituloCalendario').html(
-            `Período: <strong>${fi}</strong> – <strong>${ff}</strong> &nbsp;|&nbsp; ${perLabel}`);
+            `${T.periodo}: <strong>${fi}</strong> – <strong>${ff}</strong> &nbsp;|&nbsp; ${perLabel}`);
     }
 
     function renderPersonas(personas, esZona = false) {

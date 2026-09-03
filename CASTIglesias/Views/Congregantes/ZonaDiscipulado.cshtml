@@ -1,4 +1,4 @@
-@using CapaEntidad
+﻿@using CapaEntidad
 @{
     var titulo = ViewBag.TituloZona as string ?? "Zona";
     var icono = ViewBag.IconoZona as string ?? "fas fa-users";
@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Información</a></li>
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
     <li class="breadcrumb-item active">@titulo</li>
 </ol>
 
@@ -21,7 +21,7 @@
 {
     <div class="alert alert-info d-flex align-items-center mb-4">
         <i class="fas fa-info-circle me-2"></i>
-        <span>Estás viendo los miembros de todas las sedes. Selecciona una sede específica para añadir miembros a esta zona.</span>
+        <span>@L["Estás viendo los miembros de todas las sedes. Selecciona una sede específica para añadir miembros a esta zona."]</span>
     </div>
 }
 
@@ -36,7 +36,7 @@
         @if (zona != null)
         {
             <button type="button" class="btn btn-success btn-sm" onclick="abrirModalMiembroZona()">
-                <i class="fas fa-plus me-1"></i> Añadir miembro
+                <i class="fas fa-plus me-1"></i> @L["Añadir miembro"]
             </button>
         }
     </div>
@@ -44,12 +44,12 @@
         <table id="tablaMiembrosZona" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellidos</th>
-                    <th>Teléfono</th>
-                    <th>Edad</th>
-                    <th>Grupo</th>
-                    <th>Acciones</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Apellidos"]</th>
+                    <th>@L["Teléfono"]</th>
+                    <th>@L["Edad"]</th>
+                    <th>@L["Grupo"]</th>
+                    <th>@L["Acciones"]</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -62,19 +62,19 @@
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> Cambiar grupo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title"><i class="fas fa-users-cog me-1"></i> @L["Cambiar grupo"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hdnIdZgm" value="0" />
                 <div class="mb-3">
-                    <label class="form-label">Miembro</label>
+                    <label class="form-label">@L["Miembro"]</label>
                     <input type="text" id="txtNombreMiembroEditar" class="form-control" readonly />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Grupo</label>
+                    <label class="form-label">@L["Grupo"]</label>
                     <select id="cboGrupoEditar" class="form-select">
-                        <option value="0">— Sin grupo —</option>
+                        <option value="0">@L["— Sin grupo —"]</option>
                         @foreach (var g in grupos)
                         {
                             <option value="@g.ID_grupo">@g.Descripcion</option>
@@ -84,9 +84,9 @@
                 <div id="mensajeErrorEditar" class="alert alert-danger d-none"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarCambioGrupo()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -99,27 +99,27 @@
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
                 <h5 class="modal-title">Añadir miembro a @titulo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">Buscar miembro <span class="text-danger">*</span></label>
-                        <input type="text" id="txtBuscarMiembroZona" class="form-control" placeholder="Escribe el nombre…" autocomplete="off" />
+                        <label class="form-label">@L["Buscar miembro"] <span class="text-danger">*</span></label>
+                        <input type="text" id="txtBuscarMiembroZona" class="form-control" placeholder="@L["Escribe el nombre…"]" autocomplete="off" />
                         <input type="hidden" id="hdnIdMiembroZona" value="0" />
                     </div>
                     <div class="col-sm-4">
-                        <label class="form-label">Edad</label>
+                        <label class="form-label">@L["Edad"]</label>
                         <input type="text" id="txtEdadMiembroZona" class="form-control" readonly />
                     </div>
                     <div class="col-sm-8">
-                        <label class="form-label">Teléfono</label>
+                        <label class="form-label">@L["Teléfono"]</label>
                         <input type="text" id="txtTelefonoMiembroZona" class="form-control" readonly />
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Grupo</label>
+                        <label class="form-label">@L["Grupo"]</label>
                         <select id="cboGrupoMiembroZona" class="form-select">
-                            <option value="0">— Sin grupo —</option>
+                            <option value="0">@L["— Sin grupo —"]</option>
                             @foreach (var g in grupos)
                             {
                                 <option value="@g.ID_grupo">@g.Descripcion</option>
@@ -134,8 +134,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="btnGuardarMiembroZona" onclick="guardarMiembroZona()">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarMiembroZona" onclick="guardarMiembroZona()">@L["Guardar"]</button>
             </div>
         </div>
     </div>
@@ -149,6 +149,21 @@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
+        // Textos traducidos que consume el JavaScript de esta vista.
+        //
+        // Se AMPLÍA window.T (ya declarado en el layout) en lugar de declarar un
+        // "const T" propio: comparten ámbito global y una segunda declaración
+        // const lanza SyntaxError que tumba este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            quitarDeZonaNombrada: @Json.Serialize(L["Se eliminará a \"{0}\" de la zona de {1}. Sus otros datos no se verán afectados."].Value),
+            cancelar:     @Json.Serialize(L["Cancelar"].Value),
+            eliminado:    @Json.Serialize(L["Eliminado"].Value),
+            error:        @Json.Serialize(L["Error"].Value),
+            guardado:     @Json.Serialize(L["Guardado"].Value),
+            quitarDeZona: @Json.Serialize(L["¿Quitar de la zona?"].Value),
+            siQuitar:     @Json.Serialize(L["Sí, quitar"].Value)
+        });
+
         const tipoZona = '@tipo';
         const tituloZona = '@titulo';
 
@@ -158,7 +173,7 @@
             tablaMiembrosZona = $("#tablaMiembrosZona").DataTable({
                 responsive: true,
                 ordering: false,
-                language: { url: "https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json" },
+                language: window.dtLang ? { url: window.dtLang } : {},
                 initComplete: function () {
                     $(this.api().table().header()).css({ 'background-color': '#1E3A8A', 'color': 'white', 'text-align': 'center' });
                 },
@@ -204,20 +219,20 @@
             $("#tablaMiembrosZona tbody").on("click", ".btn-eliminarMiembroZona", function () {
                 const data = tablaMiembrosZona.row($(this).closest("tr")).data();
                 Swal.fire({
-                    title: "¿Quitar de la zona?",
-                    text: `Se eliminará a "${data.nombre_miembro} ${data.apellidos_miembro}" de la zona de ${tituloZona}. Sus otros datos no se verán afectados.`,
+                    title: T.quitarDeZona,
+                    text: fmt(T.quitarDeZonaNombrada, `${data.nombre_miembro} ${data.apellidos_miembro}`, tituloZona),
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Sí, quitar",
-                    cancelButtonText: "Cancelar"
+                    confirmButtonText: T.siQuitar,
+                    cancelButtonText: T.cancelar
                 }).then(result => {
                     if (result.isConfirmed) {
                         $.post('@Url.Action("EliminarMiembroZonaDiscipulado", "Congregantes")', { idZgm: data.id_zgm }, function (res) {
                             if (res.resultado) {
                                 tablaMiembrosZona.ajax.reload();
-                                Swal.fire("Eliminado", res.mensaje, "success");
+                                Swal.fire(T.eliminado, res.mensaje, "success");
                             } else {
-                                Swal.fire("Error", res.mensaje, "error");
+                                Swal.fire(T.error, res.mensaje, "error");
                             }
                         });
                     }
@@ -300,7 +315,7 @@
                 if (res.resultado && res.resultado !== 0) {
                     bootstrap.Modal.getInstance(document.getElementById("FormModalMiembroZona")).hide();
                     tablaMiembrosZona.ajax.reload();
-                    Swal.fire("Guardado", res.mensaje, "success");
+                    Swal.fire(T.guardado, res.mensaje, "success");
                 } else {
                     $("#mensajeErrorMiembroZona").removeClass("d-none").text(res.mensaje);
                 }

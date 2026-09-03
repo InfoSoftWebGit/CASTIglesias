@@ -1,5 +1,5 @@
-@{
-    ViewBag.Title = "Seguimiento";
+﻿@{
+    ViewBag.Title = L["Seguimiento"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var loggedInSedeID = ViewBag.sedeID ?? 0;
@@ -33,20 +33,20 @@
 </style>
 
 <ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item"><a href="#">Resumen</a></li>
-    <li class="breadcrumb-item active">Seguimiento de congregantes</li>
+    <li class="breadcrumb-item"><a href="#">@L["Resumen"]</a></li>
+    <li class="breadcrumb-item active">@L["Seguimiento de congregantes"]</li>
 </ol>
 
 <div class="card">
     <div class="card-header">
-        <i class="fas fa-clipboard-list me-1"></i> Seguimiento de congregantes
+        <i class="fas fa-clipboard-list me-1"></i> @L["Seguimiento de congregantes"]
     </div>
 
     <div class="table-responsive p-3">
         <div class="row mb-2">
             <div class="col-12">
                 <button type="button" class="btn btn-success" onclick="abrirModal(null)">
-                    <i class="fas fa-plus me-1"></i> Nuevo seguimiento
+                    <i class="fas fa-plus me-1"></i> @L["Nuevo seguimiento"]
                 </button>
             </div>
         </div>
@@ -54,11 +54,11 @@
         <table id="tablaSeguimiento" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
-                    <th>Miembro</th>
-                    <th>Tipo</th>
-                    <th>Fecha</th>
-                    <th>Persona a cargo</th>
-                    <th>Observaciones</th>
+                    <th>@L["Miembro"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Persona a cargo"]</th>
+                    <th>@L["Observaciones"]</th>
                     <th></th>
                 </tr>
             </thead>
@@ -72,69 +72,69 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title" id="modalTitulo">Nuevo seguimiento</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title" id="modalTitulo">@L["Nuevo seguimiento"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="hiddenID" value="0" />
                 <input type="hidden" id="hiddenIdMiembro" value="0" />
                 <input type="hidden" id="hiddenIdPersonaCargo" value="0" />
 
-                <h6 class="mb-3">Información del miembro</h6>
+                <h6 class="mb-3">@L["Información del miembro"]</h6>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="form-label">Nombre del miembro <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Nombre del miembro"] <span class="text-danger">*</span></label>
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtNombreMiembro"
-                                   autocomplete="off" placeholder="Buscar por nombre...">
+                                   autocomplete="off" placeholder="@L["Buscar por nombre..."]">
                             <div id="dropdownNombreMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label">Apellidos del miembro</label>
+                        <label class="form-label">@L["Apellidos del miembro"]</label>
                         <input type="text" class="form-control" id="txtApellidosMiembro"
-                               autocomplete="off" placeholder="Se rellena al seleccionar..." readonly>
+                               autocomplete="off" placeholder="@L["Se rellena al seleccionar..."]" readonly>
                     </div>
                 </div>
 
                 <hr />
-                <h6 class="mb-3">Datos del seguimiento</h6>
+                <h6 class="mb-3">@L["Datos del seguimiento"]</h6>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="form-label">Tipo de seguimiento <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Tipo de seguimiento"] <span class="text-danger">*</span></label>
                         <select class="form-select" id="selectTipoSeguimiento">
-                            <option value="">-- Selecciona un tipo --</option>
-                            <option value="Llamada">Llamada</option>
-                            <option value="Consejeria">Consejería</option>
-                            <option value="Visita">Visita</option>
+                            <option value="">@L["-- Selecciona un tipo --"]</option>
+                            <option value="Llamada">@L["Llamada"]</option>
+                            <option value="Consejeria">@L["Consejería"]</option>
+                            <option value="Visita">@L["Visita"]</option>
                         </select>
                     </div>
 
                     <div class="col-sm-6">
-                        <label class="form-label">Fecha del seguimiento <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Fecha del seguimiento"] <span class="text-danger">*</span></label>
                         <input type="date" class="form-control" id="txtFechaSeguimiento">
                     </div>
 
                     <div class="col-sm-6">
-                        <label class="form-label">Persona a cargo <span class="text-danger">*</span></label>
+                        <label class="form-label">@L["Persona a cargo"] <span class="text-danger">*</span></label>
                         <div class="autocomplete-wrapper">
                             <input type="text" class="form-control" id="txtPersonaCargo"
-                                   autocomplete="off" placeholder="Buscar líder...">
+                                   autocomplete="off" placeholder="@L["Buscar líder..."]">
                             <div id="dropdownPersonaCargo" class="autocomplete-dropdown list-group" style="display:none;"></div>
                         </div>
                     </div>
 
                     <div class="col-12">
-                        <label class="form-label">Observaciones</label>
+                        <label class="form-label">@L["Observaciones"]</label>
                         <textarea class="form-control" id="txtObservaciones" rows="3"
-                                  maxlength="255" placeholder="Máx. 255 caracteres..."></textarea>
+                                  maxlength="255" placeholder="@L["Máx. 255 caracteres..."]"></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
                 <button type="button" class="btn btn-primary" onclick="guardarSeguimiento()">
-                    <i class="fas fa-save me-1"></i> Guardar
+                    <i class="fas fa-save me-1"></i> @L["Guardar"]
                 </button>
             </div>
         </div>
@@ -197,9 +197,7 @@
                     }
                 }
             ],
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
+            language: window.dtLang ? { url: window.dtLang } : {},
             responsive: true
         });
     });

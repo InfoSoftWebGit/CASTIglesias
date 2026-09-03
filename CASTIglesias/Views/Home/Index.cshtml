@@ -1,9 +1,9 @@
 ﻿@{
-    ViewBag.Title = "Dashboard";
+    ViewBag.Title = L["Dashboard"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="mt-4">Dashboard</h1>
+<h1 class="mt-4">@L["Dashboard"]</h1>
 <ol class="breadcrumb mb-4">
     <li class="breadcrumb-item active"></li>
 </ol>
@@ -14,7 +14,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Total de Visitantes</h6>
+                        <h6>@L["Total de Visitantes"]</h6>
                         <h6 id="totalvisitantes"></h6>
                     </div>
                     <div class="col-sm-3">
@@ -29,7 +29,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Total de Simpatizantes</h6>
+                        <h6>@L["Total de Simpatizantes"]</h6>
                         <h6 id="totalsimpatizantes"></h6>
                     </div>
                     <div class="col-sm-3">
@@ -44,7 +44,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Total En Proceso</h6>
+                        <h6>@L["Total En Proceso"]</h6>
                         <h6 id="totalenproceso"></h6>
                     </div>
                     <div class="col-sm-3">
@@ -59,7 +59,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Total de Miembros</h6>
+                        <h6>@L["Total de Miembros"]</h6>
                         <h6 id="totalmiembros"></h6>
                     </div>
                     <div class="col-sm-3">
@@ -74,7 +74,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Total de Miembros de Baja</h6>
+                        <h6>@L["Total de Miembros de Baja"]</h6>
                         <h6 id="totalmiembrosbaja"></h6>
                     </div>
                     <div class="col-sm-3">
@@ -86,7 +86,87 @@
     </div>
 </div>
 
-<div class="row" id="contenedor-zonas">
+<hr class="my-4" />
+
+@* Bloque inferior: las tarjetas de zona (Hombres, Jóvenes...) se insertan desde
+   cargarTarjetasZonas() en esta misma fila y se ordenan junto a las fijas por
+   data-orden, para que salgan seguidas de izquierda a derecha. *@
+<div class="row" id="contenedor-tarjetas">
+    <div class="col-xl-3 col-md-6" data-orden="2">
+        <div class="card text-white mb-4" style="background-color: #A21CAF;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>@L["Total de Mujeres"]</h6>
+                        <h6 id="totalmujeresactivas"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-venus fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="4">
+        <div class="card text-white mb-4" style="background-color: #D97706;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>@L["Total de Niños"]</h6>
+                        <h6 id="totalninos"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-child fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="5">
+        <div class="card text-white mb-4" style="background-color: #BE185D;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>@L["Total de Matrimonios"]</h6>
+                        <h6 id="totalmatrimonios"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="6">
+        <div class="card text-white mb-4" style="background-color: #6D28D9;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>@L["Total de Familias"]</h6>
+                        <h6 id="totalfamilias"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-people-roof fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="7">
+        <div class="card text-white mb-4" style="background-color: #047857;">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>@L["Total de Líderes"]</h6>
+                        <h6 id="totallideresactivos"></h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-tie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <hr class="my-4" />
@@ -94,54 +174,54 @@
 <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-chart-bar me-1"></i>
-        Asistencia al Culto
+        @L["Asistencia al Culto"]
     </div>
     <div class="card-body">
         <div class="row align-items-end mb-3 g-2">
             <div class="col-sm-3 col-md-2">
-                <label class="form-label fw-semibold">Vista</label>
+                <label class="form-label fw-semibold">@L["Vista"]</label>
                 <select class="form-select form-select-sm" id="modoGrafico">
-                    <option value="anual">Año completo</option>
-                    <option value="mensual">Mes completo</option>
-                    <option value="diario">Día específico</option>
+                    <option value="anual">@L["Año completo"]</option>
+                    <option value="mensual">@L["Mes completo"]</option>
+                    <option value="diario">@L["Día específico"]</option>
                 </select>
             </div>
             <div class="col-sm-3 col-md-2">
-                <label class="form-label fw-semibold">Turno</label>
+                <label class="form-label fw-semibold">@L["Turno"]</label>
                 <select class="form-select form-select-sm" id="turnoGrafico">
-                    <option value="todos">Todos</option>
-                    <option value="mañana">Mañana</option>
-                    <option value="tarde">Tarde</option>
+                    <option value="todos">@L["Todos"]</option>
+                    <option value="mañana">@L["Mañana"]</option>
+                    <option value="tarde">@L["Tarde"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1">
-                <label class="form-label fw-semibold">Año</label>
+                <label class="form-label fw-semibold">@L["Año"]</label>
                 <input type="number" class="form-control form-control-sm" id="anioGrafico" min="2000" max="2099" />
             </div>
             <div class="col-sm-3 col-md-2" id="colMesGrafico" style="display:none">
-                <label class="form-label fw-semibold">Mes</label>
+                <label class="form-label fw-semibold">@L["Mes"]</label>
                 <select class="form-select form-select-sm" id="mesGrafico">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    <option value="1">@L["Enero"]</option>
+                    <option value="2">@L["Febrero"]</option>
+                    <option value="3">@L["Marzo"]</option>
+                    <option value="4">@L["Abril"]</option>
+                    <option value="5">@L["Mayo"]</option>
+                    <option value="6">@L["Junio"]</option>
+                    <option value="7">@L["Julio"]</option>
+                    <option value="8">@L["Agosto"]</option>
+                    <option value="9">@L["Septiembre"]</option>
+                    <option value="10">@L["Octubre"]</option>
+                    <option value="11">@L["Noviembre"]</option>
+                    <option value="12">@L["Diciembre"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1" id="colDiaGrafico" style="display:none">
-                <label class="form-label fw-semibold">Día</label>
+                <label class="form-label fw-semibold">@L["Día"]</label>
                 <input type="number" class="form-control form-control-sm" id="diaGrafico" min="1" max="31" />
             </div>
             <div class="col-sm-2 col-md-1">
                 <button class="btn btn-primary btn-sm w-100" id="btnActualizarGrafico">
-                    <i class="fas fa-sync-alt"></i> Actualizar
+                    <i class="fas fa-sync-alt"></i> @L["Actualizar"]
                 </button>
             </div>
         </div>
@@ -149,7 +229,7 @@
             <canvas id="graficoAsistencia"></canvas>
         </div>
         <p class="text-muted text-center mt-2 mb-0" id="graficoSinDatos" style="display:none">
-            <i class="fas fa-info-circle"></i> No hay registros de asistencia para el período seleccionado.
+            <i class="fas fa-info-circle"></i> @L["No hay registros de asistencia para el período seleccionado."]
         </p>
     </div>
 </div>
@@ -159,41 +239,41 @@
 <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-file-invoice-dollar me-1"></i>
-        Gastos
+        @L["Gastos"]
     </div>
     <div class="card-body">
         <div class="row align-items-end mb-3 g-2">
             <div class="col-sm-3 col-md-2">
-                <label class="form-label fw-semibold">Vista</label>
+                <label class="form-label fw-semibold">@L["Vista"]</label>
                 <select class="form-select form-select-sm" id="modoGasto">
-                    <option value="anual">Año completo</option>
-                    <option value="mensual">Mes completo</option>
+                    <option value="anual">@L["Año completo"]</option>
+                    <option value="mensual">@L["Mes completo"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1">
-                <label class="form-label fw-semibold">Año</label>
+                <label class="form-label fw-semibold">@L["Año"]</label>
                 <input type="number" class="form-control form-control-sm" id="anioGasto" min="2000" max="2099" />
             </div>
             <div class="col-sm-3 col-md-2" id="colMesGasto" style="display:none">
-                <label class="form-label fw-semibold">Mes</label>
+                <label class="form-label fw-semibold">@L["Mes"]</label>
                 <select class="form-select form-select-sm" id="mesGasto">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    <option value="1">@L["Enero"]</option>
+                    <option value="2">@L["Febrero"]</option>
+                    <option value="3">@L["Marzo"]</option>
+                    <option value="4">@L["Abril"]</option>
+                    <option value="5">@L["Mayo"]</option>
+                    <option value="6">@L["Junio"]</option>
+                    <option value="7">@L["Julio"]</option>
+                    <option value="8">@L["Agosto"]</option>
+                    <option value="9">@L["Septiembre"]</option>
+                    <option value="10">@L["Octubre"]</option>
+                    <option value="11">@L["Noviembre"]</option>
+                    <option value="12">@L["Diciembre"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1">
                 <button class="btn btn-primary btn-sm w-100" id="btnActualizarGasto">
-                    <i class="fas fa-sync-alt"></i> Actualizar
+                    <i class="fas fa-sync-alt"></i> @L["Actualizar"]
                 </button>
             </div>
         </div>
@@ -201,7 +281,7 @@
             <canvas id="graficoGastos"></canvas>
         </div>
         <p class="text-muted text-center mt-2 mb-0" id="gastoSinDatos" style="display:none">
-            <i class="fas fa-info-circle"></i> No hay registros de gastos para el período seleccionado.
+            <i class="fas fa-info-circle"></i> @L["No hay registros de gastos para el período seleccionado."]
         </p>
     </div>
 </div>
@@ -211,41 +291,41 @@
 <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-hand-holding-usd me-1"></i>
-        Diezmos por Concepto
+        @L["Diezmos por Concepto"]
     </div>
     <div class="card-body">
         <div class="row align-items-end mb-3 g-2">
             <div class="col-sm-3 col-md-2">
-                <label class="form-label fw-semibold">Vista</label>
+                <label class="form-label fw-semibold">@L["Vista"]</label>
                 <select class="form-select form-select-sm" id="modoDiezmo">
-                    <option value="anual">Año completo</option>
-                    <option value="mensual">Mes completo</option>
+                    <option value="anual">@L["Año completo"]</option>
+                    <option value="mensual">@L["Mes completo"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1">
-                <label class="form-label fw-semibold">Año</label>
+                <label class="form-label fw-semibold">@L["Año"]</label>
                 <input type="number" class="form-control form-control-sm" id="anioDiezmo" min="2000" max="2099" />
             </div>
             <div class="col-sm-3 col-md-2" id="colMesDiezmo" style="display:none">
-                <label class="form-label fw-semibold">Mes</label>
+                <label class="form-label fw-semibold">@L["Mes"]</label>
                 <select class="form-select form-select-sm" id="mesDiezmo">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
+                    <option value="1">@L["Enero"]</option>
+                    <option value="2">@L["Febrero"]</option>
+                    <option value="3">@L["Marzo"]</option>
+                    <option value="4">@L["Abril"]</option>
+                    <option value="5">@L["Mayo"]</option>
+                    <option value="6">@L["Junio"]</option>
+                    <option value="7">@L["Julio"]</option>
+                    <option value="8">@L["Agosto"]</option>
+                    <option value="9">@L["Septiembre"]</option>
+                    <option value="10">@L["Octubre"]</option>
+                    <option value="11">@L["Noviembre"]</option>
+                    <option value="12">@L["Diciembre"]</option>
                 </select>
             </div>
             <div class="col-sm-2 col-md-1">
                 <button class="btn btn-primary btn-sm w-100" id="btnActualizarDiezmo">
-                    <i class="fas fa-sync-alt"></i> Actualizar
+                    <i class="fas fa-sync-alt"></i> @L["Actualizar"]
                 </button>
             </div>
         </div>
@@ -253,7 +333,7 @@
             <canvas id="graficoDiezmos"></canvas>
         </div>
         <p class="text-muted text-center mt-2 mb-0" id="diezmoSinDatos" style="display:none">
-            <i class="fas fa-info-circle"></i> No hay registros de diezmos para el período seleccionado.
+            <i class="fas fa-info-circle"></i> @L["No hay registros de diezmos para el período seleccionado."]
         </p>
     </div>
 </div>
@@ -262,19 +342,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
     <script>
+        // Se AMPLÍA window.T (ya declarado en el layout): un segundo "const T"
+        // lanzaría SyntaxError y tumbaría este bloque <script> entero.
+        window.T = Object.assign(window.T || {}, {
+            totalEnZona: @Json.Serialize(L["Total en zona {0}"].Value),
+            ninos:       @Json.Serialize(L["Niños"].Value),
+            adultos:     @Json.Serialize(L["Adultos"].Value),
+            invitadosVisitantes: @Json.Serialize(L["Invitados / Visitantes"].Value),
+            gastos:      @Json.Serialize(L["Gastos"].Value)
+        });
+
+        // Hueco fijo de cada tarjeta en la fila inferior. Las zonas propias de cada
+        // iglesia (tipo 'general') no tienen hueco reservado y van al final.
+        const ORDEN_TIPO_ZONA = {
+            hombres: 1, mujeres: 2, jovenes: 3, ninos: 4, matrimonios: 5, familias: 6
+        };
+
         function cargarTarjetasZonas() {
             $.get('@Url.Action("ObtenerZonasConMiembros", "Home")', function (data) {
-                const contenedorZonas = $('#contenedor-zonas');
-                contenedorZonas.empty();
+                const contenedor = $('#contenedor-tarjetas');
+                // Solo se limpian las tarjetas de zona: las fijas están en el HTML.
+                contenedor.children('[data-zona]').remove();
+
                 if (Array.isArray(data) && data.length > 0) {
                     data.forEach(function (zona) {
+                        const orden = ORDEN_TIPO_ZONA[zona.tipo] ?? 99;
                         const tarjetaHtml = `
-                            <div class="col-xl-3 col-md-6">
+                            <div class="col-xl-3 col-md-6" data-zona="1" data-orden="${orden}">
                                 <div class="card text-white mb-4" style="background-color: #1E3A8A;">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-9">
-                                                <h6>Total en zona ${zona.nombre_zona}</h6>
+                                                @* tDato() traduce los nombres de zona que crea la
+                                                   aplicación (Hombres, Mujeres, Niños, Jóvenes) y
+                                                   deja intactos los que crea cada iglesia. *@
+                                                <h6>${fmt(T.totalEnZona, tDato(zona.nombre_zona))}</h6>
                                                 <h6>${zona.total_miembros}</h6>
                                             </div>
                                             <div class="col-sm-3">
@@ -284,9 +386,14 @@
                                     </div>
                                 </div>
                             </div>`;
-                        contenedorZonas.append(tarjetaHtml);
+                        contenedor.append(tarjetaHtml);
                     });
                 }
+
+                // Reordena fijas y de zona en un único flujo de izquierda a derecha.
+                contenedor.children().sort(function (a, b) {
+                    return (+a.dataset.orden) - (+b.dataset.orden);
+                }).appendTo(contenedor);
             });
         }
 
@@ -310,6 +417,26 @@
             $.get('@Url.Action("ContadorEnProceso", "Congregantes")', function (data) {
                 $("#totalenproceso").text(data.resultado ?? 0);
             }).fail(function () { $("#totalenproceso").text('Error'); });
+
+            $.get('@Url.Action("ContadorFamilias", "Congregantes")', function (data) {
+                $("#totalfamilias").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalfamilias").text('Error'); });
+
+            $.get('@Url.Action("ContadorMatrimonios", "Congregantes")', function (data) {
+                $("#totalmatrimonios").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalmatrimonios").text('Error'); });
+
+            $.get('@Url.Action("ContadorMujeresActivas", "Congregantes")', function (data) {
+                $("#totalmujeresactivas").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalmujeresactivas").text('Error'); });
+
+            $.get('@Url.Action("ContadorNinos", "Congregantes")', function (data) {
+                $("#totalninos").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalninos").text('Error'); });
+
+            $.get('@Url.Action("ContadorLideresActivos", "Congregantes")', function (data) {
+                $("#totallideresactivos").text(data.resultado ?? 0);
+            }).fail(function () { $("#totallideresactivos").text('Error'); });
 
             cargarTarjetasZonas();
         });
@@ -364,21 +491,21 @@
                             labels,
                             datasets: [
                                 {
-                                    label: 'Adultos',
+                                    label: T.adultos,
                                     data: adultos,
                                     backgroundColor: 'rgba(54, 162, 235, 0.75)',
                                     borderColor:     'rgba(54, 162, 235, 1)',
                                     borderWidth: 1
                                 },
                                 {
-                                    label: 'Niños',
+                                    label: T.ninos,
                                     data: ninos,
                                     backgroundColor: 'rgba(75, 192, 192, 0.75)',
                                     borderColor:     'rgba(75, 192, 192, 1)',
                                     borderWidth: 1
                                 },
                                 {
-                                    label: 'Invitados / Visitantes',
+                                    label: T.invitadosVisitantes,
                                     data: invitados,
                                     backgroundColor: 'rgba(255, 159, 64, 0.75)',
                                     borderColor:     'rgba(255, 159, 64, 1)',
@@ -560,7 +687,7 @@
                     data: {
                         labels: res.labels,
                         datasets: [{
-                            label: 'Gastos',
+                            label: T.gastos,
                             data: res.totales,
                             backgroundColor: 'rgba(239, 68, 68, 0.75)',
                             borderColor: 'rgba(239, 68, 68, 1)',
