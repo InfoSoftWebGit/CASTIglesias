@@ -47,8 +47,9 @@ html, body {
     flex-shrink: 0;
     background-color: #0D1B3D;
     transition: width 0.3s ease, overflow 0.3s ease;
-    overflow-y: auto;
-    overflow-x: hidden;
+    /* El contenedor no scrollea: el scroll vive dentro de .sb-sidenav-menu para
+       que el footer (usuario y sede) quede fijo abajo y siempre a la vista. */
+    overflow: hidden;
 }
 
 /* Toggle en desktop: colapsa el sidebar */
@@ -80,11 +81,16 @@ html, body {
         position: fixed;
         top: 60px;
         left: -225px;
+        /* 100vh en móvil incluye la barra de direcciones del navegador, así que el
+           final del sidebar quedaba por debajo de lo visible. dvh mide el viewport
+           real; se deja vh antes como respaldo para navegadores antiguos. */
         height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+        max-height: calc(100dvh - 60px);
         width: 225px;
         z-index: 1050;
         transition: left 0.3s ease;
-        overflow-y: auto;
+        overflow: hidden;
     }
 
     body.sb-sidenav-toggled #layoutSidenav_nav {
@@ -99,6 +105,7 @@ html, body {
         left: 0;
         width: 100%;
         height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
         background: rgba(0, 0, 0, 0.4);
         z-index: 1040;
     }
@@ -183,12 +190,20 @@ html, body {
     display: flex;
     flex-direction: column;
     height: 100%;
+    /* Evita que el contenido del menú estire el nav por encima de su altura */
+    min-height: 0;
     background-color: #0D1B3D;
 }
 
     .sb-sidenav .sb-sidenav-menu {
         flex: 1 1 auto;
         overflow-y: auto;
+        /* min-height:0 es imprescindible: por defecto un hijo flex usa min-height:auto
+           y crece hasta la altura de su contenido, empujando el footer fuera de la
+           pantalla. Con 0 el menú se encoge y muestra su propio scroll (solo cuando
+           los enlaces no caben), dejando el footer siempre visible. */
+        min-height: 0;
+        -webkit-overflow-scrolling: touch;
     }
 
         .sb-sidenav .sb-sidenav-menu .nav {
@@ -204,9 +219,12 @@ html, body {
         font-size: 0.85rem;
         border-top: 1px solid rgba(0, 191, 165, 0.2);
         text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        /* El footer nunca se encoge ni se recorta: es el bloque que identifica
+           al usuario y la sede activa, así que el texto largo se parte en varias
+           líneas en lugar de cortarse con puntos suspensivos. */
+        flex: 0 0 auto;
+        white-space: normal;
+        overflow-wrap: anywhere;
         position: relative;
         z-index: 1;
     }
