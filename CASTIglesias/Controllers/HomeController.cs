@@ -24,6 +24,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Miembros _cnMiembros;
         private readonly CN_Diezmo _cnDiezmo;
         private readonly CN_Usuarios _cnUsuarios;
+        private readonly CN_ZonaDiscipulado _cnZonaDiscipulado;
         private readonly AppDbContext _context;
 
         public HomeController(
@@ -32,17 +33,29 @@ namespace CASTIglesias.Controllers
           CN_Usuarios negocioUsuarios,
           CN_Sedes negocioSedes,
           CN_Permisos negocioPermisos,
+          CN_ZonaDiscipulado negocioZonaDiscipulado,
           AppDbContext context)
           : base(negocioSedes, negocioPermisos)
         {
             _cnMiembros = negocioMiembros;
             _cnDiezmo = negocioDiezmo;
             _cnUsuarios = negocioUsuarios;
+            _cnZonaDiscipulado = negocioZonaDiscipulado;
             _context = context;
         }
         #endregion
 
-        public IActionResult Index() => View();
+        public IActionResult Index()
+        {
+            // El dashboard es la primera pantalla tras el login: se aprovecha para
+            // garantizar las seis zonas por defecto antes de que los contadores de
+            // las tarjetas las consulten. Si la iglesia ya tenía una zona propia con
+            // el mismo nombre, se adopta en lugar de duplicarla.
+            try { _cnZonaDiscipulado.AsegurarZonasPorDefecto(ObtenerIdSedeUsuario()); }
+            catch (UnauthorizedAccessException) { /* sin sede válida no hay nada que asegurar */ }
+
+            return View();
+        }
         public IActionResult Bienvenida() => View();
 
         // ----------------------------------------------------
@@ -370,19 +383,21 @@ namespace CASTIglesias.Controllers
             {
                 int sedeID = ObtenerIdSedeUsuario();
 
+                // Solo las zonas que crea cada iglesia: las seis por defecto
+                // (hombres, mujeres, jovenes, ninos, matrimonios, familias) ya tienen
+                // tarjeta fija en el dashboard, así que aquí se excluyen para no
+                // duplicarlas. Se cuenta con LEFT JOIN para que una zona recién creada
+                // y todavía sin miembros aparezca igualmente con un 0.
                 var resultado = (
                     from z in _context.Zona
-                    join mzg in _context.Miembros_Zona_Grupo_Ministerio on z.ID_zona equals mzg.ID_zona
-                    where sedeID == 1000 || z.ID_sede == sedeID
-                    // El tipo viaja a la vista para colocar cada tarjeta en su hueco fijo
-                    // del dashboard sin depender del nombre que le dé cada iglesia.
-                    group mzg by new { z.ID_zona, z.nombre_zona, z.tipo } into g
+                    join mzg in _context.Miembros_Zona_Grupo_Ministerio on z.ID_zona equals mzg.ID_zona into miembrosZona
+                    where (sedeID == 1000 || z.ID_sede == sedeID)
+                          && (z.tipo == null || z.tipo == "general")
                     select new
                     {
-                        ID_zona = g.Key.ID_zona,
-                        nombre_zona = g.Key.nombre_zona,
-                        tipo = g.Key.tipo,
-                        total_miembros = g.Count()
+                        ID_zona = z.ID_zona,
+                        nombre_zona = z.nombre_zona,
+                        total_miembros = miembrosZona.Count()
                     }
                 )
                 .OrderBy(x => x.nombre_zona)

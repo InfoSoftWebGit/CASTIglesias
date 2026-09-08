@@ -361,9 +361,8 @@
   <data name="Fecha de Baja (Retiro)" xml:space="preserve">
     <value>Inactive Since</value>
   </data>
-  <data name="Alumno VyF" xml:space="preserve">
-    <value>VyF Student</value>
-    <comment>VyF es el nombre propio del curso; no se traduce la sigla.</comment>
+  <data name="Alumno Escuela Bíblica" xml:space="preserve">
+    <value>Bible School Student</value>
   </data>
   <data name="Curso acabado" xml:space="preserve">
     <value>Course Completed</value>
@@ -914,7 +913,9 @@
   <data name="Total En Proceso" xml:space="preserve"><value>Total In Process</value></data>
   <data name="Total de Familias" xml:space="preserve"><value>Total Families</value></data>
   <data name="Total de Matrimonios" xml:space="preserve"><value>Total Marriages</value></data>
+  <data name="Total de Hombres" xml:space="preserve"><value>Total Men</value></data>
   <data name="Total de Mujeres" xml:space="preserve"><value>Total Women</value></data>
+  <data name="Total de Jóvenes" xml:space="preserve"><value>Total Youth</value></data>
   <data name="Total de Niños" xml:space="preserve"><value>Total Children</value></data>
   <data name="Total de Líderes" xml:space="preserve"><value>Total Leaders</value></data>
   <data name="Total de asistidos" xml:space="preserve"><value>Total attended</value></data>
@@ -1346,7 +1347,11 @@
   <data name="Zona Sur · Ministerio Alabanza" xml:space="preserve"><value>South Zone · Worship Ministry</value></data>
   <data name="Zona de Jóvenes" xml:space="preserve"><value>Youth Zone</value></data>
   <data name="a todos los módulos" xml:space="preserve"><value>to every module</value></data>
-  <data name="de forma" xml:space="preserve"><value>in a</value></data>
+  <!-- Titular del hero: se traduce como una sola frase partida en dos trozos
+       ("Manage your church / the smart way"), por eso "de forma" no lleva aquí
+       su traducción literal. No reutilizar estas dos claves fuera del hero. -->
+  <data name="de forma" xml:space="preserve"><value>the</value></data>
+  <data name="inteligente" xml:space="preserve"><value>smart way</value></data>
   <data name="de soporte incluidas" xml:space="preserve"><value>of support included</value></data>
   <data name="el miembro 25 se mostrará como" xml:space="preserve"><value>member 25 will be shown as</value></data>
   <data name="el número quedará como" xml:space="preserve"><value>the number will read</value></data>

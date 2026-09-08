@@ -289,6 +289,24 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        public JsonResult ContadorHombres()
+        {
+            try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "hombres") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        // La zona de jóvenes se cuenta por tipo igual que las demás de discipulado:
+        // la configuración de edades solo filtra la vista, no la pertenencia.
+        [HttpGet]
+        public JsonResult ContadorJovenes()
+        {
+            try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "jovenes") }); }
+            catch (UnauthorizedAccessException ex) { return Json(new { resultado = 0, error = true, mensaje = ErrorHelper.Mensaje(ex) }); }
+            catch (Exception) { return Json(new { resultado = 0, error = true }); }
+        }
+
+        [HttpGet]
         public JsonResult ContadorNinos()
         {
             try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "ninos") }); }

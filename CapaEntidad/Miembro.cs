@@ -91,8 +91,10 @@ namespace CapaEntidad
         [Column("Observaciones")]
         public string? observaciones { get; set; }
 
-        [Column("Alumno_vyf")]
-        public bool? alumno_VyF { get; set; } = false;
+        // Marca si el congregante es alumno de la escuela bíblica.
+        // Nombre genérico: antes era "Alumno_vyf" (nombre propio del curso de un cliente concreto).
+        [Column("alumno_escuela_biblica")]
+        public bool? alumno_escuela_biblica { get; set; } = false;
 
         [Column("Curso_acabado")]
         public bool? curso_acabado { get; set; } = false;

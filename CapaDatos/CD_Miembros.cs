@@ -77,7 +77,7 @@ namespace CapaDatos
                                 acepta_LOPD = m.acepta_LOPD,
                                 observaciones = m.observaciones,
                                 numero_hijos = m.numero_hijos,
-                                alumno_VyF = m.alumno_VyF,
+                                alumno_escuela_biblica = m.alumno_escuela_biblica,
                                 curso_acabado = m.curso_acabado,
                                 id_responsable = m.id_responsable,
                                 id_role = m.id_role,
@@ -281,7 +281,7 @@ namespace CapaDatos
                         fecha_fallecido = obj.fecha_fallecido,
                         observaciones = obj.observaciones,
                         id_responsable = obj.id_responsable,
-                        alumno_VyF = obj.alumno_VyF,
+                        alumno_escuela_biblica = obj.alumno_escuela_biblica,
                         curso_acabado = obj.curso_acabado,
                         acepta_LOPD = obj.acepta_LOPD,
                         estado = obj.estado,
@@ -336,7 +336,7 @@ namespace CapaDatos
                    nuevoMiembro.estado_Civil          = obj.estado_Civil;
                    nuevoMiembro.estado                = obj.estado;
                    nuevoMiembro.fallecido             = obj.fallecido;
-                   nuevoMiembro.alumno_VyF            = obj.alumno_VyF;
+                   nuevoMiembro.alumno_escuela_biblica            = obj.alumno_escuela_biblica;
                    nuevoMiembro.numero_hijos          = obj.numero_hijos;
                    nuevoMiembro.curso_acabado         = obj.curso_acabado;
                    nuevoMiembro.acepta_LOPD           = obj.acepta_LOPD;
@@ -466,7 +466,7 @@ namespace CapaDatos
                 miembro.estado_Civil = obj.estado_Civil;
                 // estado solo se modifica via AvanzarEstado / RetrocederEstado
                 miembro.fallecido = obj.fallecido;
-                miembro.alumno_VyF = obj.alumno_VyF;
+                miembro.alumno_escuela_biblica = obj.alumno_escuela_biblica;
                 miembro.numero_hijos = obj.numero_hijos;
                 miembro.curso_acabado = obj.curso_acabado;
                 miembro.acepta_LOPD = obj.acepta_LOPD;
@@ -1399,7 +1399,7 @@ namespace CapaDatos
                             acepta_LOPD = m.acepta_LOPD,
                             observaciones = m.observaciones,
                             numero_hijos = m.numero_hijos,
-                            alumno_VyF = m.alumno_VyF,
+                            alumno_escuela_biblica = m.alumno_escuela_biblica,
                             curso_acabado = m.curso_acabado,
                             id_responsable = m.id_responsable,
                             id_role = m.id_role,
@@ -1519,7 +1519,7 @@ namespace CapaDatos
                 miembroExistente.id_responsable = obj.id_responsable;
                 miembroExistente.observaciones = obj.observaciones;
                 miembroExistente.numero_hijos = obj.numero_hijos;
-                miembroExistente.alumno_VyF = obj.alumno_VyF;
+                miembroExistente.alumno_escuela_biblica = obj.alumno_escuela_biblica;
                 miembroExistente.curso_acabado = obj.curso_acabado;
                 miembroExistente.excluir_directorio = obj.excluir_directorio;
                 miembroExistente.diezmo_individual = obj.diezmo_individual;
@@ -1694,7 +1694,7 @@ namespace CapaDatos
                         acepta_LOPD = m.acepta_LOPD,
                         observaciones = m.observaciones,
                         numero_hijos = m.numero_hijos,
-                        alumno_VyF = m.alumno_VyF,
+                        alumno_escuela_biblica = m.alumno_escuela_biblica,
                         curso_acabado = m.curso_acabado,
                         id_responsable = m.id_responsable,
                         id_role = m.id_role,

@@ -8,164 +8,229 @@
     <li class="breadcrumb-item active"></li>
 </ol>
 
+@* Cada tarjeta es un enlace a su vista: el <a> envuelve la tarjeta entera para
+   que toda su superficie sea clicable y siga siendo accesible por teclado. *@
+<style>
+    .tarjeta-enlace { display: block; text-decoration: none; color: inherit; }
+    .tarjeta-enlace .card { transition: transform .15s ease, box-shadow .15s ease; }
+    .tarjeta-enlace:hover .card { transform: translateY(-3px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.2); }
+    .tarjeta-enlace:focus-visible .card { outline: 3px solid #0d6efd; outline-offset: 2px; }
+</style>
+
 <div class="row">
     <div class="col-xl-3 col-md-6">
-        <div class="card text-white mb-4" style="background-color: #6B7280;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Visitantes"]</h6>
-                        <h6 id="totalvisitantes"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user-clock fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Visitantes">
+            <div class="card text-white mb-4" style="background-color: #6B7280;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Visitantes"]</h6>
+                            <h6 id="totalvisitantes"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-clock fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card text-white mb-4" style="background-color: #00BFA5;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Simpatizantes"]</h6>
-                        <h6 id="totalsimpatizantes"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user-tag fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Simpatizantes">
+            <div class="card text-white mb-4" style="background-color: #00BFA5;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Simpatizantes"]</h6>
+                            <h6 id="totalsimpatizantes"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-tag fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card text-white mb-4" style="background-color: #1E3A8A;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total En Proceso"]</h6>
-                        <h6 id="totalenproceso"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user-cog fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Proceso">
+            <div class="card text-white mb-4" style="background-color: #1E3A8A;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total En Proceso"]</h6>
+                            <h6 id="totalenproceso"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-cog fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6">
-        <div class="card text-white mb-4" style="background-color: #0D1B3D;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Miembros"]</h6>
-                        <h6 id="totalmiembros"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Miembros">
+            <div class="card text-white mb-4" style="background-color: #0D1B3D;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Miembros"]</h6>
+                            <h6 id="totalmiembros"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
+    @* Las bajas no tienen vista propia: son un modo de la de Miembros, que se
+       activa al llegar con ?bajas=true. *@
     <div class="col-xl-3 col-md-6">
-        <div class="card text-white mb-4" style="background-color: #B91C1C;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Miembros de Baja"]</h6>
-                        <h6 id="totalmiembrosbaja"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user-slash fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Miembros" asp-route-bajas="true">
+            <div class="card text-white mb-4" style="background-color: #B91C1C;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Miembros de Baja"]</h6>
+                            <h6 id="totalmiembrosbaja"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-slash fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
 <hr class="my-4" />
 
-@* Bloque inferior: las tarjetas de zona (Hombres, Jóvenes...) se insertan desde
-   cargarTarjetasZonas() en esta misma fila y se ordenan junto a las fijas por
-   data-orden, para que salgan seguidas de izquierda a derecha. *@
+@* Bloque inferior: las siete tarjetas por defecto de la aplicación son fijas y
+   están siempre presentes (aunque su contador sea 0). Las zonas que crea cada
+   iglesia se añaden al final desde cargarTarjetasZonas(). *@
 <div class="row" id="contenedor-tarjetas">
-    <div class="col-xl-3 col-md-6" data-orden="2">
-        <div class="card text-white mb-4" style="background-color: #A21CAF;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Mujeres"]</h6>
-                        <h6 id="totalmujeresactivas"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-venus fa-2x"></i>
+    <div class="col-xl-3 col-md-6" data-orden="1">
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Hombres">
+            <div class="card text-white mb-4" style="background-color: #1D4ED8;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Hombres"]</h6>
+                            <h6 id="totalhombres"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-mars fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="2">
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Mujeres">
+            <div class="card text-white mb-4" style="background-color: #A21CAF;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Mujeres"]</h6>
+                            <h6 id="totalmujeresactivas"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-venus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-xl-3 col-md-6" data-orden="3">
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Jovenes">
+            <div class="card text-white mb-4" style="background-color: #0E7490;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Jóvenes"]</h6>
+                            <h6 id="totaljovenes"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-group fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6" data-orden="4">
-        <div class="card text-white mb-4" style="background-color: #D97706;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Niños"]</h6>
-                        <h6 id="totalninos"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-child fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Ninos">
+            <div class="card text-white mb-4" style="background-color: #D97706;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Niños"]</h6>
+                            <h6 id="totalninos"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-child fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6" data-orden="5">
-        <div class="card text-white mb-4" style="background-color: #BE185D;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Matrimonios"]</h6>
-                        <h6 id="totalmatrimonios"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-heart fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Matrimonios">
+            <div class="card text-white mb-4" style="background-color: #BE185D;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Matrimonios"]</h6>
+                            <h6 id="totalmatrimonios"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-heart fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6" data-orden="6">
-        <div class="card text-white mb-4" style="background-color: #6D28D9;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Familias"]</h6>
-                        <h6 id="totalfamilias"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-people-roof fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Familias">
+            <div class="card text-white mb-4" style="background-color: #6D28D9;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Familias"]</h6>
+                            <h6 id="totalfamilias"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-people-roof fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-xl-3 col-md-6" data-orden="7">
-        <div class="card text-white mb-4" style="background-color: #047857;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-9">
-                        <h6>@L["Total de Líderes"]</h6>
-                        <h6 id="totallideresactivos"></h6>
-                    </div>
-                    <div class="col-sm-3">
-                        <i class="fas fa-user-tie fa-2x"></i>
+        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Lideres">
+            <div class="card text-white mb-4" style="background-color: #047857;">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>@L["Total de Líderes"]</h6>
+                            <h6 id="totallideresactivos"></h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-tie fa-2x"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -352,11 +417,9 @@
             gastos:      @Json.Serialize(L["Gastos"].Value)
         });
 
-        // Hueco fijo de cada tarjeta en la fila inferior. Las zonas propias de cada
-        // iglesia (tipo 'general') no tienen hueco reservado y van al final.
-        const ORDEN_TIPO_ZONA = {
-            hombres: 1, mujeres: 2, jovenes: 3, ninos: 4, matrimonios: 5, familias: 6
-        };
+        // Las tarjetas por defecto ocupan los huecos 1..7 en el HTML; las zonas
+        // propias de cada iglesia se añaden detrás, todas con el mismo orden.
+        const ORDEN_ZONA_PROPIA = 99;
 
         function cargarTarjetasZonas() {
             $.get('@Url.Action("ObtenerZonasConMiembros", "Home")', function (data) {
@@ -366,16 +429,14 @@
 
                 if (Array.isArray(data) && data.length > 0) {
                     data.forEach(function (zona) {
-                        const orden = ORDEN_TIPO_ZONA[zona.tipo] ?? 99;
                         const tarjetaHtml = `
-                            <div class="col-xl-3 col-md-6" data-zona="1" data-orden="${orden}">
+                            <div class="col-xl-3 col-md-6" data-zona="1" data-orden="${ORDEN_ZONA_PROPIA}">
                                 <div class="card text-white mb-4" style="background-color: #1E3A8A;">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-sm-9">
-                                                @* tDato() traduce los nombres de zona que crea la
-                                                   aplicación (Hombres, Mujeres, Niños, Jóvenes) y
-                                                   deja intactos los que crea cada iglesia. *@
+                                                @* tDato() deja intacto el nombre que le haya puesto
+                                                   cada iglesia a su zona. *@
                                                 <h6>${fmt(T.totalEnZona, tDato(zona.nombre_zona))}</h6>
                                                 <h6>${zona.total_miembros}</h6>
                                             </div>
@@ -426,9 +487,17 @@
                 $("#totalmatrimonios").text(data.resultado ?? 0);
             }).fail(function () { $("#totalmatrimonios").text('Error'); });
 
+            $.get('@Url.Action("ContadorHombres", "Congregantes")', function (data) {
+                $("#totalhombres").text(data.resultado ?? 0);
+            }).fail(function () { $("#totalhombres").text('Error'); });
+
             $.get('@Url.Action("ContadorMujeresActivas", "Congregantes")', function (data) {
                 $("#totalmujeresactivas").text(data.resultado ?? 0);
             }).fail(function () { $("#totalmujeresactivas").text('Error'); });
+
+            $.get('@Url.Action("ContadorJovenes", "Congregantes")', function (data) {
+                $("#totaljovenes").text(data.resultado ?? 0);
+            }).fail(function () { $("#totaljovenes").text('Error'); });
 
             $.get('@Url.Action("ContadorNinos", "Congregantes")', function (data) {
                 $("#totalninos").text(data.resultado ?? 0);
