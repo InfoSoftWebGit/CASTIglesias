@@ -4,8 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CapaEntidad
 {
     [Table("matrimonios")]
-    public class Matrimonio
+    public class Matrimonio : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key]
         public int ID_matrimonio { get; set; }
         public string? Nombres { get; set; }

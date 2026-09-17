@@ -19,6 +19,23 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Permisos del usuario de la propia sesión (login y BaseController).
+        /// Ver CD_Usuarios.ObtenerPermisosDeSesion para el porqué de separarlo.
+        /// </summary>
+        public Permisos ObtenerPermisosDeSesion(int idUsuario)
+        {
+            try
+            {
+                return _datosUsuarios.ObtenerPermisosDeSesion(idUsuario);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en CN_Permisos: {ErrorHelper.Mensaje(ex)}");
+                return new Permisos();
+            }
+        }
+
+        /// <summary>
         /// Obtiene los permisos detallados de un usuario (solo si es Miembro).
         /// </summary>
         /// <param name="ID_usuario">ID del usuario</param>

@@ -4,8 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CapaEntidad
 {
     [Table("gastos")]
-    public class Gasto
+    public class Gasto : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key] public int id_gasto { get; set; }
         public int id_sede { get; set; }
         public int? numero_pago { get; set; }
@@ -22,8 +26,12 @@ namespace CapaEntidad
     }
 
     [Table("detalle_pago")]
-    public class DetallePago
+    public class DetallePago : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key] public int id_detalle { get; set; }
         public int numero_pago { get; set; }
         public int id_sede { get; set; }

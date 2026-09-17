@@ -6,8 +6,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CapaEntidad
 {
     [Table("usuarios")]
-    public class Usuario
+    public class Usuario : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key]
         public int ID_usuario { get; set; }
 
@@ -59,6 +63,11 @@ namespace CapaEntidad
         public int ID_sede { get; set; }
         
         public bool? Multisede { get; set; } = false;
+
+        // Administrador de toda la plataforma Congrega (puede entrar en cualquier iglesia).
+        // Solo se activa por SQL: ninguna pantalla lo escribe, para que un cliente no
+        // pueda concedérselo. Ver PlataformaController.
+        public bool es_admin_plataforma { get; set; } = false;
 
         [ForeignKey("ID_sede")]
         public Sedes? Sede { get; set; }

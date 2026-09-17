@@ -1,0 +1,114 @@
+@model List<CapaEntidad.Iglesia>
+@{
+    ViewData["Title"] = L["Elegir iglesia"].Value;
+    int idActiva = ViewBag.IdIglesiaActiva ?? 0;
+
+    // Etiqueta y color por estado. El estado viene de la BBDD en minúsculas.
+    (string texto, string clase) Estado(string? estado) => estado switch
+    {
+        "activa" => (L["Activa"].Value, "bg-success"),
+        "prueba" => (L["Prueba"].Value, "bg-info"),
+        "pendiente_configuracion" => (L["Pendiente de configurar"].Value, "bg-warning text-dark"),
+        "suspendida" => (L["Suspendida"].Value, "bg-danger"),
+        "cerrada" => (L["Cerrada"].Value, "bg-secondary"),
+        _ => (estado ?? "-", "bg-light text-dark")
+    };
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@L["Elegir iglesia"]</h1>
+    <p class="text-muted">
+        @L["Como administrador de plataforma puedes entrar en cualquier iglesia. Cada acceso queda registrado con su motivo."]
+    </p>
+
+    @if (TempData["ErrorPlataforma"] is string error)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-sm-8 col-md-6">
+            <input name="buscar" value="@ViewBag.Buscar" class="form-control"
+                   placeholder="@L["Buscar por nombre, CIF o correo"]" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary"><i class="fas fa-search me-1"></i>@L["Buscar"]</button>
+        </div>
+    </form>
+
+    <div class="card mb-4">
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>@L["Iglesia"]</th>
+                        <th>CIF</th>
+                        <th>@L["Correo"]</th>
+                        <th class="text-end">@L["Sedes"]</th>
+                        <th>@L["Estado"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-muted">@L["No hay iglesias que coincidan."]</td></tr>
+                    }
+                    @foreach (var iglesia in Model)
+                    {
+                        var estado = Estado(iglesia.estado);
+                        <tr class="@(iglesia.ID == idActiva ? "table-primary" : "")">
+                            <td>@iglesia.nombre_iglesia</td>
+                            <td>@iglesia.cif</td>
+                            <td>@iglesia.email_contacto</td>
+                            <td class="text-end">@iglesia.num_sedes</td>
+                            <td><span class="badge @estado.clase">@estado.texto</span></td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-entrar"
+                                        data-id="@iglesia.ID" data-nombre="@iglesia.nombre_iglesia">
+                                    @L["Entrar"]
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@* El motivo es obligatorio: justifica el acceso a datos de categoría especial (RGPD) *@
+<div class="modal fade" id="modalEntrar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="Entrar" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["Entrar en"] <span id="lblIglesia"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="idIglesia" id="txtIdIglesia" />
+                <label for="txtMotivo" class="form-label">@L["Motivo del acceso"] *</label>
+                <textarea id="txtMotivo" name="motivo" class="form-control" rows="3" maxlength="300" required minlength="5"
+                          placeholder="@L["Ej: configuración inicial tras el pago"]"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Entrar"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    // Abre el modal con la iglesia elegida; el envío es un POST normal con token antifalsificación
+    document.querySelectorAll(".btn-entrar").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            document.getElementById("txtIdIglesia").value = boton.dataset.id;
+            document.getElementById("lblIglesia").textContent = boton.dataset.nombre;
+            document.getElementById("txtMotivo").value = "";
+            bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEntrar")).show();
+        });
+    });
+</script>
+}

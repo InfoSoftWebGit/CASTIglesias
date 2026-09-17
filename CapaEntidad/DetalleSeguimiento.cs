@@ -5,8 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CapaEntidad
 {
     [Table("detalle_seguimiento")]
-    public class DetalleSeguimiento
+    public class DetalleSeguimiento : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key]
         public int ID { get; set; }
         public int ID_miembro { get; set; }

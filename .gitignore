@@ -7,7 +7,7 @@
 appsettings*.json
 
 **/launchsettings.json
-
+*.pdf
 *.md
 # data ignore
 *.csv

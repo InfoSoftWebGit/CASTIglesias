@@ -17,13 +17,19 @@ namespace CapaDatos
         }
 
         /// <summary>
-        /// Lista TODAS las sedes disponibles. No se aplica filtro de sede de usuario.
+        /// Lista las sedes reales de la iglesia activa.
         /// </summary>
+        /// <remarks>
+        /// El filtro global de AppDbContext ya limita a la iglesia de la sesión.
+        /// Se excluye la fila marcador 1000: la opción "Todas las sedes" la añade
+        /// BaseController solo a quien tiene acceso a todas.
+        /// </remarks>
         public List<Sedes> ListarSedes()
         {
             try
             {
                 var sedes = _context.Sedes
+                    .Where(s => s.ID != Sedes.TodasLasSedes)
                     .OrderBy(s => s.nombre_sede)
                     .ToList();
 
@@ -60,6 +66,20 @@ namespace CapaDatos
                 return null;
             }
         }
+        /// <summary>
+        /// Indica si la sede existe y pertenece a la iglesia activa.
+        /// </summary>
+        /// <remarks>
+        /// Es la comprobación que usa CambiarSede: un ID de sede llega desde el
+        /// navegador y sin esto cualquiera podía ponerse la sede de otra iglesia.
+        /// El filtro global hace que una sede de otra iglesia simplemente "no exista".
+        /// </remarks>
+        public bool ExisteSedeEnIglesiaActual(int sedeID)
+        {
+            if (sedeID == Sedes.TodasLasSedes) return false;
+            return _context.Sedes.Any(s => s.ID == sedeID);
+        }
+
         /// <summary>
         /// Busca el nombre de una sede específica por su ID.
         /// </summary>

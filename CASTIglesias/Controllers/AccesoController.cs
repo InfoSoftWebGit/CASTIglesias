@@ -17,11 +17,13 @@ namespace CASTIglesias.Controllers
     {
         private readonly CN_Usuarios _negocioUsuarios;
         private readonly CN_Permisos _negocioPermisos;
+        private readonly CN_Plataforma _negocioPlataforma;
 
-        public AccesoController(CN_Usuarios negocioUsuarios, CN_Permisos negocioPermisos)
+        public AccesoController(CN_Usuarios negocioUsuarios, CN_Permisos negocioPermisos, CN_Plataforma negocioPlataforma)
         {
             _negocioUsuarios = negocioUsuarios;
             _negocioPermisos = negocioPermisos;
+            _negocioPlataforma = negocioPlataforma;
         }
 
         public IActionResult Login() => View();
@@ -29,14 +31,32 @@ namespace CASTIglesias.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string correo, string clave)
         {
-            // Buscar usuario
-            var oUsuario = _negocioUsuarios.ListarTodosLosUsuariosParaLogin()
-                .FirstOrDefault(u => u.correo_electronico == correo &&
-                                     u.contrasenia == CN_Recursos.ConvertirSha256(clave));
+            // La iglesia y la sede del usuario salen de SU fila en la BBDD, nunca de lo
+            // que envíe el formulario: el correo identifica a la persona y su fila dice
+            // a qué iglesia pertenece.
+            var oUsuario = _negocioUsuarios.ValidarCredenciales(correo, clave);
 
             if (oUsuario == null)
             {
                 ViewBag.Error = "Correo o contraseña incorrecta.";
+                return View();
+            }
+
+            // "O tiene iglesia o nada": una fila sin iglesia válida no entra.
+            var iglesia = _negocioPlataforma.ObtenerIglesia(oUsuario.ID_iglesia);
+            if (iglesia == null)
+            {
+                ViewBag.Error = "El usuario no está asociado a ninguna iglesia. Contacta con soporte.";
+                return View();
+            }
+
+            // Una iglesia pendiente de configurar, suspendida o cerrada no puede entrar.
+            // El administrador de plataforma sí, porque su iglesia es la interna de Congrega.
+            if (!oUsuario.es_admin_plataforma && !Iglesia.EstadosConAcceso.Contains(iglesia.estado))
+            {
+                ViewBag.Error = iglesia.estado == "pendiente_configuracion"
+                    ? "Tu iglesia todavía se está configurando. Nos pondremos en contacto contigo."
+                    : "El acceso de tu iglesia está suspendido. Contacta con soporte@congrega.es.";
                 return View();
             }
 
@@ -55,17 +75,26 @@ namespace CASTIglesias.Controllers
             }
 
             // 🔹 Obtener permisos desde la capa de negocio
-            var permisosUsuario = _negocioPermisos.ObtenerPermisosPorUsuario(oUsuario.ID_usuario);
+            var permisosUsuario = _negocioPermisos.ObtenerPermisosDeSesion(oUsuario.ID_usuario);
 
             // Crear Claims base
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, oUsuario.correo_electronico),
+                new Claim(ClaimTypes.Name, oUsuario.correo_electronico ?? string.Empty),
                 new Claim(ClaimTypes.NameIdentifier, oUsuario.ID_usuario.ToString()),
                 new Claim(ClaimTypes.Role, oUsuario.Rol ?? "Miembro"),
-                new Claim("IDsede", sedeDelUsuarioLogueado.ToString()),
-                new Claim("Multisede", (sedeDelUsuarioLogueado == 1000).ToString())
+                // Iglesia activa: la lee AppDbContext para filtrar TODAS las consultas
+                new Claim(SesionClaims.IdIglesia, oUsuario.ID_iglesia.ToString()),
+                new Claim(SesionClaims.NombreIglesia, iglesia.nombre_iglesia ?? string.Empty),
+                new Claim(SesionClaims.IdSede, sedeDelUsuarioLogueado.ToString()),
+                // En minúsculas: el layout compara con HasClaim("Multisede", "true")
+                new Claim(SesionClaims.Multisede, (sedeDelUsuarioLogueado == 1000) ? "true" : "false")
             };
+
+            if (oUsuario.es_admin_plataforma)
+            {
+                claims.Add(new Claim(SesionClaims.AdminPlataforma, "true"));
+            }
 
             // 🔹 Agregar permisos como Claims personalizados
             claims.Add(new Claim("Permiso_Usuarios", permisosUsuario.Usuarios.ToString()));
@@ -82,15 +111,21 @@ namespace CASTIglesias.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
+            // El administrador de plataforma empieza eligiendo en qué iglesia trabajar
+            if (oUsuario.es_admin_plataforma)
+            {
+                return RedirectToAction("Index", "Plataforma");
+            }
+
             return RedirectToAction("Bienvenida", "Home");
         }
 
         public IActionResult ReestablecerClave() => View();
-       
+
         [HttpPost]
         public IActionResult ReestablecerClave(string correo)
         {
-            var oUsuario = _negocioUsuarios.ListarTodosLosUsuariosParaLogin().FirstOrDefault(u => u.correo_electronico == correo);
+            var oUsuario = string.IsNullOrWhiteSpace(correo) ? null : _negocioUsuarios.ObtenerUsuarioPorCorreo(correo.Trim());
 
             if (oUsuario == null)
             {
@@ -132,7 +167,7 @@ namespace CASTIglesias.Controllers
                 return View();
             }
 
-            var oUsuario = _negocioUsuarios.ListarTodosLosUsuariosParaLogin().FirstOrDefault(u => u.ID_usuario == id);
+            var oUsuario = _negocioUsuarios.ObtenerUsuarioSinFiltro(id);
 
             if (oUsuario == null)
             {
@@ -171,6 +206,13 @@ namespace CASTIglesias.Controllers
 
         public async Task<IActionResult> CerrarSesion()
         {
+            // Si era el administrador de plataforma, se cierra su acceso abierto a la iglesia
+            // para que el registro de auditoría refleje cuándo terminó.
+            if (SesionClaims.EsAdminPlataforma(User))
+            {
+                _negocioPlataforma.SalirDeIglesia(SesionClaims.ObtenerIdUsuario(User));
+            }
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }

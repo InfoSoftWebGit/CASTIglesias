@@ -10,11 +10,28 @@ namespace CapaNegocio
 
         public CN_Usuarios(CD_Usuarios cdUsuarios) => _cdUsuarios = cdUsuarios;
 
-        // ¡NUEVO MÉTODO! SOLO para Login y Recuperación de Clave
-        public List<Usuario> ListarTodosLosUsuariosParaLogin()
+        /// <summary>
+        /// Login: busca por correo y compara la clave. Devuelve null si no coincide.
+        /// </summary>
+        /// <remarks>
+        /// La clave se compara en C# y no en la consulta para que la BBDD solo reciba el
+        /// correo (que tiene índice único) y no el hash.
+        /// </remarks>
+        public Usuario? ValidarCredenciales(string correo, string clave)
         {
-            return _cdUsuarios.ListarTodosLosUsuarios();
+            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrEmpty(clave)) return null;
+
+            var usuario = _cdUsuarios.ObtenerUsuarioPorCorreo(correo.Trim());
+            if (usuario == null) return null;
+
+            return usuario.contrasenia == CN_Recursos.ConvertirSha256(clave) ? usuario : null;
         }
+
+        /// <summary>Solo para recuperar la clave (antes de iniciar sesión).</summary>
+        public Usuario? ObtenerUsuarioPorCorreo(string correo) => _cdUsuarios.ObtenerUsuarioPorCorreo(correo);
+
+        /// <summary>Solo para flujos con un ID fiable (claim de sesión o cambio de clave inicial).</summary>
+        public Usuario? ObtenerUsuarioSinFiltro(int idUsuario) => _cdUsuarios.ObtenerUsuarioSinFiltro(idUsuario);
 
         public List<UsuarioDTO_Permisos> ListarUsuarios(int sedeID)
         {

@@ -1,4 +1,5 @@
 ﻿using CapaEntidad;
+using Microsoft.EntityFrameworkCore; // IgnoreQueryFilters / AsNoTracking
 using System.Linq; // Necesario para usar .Where() y .Any()
 using System.Collections.Generic; // Para List<T>
 using System; // Para Exception
@@ -82,6 +83,52 @@ namespace CapaDatos
             }
 
             return permisosPorDefecto;
+        }
+
+        /// <summary>
+        /// Permisos del usuario que ha iniciado sesión (login y cada petición).
+        /// </summary>
+        /// <remarks>
+        /// A diferencia de ObtenerPermisosPorUsuario, ignora el filtro por iglesia:
+        /// el administrador de plataforma pertenece a la iglesia interna de Congrega y,
+        /// cuando trabaja dentro de otra iglesia, su propia fila no pasaría el filtro.
+        /// Es seguro porque el ID llega del claim de la cookie firmada, no del navegador.
+        /// </remarks>
+        public Permisos ObtenerPermisosDeSesion(int ID_usuario)
+        {
+            var usuario = _context.Usuarios.IgnoreQueryFilters()
+                .FirstOrDefault(u => u.ID_usuario == ID_usuario);
+
+            if (usuario == null) return new Permisos();
+
+            if (usuario.es_admin_plataforma || EsRolConAccesoTotal(usuario.Rol))
+                return ObtenerPermisosTotales(ID_usuario);
+
+            return _context.Permisos.IgnoreQueryFilters()
+                       .FirstOrDefault(p => p.ID_usuario == ID_usuario)
+                   ?? new Permisos();
+        }
+
+        private static bool EsRolConAccesoTotal(string? rol)
+        {
+            rol = rol?.Trim() ?? string.Empty;
+            return rol.Equals("AdminGlobal", StringComparison.OrdinalIgnoreCase) ||
+                   rol.Equals("PastorGeneral", StringComparison.OrdinalIgnoreCase) ||
+                   rol.Equals("PastorSede", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private Permisos ObtenerPermisosTotales(int ID_usuario)
+        {
+            // Marca como true todos los booleanos de Permisos por reflexión, para que un
+            // módulo nuevo quede incluido sin tener que acordarse de añadirlo aquí.
+            var permisos = new Permisos();
+            foreach (var prop in typeof(Permisos).GetProperties())
+            {
+                if (prop.PropertyType == typeof(bool) && prop.CanWrite)
+                    prop.SetValue(permisos, true);
+            }
+            permisos.ID_usuario = ID_usuario;
+            return permisos;
         }
 
         /// <summary>
@@ -242,9 +289,12 @@ namespace CapaDatos
                     consultaBase = consultaBase.Where(u => u.ID_sede == sedeID);
                 }
 
-                // Realizamos la unión (JOIN) con la tabla de Sedes y proyectamos al DTO
+                // LEFT JOIN con Sedes: la fila marcador 1000 pertenece a una sola iglesia y el
+                // filtro global la oculta al resto, así que con un JOIN normal los usuarios
+                // "de todas las sedes" desaparecerían del listado en las demás iglesias.
                 var listaUsuariosDTO = (from u in consultaBase
-                                        join s in _context.Sedes on u.ID_sede equals s.ID
+                                        join s in _context.Sedes on u.ID_sede equals s.ID into sedesUsuario
+                                        from s in sedesUsuario.DefaultIfEmpty()
 
                                         // 🚨 CAMBIO: Proyectar DIRECTAMENTE a UsuarioDTO_Permisos
                                         select new UsuarioDTO_Permisos
@@ -258,7 +308,9 @@ namespace CapaDatos
                                             activo = u.activo,
                                             ID_sede = u.ID_sede,
                                             Rol = u.Rol,
-                                            nombre_sede = s.nombre_sede,
+                                            nombre_sede = u.ID_sede == Sedes.TodasLasSedes
+                                                ? "Todas las Sedes"
+                                                : (s != null ? s.nombre_sede : null),
                                             Permisos = null // Inicialmente nulo (no se puede cargar en la consulta LINQ)
                                         }).ToList();
 
@@ -292,9 +344,12 @@ namespace CapaDatos
             try
             {
                 // 1. VALIDACIÓN (Lógica de Negocio)
-                if (_context.Usuarios.Any(u => u.correo_electronico == objDTO.correo_electronico && u.ID_sede == objDTO.ID_sede))
+                // El correo es el identificador de login, así que debe ser único en TODA la
+                // plataforma (la BBDD nueva tiene UNIQUE). Se ignora el filtro por iglesia
+                // para detectar también correos de otras iglesias.
+                if (_context.Usuarios.IgnoreQueryFilters().Any(u => u.correo_electronico == objDTO.correo_electronico))
                 {
-                    mensaje = "Correo ya existe en esta sede o ya es un usuario global.";
+                    mensaje = "Ya existe un usuario con ese correo.";
                     return 0;
                 }
 
@@ -431,8 +486,8 @@ namespace CapaDatos
         /// <param name="sedeID">ID de la sede del usuario logueado (1000 para Admin Global).</param>
         public bool CambiarClave(int idusuario, string clave, int sedeID) // 👈 CAMBIO: int no anulable, usando 1000
         {
-            // 1. Buscar el usuario solo por ID.
-            var u = _context.Usuarios.FirstOrDefault(x => x.ID_usuario == idusuario);
+            // 1. Buscar el usuario solo por ID (sin sesión, ver UsuariosAccesibles).
+            var u = UsuariosAccesibles().FirstOrDefault(x => x.ID_usuario == idusuario);
             if (u == null) return false;
 
             // Lógica de Control de Acceso Condicional
@@ -455,8 +510,8 @@ namespace CapaDatos
         /// <param name="sedeID">ID de la sede del usuario logueado (1000 para Admin Global).</param>
         public bool ReestablecerClave(int idusuario, string clave, int sedeID) // 👈 CAMBIO: int no anulable, usando 1000
         {
-            // 1. Buscar el usuario solo por ID.
-            var u = _context.Usuarios.FirstOrDefault(x => x.ID_usuario == idusuario);
+            // 1. Buscar el usuario solo por ID (sin sesión, ver UsuariosAccesibles).
+            var u = UsuariosAccesibles().FirstOrDefault(x => x.ID_usuario == idusuario);
             if (u == null) return false;
 
             // Lógica de Control de Acceso Condicional
@@ -470,13 +525,50 @@ namespace CapaDatos
             return true;
         }
 
-        // ----------------------------------------------------
-        // LISTAR TODOS LOS USUARIOS (Sin filtro de Sede, SOLO para Login/Recuperación)
-        // ----------------------------------------------------
-        public List<Usuario> ListarTodosLosUsuarios()
+        /// <summary>
+        /// Usuarios sobre los que puede actuar la petición actual.
+        /// </summary>
+        /// <remarks>
+        /// Antes de iniciar sesión (login, cambio de clave inicial, recuperar clave) todavía
+        /// no hay iglesia y el filtro global no devolvería a nadie, así que se ignora.
+        /// Con sesión se mantiene el filtro: un AdminGlobal de una iglesia no puede tocar
+        /// la clave de un usuario de otra iglesia aunque conozca su ID.
+        /// </remarks>
+        private IQueryable<Usuario> UsuariosAccesibles()
         {
-            // Se mantiene sin filtro de sede para permitir el proceso de login global/local.
-            return _context.Usuarios.ToList();
+            return _context.IdIglesiaActual == 0
+                ? _context.Usuarios.IgnoreQueryFilters()
+                : _context.Usuarios;
+        }
+
+        // ----------------------------------------------------
+        // BÚSQUEDAS PARA LOGIN Y SESIÓN (sin filtro por iglesia)
+        // ----------------------------------------------------
+        /// <summary>
+        /// Busca un usuario por correo en toda la plataforma. Solo para el login y la
+        /// recuperación de clave: el correo es lo que identifica a la persona y su
+        /// iglesia se conoce precisamente a partir de esta fila.
+        /// </summary>
+        /// <remarks>
+        /// Sustituye a ListarTodosLosUsuarios, que cargaba en memoria la tabla entera en
+        /// cada login (inviable con miles de iglesias).
+        /// </remarks>
+        public Usuario? ObtenerUsuarioPorCorreo(string correo)
+        {
+            return _context.Usuarios.IgnoreQueryFilters()
+                .AsNoTracking()
+                .FirstOrDefault(u => u.correo_electronico == correo);
+        }
+
+        /// <summary>
+        /// Busca un usuario por ID sin filtro por iglesia. Solo para flujos en los que el
+        /// ID es fiable: el claim de la propia sesión o el TempData del cambio de clave.
+        /// </summary>
+        public Usuario? ObtenerUsuarioSinFiltro(int idUsuario)
+        {
+            return _context.Usuarios.IgnoreQueryFilters()
+                .AsNoTracking()
+                .FirstOrDefault(u => u.ID_usuario == idUsuario);
         }
     }
     #endregion

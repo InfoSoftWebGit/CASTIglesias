@@ -1,0 +1,47 @@
+-- ---------------------------------------------------------------------
+-- 8.4 FK de cada tabla financiera a su iglesia
+-- ---------------------------------------------------------------------
+ALTER TABLE accounting_periods          ADD CONSTRAINT fki_accounting_periods          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE activities                  ADD CONSTRAINT fki_activities                  FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE approval_decisions          ADD CONSTRAINT fki_approval_decisions          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE approval_requests           ADD CONSTRAINT fki_approval_requests           FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE approval_rules              ADD CONSTRAINT fki_approval_rules              FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE approval_workflows          ADD CONSTRAINT fki_approval_workflows          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE audit_events                ADD CONSTRAINT fki_audit_events                FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE bank_statements             ADD CONSTRAINT fki_bank_statements             FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE bank_statement_lines        ADD CONSTRAINT fki_bank_statement_lines        FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE budgets                     ADD CONSTRAINT fki_budgets                     FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE budget_commitments          ADD CONSTRAINT fki_budget_commitments          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE budget_lines                ADD CONSTRAINT fki_budget_lines                FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE cash_count_lines            ADD CONSTRAINT fki_cash_count_lines            FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE cash_sessions               ADD CONSTRAINT fki_cash_sessions               FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE documents                   ADD CONSTRAINT fki_documents                   FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE document_links              ADD CONSTRAINT fki_document_links              FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE document_sequences          ADD CONSTRAINT fki_document_sequences          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE donor_profiles              ADD CONSTRAINT fki_donor_profiles              FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE financial_concepts          ADD CONSTRAINT fki_financial_concepts          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE financial_transactions      ADD CONSTRAINT fki_financial_transactions      FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE financial_transaction_lines ADD CONSTRAINT fki_financial_transaction_lines FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE fiscal_years                ADD CONSTRAINT fki_fiscal_years                FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE funds                       ADD CONSTRAINT fki_funds                       FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE fund_movements              ADD CONSTRAINT fki_fund_movements              FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE fund_site_links             ADD CONSTRAINT fki_fund_site_links             FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE idempotency_keys            ADD CONSTRAINT fki_idempotency_keys            FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE journal_entries             ADD CONSTRAINT fki_journal_entries             FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE journal_entry_lines         ADD CONSTRAINT fki_journal_entry_lines         FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE ledger_accounts             ADD CONSTRAINT fki_ledger_accounts             FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE outbox_messages             ADD CONSTRAINT fki_outbox_messages             FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE parties                     ADD CONSTRAINT fki_parties                     FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE payables                    ADD CONSTRAINT fki_payables                    FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE payments                    ADD CONSTRAINT fki_payments                    FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE payment_allocations         ADD CONSTRAINT fki_payment_allocations         FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE posting_rules               ADD CONSTRAINT fki_posting_rules               FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE posting_rule_sets           ADD CONSTRAINT fki_posting_rule_sets           FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE projects                    ADD CONSTRAINT fki_projects                    FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE reconciliation_matches      ADD CONSTRAINT fki_reconciliation_matches      FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE reversal_requests           ADD CONSTRAINT fki_reversal_requests           FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE roles                       ADD CONSTRAINT fki_roles                       FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE transfers                   ADD CONSTRAINT fki_transfers                   FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE treasury_accounts           ADD CONSTRAINT fki_treasury_accounts           FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE treasury_movements          ADD CONSTRAINT fki_treasury_movements          FOREIGN KEY (organization_id) REFERENCES iglesias (ID);
+ALTER TABLE user_roles                  ADD CONSTRAINT fki_user_roles                  FOREIGN KEY (organization_id) REFERENCES iglesias (ID);

@@ -101,6 +101,14 @@ builder.Services.AddScoped<CN_Sala>();
 builder.Services.AddScoped<CD_EventoCalendario>();
 builder.Services.AddScoped<CN_EventoCalendario>();
 
+builder.Services.AddScoped<CD_Plataforma>();
+builder.Services.AddScoped<CN_Plataforma>();
+
+// Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
+// y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IContextoIglesia, ContextoIglesiaHttp>();
+
 // ✅ Configurar EF Core
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(

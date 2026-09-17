@@ -491,6 +491,19 @@
                     <div class="small">@L["Sesión iniciada como:"]</div>
                     <div class="fw-bold">@User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value</div>
 
+                    @* Iglesia activa siempre visible: con varias iglesias (y sobre todo para el
+                       administrador de plataforma) evita trabajar en la equivocada sin darse cuenta.
+                       El nombre es dato del cliente y no se traduce. *@
+                    <div class="small mt-2 text-white-50">
+                        <i class="fas fa-place-of-worship fa-fw me-1"></i>@L["Iglesia"]: @ViewBag.NombreIglesiaActual
+                    </div>
+                    @if (ViewBag.EsAdminPlataforma == true)
+                    {
+                        <a class="small text-warning text-decoration-none" href="@Url.Action("Index", "Plataforma")">
+                            <i class="fas fa-exchange-alt fa-fw me-1"></i>@L["Cambiar de iglesia"]
+                        </a>
+                    }
+
                     @if (User.HasClaim("Multisede", "true") || User.IsInRole("AdminGlobal") || User.IsInRole("PastorGeneral"))
                     {
                         <div class="dropup mt-2">

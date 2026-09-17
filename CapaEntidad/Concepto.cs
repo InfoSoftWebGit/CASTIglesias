@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 namespace CapaEntidad
 {
     [Table("concepto")]
-    public class Concepto
+    public class Concepto : ITieneIglesia
     {
+        // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta
+        // el filtro global por iglesia (ver ITieneIglesia).
+        public int ID_iglesia { get; set; }
+
         [Key]
         public int ID_concepto { get; set; }
 

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using CapaNegocio;
 using CapaEntidad;
 using System.Collections.Generic;
+using CASTIglesias.Models; // SesionClaims
 
 namespace CASTIglesias.Controllers
 {
@@ -72,6 +73,14 @@ namespace CASTIglesias.Controllers
 
             if (HttpContext.User.Identity.IsAuthenticated)
             {
+                // Sesiones iniciadas antes de existir el claim de iglesia: sin él, el filtro
+                // global no devuelve nada y la app parecería vacía. Se obliga a entrar de nuevo.
+                if (SesionClaims.ObtenerIdIglesia(HttpContext.User) == 0)
+                {
+                    context.Result = RedirectToAction("CerrarSesion", "Acceso");
+                    return;
+                }
+
                 try
                 {
                     // 1. Obtener la sede actual.
@@ -79,8 +88,9 @@ namespace CASTIglesias.Controllers
                     string nombreSedeActual;
                     List<Sedes> listaSedes;
 
-                    var esRolAltoGlobal = HttpContext.User.IsInRole("AdminGlobal") || HttpContext.User.IsInRole("PastorGeneral") || HttpContext.User.IsInRole("PastorSede");
-                    var esMultiSede = esRolAltoGlobal || HttpContext.User.HasClaim("Multisede", "true");
+                    // PastorSede ya no cuenta como multisede: es pastor de UNA sede y antes
+                    // recibía la lista completa. Ver SesionClaims.TieneAccesoATodasLasSedes.
+                    var esMultiSede = SesionClaims.TieneAccesoATodasLasSedes(HttpContext.User);
 
                     var nombreClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "NombreSedeActual");
 
@@ -95,7 +105,14 @@ namespace CASTIglesias.Controllers
 
                     if (esMultiSede)
                     {
-                        listaSedes = _negocioSedes.ListarSedes() ?? new List<Sedes>();
+                        // ListarSedes ya viene limitado a la iglesia activa y sin la fila 1000;
+                        // la opción "Todas las Sedes" se añade aquí para que siempre signifique
+                        // "todas las de esta iglesia".
+                        listaSedes = new List<Sedes>
+                        {
+                            new Sedes { ID = Sedes.TodasLasSedes, nombre_sede = "Todas las Sedes" }
+                        };
+                        listaSedes.AddRange(_negocioSedes.ListarSedes() ?? new List<Sedes>());
                     }
                     else
                     {
@@ -109,8 +126,10 @@ namespace CASTIglesias.Controllers
                     var idUsuarioClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
                     if (idUsuarioClaim != null && int.TryParse(idUsuarioClaim.Value, out int idUsuario))
                     {
-                        permisosUsuario = _negocioPermisos.ObtenerPermisosPorUsuario(idUsuario);
+                        permisosUsuario = _negocioPermisos.ObtenerPermisosDeSesion(idUsuario);
                     }
+                    ViewBag.NombreIglesiaActual = HttpContext.User.FindFirst(SesionClaims.NombreIglesia)?.Value;
+                    ViewBag.EsAdminPlataforma = SesionClaims.EsAdminPlataforma(HttpContext.User);
                     ViewBag.SedeIDActual = sedeIDActual;
                     ViewBag.NombreSedeActual = nombreSedeActual;
                     ViewBag.ListaSedes = listaSedes;
@@ -140,42 +159,49 @@ namespace CASTIglesias.Controllers
 
             try
             {
-                if (nuevoSedeID < 0)
-                {
-                    return Json(new { success = false, message = "ID de sede inválido." });
-                }
-
-                string nuevoNombreSede = nuevoSedeID == 1000
-                    ? "Todas las Sedes"
-                    : ObtenerNombreSede(nuevoSedeID);
-
-                if (nuevoNombreSede == "Sede Desconocida")
-                {
-                    return Json(new { success = false, message = "Sede desconocida." });
-                }
-
-                var identity = HttpContext.User.Identity as ClaimsIdentity;
-                if (identity == null)
+                if (!HttpContext.User.Identity?.IsAuthenticated ?? true)
                 {
                     return Json(new { success = false, message = "Identidad no válida o sesión expirada." });
                 }
 
-                var claims = identity.Claims.ToList();
+                // El ID de sede llega del navegador: antes se guardaba en la cookie sin
+                // comprobar nada y cualquiera podía ponerse una sede de otra iglesia o 1000.
+                bool accesoTotal = SesionClaims.TieneAccesoATodasLasSedes(HttpContext.User);
 
-                // --- INICIO DE CAMBIO IMPORTANTE: Actualizar Claims ---
-                claims.RemoveAll(c => c.Type == "IDsede" || c.Type == "NombreSedeActual");
-                claims.Add(new Claim("IDsede", nuevoSedeID.ToString())); // Usamos IDsede como Claim Name (como está configurado)
-                claims.Add(new Claim("NombreSedeActual", nuevoNombreSede));
-                // --- FIN DE CAMBIO IMPORTANTE ---
+                if (nuevoSedeID == Sedes.TodasLasSedes)
+                {
+                    if (!accesoTotal)
+                        return Json(new { success = false, message = "No tienes acceso a todas las sedes." });
+                }
+                else
+                {
+                    // El filtro global hace que una sede de otra iglesia "no exista"
+                    if (!_negocioSedes.ExisteSedeEnIglesiaActual(nuevoSedeID))
+                        return Json(new { success = false, message = "Sede desconocida." });
 
-                var newIdentity = new ClaimsIdentity(claims, identity.AuthenticationType);
-                var newPrincipal = new ClaimsPrincipal(newIdentity);
+                    // Sin acceso total, solo se admite la sede propia (leída de la BBDD)
+                    if (!accesoTotal)
+                    {
+                        var negocioUsuarios = HttpContext.RequestServices.GetRequiredService<CN_Usuarios>();
+                        var usuario = negocioUsuarios.ObtenerUsuarioSinFiltro(SesionClaims.ObtenerIdUsuario(HttpContext.User));
+                        if (usuario == null || usuario.ID_sede != nuevoSedeID)
+                            return Json(new { success = false, message = "No tienes acceso a esa sede." });
+                    }
+                }
 
-                // Volver a firmar (esto debería actualizar la cookie de sesión)
-                await HttpContext.SignInAsync(newPrincipal);
+                string nuevoNombreSede = nuevoSedeID == Sedes.TodasLasSedes
+                    ? "Todas las Sedes"
+                    : ObtenerNombreSede(nuevoSedeID);
 
-                // Devolver la URL de retorno para que el cliente recargue la página
-                return Json(new { success = true, redirectUrl = returnUrl });
+                await SesionClaims.ReemplazarAsync(HttpContext, new Dictionary<string, string>
+                {
+                    [SesionClaims.IdSede] = nuevoSedeID.ToString(),
+                    [SesionClaims.NombreSede] = nuevoNombreSede
+                });
+
+                // Url.IsLocalUrl evita usar este endpoint para redirigir a otro dominio
+                var destino = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "/";
+                return Json(new { success = true, redirectUrl = destino });
             }
             catch (Exception ex)
             {

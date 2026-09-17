@@ -22,6 +22,11 @@ namespace CapaNegocio
         {
             return _cdSedes.ListarSedes();
         }
+        public bool ExisteSedeEnIglesiaActual(int sedeID)
+        {
+            return _cdSedes.ExisteSedeEnIglesiaActual(sedeID);
+        }
+
         //public List<Sedes> ObtenerSedePorID(int sedeID)
         //{
         //    return _cdSedes.ListarSedes();
