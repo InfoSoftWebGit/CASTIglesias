@@ -1,0 +1,91 @@
+@*
+    Menú lateral del área financiera.
+
+    Se pinta en lugar del de congregación cuando la pantalla hereda de
+    AreaFinancieraController. Solo aparecen aquí las pantallas financieras:
+    para volver al programa de siempre está el enlace del final.
+
+    Mismo patrón de grupos plegables que _MenuCongregacion: data-bs-parent
+    apuntando a #sidenavAccordion, que es lo que hace que al abrir un grupo
+    se cierre el anterior.
+
+    Las entradas marcadas como "Pronto" se irán activando conforme lleguen los
+    bloques siguientes (maestros, asistente, operaciones). Se dejan a la vista,
+    y deshabilitadas, para que se entienda qué trae el área; una entrada que
+    lleva a una página en blanco parece un fallo.
+*@
+
+                        <a class="nav-link" href="@Url.Action("Index", "Finanzas")">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
+                            @L["Panel financiero"]
+                        </a>
+
+                        <!-- BLOQUE OPERACIONES -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinOperaciones" aria-expanded="false">
+                            <div class="sb-nav-link-icon"><i class="fas fa-right-left"></i></div>
+                            @L["Operaciones"]
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseFinOperaciones" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                                    @L["Ingresos y aportaciones"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
+                                    @L["Gastos"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                            </nav>
+                        </div>
+
+                        <!-- BLOQUE CONFIGURACIÓN -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinConfiguracion" aria-expanded="false">
+                            <div class="sb-nav-link-icon"><i class="fas fa-sliders"></i></div>
+                            @L["Configuración"]
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseFinConfiguracion" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                    @L["Conceptos"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
+                                    @L["Cajas y bancos"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-piggy-bank"></i></div>
+                                    @L["Fondos"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-sitemap"></i></div>
+                                    @L["Plan de cuentas"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
+                                    @L["Ejercicios y periodos"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
+                                    @L["Terceros"]
+                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
+                                </a>
+                            </nav>
+                        </div>
+
+                        @* Salida del área. Va al final y separada, para que no se
+                           confunda con una pantalla más del menú. *@
+                        <hr class="border-secondary mx-3 my-2" />
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <div class="sb-nav-link-icon"><i class="fas fa-arrow-left"></i></div>
+                            @L["Volver al área de congregación"]
+                        </a>

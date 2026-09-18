@@ -60,6 +60,20 @@ namespace CapaNegocio
 
         public Iglesia? ObtenerIglesia(int idIglesia) => _cdPlataforma.ObtenerIglesia(idIglesia);
 
+        /// <summary>
+        /// Única puerta de entrada a "¿esta iglesia tiene el área financiera?".
+        /// </summary>
+        /// <remarks>
+        /// El área financiera se vende aparte. Todo el módulo pregunta por aquí y por
+        /// ningún otro sitio, así que cuando el dato pase a salir del plan contratado
+        /// (planes.modulos de la suscripción vigente) solo cambia este método.
+        /// </remarks>
+        public bool TieneModuloFinanzas(int idIglesia) =>
+            idIglesia > 0 && _cdPlataforma.TieneModuloFinanzas(idIglesia);
+
+        public bool CambiarModuloFinanzas(int idIglesia, bool activo) =>
+            _cdPlataforma.CambiarModuloFinanzas(idIglesia, activo);
+
         private static string? CalcularHash(string? valor)
         {
             if (string.IsNullOrEmpty(valor)) return null;

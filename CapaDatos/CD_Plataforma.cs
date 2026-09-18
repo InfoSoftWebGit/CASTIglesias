@@ -71,6 +71,30 @@ namespace CapaDatos
         }
 
         /// <summary>
+        /// Si la iglesia tiene contratada el área financiera.
+        /// </summary>
+        /// <remarks>
+        /// Se proyecta solo la columna en lugar de traer la fila entera: esto se
+        /// consulta en cada petición del área financiera.
+        /// </remarks>
+        public bool TieneModuloFinanzas(int idIglesia)
+        {
+            return _context.Iglesias
+                .AsNoTracking()
+                .Where(i => i.ID == idIglesia)
+                .Select(i => i.modulo_finanzas)
+                .FirstOrDefault();
+        }
+
+        /// <summary>Activa o desactiva el área financiera de una iglesia.</summary>
+        public bool CambiarModuloFinanzas(int idIglesia, bool activo)
+        {
+            return _context.Iglesias
+                .Where(i => i.ID == idIglesia)
+                .ExecuteUpdate(s => s.SetProperty(i => i.modulo_finanzas, activo)) > 0;
+        }
+
+        /// <summary>
         /// Cierra los accesos que el administrador tenga abiertos y abre uno nuevo.
         /// </summary>
         /// <remarks>

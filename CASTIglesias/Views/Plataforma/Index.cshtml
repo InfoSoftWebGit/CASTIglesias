@@ -46,13 +46,16 @@
                         <th>@L["Correo"]</th>
                         <th class="text-end">@L["Sedes"]</th>
                         <th>@L["Estado"]</th>
+                        @* El área financiera se vende aparte y todavía no hay pasarela:
+                           hasta entonces se contrata desde aquí. *@
+                        <th class="text-center">@L["Finanzas"]</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model.Count == 0)
                     {
-                        <tr><td colspan="6" class="text-muted">@L["No hay iglesias que coincidan."]</td></tr>
+                        <tr><td colspan="7" class="text-muted">@L["No hay iglesias que coincidan."]</td></tr>
                     }
                     @foreach (var iglesia in Model)
                     {
@@ -63,6 +66,14 @@
                             <td>@iglesia.email_contacto</td>
                             <td class="text-end">@iglesia.num_sedes</td>
                             <td><span class="badge @estado.clase">@estado.texto</span></td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input chk-finanzas" type="checkbox"
+                                           role="switch" data-id="@iglesia.ID"
+                                           title="@L["Área financiera"]"
+                                           @(iglesia.modulo_finanzas ? "checked" : "") />
+                                </div>
+                            </td>
                             <td class="text-end">
                                 <button type="button" class="btn btn-sm btn-outline-primary btn-entrar"
                                         data-id="@iglesia.ID" data-nombre="@iglesia.nombre_iglesia">
@@ -108,6 +119,49 @@
             document.getElementById("lblIglesia").textContent = boton.dataset.nombre;
             document.getElementById("txtMotivo").value = "";
             bootstrap.Modal.getOrCreateInstance(document.getElementById("modalEntrar")).show();
+        });
+    });
+
+    // Interruptor del área financiera.
+    //
+    // Esta pantalla no usa jQuery, así que el $.ajaxPrefilter del layout no le
+    // añade el token antifalsificación: hay que leerlo del campo oculto y
+    // mandarlo a mano en la cabecera.
+    const tokenAntifalsificacion = document.querySelector('input[name="__RequestVerificationToken"]');
+
+    document.querySelectorAll(".chk-finanzas").forEach(function (interruptor) {
+        interruptor.addEventListener("change", function () {
+            const activo = interruptor.checked;
+            interruptor.disabled = true;
+
+            const datos = new URLSearchParams();
+            datos.append("idIglesia", interruptor.dataset.id);
+            datos.append("activo", activo);
+
+            fetch('@Url.Action("CambiarModuloFinanzas", "Plataforma")', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "RequestVerificationToken": tokenAntifalsificacion ? tokenAntifalsificacion.value : ""
+                },
+                body: datos
+            })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+            .then(function (respuesta) {
+                if (respuesta.resultado) {
+                    Swal.fire({ icon: "success", title: respuesta.mensaje, timer: 1500, showConfirmButton: false });
+                } else {
+                    // Se devuelve el interruptor a como estaba: si no, enseñaría
+                    // un estado que no es el que hay guardado.
+                    interruptor.checked = !activo;
+                    Swal.fire(T.error, respuesta.mensaje, "error");
+                }
+            })
+            .catch(function () {
+                interruptor.checked = !activo;
+                Swal.fire(T.error, T.mErrorConexionPunto, "error");
+            })
+            .finally(function () { interruptor.disabled = false; });
         });
     });
 </script>

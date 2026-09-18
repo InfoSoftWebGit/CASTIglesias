@@ -43,6 +43,32 @@ namespace CASTIglesias.Controllers
             return View(_negocioPlataforma.ListarIglesias(buscar));
         }
 
+        /// <summary>
+        /// Activa o desactiva el área financiera de una iglesia.
+        /// </summary>
+        /// <remarks>
+        /// El área financiera se vende aparte y todavía no hay pasarela, así que
+        /// de momento la contrata el administrador de plataforma desde aquí.
+        /// Cuando el dato salga del plan contratado, esta acción desaparece.
+        /// </remarks>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CambiarModuloFinanzas(int idIglesia, bool activo)
+        {
+            if (!EsAdminVerificado()) return NotFound();
+
+            bool cambiado = _negocioPlataforma.CambiarModuloFinanzas(idIglesia, activo);
+
+            return Json(new
+            {
+                resultado = cambiado,
+                activo,
+                mensaje = cambiado
+                    ? (activo ? "Área financiera activada." : "Área financiera desactivada.")
+                    : "No se pudo cambiar el área financiera de esa iglesia."
+            });
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Entrar(int idIglesia, string? motivo)

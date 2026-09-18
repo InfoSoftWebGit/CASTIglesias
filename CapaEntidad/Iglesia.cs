@@ -32,6 +32,17 @@ namespace CapaEntidad
 
         public DateTime creado_en { get; set; }
 
+        /// <summary>
+        /// Si esta iglesia tiene contratada el área financiera, que se vende aparte.
+        /// </summary>
+        /// <remarks>
+        /// Hoy es un interruptor que activa el administrador de plataforma a mano.
+        /// Cuando exista la pasarela pasará a salir del plan contratado, y el único
+        /// sitio que hay que cambiar es CN_Plataforma.TieneModuloFinanzas: el resto
+        /// del área financiera no sabe de dónde viene el dato.
+        /// </remarks>
+        public bool modulo_finanzas { get; set; }
+
         // Número de sedes reales; se rellena en la consulta del listado
         [NotMapped]
         public int num_sedes { get; set; }

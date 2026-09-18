@@ -1,0 +1,300 @@
+@* El menú lee los permisos de la sesión, que son de CapaEntidad. En el layout
+   este using ya estaba; al mover el menú aquí hay que repetirlo. *@
+@using CapaEntidad
+
+@*
+    Menú lateral del área de congregación (el programa de siempre).
+
+    Vivía dentro de _Layout.cshtml. Se sacó aquí el 18/09/2026 al aparecer el
+    área financiera, que tiene su propio menú: así el layout solo elige entre
+    uno y otro, en vez de llevar los dos seguidos.
+
+    No se ha tocado nada del contenido, solo se ha movido de sitio.
+*@
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-bar"></i></div>
+                            @L["Dashboard"]
+                        </a>
+
+                        @{
+                            var tieneAccesoTotal = User.IsInRole("AdminGlobal") || User.IsInRole("PastorGeneral") || User.IsInRole("PastorSede");
+                            var permisosMiembro = ViewBag.PermisosMiembro as Permisos ?? new Permisos();
+                        }
+                        <!-- BLOQUE ASISTENCIA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Miembros || permisosMiembro.Visitantes || permisosMiembro.Simpatizantes || permisosMiembro.Proceso)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCongregantes" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
+                                @L["Congregantes"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseCongregantes" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Visitantes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Visitantes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-street-view">></i></div>
+                                            @L["Visitantes"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Simpatizantes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Simpatizantes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-handshake"></i></div>
+                                            @L["Simpatizantes"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Proceso)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Proceso", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-forward"></i></div>
+                                            @L["En proceso"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Miembros", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
+                                            @L["Miembros"]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                        <!-- BLOQUE DISCIPULADO -->
+                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Hombres || permisosMiembro.Mujeres || permisosMiembro.Ninos || permisosMiembro.Miembros)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDiscipulado" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                @L["Discipulado"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseDiscipulado" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Familias)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Familias", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fa fa-heart"></i></div>
+                                            @L["Familias"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Matrimonios)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Matrimonios", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-ring"></i></div>
+                                            @L["Matrimonios"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Jovenes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
+                                            @L["Jóvenes"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Hombres)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Hombres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-person"></i></div>
+                                            @L["Hombres"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Mujeres)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Mujeres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-person-dress"></i></div>
+                                            @L["Mujeres"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ninos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Ninos", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-child"></i></div>
+                                            @L["Niños"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Lideres", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
+                                            @L["Líderes"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Seguimiento", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                                            @L["Seguimiento"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("DetallesSeguimiento", "Congregantes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-search"></i></div>
+                                            @L["Detalle de seguimiento"]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                        <!-- BLOQUE MANTENIMIENTO -->
+                        @if (tieneAccesoTotal || permisosMiembro.Zonas || permisosMiembro.Grupos || permisosMiembro.Ministerio)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseMantenimiento" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-cogs"></i></div>
+                                @L["Organización Pastoral"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseMantenimiento" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Zonas)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Zonas", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                            @L["Zonas"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Grupos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Grupos", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+                                            @L["Grupos"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ministerio)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Ministerios", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+                                            @L["Ministerios"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseServicios" aria-expanded="false">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-hands-helping"></i></div>
+                                            @L["Servicios"]
+                                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                                        </a>
+                                        <div class="collapse" id="collapseServicios">
+                                            <nav class="sb-sidenav-menu-nested nav" id="serviciosSubmenu" data-url-servicios="@Url.Action("Servicios", "Mantenedor")" data-url-listar="@Url.Action("ListarMinisterios", "Mantenedor")">
+                                                <span class="nav-link collapsed-sub-item text-white-50" id="serviciosCargando" style="font-size: 0.85rem;">@L["Cargando…"]</span>
+                                            </nav>
+                                        </div>
+                                    }
+                                </nav>
+                            </div>
+                        }
+
+                        <!-- BLOQUE ECONOMÍA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Diezmos || permisosMiembro.Conceptos || permisosMiembro.Gastos)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseEconomia" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                                @L["Finanzas"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseEconomia" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Diezmos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
+                                            @L["Diezmos"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Conceptos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Conceptos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
+                                            @L["Conceptos"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Gastos)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "Economia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                            @L["Gastos"]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+
+                        <!-- BLOQUE ASISTENCIA -->
+                        @if (tieneAccesoTotal || permisosMiembro.Asistencia)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAsistencia" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
+                                @L["Control"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseAsistencia" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Asistencia)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Asistencia", "Asistencia")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
+                                            @L["Asistencia"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Cultos", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
+                                            @L["Cultos y Servicios"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Calendarios", "Calendario")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
+                                            @L["Calendario de Servicios"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "CalendarioAnual")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-calendar"></i></div>
+                                            @L["Calendario Anual"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "Sala")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-door-open"></i></div>
+                                            @L["Salas"]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+                        @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                        {
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAjustes" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas fa-cog"></i></div>
+                                @L["Configuración de la aplicación"]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="collapseAjustes" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @if (tieneAccesoTotal || permisosMiembro.Usuarios)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Usuarios", "Mantenedor")">
+                                            <div class="sb-nav-link-icon"><i class="fa-solid fa-handshake"></i></div>
+                                            @L["Usuarios"]
+                                        </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Diezmos", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
+                                            @L["Diezmos y Miembros"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Jovenes", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-user-friends"></i></div>
+                                            @L["Jóvenes"]
+                                        </a>
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Servicios", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
+                                            @L["Servicios"]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
+
+@*
+    Entrada al área financiera. Solo se pinta si la iglesia la tiene contratada;
+    quien de verdad corta el paso es AreaFinancieraController, en cada petición.
+    Va al final y separada porque no es una pantalla más: cambia de área entera.
+*@
+@if (ViewBag.TieneModuloFinanzas == true)
+{
+    <hr class="border-secondary mx-3 my-2" />
+    <a class="nav-link" href="@Url.Action("Index", "Finanzas")">
+        <div class="sb-nav-link-icon"><i class="fas fa-coins"></i></div>
+        @L["Área financiera"]
+    </a>
+}

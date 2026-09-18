@@ -1716,4 +1716,61 @@
   <data name="Añadir miembro a {0}" xml:space="preserve">
     <value>Add member to {0}</value>
   </data>
+  <data name="Área financiera" xml:space="preserve">
+    <value>Financial area</value>
+  </data>
+  <data name="Panel financiero" xml:space="preserve">
+    <value>Financial dashboard</value>
+  </data>
+  <data name="Volver al área de congregación" xml:space="preserve">
+    <value>Back to the congregation area</value>
+  </data>
+  <data name="Operaciones" xml:space="preserve">
+    <value>Transactions</value>
+  </data>
+  <data name="Ingresos y aportaciones" xml:space="preserve">
+    <value>Income and contributions</value>
+  </data>
+  <data name="Cajas y bancos" xml:space="preserve">
+    <value>Cash and banks</value>
+  </data>
+  <data name="Fondos" xml:space="preserve">
+    <value>Funds</value>
+  </data>
+  <data name="Plan de cuentas" xml:space="preserve">
+    <value>Chart of accounts</value>
+  </data>
+  <data name="Ejercicios y periodos" xml:space="preserve">
+    <value>Financial years and periods</value>
+  </data>
+  <data name="Terceros" xml:space="preserve">
+    <value>Third parties</value>
+  </data>
+  <data name="Pronto" xml:space="preserve">
+    <value>Soon</value>
+  </data>
+  <data name="Resumen financiero" xml:space="preserve">
+    <value>Financial summary</value>
+  </data>
+  <data name="Importante" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="El área financiera se está construyendo." xml:space="preserve">
+    <value>The financial area is under construction.</value>
+  </data>
+  <data name="Aquí aparecerán los ingresos y gastos del ejercicio, los saldos de cada caja y banco, el reparto por fondo y la comparación con el presupuesto. De momento no hay datos que mostrar porque las pantallas de registro aún no están disponibles." xml:space="preserve">
+    <value>This is where the income and expenses for the year, the balance of each cash account and bank, the breakdown by fund and the comparison against the budget will appear. There is nothing to show yet because the data-entry screens are not available.</value>
+  </data>
+  <data name="Las pantallas de Diezmos, Gastos y Conceptos del área de congregación siguen funcionando por separado. Lo que se registre allí no forma parte de la contabilidad ni aparece en este panel." xml:space="preserve">
+    <value>The Tithes, Expenses and Concepts screens in the congregation area still work separately. Anything recorded there is not part of the accounts and does not appear on this dashboard.</value>
+  </data>
+  <data name="Lo que registres en esta pantalla no forma parte de la contabilidad." xml:space="preserve">
+    <value>Anything you record on this screen is not part of the accounts.</value>
+  </data>
+  <data name="Ir al área financiera" xml:space="preserve">
+    <value>Go to the financial area</value>
+  </data>
+  <data name="Tu iglesia no tiene contratada el área financiera." xml:space="preserve">
+    <value>Your church has not subscribed to the financial area.</value>
+  </data>
 </root>

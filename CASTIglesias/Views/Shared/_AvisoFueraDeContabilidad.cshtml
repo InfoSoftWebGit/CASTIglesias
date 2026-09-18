@@ -1,0 +1,24 @@
+@*
+    Aviso para las pantallas de Diezmos, Gastos y Conceptos del área de
+    congregación.
+
+    Se decidió el 18/09/2026 que las dos formas de registrar conviven sin
+    sincronizarse. La consecuencia es que lo apuntado aquí no llega a la
+    contabilidad, y eso hay que decirlo donde se está apuntando: si no, el
+    arqueo no cuadra y nadie sabe por qué.
+
+    Solo se muestra a quien tiene el área financiera contratada. Para el resto
+    no existe tal distinción y el aviso solo confundiría.
+*@
+@if (ViewBag.TieneModuloFinanzas == true)
+{
+    <div class="alert alert-warning d-flex align-items-start" role="alert">
+        <i class="fas fa-triangle-exclamation me-2 mt-1"></i>
+        <div>
+            @L["Lo que registres en esta pantalla no forma parte de la contabilidad."]
+            <a href="@Url.Action("Index", "Finanzas")" class="alert-link ms-1">
+                @L["Ir al área financiera"]
+            </a>
+        </div>
+    </div>
+}

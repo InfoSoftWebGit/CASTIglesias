@@ -190,6 +190,15 @@ namespace CASTIglesias.Controllers
                     ViewBag.PermisosMiembro = permisosUsuario ?? new Permisos();
                     // Lo reutiliza [RequierePermiso], que se ejecuta después de este método
                     HttpContext.Items[Filters.RequierePermisoAttribute.ClaveItems] = ViewBag.PermisosMiembro;
+
+                    // El botón "Área financiera" solo se pinta si la iglesia la tiene
+                    // contratada. Es presentación: quien de verdad corta el paso es
+                    // AreaFinancieraController, que lo comprueba en cada petición.
+                    // Se pide al contenedor para no cambiar el constructor de todos
+                    // los controladores, igual que CN_UsuarioSedes.
+                    var negocioPlataforma = HttpContext.RequestServices.GetRequiredService<CN_Plataforma>();
+                    ViewBag.TieneModuloFinanzas =
+                        negocioPlataforma.TieneModuloFinanzas(SesionClaims.ObtenerIdIglesia(HttpContext.User));
                 }
                 catch (UnauthorizedAccessException)
                 {

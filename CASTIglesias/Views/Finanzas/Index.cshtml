@@ -1,0 +1,50 @@
+@{
+    ViewBag.Title = L["Panel financiero"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item active">@L["Panel financiero"]</li>
+</ol>
+
+@*
+    Panel del área financiera.
+
+    Está vacío a propósito: las gráficas del documento funcional se alimentan de
+    ingresos, gastos, saldos, presupuestos y asientos, y ninguna de esas tablas
+    tiene datos todavía. Se irá llenando conforme lleguen los bloques siguientes,
+    en vez de enseñar cifras inventadas que parecerían reales.
+*@
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-pie me-1"></i> @L["Resumen financiero"]
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info d-flex align-items-start mb-0">
+            <i class="fas fa-info-circle me-2 mt-1"></i>
+            <div>
+                <strong>@L["El área financiera se está construyendo."]</strong>
+                <p class="mb-0 mt-1">
+                    @L["Aquí aparecerán los ingresos y gastos del ejercicio, los saldos de cada caja y banco, el reparto por fondo y la comparación con el presupuesto. De momento no hay datos que mostrar porque las pantallas de registro aún no están disponibles."]
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*
+    Aviso de convivencia. Mientras existan las dos formas de registrar, lo que se
+    apunte en Diezmos y Gastos del área de congregación NO llega hasta aquí.
+    Conviene decirlo en el propio panel, que es donde alguien va a buscar el total
+    y no le va a cuadrar.
+*@
+<div class="card mb-4 border-warning">
+    <div class="card-header bg-warning-subtle">
+        <i class="fas fa-triangle-exclamation me-1"></i> @L["Importante"]
+    </div>
+    <div class="card-body">
+        <p class="mb-0">
+            @L["Las pantallas de Diezmos, Gastos y Conceptos del área de congregación siguen funcionando por separado. Lo que se registre allí no forma parte de la contabilidad ni aparece en este panel."]
+        </p>
+    </div>
+</div>
