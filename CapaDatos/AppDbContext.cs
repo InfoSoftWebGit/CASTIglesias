@@ -1,4 +1,5 @@
 using CapaEntidad;
+using CapaEntidad.Financiero;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -57,6 +58,61 @@ namespace CapaDatos
         public DbSet<AccesoPlataforma> AccesosPlataforma { get; set; }
         public DbSet<UsuarioSede> UsuarioSedes { get; set; }
 
+        // ── Módulo financiero ────────────────────────────────────────────────
+        // Las 48 tablas del área financiera. Las 44 que tienen organization_id
+        // implementan ITieneIglesia, así que el filtro global por iglesia se les
+        // aplica solo en OnModelCreating, sin listarlas aquí.
+        // Las cuatro restantes (Permission, RolePermission, AccountingTemplate y
+        // AccountingTemplateAccount) son catálogo común a todas las iglesias.
+        public DbSet<FiscalYear> FiscalYears { get; set; }
+        public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
+        public DbSet<DocumentSequence> DocumentSequences { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<LedgerAccount> LedgerAccounts { get; set; }
+        public DbSet<AccountingTemplate> AccountingTemplates { get; set; }
+        public DbSet<AccountingTemplateAccount> AccountingTemplateAccounts { get; set; }
+        public DbSet<Fund> Funds { get; set; }
+        public DbSet<FundSiteLink> FundSiteLinks { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+        public DbSet<FinancialConcept> FinancialConcepts { get; set; }
+        public DbSet<PostingRuleSet> PostingRuleSets { get; set; }
+        public DbSet<PostingRule> PostingRules { get; set; }
+        public DbSet<Party> Parties { get; set; }
+        public DbSet<DonorProfile> DonorProfiles { get; set; }
+        public DbSet<TreasuryAccount> TreasuryAccounts { get; set; }
+        public DbSet<JournalEntry> JournalEntries { get; set; }
+        public DbSet<JournalEntryLine> JournalEntryLines { get; set; }
+        public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+        public DbSet<FinancialTransactionLine> FinancialTransactionLines { get; set; }
+        public DbSet<ReversalRequest> ReversalRequests { get; set; }
+        public DbSet<TreasuryMovement> TreasuryMovements { get; set; }
+        public DbSet<CashSession> CashSessions { get; set; }
+        public DbSet<CashCountLine> CashCountLines { get; set; }
+        public DbSet<FundMovement> FundMovements { get; set; }
+        public DbSet<Transfer> Transfers { get; set; }
+        public DbSet<Payable> Payables { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentAllocation> PaymentAllocations { get; set; }
+        public DbSet<Budget> Budgets { get; set; }
+        public DbSet<BudgetLine> BudgetLines { get; set; }
+        public DbSet<BudgetCommitment> BudgetCommitments { get; set; }
+        public DbSet<ApprovalWorkflow> ApprovalWorkflows { get; set; }
+        public DbSet<ApprovalRule> ApprovalRules { get; set; }
+        public DbSet<ApprovalRequest> ApprovalRequests { get; set; }
+        public DbSet<ApprovalDecision> ApprovalDecisions { get; set; }
+        public DbSet<BankStatement> BankStatements { get; set; }
+        public DbSet<BankStatementLine> BankStatementLines { get; set; }
+        public DbSet<ReconciliationMatch> ReconciliationMatches { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<DocumentLink> DocumentLinks { get; set; }
+        public DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
+        public DbSet<AuditEvent> AuditEvents { get; set; }
+        public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<VistaUsuariosPermisos>()
@@ -71,6 +127,16 @@ namespace CapaDatos
                       .WithOne()
                       .HasForeignKey<Permisos>(p => p.ID_usuario);
             });
+
+            // Las tres tablas de enlace del módulo financiero no tienen columna id:
+            // su clave es la pareja que relacionan. EF no lo adivina y, sin esto, el
+            // modelo ni siquiera se construye.
+            modelBuilder.Entity<RolePermission>()
+                .HasKey(e => new { e.role_id, e.permission_id });
+            modelBuilder.Entity<FundSiteLink>()
+                .HasKey(e => new { e.fund_id, e.site_id });
+            modelBuilder.Entity<PaymentAllocation>()
+                .HasKey(e => new { e.payment_id, e.payable_id });
 
             // Filtro global por iglesia en todas las entidades que implementan ITieneIglesia.
             // Se recorre el modelo en vez de listar entidades a mano para que una tabla

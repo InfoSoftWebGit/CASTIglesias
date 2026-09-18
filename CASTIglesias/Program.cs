@@ -108,6 +108,18 @@ builder.Services.AddScoped<CN_Plataforma>();
 builder.Services.AddScoped<CD_UsuarioSedes>();
 builder.Services.AddScoped<CN_UsuarioSedes>();
 
+// Área financiera
+builder.Services.AddScoped<CD_Ejercicios>();
+builder.Services.AddScoped<CN_Ejercicios>();
+builder.Services.AddScoped<CD_PlanCuentas>();
+builder.Services.AddScoped<CN_PlanCuentas>();
+builder.Services.AddScoped<CD_Fondos>();
+builder.Services.AddScoped<CN_Fondos>();
+builder.Services.AddScoped<CD_Tesoreria>();
+builder.Services.AddScoped<CN_Tesoreria>();
+builder.Services.AddScoped<CD_ConceptosFinancieros>();
+builder.Services.AddScoped<CN_ConceptosFinancieros>();
+
 // Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
 // y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.
 builder.Services.AddHttpContextAccessor();

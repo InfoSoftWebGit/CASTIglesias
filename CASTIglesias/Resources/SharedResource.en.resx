@@ -1773,4 +1773,343 @@
   <data name="Tu iglesia no tiene contratada el área financiera." xml:space="preserve">
     <value>Your church has not subscribed to the financial area.</value>
   </data>
+  <data name="Un ejercicio es el año contable. Se crea planificado, se le generan los periodos (normalmente los meses) y después se abre. Solo se puede registrar en un ejercicio abierto y dentro de un periodo abierto." xml:space="preserve">
+    <value>A financial year is the accounting year. It is created as planned, its periods (usually the months) are generated, and then it is opened. Entries can only be recorded in an open year and within an open period.</value>
+  </data>
+  <data name="Ejercicios" xml:space="preserve">
+    <value>Financial years</value>
+  </data>
+  <data name="Nuevo ejercicio" xml:space="preserve">
+    <value>New financial year</value>
+  </data>
+  <data name="Editar ejercicio" xml:space="preserve">
+    <value>Edit financial year</value>
+  </data>
+  <data name="Código" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="Fin" xml:space="preserve">
+    <value>End</value>
+  </data>
+  <data name="Periodos de" xml:space="preserve">
+    <value>Periods of</value>
+  </data>
+  <data name="Nº" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="Ver periodos" xml:space="preserve">
+    <value>View periods</value>
+  </data>
+  <data name="Generar periodos" xml:space="preserve">
+    <value>Generate periods</value>
+  </data>
+  <data name="Abrir" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Planificado" xml:space="preserve">
+    <value>Planned</value>
+  </data>
+  <data name="Abierto" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Cerrando" xml:space="preserve">
+    <value>Closing</value>
+  </data>
+  <data name="Cerrado" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="El nombre con el que se identifica el año contable, por ejemplo 2026." xml:space="preserve">
+    <value>The name that identifies the accounting year, for example 2026.</value>
+  </data>
+  <data name="El código del ejercicio es obligatorio." xml:space="preserve">
+    <value>The financial year code is required.</value>
+  </data>
+  <data name="Las fechas de inicio y fin son obligatorias." xml:space="preserve">
+    <value>The start and end dates are required.</value>
+  </data>
+  <data name="¿Eliminar este ejercicio?" xml:space="preserve">
+    <value>Delete this financial year?</value>
+  </data>
+  <data name="Se eliminarán también sus periodos." xml:space="preserve">
+    <value>Its periods will be deleted too.</value>
+  </data>
+  <data name="¿Cerrar este ejercicio?" xml:space="preserve">
+    <value>Close this financial year?</value>
+  </data>
+  <data name="Un ejercicio cerrado no se puede modificar." xml:space="preserve">
+    <value>A closed financial year cannot be changed.</value>
+  </data>
+  <data name="¿Cerrar este periodo?" xml:space="preserve">
+    <value>Close this period?</value>
+  </data>
+  <data name="El plan de cuentas es la lista de cuentas contables donde se anota cada movimiento. Las cuentas que agrupan a otras no reciben apuntes: solo lo hacen las cuentas de último nivel." xml:space="preserve">
+    <value>The chart of accounts is the list of ledger accounts where every movement is recorded. Accounts that group others do not take entries: only the lowest-level accounts do.</value>
+  </data>
+  <data name="Importante:" xml:space="preserve">
+    <value>Important:</value>
+  </data>
+  <data name="Qué cuenta corresponde a cada cosa lo decide tu asesoría, no el programa." xml:space="preserve">
+    <value>Which account each item belongs to is decided by your accountant, not by the software.</value>
+  </data>
+  <data name="Nueva cuenta" xml:space="preserve">
+    <value>New account</value>
+  </data>
+  <data name="Editar cuenta" xml:space="preserve">
+    <value>Edit account</value>
+  </data>
+  <data name="Saldo normal" xml:space="preserve">
+    <value>Normal balance</value>
+  </data>
+  <data name="Admite apuntes" xml:space="preserve">
+    <value>Takes entries</value>
+  </data>
+  <data name="Cuenta superior" xml:space="preserve">
+    <value>Parent account</value>
+  </data>
+  <data name="— Ninguna (cuenta raíz) —" xml:space="preserve">
+    <value>— None (top-level account) —</value>
+  </data>
+  <data name="Si eliges una, esa cuenta dejará de admitir apuntes." xml:space="preserve">
+    <value>If you pick one, that account will stop taking entries.</value>
+  </data>
+  <data name="Pasivo" xml:space="preserve">
+    <value>Liability</value>
+  </data>
+  <data name="Patrimonio neto" xml:space="preserve">
+    <value>Equity</value>
+  </data>
+  <data name="Cuenta de orden" xml:space="preserve">
+    <value>Memorandum account</value>
+  </data>
+  <data name="Deudor" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="Acreedor" xml:space="preserve">
+    <value>Credit</value>
+  </data>
+  <data name="Activo y gastos suelen ser deudores; pasivo, patrimonio e ingresos, acreedores." xml:space="preserve">
+    <value>Assets and expenses are usually debit; liabilities, equity and income are usually credit.</value>
+  </data>
+  <data name="Exigir al usar esta cuenta:" xml:space="preserve">
+    <value>Require when using this account:</value>
+  </data>
+  <data name="Un tercero (donante o proveedor)" xml:space="preserve">
+    <value>A third party (donor or supplier)</value>
+  </data>
+  <data name="Una sede" xml:space="preserve">
+    <value>A campus</value>
+  </data>
+  <data name="Un fondo" xml:space="preserve">
+    <value>A fund</value>
+  </data>
+  <data name="El código de la cuenta es obligatorio." xml:space="preserve">
+    <value>The account code is required.</value>
+  </data>
+  <data name="El nombre de la cuenta es obligatorio." xml:space="preserve">
+    <value>The account name is required.</value>
+  </data>
+  <data name="¿Eliminar esta cuenta?" xml:space="preserve">
+    <value>Delete this account?</value>
+  </data>
+  <data name="Activa" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Inactiva" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Un fondo es dinero con un destino concreto: lo donado para el comedor social no se puede gastar en otra cosa." xml:space="preserve">
+    <value>A fund is money with a specific purpose: what was donated for the soup kitchen cannot be spent on anything else.</value>
+  </data>
+  <data name="Un fondo no es una cuenta bancaria." xml:space="preserve">
+    <value>A fund is not a bank account.</value>
+  </data>
+  <data name="Puedes tener 10.000 € en el banco y solo 2.000 disponibles para gastos generales, porque el resto está comprometido con fondos." xml:space="preserve">
+    <value>You can have 10,000 EUR in the bank and only 2,000 available for general expenses, because the rest is committed to funds.</value>
+  </data>
+  <data name="Nuevo fondo" xml:space="preserve">
+    <value>New fund</value>
+  </data>
+  <data name="Editar fondo" xml:space="preserve">
+    <value>Edit fund</value>
+  </data>
+  <data name="Alcance" xml:space="preserve">
+    <value>Scope</value>
+  </data>
+  <data name="Si se queda sin saldo" xml:space="preserve">
+    <value>If it runs out of money</value>
+  </data>
+  <data name="Para qué es este fondo" xml:space="preserve">
+    <value>What this fund is for</value>
+  </data>
+  <data name="De toda la iglesia" xml:space="preserve">
+    <value>Whole church</value>
+  </data>
+  <data name="De una sede" xml:space="preserve">
+    <value>Single campus</value>
+  </data>
+  <data name="Compartido por varias sedes" xml:space="preserve">
+    <value>Shared by several campuses</value>
+  </data>
+  <data name="Sedes que pueden usarlo" xml:space="preserve">
+    <value>Campuses that can use it</value>
+  </data>
+  <data name="Avisar, pero dejar seguir" xml:space="preserve">
+    <value>Warn, but allow</value>
+  </data>
+  <data name="Impedir el gasto" xml:space="preserve">
+    <value>Block the expense</value>
+  </data>
+  <data name="Pedir una aprobación" xml:space="preserve">
+    <value>Require approval</value>
+  </data>
+  <data name="Permitir sin avisar" xml:space="preserve">
+    <value>Allow without warning</value>
+  </data>
+  <data name="Opcional" xml:space="preserve">
+    <value>Optional</value>
+  </data>
+  <data name="El código del fondo es obligatorio." xml:space="preserve">
+    <value>The fund code is required.</value>
+  </data>
+  <data name="El nombre del fondo es obligatorio." xml:space="preserve">
+    <value>The fund name is required.</value>
+  </data>
+  <data name="La fecha de inicio es obligatoria." xml:space="preserve">
+    <value>The start date is required.</value>
+  </data>
+  <data name="¿Eliminar este fondo?" xml:space="preserve">
+    <value>Delete this fund?</value>
+  </data>
+  <data name="Inactivo" xml:space="preserve">
+    <value>Inactive</value>
+  </data>
+  <data name="Aquí se declara dónde está el dinero: la caja de cada sede, las cuentas bancarias, el datáfono. Cada una se enlaza con una cuenta contable, que es el puente con la contabilidad." xml:space="preserve">
+    <value>This is where you declare where the money is: each campus cash box, the bank accounts, the card reader. Each one links to a ledger account, which is the bridge to the accounts.</value>
+  </data>
+  <data name="Todavía no hay cuentas contables que admitan apuntes, así que no se puede crear ninguna caja." xml:space="preserve">
+    <value>There are no ledger accounts that take entries yet, so no cash account can be created.</value>
+  </data>
+  <data name="Ir al plan de cuentas" xml:space="preserve">
+    <value>Go to the chart of accounts</value>
+  </data>
+  <data name="Nueva caja o banco" xml:space="preserve">
+    <value>New cash or bank account</value>
+  </data>
+  <data name="Editar caja o banco" xml:space="preserve">
+    <value>Edit cash or bank account</value>
+  </data>
+  <data name="Cuenta contable" xml:space="preserve">
+    <value>Ledger account</value>
+  </data>
+  <data name="Caja (efectivo)" xml:space="preserve">
+    <value>Cash</value>
+  </data>
+  <data name="Cuenta bancaria" xml:space="preserve">
+    <value>Bank account</value>
+  </data>
+  <data name="Tarjeta" xml:space="preserve">
+    <value>Card</value>
+  </data>
+  <data name="Pasarela de pago" xml:space="preserve">
+    <value>Payment gateway</value>
+  </data>
+  <data name="— De toda la iglesia —" xml:space="preserve">
+    <value>— Whole church —</value>
+  </data>
+  <data name="Solo aparecen las cuentas que admiten apuntes." xml:space="preserve">
+    <value>Only accounts that take entries are listed.</value>
+  </data>
+  <data name="Banco" xml:space="preserve">
+    <value>Bank</value>
+  </data>
+  <data name="El IBAN todavía no se puede guardar: falta el cifrado de datos bancarios." xml:space="preserve">
+    <value>The IBAN cannot be stored yet: bank data encryption is still pending.</value>
+  </data>
+  <data name="Permitir que quede en negativo" xml:space="preserve">
+    <value>Allow a negative balance</value>
+  </data>
+  <data name="Hay que indicar a qué cuenta contable corresponde." xml:space="preserve">
+    <value>You must indicate which ledger account it maps to.</value>
+  </data>
+  <data name="¿Eliminar esta caja o banco?" xml:space="preserve">
+    <value>Delete this cash or bank account?</value>
+  </data>
+  <data name="El concepto es lo que elige quien registra el movimiento: «Diezmo», «Ofrenda misionera», «Luz». Detrás, cada concepto sabe a qué cuenta contable y a qué fondo va, de modo que el usuario no necesita saber contabilidad." xml:space="preserve">
+    <value>The concept is what the person recording the movement picks: &quot;Tithe&quot;, &quot;Mission offering&quot;, &quot;Electricity&quot;. Behind the scenes each concept knows which ledger account and fund it belongs to, so the user does not need to know accounting.</value>
+  </data>
+  <data name="Nuevo concepto" xml:space="preserve">
+    <value>New concept</value>
+  </data>
+  <data name="Editar concepto" xml:space="preserve">
+    <value>Edit concept</value>
+  </data>
+  <data name="Aportación (diezmo, ofrenda)" xml:space="preserve">
+    <value>Contribution (tithe, offering)</value>
+  </data>
+  <data name="Otro ingreso" xml:space="preserve">
+    <value>Other income</value>
+  </data>
+  <data name="Transferencia" xml:space="preserve">
+    <value>Transfer</value>
+  </data>
+  <data name="Ajuste" xml:space="preserve">
+    <value>Adjustment</value>
+  </data>
+  <data name="Devolución" xml:space="preserve">
+    <value>Refund</value>
+  </data>
+  <data name="Fondo por defecto" xml:space="preserve">
+    <value>Default fund</value>
+  </data>
+  <data name="— Ninguno —" xml:space="preserve">
+    <value>— None —</value>
+  </data>
+  <data name="— Ninguna —" xml:space="preserve">
+    <value>— None —</value>
+  </data>
+  <data name="Cuenta de ingresos" xml:space="preserve">
+    <value>Income account</value>
+  </data>
+  <data name="Cuenta de gastos" xml:space="preserve">
+    <value>Expense account</value>
+  </data>
+  <data name="Exigir identificar al donante" xml:space="preserve">
+    <value>Require identifying the donor</value>
+  </data>
+  <data name="Permitir aportaciones anónimas" xml:space="preserve">
+    <value>Allow anonymous contributions</value>
+  </data>
+  <data name="Una aportación anónima cuenta para la caja y la contabilidad, pero no puede generar certificado fiscal." xml:space="preserve">
+    <value>An anonymous contribution counts towards cash and accounting, but cannot produce a tax certificate.</value>
+  </data>
+  <data name="Exigir adjuntar un justificante" xml:space="preserve">
+    <value>Require attaching a receipt</value>
+  </data>
+  <data name="Exigir aprobación antes de contabilizar" xml:space="preserve">
+    <value>Require approval before posting</value>
+  </data>
+  <data name="El código del concepto es obligatorio." xml:space="preserve">
+    <value>The concept code is required.</value>
+  </data>
+  <data name="El nombre del concepto es obligatorio." xml:space="preserve">
+    <value>The concept name is required.</value>
+  </data>
+  <data name="¿Eliminar este concepto?" xml:space="preserve">
+    <value>Delete this concept?</value>
+  </data>
+  <data name="Fondo" xml:space="preserve">
+    <value>Fund</value>
+  </data>
+  <data name="Editar" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Gasto" xml:space="preserve">
+    <value>Expense</value>
+  </data>
+  <data name="Ingresos" xml:space="preserve">
+    <value>Income</value>
+  </data>
+  <data name="Configuración" xml:space="preserve">
+    <value>Settings</value>
+  </data>
 </root>

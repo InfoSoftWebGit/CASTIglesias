@@ -1,0 +1,360 @@
+@using System.Text.Json
+@{
+    ViewBag.Title = L["Ejercicios y periodos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Ejercicios y periodos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Un ejercicio es el año contable. Se crea planificado, se le generan los periodos (normalmente los meses) y después se abre. Solo se puede registrar en un ejercicio abierto y dentro de un periodo abierto."]
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-calendar-check me-1"></i> @L["Ejercicios"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalEjercicio(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nuevo ejercicio"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaEjercicios" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Inicio"]</th>
+                    <th>@L["Fin"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@* Periodos del ejercicio elegido. Oculto hasta que se pulsa "Ver periodos": sin
+   ejercicio seleccionado no hay nada que enseñar. *@
+<div class="card mb-4 d-none" id="tarjetaPeriodos">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-calendar-days me-1"></i> @L["Periodos de"] <span id="lblEjercicioPeriodos" class="fw-bold"></span></span>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="cerrarPeriodos()">
+            <i class="fas fa-xmark me-1"></i> @L["Cerrar"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaPeriodos" class="table table-bordered table-striped border-top mb-0" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Nº"]</th>
+                    <th>@L["Inicio"]</th>
+                    <th>@L["Fin"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL EJERCICIO -->
+<div class="modal fade" id="modalEjercicio" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalEjercicio">@L["Nuevo ejercicio"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdEjercicio" value="0" />
+                <div class="mb-3">
+                    <label for="txtCodigo" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="txtCodigo" maxlength="20" placeholder="2026" autocomplete="off" />
+                    <div class="form-text">@L["El nombre con el que se identifica el año contable, por ejemplo 2026."]</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtInicio" class="form-label">@L["Inicio"] <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtInicio" />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtFin" class="form-label">@L["Fin"] <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFin" />
+                    </div>
+                </div>
+                <div id="errorEjercicio" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEjercicio()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        // Igual que en el resto de pantallas: se amplía window.T, nunca se redeclara
+        window.T = Object.assign(window.T || {}, {
+            codigoObligatorio:  @Json.Serialize(L["El código del ejercicio es obligatorio."].Value),
+            fechasObligatorias: @Json.Serialize(L["Las fechas de inicio y fin son obligatorias."].Value),
+            confirmarBorrar:    @Json.Serialize(L["¿Eliminar este ejercicio?"].Value),
+            avisoBorrar:        @Json.Serialize(L["Se eliminarán también sus periodos."].Value),
+            confirmarCerrar:    @Json.Serialize(L["¿Cerrar este ejercicio?"].Value),
+            avisoCerrar:        @Json.Serialize(L["Un ejercicio cerrado no se puede modificar."].Value),
+            confirmarCerrarPeriodo: @Json.Serialize(L["¿Cerrar este periodo?"].Value),
+            editarEjercicio:    @Json.Serialize(L["Editar ejercicio"].Value),
+            nuevoEjercicio:     @Json.Serialize(L["Nuevo ejercicio"].Value),
+            verPeriodos:        @Json.Serialize(L["Ver periodos"].Value),
+            generarPeriodos:    @Json.Serialize(L["Generar periodos"].Value),
+            abrir:              @Json.Serialize(L["Abrir"].Value),
+            cerrar:             @Json.Serialize(L["Cerrar"].Value),
+            editar:             @Json.Serialize(L["Editar"].Value),
+            eliminar:           @Json.Serialize(L["Eliminar"].Value),
+            periodosDe:         @Json.Serialize(L["Periodos de"].Value)
+        });
+
+        // Los estados llegan en inglés desde la BBDD (es el ENUM). Se traducen solo
+        // al pintarlos: el valor guardado nunca cambia.
+        const ESTADOS = {
+            planned: { texto: @Json.Serialize(L["Planificado"].Value), clase: "bg-secondary" },
+            open:    { texto: @Json.Serialize(L["Abierto"].Value),     clase: "bg-success" },
+            closing: { texto: @Json.Serialize(L["Cerrando"].Value),    clase: "bg-warning text-dark" },
+            closed:  { texto: @Json.Serialize(L["Cerrado"].Value),     clase: "bg-dark" }
+        };
+
+        let tablaEjercicios, tablaPeriodos, idEjercicioActual = 0;
+
+        function pintarEstado(valor) {
+            const estado = ESTADOS[valor] || { texto: valor || "", clase: "bg-light text-dark" };
+            return '<span class="badge ' + estado.clase + '">' + estado.texto + '</span>';
+        }
+
+        // Las fechas llegan como ISO; se muestran en el formato del idioma activo
+        function pintarFecha(valor) {
+            if (!valor) return "";
+            const f = new Date(valor);
+            return isNaN(f) ? "" : f.toLocaleDateString();
+        }
+
+        $(document).ready(function () {
+            tablaEjercicios = $('#tablaEjercicios').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasEjercicios")', dataSrc: 'data' },
+                columns: [
+                    { data: 'code' },
+                    { data: 'start_date', render: pintarFecha },
+                    { data: 'end_date', render: pintarFecha },
+                    { data: 'status', render: pintarEstado },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            const cerrado = fila.status === 'closed';
+                            let botones = '<div class="d-flex justify-content-center gap-1 flex-wrap">';
+
+                            botones += '<button class="btn btn-sm btn-outline-primary btn-periodos" data-id="' + fila.id +
+                                       '" data-code="' + fila.code + '" title="' + T.verPeriodos + '"><i class="fas fa-calendar-days"></i></button>';
+
+                            if (!fila.tienePeriodos && !cerrado) {
+                                botones += '<button class="btn btn-sm btn-outline-info btn-generar" data-id="' + fila.id +
+                                           '" title="' + T.generarPeriodos + '"><i class="fas fa-wand-magic-sparkles"></i></button>';
+                            }
+                            if (fila.status === 'planned') {
+                                botones += '<button class="btn btn-sm btn-outline-success btn-abrir" data-id="' + fila.id +
+                                           '" title="' + T.abrir + '"><i class="fas fa-lock-open"></i></button>';
+                            }
+                            if (fila.status === 'open') {
+                                botones += '<button class="btn btn-sm btn-outline-warning btn-cerrar" data-id="' + fila.id +
+                                           '" title="' + T.cerrar + '"><i class="fas fa-lock"></i></button>';
+                            }
+                            if (!cerrado) {
+                                botones += '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id +
+                                           '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>';
+                                botones += '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id +
+                                           '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>';
+                            }
+                            return botones + '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            tablaPeriodos = $('#tablaPeriodos').DataTable({
+                responsive: true,
+                paging: false,
+                searching: false,
+                info: false,
+                columns: [
+                    { data: 'period_number' },
+                    { data: 'start_date', render: pintarFecha },
+                    { data: 'end_date', render: pintarFecha },
+                    { data: 'status', render: pintarEstado },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            let botones = '<div class="d-flex justify-content-center gap-1">';
+                            if (fila.status !== 'open') {
+                                botones += '<button class="btn btn-sm btn-outline-success btn-abrir-periodo" data-id="' + fila.id +
+                                           '" title="' + T.abrir + '"><i class="fas fa-lock-open"></i></button>';
+                            }
+                            if (fila.status !== 'closed') {
+                                botones += '<button class="btn btn-sm btn-outline-warning btn-cerrar-periodo" data-id="' + fila.id +
+                                           '" title="' + T.cerrar + '"><i class="fas fa-lock"></i></button>';
+                            }
+                            return botones + '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            // Los botones se crean al pintar la tabla, así que se escucha en el
+            // cuerpo y no en cada botón: si no, dejarían de responder al repaginar.
+            $('#tablaEjercicios tbody').on('click', '.btn-periodos', function () {
+                verPeriodos($(this).data('id'), $(this).data('code'));
+            });
+            $('#tablaEjercicios tbody').on('click', '.btn-generar', function () {
+                accion('@Url.Action("GenerarPeriodos", "FinanzasEjercicios")', { idEjercicio: $(this).data('id') });
+            });
+            $('#tablaEjercicios tbody').on('click', '.btn-abrir', function () {
+                accion('@Url.Action("Abrir", "FinanzasEjercicios")', { id: $(this).data('id') });
+            });
+            $('#tablaEjercicios tbody').on('click', '.btn-cerrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarCerrar, text: T.avisoCerrar, icon: 'warning',
+                    showCancelButton: true, confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (r.isConfirmed) accion('@Url.Action("Cerrar", "FinanzasEjercicios")', { id: id });
+                });
+            });
+            $('#tablaEjercicios tbody').on('click', '.btn-editar', function () {
+                const fila = tablaEjercicios.row($(this).closest('tr')).data();
+                abrirModalEjercicio(fila);
+            });
+            $('#tablaEjercicios tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrar, text: T.avisoBorrar, icon: 'warning',
+                    showCancelButton: true, confirmButtonText: T.siEliminar || T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (r.isConfirmed) accion('@Url.Action("Eliminar", "FinanzasEjercicios")', { id: id });
+                });
+            });
+
+            $('#tablaPeriodos tbody').on('click', '.btn-abrir-periodo', function () {
+                accion('@Url.Action("AbrirPeriodo", "FinanzasEjercicios")', { id: $(this).data('id') }, true);
+            });
+            $('#tablaPeriodos tbody').on('click', '.btn-cerrar-periodo', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarCerrarPeriodo, icon: 'warning',
+                    showCancelButton: true, confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (r.isConfirmed) accion('@Url.Action("CerrarPeriodo", "FinanzasEjercicios")', { id: id }, true);
+                });
+            });
+        });
+
+        // Toda acción del servidor devuelve { resultado, mensaje }: se centraliza
+        // aquí para no repetir el mismo bloque en cada botón.
+        function accion(url, datos, recargarPeriodos) {
+            $.post(url, datos, function (respuesta) {
+                if (respuesta.resultado) {
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaEjercicios.ajax.reload(null, false);
+                    if (recargarPeriodos || idEjercicioActual > 0) recargarTablaPeriodos();
+                } else {
+                    Swal.fire(T.error, respuesta.mensaje, 'error');
+                }
+            }).fail(function () {
+                Swal.fire(T.error, T.mErrorConexionPunto, 'error');
+            });
+        }
+
+        function verPeriodos(id, codigo) {
+            idEjercicioActual = id;
+            $('#lblEjercicioPeriodos').text(codigo);
+            $('#tarjetaPeriodos').removeClass('d-none');
+            recargarTablaPeriodos();
+            document.getElementById('tarjetaPeriodos').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function recargarTablaPeriodos() {
+            if (idEjercicioActual === 0) return;
+            $.get('@Url.Action("ListarPeriodos", "FinanzasEjercicios")', { idEjercicio: idEjercicioActual }, function (r) {
+                tablaPeriodos.clear();
+                if (r.resultado) tablaPeriodos.rows.add(r.data);
+                tablaPeriodos.draw();
+            });
+        }
+
+        function cerrarPeriodos() {
+            idEjercicioActual = 0;
+            $('#tarjetaPeriodos').addClass('d-none');
+        }
+
+        function abrirModalEjercicio(fila) {
+            $('#errorEjercicio').addClass('d-none').text('');
+            if (fila) {
+                $('#tituloModalEjercicio').text(T.editarEjercicio);
+                $('#txtIdEjercicio').val(fila.id);
+                $('#txtCodigo').val(fila.code);
+                // El input date solo entiende aaaa-mm-dd
+                $('#txtInicio').val((fila.start_date || '').substring(0, 10));
+                $('#txtFin').val((fila.end_date || '').substring(0, 10));
+            } else {
+                $('#tituloModalEjercicio').text(T.nuevoEjercicio);
+                $('#txtIdEjercicio').val(0);
+                $('#txtCodigo').val('');
+                $('#txtInicio').val('');
+                $('#txtFin').val('');
+            }
+            new bootstrap.Modal(document.getElementById('modalEjercicio')).show();
+        }
+
+        function guardarEjercicio() {
+            const codigo = $('#txtCodigo').val().trim();
+            const inicio = $('#txtInicio').val();
+            const fin = $('#txtFin').val();
+
+            if (codigo === '') { mostrarError(T.codigoObligatorio); return; }
+            if (!inicio || !fin) { mostrarError(T.fechasObligatorias); return; }
+
+            $.post('@Url.Action("Guardar", "FinanzasEjercicios")', {
+                id: $('#txtIdEjercicio').val(),
+                code: codigo,
+                start_date: inicio,
+                end_date: fin
+            }, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalEjercicio')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaEjercicios.ajax.reload(null, false);
+                } else {
+                    // El error se enseña dentro del modal, no en un aviso aparte:
+                    // así no se pierde lo que el usuario acaba de escribir.
+                    mostrarError(respuesta.mensaje);
+                }
+            }).fail(function () {
+                mostrarError(T.mErrorConexionPunto);
+            });
+        }
+
+        function mostrarError(texto) {
+            $('#errorEjercicio').removeClass('d-none').text(texto);
+        }
+    </script>
+}

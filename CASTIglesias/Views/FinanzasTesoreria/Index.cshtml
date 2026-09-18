@@ -1,0 +1,279 @@
+@using System.Text.Json
+@using CapaEntidad
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Cajas y bancos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+    var cuentasContables = ViewBag.CuentasContables as List<LedgerAccount> ?? new List<LedgerAccount>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Cajas y bancos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Aquí se declara dónde está el dinero: la caja de cada sede, las cuentas bancarias, el datáfono. Cada una se enlaza con una cuenta contable, que es el puente con la contabilidad."]
+    </div>
+</div>
+
+@if (cuentasContables.Count == 0)
+{
+    <div class="alert alert-warning d-flex align-items-start">
+        <i class="fas fa-triangle-exclamation me-2 mt-1"></i>
+        <div>
+            @L["Todavía no hay cuentas contables que admitan apuntes, así que no se puede crear ninguna caja."]
+            <a href="@Url.Action("Index", "FinanzasPlanCuentas")" class="alert-link ms-1">@L["Ir al plan de cuentas"]</a>
+        </div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-cash-register me-1"></i> @L["Cajas y bancos"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalCaja(null)"
+                @(cuentasContables.Count == 0 ? "disabled" : "")>
+            <i class="fas fa-plus me-1"></i> @L["Nueva caja o banco"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaCajas" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Cuenta contable"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL CAJA -->
+<div class="modal fade" id="modalCaja" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalCaja">@L["Nueva caja o banco"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdCaja" value="0" />
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtCodigoCaja" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtCodigoCaja" maxlength="20" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="txtNombreCaja" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreCaja" maxlength="150" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboTipoCaja" class="form-label">@L["Tipo"] <span class="text-danger">*</span></label>
+                        <select id="cboTipoCaja" class="form-select" onchange="cambiarTipoCaja()">
+                            <option value="cash">@L["Caja (efectivo)"]</option>
+                            <option value="bank">@L["Cuenta bancaria"]</option>
+                            <option value="card">@L["Tarjeta"]</option>
+                            <option value="payment_gateway">@L["Pasarela de pago"]</option>
+                            <option value="other">@L["Otro"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboSedeCaja" class="form-label">@L["Sede"]</label>
+                        <select id="cboSedeCaja" class="form-select">
+                            <option value="">@L["— De toda la iglesia —"]</option>
+                            @foreach (var s in sedes)
+                            {
+                                <option value="@s.ID">@s.nombre_sede</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label for="cboCuentaContable" class="form-label">@L["Cuenta contable"] <span class="text-danger">*</span></label>
+                        <select id="cboCuentaContable" class="form-select">
+                            @foreach (var c in cuentasContables)
+                            {
+                                <option value="@c.id">@c.code - @c.name</option>
+                            }
+                        </select>
+                        <div class="form-text">@L["Solo aparecen las cuentas que admiten apuntes."]</div>
+                    </div>
+                    <div class="col-sm-8 mb-3 d-none" id="bloqueBanco">
+                        <label for="txtBanco" class="form-label">@L["Banco"]</label>
+                        <input type="text" class="form-control" id="txtBanco" maxlength="150" autocomplete="off" />
+                        <div class="form-text">
+                            @L["El IBAN todavía no se puede guardar: falta el cifrado de datos bancarios."]
+                        </div>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboEstadoCaja" class="form-label">@L["Estado"]</label>
+                        <select id="cboEstadoCaja" class="form-select">
+                            <option value="active">@L["Activa"]</option>
+                            <option value="inactive">@L["Inactiva"]</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkNegativo" />
+                    <label class="form-check-label" for="chkNegativo">@L["Permitir que quede en negativo"]</label>
+                </div>
+
+                <div id="errorCaja" class="alert alert-danger d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCaja()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            codigoCajaObligatorio: @Json.Serialize(L["El código de la cuenta es obligatorio."].Value),
+            nombreCajaObligatorio: @Json.Serialize(L["El nombre de la cuenta es obligatorio."].Value),
+            cuentaContableObligatoria: @Json.Serialize(L["Hay que indicar a qué cuenta contable corresponde."].Value),
+            confirmarBorrarCaja:   @Json.Serialize(L["¿Eliminar esta caja o banco?"].Value),
+            nuevaCaja:             @Json.Serialize(L["Nueva caja o banco"].Value),
+            editarCaja:            @Json.Serialize(L["Editar caja o banco"].Value),
+            editar:                @Json.Serialize(L["Editar"].Value),
+            eliminar:              @Json.Serialize(L["Eliminar"].Value)
+        });
+
+        const TIPOS_CAJA = {
+            cash:            @Json.Serialize(L["Caja (efectivo)"].Value),
+            bank:            @Json.Serialize(L["Cuenta bancaria"].Value),
+            card:            @Json.Serialize(L["Tarjeta"].Value),
+            payment_gateway: @Json.Serialize(L["Pasarela de pago"].Value),
+            other:           @Json.Serialize(L["Otro"].Value)
+        };
+        const ESTADOS_CAJA = {
+            active:   { texto: @Json.Serialize(L["Activa"].Value),   clase: "bg-success" },
+            inactive: { texto: @Json.Serialize(L["Inactiva"].Value), clase: "bg-secondary" }
+        };
+
+        let tablaCajas;
+
+        $(document).ready(function () {
+            tablaCajas = $('#tablaCajas').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasTesoreria")', dataSrc: 'data' },
+                columns: [
+                    { data: 'code' },
+                    { data: 'name' },
+                    { data: 'account_type', render: function (v) { return TIPOS_CAJA[v] || v; } },
+                    { data: 'cuenta_contable' },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_CAJA[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaCajas tbody').on('click', '.btn-editar', function () {
+                abrirModalCaja(tablaCajas.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaCajas tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarCaja, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasTesoreria")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaCajas.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        // El nombre del banco solo se pide si es una cuenta bancaria
+        function cambiarTipoCaja() {
+            $('#bloqueBanco').toggleClass('d-none', $('#cboTipoCaja').val() !== 'bank');
+        }
+
+        function abrirModalCaja(fila) {
+            $('#errorCaja').addClass('d-none').text('');
+
+            $('#tituloModalCaja').text(fila ? T.editarCaja : T.nuevaCaja);
+            $('#txtIdCaja').val(fila ? fila.id : 0);
+            $('#txtCodigoCaja').val(fila ? fila.code : '');
+            $('#txtNombreCaja').val(fila ? fila.name : '');
+            $('#cboTipoCaja').val(fila ? fila.account_type : 'cash');
+            $('#cboSedeCaja').val(fila && fila.site_id ? fila.site_id : '');
+            $('#cboCuentaContable').val(fila ? fila.ledger_account_id : '');
+            $('#txtBanco').val(fila ? (fila.bank_name || '') : '');
+            $('#cboEstadoCaja').val(fila ? fila.status : 'active');
+            $('#chkNegativo').prop('checked', fila ? !!fila.allows_negative_balance : false);
+
+            cambiarTipoCaja();
+            new bootstrap.Modal(document.getElementById('modalCaja')).show();
+        }
+
+        function guardarCaja() {
+            const codigo = $('#txtCodigoCaja').val().trim();
+            const nombre = $('#txtNombreCaja').val().trim();
+            const cuenta = $('#cboCuentaContable').val();
+
+            if (codigo === '') { errorCaja(T.codigoCajaObligatorio); return; }
+            if (nombre === '') { errorCaja(T.nombreCajaObligatorio); return; }
+            if (!cuenta) { errorCaja(T.cuentaContableObligatoria); return; }
+
+            $.post('@Url.Action("Guardar", "FinanzasTesoreria")', {
+                id: $('#txtIdCaja').val(),
+                code: codigo,
+                name: nombre,
+                account_type: $('#cboTipoCaja').val(),
+                site_id: $('#cboSedeCaja').val() || '',
+                ledger_account_id: cuenta,
+                bank_name: $('#txtBanco').val(),
+                allows_negative_balance: $('#chkNegativo').is(':checked'),
+                status: $('#cboEstadoCaja').val()
+            }, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalCaja')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaCajas.ajax.reload(null, false);
+                } else {
+                    errorCaja(respuesta.mensaje);
+                }
+            }).fail(function () { errorCaja(T.mErrorConexionPunto); });
+        }
+
+        function errorCaja(texto) {
+            $('#errorCaja').removeClass('d-none').text(texto);
+        }
+    </script>
+}

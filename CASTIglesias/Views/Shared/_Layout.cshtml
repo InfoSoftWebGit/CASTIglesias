@@ -368,6 +368,17 @@
             desconocido:      @Json.Serialize(L["Desconocido"].Value),
             errorConexionSede:@Json.Serialize(L["Error de conexión al cambiar de sede. Inténtalo de nuevo."].Value),
 
+            @* Palabras sueltas que usan los avisos de SweetAlert (títulos y botones
+               de confirmación). Estaban repetidas en cada vista, así que una vista
+               nueva que se olvidara de declararlas pintaba "undefined" en el botón.
+               Aquí valen para todas; una vista puede afinarlas redefiniéndolas. *@
+            error:            @Json.Serialize(L["Error"].Value),
+            exito:            @Json.Serialize(L["Éxito"].Value),
+            si:               @Json.Serialize(L["Sí"].Value),
+            no:               @Json.Serialize(L["No"].Value),
+            siEliminar:       @Json.Serialize(L["Sí, eliminar"].Value),
+            cancelar:         @Json.Serialize(L["Cancelar"].Value),
+
             // ── Mensajes comunes a varias pantallas ──────────────────────────
             // Viven aquí y no en cada vista porque los mismos avisos se repiten en
             // casi todas. Las vistas amplían este objeto DESPUÉS, así que una vista

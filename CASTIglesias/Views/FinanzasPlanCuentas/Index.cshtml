@@ -1,0 +1,305 @@
+@using System.Text.Json
+@{
+    ViewBag.Title = L["Plan de cuentas"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Plan de cuentas"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["El plan de cuentas es la lista de cuentas contables donde se anota cada movimiento. Las cuentas que agrupan a otras no reciben apuntes: solo lo hacen las cuentas de último nivel."]
+        <div class="mt-1">
+            <strong>@L["Importante:"]</strong>
+            @L["Qué cuenta corresponde a cada cosa lo decide tu asesoría, no el programa."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-sitemap me-1"></i> @L["Plan de cuentas"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalCuenta(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nueva cuenta"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaCuentas" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Saldo normal"]</th>
+                    <th>@L["Admite apuntes"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL CUENTA -->
+<div class="modal fade" id="modalCuenta" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalCuenta">@L["Nueva cuenta"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdCuenta" value="0" />
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtCodigoCuenta" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtCodigoCuenta" maxlength="20" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="txtNombreCuenta" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreCuenta" maxlength="150" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboTipoCuenta" class="form-label">@L["Tipo"] <span class="text-danger">*</span></label>
+                        <select id="cboTipoCuenta" class="form-select">
+                            <option value="asset">@L["Activo"]</option>
+                            <option value="liability">@L["Pasivo"]</option>
+                            <option value="equity">@L["Patrimonio neto"]</option>
+                            <option value="income">@L["Ingresos"]</option>
+                            <option value="expense">@L["Gastos"]</option>
+                            <option value="memorandum">@L["Cuenta de orden"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboSaldoNormal" class="form-label">@L["Saldo normal"] <span class="text-danger">*</span></label>
+                        <select id="cboSaldoNormal" class="form-select">
+                            <option value="debit">@L["Deudor"]</option>
+                            <option value="credit">@L["Acreedor"]</option>
+                        </select>
+                        <div class="form-text">@L["Activo y gastos suelen ser deudores; pasivo, patrimonio e ingresos, acreedores."]</div>
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="cboPadre" class="form-label">@L["Cuenta superior"]</label>
+                        <select id="cboPadre" class="form-select">
+                            <option value="">@L["— Ninguna (cuenta raíz) —"]</option>
+                        </select>
+                        <div class="form-text">@L["Si eliges una, esa cuenta dejará de admitir apuntes."]</div>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboEstadoCuenta" class="form-label">@L["Estado"]</label>
+                        <select id="cboEstadoCuenta" class="form-select">
+                            <option value="active">@L["Activa"]</option>
+                            <option value="inactive">@L["Inactiva"]</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="chkContabilizable" checked />
+                    <label class="form-check-label" for="chkContabilizable">@L["Admite apuntes"]</label>
+                </div>
+
+                <hr />
+                <p class="text-muted mb-2">@L["Exigir al usar esta cuenta:"]</p>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkExigeTercero" />
+                    <label class="form-check-label" for="chkExigeTercero">@L["Un tercero (donante o proveedor)"]</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkExigeSede" />
+                    <label class="form-check-label" for="chkExigeSede">@L["Una sede"]</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkExigeFondo" />
+                    <label class="form-check-label" for="chkExigeFondo">@L["Un fondo"]</label>
+                </div>
+
+                <div id="errorCuenta" class="alert alert-danger d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarCuenta()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            codigoCuentaObligatorio: @Json.Serialize(L["El código de la cuenta es obligatorio."].Value),
+            nombreCuentaObligatorio: @Json.Serialize(L["El nombre de la cuenta es obligatorio."].Value),
+            confirmarBorrarCuenta:   @Json.Serialize(L["¿Eliminar esta cuenta?"].Value),
+            nuevaCuenta:             @Json.Serialize(L["Nueva cuenta"].Value),
+            editarCuenta:            @Json.Serialize(L["Editar cuenta"].Value),
+            editar:                  @Json.Serialize(L["Editar"].Value),
+            eliminar:                @Json.Serialize(L["Eliminar"].Value)
+        });
+
+        // Los valores se guardan en inglés (son el ENUM de la tabla) y se traducen
+        // solo al pintarlos: el dato almacenado no cambia nunca.
+        const TIPOS = {
+            asset:      @Json.Serialize(L["Activo"].Value),
+            liability:  @Json.Serialize(L["Pasivo"].Value),
+            equity:     @Json.Serialize(L["Patrimonio neto"].Value),
+            income:     @Json.Serialize(L["Ingresos"].Value),
+            expense:    @Json.Serialize(L["Gastos"].Value),
+            memorandum: @Json.Serialize(L["Cuenta de orden"].Value)
+        };
+        const SALDOS = {
+            debit:  @Json.Serialize(L["Deudor"].Value),
+            credit: @Json.Serialize(L["Acreedor"].Value)
+        };
+        const ESTADOS_CUENTA = {
+            active:   { texto: @Json.Serialize(L["Activa"].Value),   clase: "bg-success" },
+            inactive: { texto: @Json.Serialize(L["Inactiva"].Value), clase: "bg-secondary" }
+        };
+
+        let tablaCuentas;
+
+        $(document).ready(function () {
+            tablaCuentas = $('#tablaCuentas').DataTable({
+                responsive: true,
+                pageLength: 25,
+                ajax: { url: '@Url.Action("Listar", "FinanzasPlanCuentas")', dataSrc: 'data' },
+                columns: [
+                    {
+                        data: 'code',
+                        render: function (valor, tipo, fila) {
+                            if (tipo !== 'display') return valor;
+                            // Sangrado por nivel: es como se lee un plan contable
+                            const sangria = '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(Math.max(0, (fila.level || 1) - 1));
+                            return sangria + '<span class="font-monospace">' + valor + '</span>';
+                        }
+                    },
+                    { data: 'name' },
+                    { data: 'account_type', render: function (v) { return TIPOS[v] || v; } },
+                    { data: 'normal_balance', render: function (v) { return SALDOS[v] || v; } },
+                    {
+                        data: 'is_postable', className: 'text-center',
+                        render: function (v) {
+                            return v ? '<i class="fas fa-check text-success"></i>'
+                                     : '<i class="fas fa-minus text-muted"></i>';
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_CUENTA[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaCuentas tbody').on('click', '.btn-editar', function () {
+                abrirModalCuenta(tablaCuentas.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaCuentas tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarCuenta, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasPlanCuentas")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaCuentas.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        function cargarPadres(idActual, seleccionado) {
+            return $.get('@Url.Action("ListarParaSelector", "FinanzasPlanCuentas")', function (r) {
+                const cbo = $('#cboPadre');
+                cbo.find('option:not(:first)').remove();
+                if (!r.resultado) return;
+                r.data.forEach(function (c) {
+                    // Una cuenta no puede ser su propio padre: se quita de la lista
+                    if (c.id === idActual) return;
+                    cbo.append($('<option>').val(c.id).text(c.texto));
+                });
+                cbo.val(seleccionado || '');
+            });
+        }
+
+        function abrirModalCuenta(fila) {
+            $('#errorCuenta').addClass('d-none').text('');
+
+            const id = fila ? fila.id : 0;
+            $('#tituloModalCuenta').text(fila ? T.editarCuenta : T.nuevaCuenta);
+            $('#txtIdCuenta').val(id);
+            $('#txtCodigoCuenta').val(fila ? fila.code : '');
+            $('#txtNombreCuenta').val(fila ? fila.name : '');
+            $('#cboTipoCuenta').val(fila ? fila.account_type : 'asset');
+            $('#cboSaldoNormal').val(fila ? fila.normal_balance : 'debit');
+            $('#cboEstadoCuenta').val(fila ? fila.status : 'active');
+            $('#chkContabilizable').prop('checked', fila ? !!fila.is_postable : true);
+            $('#chkExigeTercero').prop('checked', fila ? !!fila.requires_third_party : false);
+            $('#chkExigeSede').prop('checked', fila ? !!fila.requires_site : false);
+            $('#chkExigeFondo').prop('checked', fila ? !!fila.requires_fund : false);
+
+            cargarPadres(id, fila ? fila.parent_account_id : null);
+            new bootstrap.Modal(document.getElementById('modalCuenta')).show();
+        }
+
+        function guardarCuenta() {
+            const codigo = $('#txtCodigoCuenta').val().trim();
+            const nombre = $('#txtNombreCuenta').val().trim();
+
+            if (codigo === '') { errorCuenta(T.codigoCuentaObligatorio); return; }
+            if (nombre === '') { errorCuenta(T.nombreCuentaObligatorio); return; }
+
+            $.post('@Url.Action("Guardar", "FinanzasPlanCuentas")', {
+                id: $('#txtIdCuenta').val(),
+                code: codigo,
+                name: nombre,
+                account_type: $('#cboTipoCuenta').val(),
+                normal_balance: $('#cboSaldoNormal').val(),
+                parent_account_id: $('#cboPadre').val() || '',
+                status: $('#cboEstadoCuenta').val(),
+                is_postable: $('#chkContabilizable').is(':checked'),
+                requires_third_party: $('#chkExigeTercero').is(':checked'),
+                requires_site: $('#chkExigeSede').is(':checked'),
+                requires_fund: $('#chkExigeFondo').is(':checked')
+            }, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalCuenta')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaCuentas.ajax.reload(null, false);
+                } else {
+                    errorCuenta(respuesta.mensaje);
+                }
+            }).fail(function () { errorCuenta(T.mErrorConexionPunto); });
+        }
+
+        function errorCuenta(texto) {
+            $('#errorCuenta').removeClass('d-none').text(texto);
+        }
+    </script>
+}

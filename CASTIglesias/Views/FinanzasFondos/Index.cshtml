@@ -1,0 +1,317 @@
+@using System.Text.Json
+@using CapaEntidad
+@{
+    ViewBag.Title = L["Fondos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Fondos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Un fondo es dinero con un destino concreto: lo donado para el comedor social no se puede gastar en otra cosa."]
+        <div class="mt-1">
+            <strong>@L["Un fondo no es una cuenta bancaria."]</strong>
+            @L["Puedes tener 10.000 € en el banco y solo 2.000 disponibles para gastos generales, porque el resto está comprometido con fondos."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-piggy-bank me-1"></i> @L["Fondos"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalFondo(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nuevo fondo"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaFondos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Alcance"]</th>
+                    <th>@L["Si se queda sin saldo"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL FONDO -->
+<div class="modal fade" id="modalFondo" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalFondo">@L["Nuevo fondo"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdFondo" value="0" />
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtCodigoFondo" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtCodigoFondo" maxlength="20" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="txtNombreFondo" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreFondo" maxlength="150" autocomplete="off" />
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label for="txtProposito" class="form-label">@L["Para qué es este fondo"]</label>
+                        <textarea class="form-control" id="txtProposito" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboAlcance" class="form-label">@L["Alcance"] <span class="text-danger">*</span></label>
+                        <select id="cboAlcance" class="form-select" onchange="cambiarAlcance()">
+                            <option value="corporate">@L["De toda la iglesia"]</option>
+                            <option value="site">@L["De una sede"]</option>
+                            <option value="shared">@L["Compartido por varias sedes"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3 d-none" id="bloqueSedePropietaria">
+                        <label for="cboSedeFondo" class="form-label">@L["Sede"] <span class="text-danger">*</span></label>
+                        <select id="cboSedeFondo" class="form-select">
+                            @foreach (var s in sedes)
+                            {
+                                <option value="@s.ID">@s.nombre_sede</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 d-none" id="bloqueSedesCompartidas">
+                    <label class="form-label">@L["Sedes que pueden usarlo"]</label>
+                    <div class="border rounded p-2">
+                        @if (sedes.Count == 0)
+                        {
+                            <span class="text-muted">@L["No hay sedes disponibles."]</span>
+                        }
+                        @foreach (var s in sedes)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input chk-sede-fondo" type="checkbox" value="@s.ID" id="sedeFondo@(s.ID)" />
+                                <label class="form-check-label" for="sedeFondo@(s.ID)">@s.nombre_sede</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboSobregiro" class="form-label">@L["Si se queda sin saldo"]</label>
+                        <select id="cboSobregiro" class="form-select">
+                            <option value="warn">@L["Avisar, pero dejar seguir"]</option>
+                            <option value="block">@L["Impedir el gasto"]</option>
+                            <option value="require_approval">@L["Pedir una aprobación"]</option>
+                            <option value="allow">@L["Permitir sin avisar"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 mb-3">
+                        <label for="txtInicioFondo" class="form-label">@L["Inicio"] <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtInicioFondo" />
+                    </div>
+                    <div class="col-sm-3 mb-3">
+                        <label for="txtFinFondo" class="form-label">@L["Fin"]</label>
+                        <input type="date" class="form-control" id="txtFinFondo" />
+                        <div class="form-text">@L["Opcional"]</div>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboEstadoFondo" class="form-label">@L["Estado"]</label>
+                        <select id="cboEstadoFondo" class="form-select">
+                            <option value="active">@L["Activo"]</option>
+                            <option value="inactive">@L["Inactivo"]</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="errorFondo" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarFondo()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            codigoFondoObligatorio: @Json.Serialize(L["El código del fondo es obligatorio."].Value),
+            nombreFondoObligatorio: @Json.Serialize(L["El nombre del fondo es obligatorio."].Value),
+            inicioObligatorio:      @Json.Serialize(L["La fecha de inicio es obligatoria."].Value),
+            confirmarBorrarFondo:   @Json.Serialize(L["¿Eliminar este fondo?"].Value),
+            nuevoFondo:             @Json.Serialize(L["Nuevo fondo"].Value),
+            editarFondo:            @Json.Serialize(L["Editar fondo"].Value),
+            editar:                 @Json.Serialize(L["Editar"].Value),
+            eliminar:               @Json.Serialize(L["Eliminar"].Value)
+        });
+
+        const ALCANCES = {
+            corporate: @Json.Serialize(L["De toda la iglesia"].Value),
+            site:      @Json.Serialize(L["De una sede"].Value),
+            shared:    @Json.Serialize(L["Compartido por varias sedes"].Value)
+        };
+        const SOBREGIROS = {
+            warn:             @Json.Serialize(L["Avisar, pero dejar seguir"].Value),
+            block:            @Json.Serialize(L["Impedir el gasto"].Value),
+            require_approval: @Json.Serialize(L["Pedir una aprobación"].Value),
+            allow:            @Json.Serialize(L["Permitir sin avisar"].Value)
+        };
+        const ESTADOS_FONDO = {
+            active:   { texto: @Json.Serialize(L["Activo"].Value),   clase: "bg-success" },
+            inactive: { texto: @Json.Serialize(L["Inactivo"].Value), clase: "bg-secondary" }
+        };
+
+        let tablaFondos;
+
+        $(document).ready(function () {
+            tablaFondos = $('#tablaFondos').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasFondos")', dataSrc: 'data' },
+                columns: [
+                    { data: 'code' },
+                    { data: 'name' },
+                    { data: 'scope_type', render: function (v) { return ALCANCES[v] || v; } },
+                    { data: 'overdraw_policy', render: function (v) { return SOBREGIROS[v] || v; } },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_FONDO[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaFondos tbody').on('click', '.btn-editar', function () {
+                abrirModalFondo(tablaFondos.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaFondos tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarFondo, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasFondos")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaFondos.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        // El alcance decide qué campos tienen sentido: una sede concreta, varias
+        // o ninguna. Se enseñan solo los que aplican para no pedir datos de más.
+        function cambiarAlcance() {
+            const alcance = $('#cboAlcance').val();
+            $('#bloqueSedePropietaria').toggleClass('d-none', alcance !== 'site');
+            $('#bloqueSedesCompartidas').toggleClass('d-none', alcance !== 'shared');
+        }
+
+        function abrirModalFondo(fila) {
+            $('#errorFondo').addClass('d-none').text('');
+            $('.chk-sede-fondo').prop('checked', false);
+
+            $('#tituloModalFondo').text(fila ? T.editarFondo : T.nuevoFondo);
+            $('#txtIdFondo').val(fila ? fila.id : 0);
+            $('#txtCodigoFondo').val(fila ? fila.code : '');
+            $('#txtNombreFondo').val(fila ? fila.name : '');
+            $('#txtProposito').val(fila ? (fila.purpose || '') : '');
+            $('#cboAlcance').val(fila ? fila.scope_type : 'corporate');
+            $('#cboSobregiro').val(fila ? fila.overdraw_policy : 'warn');
+            $('#cboEstadoFondo').val(fila ? fila.status : 'active');
+            $('#txtInicioFondo').val(fila ? (fila.start_date || '').substring(0, 10) : new Date().toISOString().substring(0, 10));
+            $('#txtFinFondo').val(fila && fila.end_date ? fila.end_date.substring(0, 10) : '');
+            if (fila && fila.owner_site_id) $('#cboSedeFondo').val(fila.owner_site_id);
+
+            cambiarAlcance();
+
+            // Las sedes de un fondo compartido se piden aparte: no vienen en el listado
+            if (fila && fila.scope_type === 'shared') {
+                $.get('@Url.Action("SedesDelFondo", "FinanzasFondos")', { idFondo: fila.id }, function (r) {
+                    if (!r.resultado) return;
+                    r.data.forEach(function (idSede) {
+                        $('.chk-sede-fondo[value="' + idSede + '"]').prop('checked', true);
+                    });
+                });
+            }
+
+            new bootstrap.Modal(document.getElementById('modalFondo')).show();
+        }
+
+        function guardarFondo() {
+            const codigo = $('#txtCodigoFondo').val().trim();
+            const nombre = $('#txtNombreFondo').val().trim();
+            const inicio = $('#txtInicioFondo').val();
+
+            if (codigo === '') { errorFondo(T.codigoFondoObligatorio); return; }
+            if (nombre === '') { errorFondo(T.nombreFondoObligatorio); return; }
+            if (!inicio) { errorFondo(T.inicioObligatorio); return; }
+
+            const datos = {
+                id: $('#txtIdFondo').val(),
+                code: codigo,
+                name: nombre,
+                purpose: $('#txtProposito').val(),
+                scope_type: $('#cboAlcance').val(),
+                owner_site_id: $('#cboAlcance').val() === 'site' ? $('#cboSedeFondo').val() : '',
+                overdraw_policy: $('#cboSobregiro').val(),
+                start_date: inicio,
+                end_date: $('#txtFinFondo').val() || '',
+                status: $('#cboEstadoFondo').val()
+            };
+
+            // Las casillas van como sedes[0], sedes[1]... que es como el enlazado
+            // de modelos de ASP.NET espera una lista
+            let i = 0;
+            $('.chk-sede-fondo:checked').each(function () {
+                datos['sedes[' + i + ']'] = this.value;
+                i++;
+            });
+
+            $.post('@Url.Action("Guardar", "FinanzasFondos")', datos, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalFondo')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaFondos.ajax.reload(null, false);
+                } else {
+                    errorFondo(respuesta.mensaje);
+                }
+            }).fail(function () { errorFondo(T.mErrorConexionPunto); });
+        }
+
+        function errorFondo(texto) {
+            $('#errorFondo').removeClass('d-none').text(texto);
+        }
+    </script>
+}

@@ -1,0 +1,313 @@
+@using System.Text.Json
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Conceptos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var cuentas = ViewBag.CuentasContables as List<LedgerAccount> ?? new List<LedgerAccount>();
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Conceptos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["El concepto es lo que elige quien registra el movimiento: «Diezmo», «Ofrenda misionera», «Luz». Detrás, cada concepto sabe a qué cuenta contable y a qué fondo va, de modo que el usuario no necesita saber contabilidad."]
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-tags me-1"></i> @L["Conceptos"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalConcepto(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nuevo concepto"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaConceptos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Cuenta contable"]</th>
+                    <th>@L["Fondo"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL CONCEPTO -->
+<div class="modal fade" id="modalConcepto" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalConcepto">@L["Nuevo concepto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdConcepto" value="0" />
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtCodigoConcepto" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtCodigoConcepto" maxlength="20" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="txtNombreConcepto" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreConcepto" maxlength="150" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboTipoConcepto" class="form-label">@L["Tipo"] <span class="text-danger">*</span></label>
+                        <select id="cboTipoConcepto" class="form-select" onchange="cambiarTipoConcepto()">
+                            <option value="contribution">@L["Aportación (diezmo, ofrenda)"]</option>
+                            <option value="other_income">@L["Otro ingreso"]</option>
+                            <option value="expense">@L["Gasto"]</option>
+                            <option value="transfer">@L["Transferencia"]</option>
+                            <option value="adjustment">@L["Ajuste"]</option>
+                            <option value="refund">@L["Devolución"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboFondo" class="form-label">@L["Fondo por defecto"]</label>
+                        <select id="cboFondo" class="form-select">
+                            <option value="">@L["— Ninguno —"]</option>
+                            @foreach (var f in fondos)
+                            {
+                                <option value="@f.id">@f.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 mb-3" id="bloqueCuentaIngreso">
+                        <label for="cboCuentaIngreso" class="form-label">@L["Cuenta de ingresos"]</label>
+                        <select id="cboCuentaIngreso" class="form-select">
+                            <option value="">@L["— Ninguna —"]</option>
+                            @foreach (var c in cuentas)
+                            {
+                                <option value="@c.id">@c.code - @c.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 mb-3 d-none" id="bloqueCuentaGasto">
+                        <label for="cboCuentaGasto" class="form-label">@L["Cuenta de gastos"]</label>
+                        <select id="cboCuentaGasto" class="form-select">
+                            <option value="">@L["— Ninguna —"]</option>
+                            @foreach (var c in cuentas)
+                            {
+                                <option value="@c.id">@c.code - @c.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboEstadoConcepto" class="form-label">@L["Estado"]</label>
+                        <select id="cboEstadoConcepto" class="form-select">
+                            <option value="active">@L["Activo"]</option>
+                            <option value="inactive">@L["Inactivo"]</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr />
+                <div id="bloqueDonante">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkExigeDonante" onchange="ajustarDonante()" />
+                        <label class="form-check-label" for="chkExigeDonante">@L["Exigir identificar al donante"]</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="chkPermiteAnonimo" checked onchange="ajustarDonante()" />
+                        <label class="form-check-label" for="chkPermiteAnonimo">@L["Permitir aportaciones anónimas"]</label>
+                    </div>
+                    <div class="form-text mb-2">
+                        @L["Una aportación anónima cuenta para la caja y la contabilidad, pero no puede generar certificado fiscal."]
+                    </div>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkExigeDocumento" />
+                    <label class="form-check-label" for="chkExigeDocumento">@L["Exigir adjuntar un justificante"]</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkExigeAprobacion" />
+                    <label class="form-check-label" for="chkExigeAprobacion">@L["Exigir aprobación antes de contabilizar"]</label>
+                </div>
+
+                <div id="errorConcepto" class="alert alert-danger d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarConcepto()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            codigoConceptoObligatorio: @Json.Serialize(L["El código del concepto es obligatorio."].Value),
+            nombreConceptoObligatorio: @Json.Serialize(L["El nombre del concepto es obligatorio."].Value),
+            confirmarBorrarConcepto:   @Json.Serialize(L["¿Eliminar este concepto?"].Value),
+            nuevoConcepto:             @Json.Serialize(L["Nuevo concepto"].Value),
+            editarConcepto:            @Json.Serialize(L["Editar concepto"].Value),
+            editar:                    @Json.Serialize(L["Editar"].Value),
+            eliminar:                  @Json.Serialize(L["Eliminar"].Value)
+        });
+
+        const TIPOS_CONCEPTO = {
+            contribution: @Json.Serialize(L["Aportación (diezmo, ofrenda)"].Value),
+            other_income: @Json.Serialize(L["Otro ingreso"].Value),
+            expense:      @Json.Serialize(L["Gasto"].Value),
+            transfer:     @Json.Serialize(L["Transferencia"].Value),
+            adjustment:   @Json.Serialize(L["Ajuste"].Value),
+            refund:       @Json.Serialize(L["Devolución"].Value)
+        };
+        const ESTADOS_CONCEPTO = {
+            active:   { texto: @Json.Serialize(L["Activo"].Value),   clase: "bg-success" },
+            inactive: { texto: @Json.Serialize(L["Inactivo"].Value), clase: "bg-secondary" }
+        };
+        // Los tipos que representan dinero que entra; el resto usa cuenta de gasto
+        const TIPOS_INGRESO = ['contribution', 'other_income'];
+
+        let tablaConceptos;
+
+        $(document).ready(function () {
+            tablaConceptos = $('#tablaConceptos').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasConceptos")', dataSrc: 'data' },
+                columns: [
+                    { data: 'code' },
+                    { data: 'name' },
+                    { data: 'transaction_kind', render: function (v) { return TIPOS_CONCEPTO[v] || v; } },
+                    { data: 'cuenta' },
+                    { data: 'fondo' },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_CONCEPTO[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaConceptos tbody').on('click', '.btn-editar', function () {
+                abrirModalConcepto(tablaConceptos.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaConceptos tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarConcepto, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasConceptos")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaConceptos.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        // Según el tipo, unos campos sobran: un gasto no tiene donante ni cuenta
+        // de ingresos. Se ocultan para no pedir datos que no se van a usar.
+        function cambiarTipoConcepto() {
+            const tipo = $('#cboTipoConcepto').val();
+            const esIngreso = TIPOS_INGRESO.indexOf(tipo) >= 0;
+
+            $('#bloqueCuentaIngreso').toggleClass('d-none', !esIngreso);
+            $('#bloqueCuentaGasto').toggleClass('d-none', esIngreso);
+            $('#bloqueDonante').toggleClass('d-none', tipo !== 'contribution');
+        }
+
+        // Exigir donante y permitir anónimo a la vez no se puede cumplir: al marcar
+        // uno se desmarca el otro, en lugar de dejar guardar algo imposible.
+        function ajustarDonante() {
+            if ($('#chkExigeDonante').is(':checked') && $('#chkPermiteAnonimo').is(':checked')) {
+                $('#chkPermiteAnonimo').prop('checked', false);
+            }
+        }
+
+        function abrirModalConcepto(fila) {
+            $('#errorConcepto').addClass('d-none').text('');
+
+            $('#tituloModalConcepto').text(fila ? T.editarConcepto : T.nuevoConcepto);
+            $('#txtIdConcepto').val(fila ? fila.id : 0);
+            $('#txtCodigoConcepto').val(fila ? fila.code : '');
+            $('#txtNombreConcepto').val(fila ? fila.name : '');
+            $('#cboTipoConcepto').val(fila ? fila.transaction_kind : 'contribution');
+            $('#cboFondo').val(fila && fila.default_fund_id ? fila.default_fund_id : '');
+            $('#cboCuentaIngreso').val(fila && fila.default_income_account_id ? fila.default_income_account_id : '');
+            $('#cboCuentaGasto').val(fila && fila.default_expense_account_id ? fila.default_expense_account_id : '');
+            $('#cboEstadoConcepto').val(fila ? fila.status : 'active');
+            $('#chkExigeDonante').prop('checked', fila ? !!fila.requires_donor : false);
+            $('#chkPermiteAnonimo').prop('checked', fila ? !!fila.allows_anonymous : true);
+            $('#chkExigeDocumento').prop('checked', fila ? !!fila.requires_document : false);
+            $('#chkExigeAprobacion').prop('checked', fila ? !!fila.requires_approval : false);
+
+            cambiarTipoConcepto();
+            new bootstrap.Modal(document.getElementById('modalConcepto')).show();
+        }
+
+        function guardarConcepto() {
+            const codigo = $('#txtCodigoConcepto').val().trim();
+            const nombre = $('#txtNombreConcepto').val().trim();
+
+            if (codigo === '') { errorConcepto(T.codigoConceptoObligatorio); return; }
+            if (nombre === '') { errorConcepto(T.nombreConceptoObligatorio); return; }
+
+            $.post('@Url.Action("Guardar", "FinanzasConceptos")', {
+                id: $('#txtIdConcepto').val(),
+                code: codigo,
+                name: nombre,
+                transaction_kind: $('#cboTipoConcepto').val(),
+                default_fund_id: $('#cboFondo').val() || '',
+                default_income_account_id: $('#cboCuentaIngreso').val() || '',
+                default_expense_account_id: $('#cboCuentaGasto').val() || '',
+                requires_donor: $('#chkExigeDonante').is(':checked'),
+                allows_anonymous: $('#chkPermiteAnonimo').is(':checked'),
+                requires_document: $('#chkExigeDocumento').is(':checked'),
+                requires_approval: $('#chkExigeAprobacion').is(':checked'),
+                status: $('#cboEstadoConcepto').val()
+            }, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalConcepto')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaConceptos.ajax.reload(null, false);
+                } else {
+                    errorConcepto(respuesta.mensaje);
+                }
+            }).fail(function () { errorConcepto(T.mErrorConexionPunto); });
+        }
+
+        function errorConcepto(texto) {
+            $('#errorConcepto').removeClass('d-none').text(texto);
+        }
+    </script>
+}
