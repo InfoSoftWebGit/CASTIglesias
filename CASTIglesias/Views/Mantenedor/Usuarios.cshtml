@@ -9,6 +9,12 @@
     // 🔑 Uso de los ViewBag del controlador
     var loggedInSedeID = ViewBag.sedeID ?? 0;
     var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
+
+    // Botones según los permisos de la sesión. Es solo presentación: el servidor
+    // vuelve a comprobarlo en GuardarUsuario y EliminarUsuario.
+    var permisosSesion = ViewBag.PermisosMiembro as CapaEntidad.Permisos ?? new CapaEntidad.Permisos();
+    bool puedeCrearEditarUsuarios = permisosSesion.UsuariosCrearEditar;
+    bool puedeEliminarUsuarios = permisosSesion.UsuariosEliminar;
 }
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a href="index.html">@L["Resumen"]</a></li>
@@ -21,12 +27,15 @@
     </div>
 
     <div class="table-responsive">
-        <div class="row">
-            <div class="col-12 mb-2">
-                <button type="button" class="btn btn-success" onclick="abrirModalUsuarios(null)">@L["Añadir nuevo usuario"]</button>
+        @if (puedeCrearEditarUsuarios)
+        {
+            <div class="row">
+                <div class="col-12 mb-2">
+                    <button type="button" class="btn btn-success" onclick="abrirModalUsuarios(null)">@L["Añadir nuevo usuario"]</button>
+                </div>
             </div>
-        </div>
-        <hr />
+            <hr />
+        }
         <table id="tablaUsuarios" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
@@ -91,6 +100,37 @@
                             <option value="4">@L["Miembro"]</option>
                         </select>
                     </div>
+                    @* Sedes con acceso (tabla usuario_sedes). Solo aparecen las que puede
+                       conceder quien edita; si no hay nada que elegir, no se muestra. La
+                       sede principal se marca y bloquea desde el script. *@
+                    @{
+                        var sedesAsignables = ViewBag.SedesAsignables as List<CapaEntidad.Sedes> ?? new List<CapaEntidad.Sedes>();
+                        bool puedeAsignarTodas = ViewBag.PuedeAsignarTodas == true;
+                    }
+                    @if (puedeAsignarTodas || sedesAsignables.Count > 1)
+                    {
+                        <div class="col-12 mb-2" id="contenedorSedes">
+                            <label class="form-label mb-0">@L["Sedes con acceso"]</label>
+                            <div class="form-text mt-0 mb-2">@L["La sede principal del usuario siempre está incluida."]</div>
+                            @if (puedeAsignarTodas)
+                            {
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="chkTodasSedes">
+                                    <label class="form-check-label fw-semibold" for="chkTodasSedes">@L["Todas las sedes (también las que se abran en el futuro)"]</label>
+                                </div>
+                            }
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach (var sede in sedesAsignables)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input chk-sede" type="checkbox" value="@sede.ID" id="chkSede_@sede.ID">
+                                        @* El nombre de la sede es dato del cliente: no se traduce *@
+                                        <label class="form-check-label" for="chkSede_@sede.ID">@sede.nombre_sede</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
                     <div class="row mt-3" id="contenedorPermisos" style="display: none;">
                         <div class="col-12">
                             <h5>@L["Permisos Específicos"] <small class="text-muted fs-6">@L["(Solo para Rol Miembro)"]</small></h5>
@@ -268,7 +308,14 @@
             passwordObligatoria:   @Json.Serialize(L["La contraseña es obligatoria para nuevos usuarios."].Value),
             rolInvalido:           @Json.Serialize(L["Debe seleccionar un Rol válido."].Value),
             si:                    @Json.Serialize(L["Sí"].Value),
-            siEliminar:            @Json.Serialize(L["Sí, eliminar"].Value)
+            siEliminar:            @Json.Serialize(L["Sí, eliminar"].Value),
+            usuarioEliminado:      @Json.Serialize(L["El usuario fue eliminado"].Value),
+            noSePudoEliminar:      @Json.Serialize(L["No se pudo eliminar el usuario"].Value),
+            usuarioCreado:         @Json.Serialize(L["Usuario creado con éxito"].Value),
+            // Lleva etiquetas HTML porque "temporal" va en negrita dentro de la frase;
+            // se pinta con la opción "html" de SweetAlert, no con "text".
+            compruebeBandeja:      @Json.Serialize(L["Compruebe su bandeja de entrada para obtener la contraseña <b>temporal</b>."].Value),
+            errorAlGuardar:        @Json.Serialize(L["Error al guardar el usuario"].Value)
         });
 
         var tabladata;
@@ -282,6 +329,10 @@
         // SOLUCIÓN: Usamos Html.Raw para inyectar valores directamente y evitar problemas de comillas extra.
         const loggedInUserRoleID = @Html.Raw(JsonSerializer.Serialize(ViewBag.rolID ?? 4));
         const ID_SEDE_GLOBAL = 1000;
+
+        // Permisos de la sesión para mostrar u ocultar botones (el servidor los revalida)
+        const PUEDE_EDITAR_USUARIOS = @Json.Serialize(puedeCrearEditarUsuarios);
+        const PUEDE_ELIMINAR_USUARIOS = @Json.Serialize(puedeEliminarUsuarios);
 
 
         const ROLES = {
@@ -335,7 +386,9 @@
             ['Diezmos',       'chkDiezmos',       'chkDiezmosCrearEditar',       'chkDiezmosEliminar'],
             ['Conceptos',     'chkConceptos',     'chkConceptosCrearEditar',     'chkConceptosEliminar'],
             ['Gastos',        'chkGastos',        'chkGastosCrearEditar',        'chkGastosEliminar'],
-            ['Control',    'chkAsistencia',    'chkAsistenciaCrearEditar',    'chkAsistenciaEliminar'],
+            // El primer valor es el nombre de la propiedad en Permisos (Asistencia), no el
+            // texto del menú ("Control"): con "Control" nunca se guardaba ni se cargaba.
+            ['Asistencia',    'chkAsistencia',    'chkAsistenciaCrearEditar',    'chkAsistenciaEliminar'],
             ['Ajustes',       'chkAjustes',       'chkAjustesCrearEditar',       'chkAjustesEliminar'],
         ];
 
@@ -386,6 +439,47 @@
             });
         }
 
+        // ── Sedes con acceso (usuario_sedes) ─────────────────────────────
+        // La sede principal se muestra marcada y bloqueada: el servidor la incluye
+        // siempre, así que desmarcarla no tendría efecto y confundiría.
+        let sedePrincipalModal = 0;
+
+        function aplicarEstadoSedes() {
+            const todas = $('#chkTodasSedes').is(':checked');
+            $('.chk-sede').each(function () {
+                const esPrincipal = parseInt(this.value) === sedePrincipalModal;
+                $(this).prop('disabled', todas || esPrincipal);
+                if (todas || esPrincipal) $(this).prop('checked', true);
+            });
+        }
+
+        function cargarSedesEnModal(usuario) {
+            $('#chkTodasSedes').prop('checked', false).prop('disabled', false);
+            $('.chk-sede').prop('checked', false);
+
+            sedePrincipalModal = (usuario ? usuario.iD_sede : loggedInSedeID) || loggedInSedeID;
+
+            // Creado en "Todas las Sedes": no se puede reducir desde aquí
+            if (sedePrincipalModal === ID_SEDE_GLOBAL) {
+                $('#chkTodasSedes').prop('checked', true).prop('disabled', true);
+            }
+            aplicarEstadoSedes();
+
+            if (!usuario || $('#contenedorSedes').length === 0) return;
+
+            $.get('@Url.Action("ObtenerSedesUsuario", "Mantenedor")', { id: usuario.iD_usuario }, function (res) {
+                if (res.todas) $('#chkTodasSedes').prop('checked', true);
+                (res.sedes || []).forEach(id => $('#chkSede_' + id).prop('checked', true));
+                aplicarEstadoSedes();
+            });
+        }
+
+        $(document).on('change', '#chkTodasSedes', function () {
+            // Al quitar "todas", se vuelve a partir solo de la sede principal
+            if (!this.checked) $('.chk-sede').prop('checked', false);
+            aplicarEstadoSedes();
+        });
+
         $(document).ready(function () {
             $("#cboRol").on('change', actualizarVisibilidadPermisos);
 
@@ -435,7 +529,7 @@
                     dataType: "json",
                     dataSrc: "data",
                     error: function(xhr, error, code) {
-                        console.error("Error al cargar datos de DataTables:", code);
+                        console.error(T.mErrorDataTables, code);
                     }
                 },
                 columns: [
@@ -451,14 +545,15 @@
                     { data: "nombre_sede" },
                     { data: "rol", render: function (valor) { return tDato(valor); } },
                     {
+                        // Solo se pintan los botones que el usuario puede usar
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button class="btn btn-primary btn-sm btn-editarUsuario">
+                                ${PUEDE_EDITAR_USUARIOS ? `<button class="btn btn-primary btn-sm btn-editarUsuario">
                                     <i class="fas fa-pen"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm btn-eliminarUsuario">
+                                </button>` : ''}
+                                ${PUEDE_ELIMINAR_USUARIOS ? `<button class="btn btn-danger btn-sm btn-eliminarUsuario">
                                     <i class="fas fa-trash"></i>
-                                </button>
+                                </button>` : ''}
                             </div>`,
                         orderable: false,
                         searchable: false,
@@ -475,7 +570,7 @@
                     filaSeleccionada = fila.tr;
                     abrirModalUsuarios(fila.data);
                 } else {
-                    console.error("No se pudo obtener el usuario para editar");
+                    console.error(T.mNoObtenerUsuario);
                 }
             });
 
@@ -507,13 +602,13 @@
                                 if (resp.resultado) {
                                     tabladata.row(trAEliminar).remove().draw(false);
                                     filaSeleccionada = null;
-                                    Swal.fire(T.eliminado, "El usuario fue eliminado", "success");
+                                    Swal.fire(T.eliminado, T.usuarioEliminado, "success");
                                 } else {
                                     Swal.fire(T.error, resp.mensaje, "error");
                                 }
                             }).fail(function(xhr, status, error) {
                                 console.error(xhr.responseText);
-                                Swal.fire(T.error, "No se pudo eliminar el usuario: " + error, "error");
+                                Swal.fire(T.error, T.noSePudoEliminar + ": " + error, "error");
                             });
                     }
                     filaSeleccionada = null;
@@ -594,17 +689,18 @@
                         if (response.resultado && response.data) {
                             cargarPermisosEnModal(response.data);
                         } else {
-                            console.warn("No se encontraron permisos específicos para el usuario. Permisos por defecto: ninguno.");
+                            console.warn(T.mSinPermisosEspecificos);
                         }
                     },
                     error: function (xhr, status, error) {
                         $(".modal-body").LoadingOverlay("hide");
-                        console.error("Error al obtener permisos:", error);
-                        Swal.fire(T.error, "No se pudieron cargar los permisos del usuario. " + (xhr.responseJSON?.mensaje || ""), "error");
+                        console.error(T.mErrorObtenerPermisos, error);
+                        Swal.fire(T.error, T.mNoCargarPermisos + " " + (xhr.responseJSON?.mensaje || ""), "error");
                     }
                 });
             }
             actualizarVisibilidadPermisos();
+            cargarSedesEnModal(usuario);
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalUsuarios"));
             modal.show();
@@ -616,7 +712,7 @@
             var rolID = parseInt($("#cboRol").val());
 
             if ($("#txtNombres").val().trim() === "" || $("#txtApellido").val().trim() === "" || $("#txtCorreo_electronico").val().trim() === "") {
-                $("#mensajeError").text("Todos los campos de Nombre, Apellido y Correo son obligatorios.").show();
+                $("#mensajeError").text(T.mCamposUsuarioObligatorios).show();
                 return;
             }
 
@@ -655,6 +751,14 @@
                 Usuario.Permisos = permisos;
             }
 
+            // Sedes: con índices explícitos (SedesAdicionales[0]...) para que ASP.NET
+            // las enlace a la lista; jQuery por defecto enviaría "SedesAdicionales[]".
+            // Las casillas bloqueadas (principal o "todas") no se envían.
+            Usuario.TodasLasSedes = $('#chkTodasSedes').is(':checked');
+            $('.chk-sede:checked:not(:disabled)').each(function (i) {
+                Usuario['SedesAdicionales[' + i + ']'] = this.value;
+            });
+
             $("#mensajeError").hide();
             $(".modal-body").LoadingOverlay("show", { text: "Guardando..." });
 
@@ -667,6 +771,13 @@
                         Usuario.nombre_sede = loggedInSedeNombre;
                         tabladata.row.add(Usuario).draw(false);
                         bootstrap.Modal.getInstance(document.getElementById("FormModalUsuarios")).hide();
+                        // Si se llega aquí, el correo con la clave temporal ya salió: el
+                        // servidor no crea el usuario si no ha podido enviarlo.
+                        Swal.fire({
+                            icon: "success",
+                            title: T.usuarioCreado,
+                            html: T.compruebeBandeja
+                        });
                     } else {
                         $("#mensajeError").text(data.mensaje).show();
                     }
@@ -683,7 +794,7 @@
                 }
             }).fail(function(xhr, status, error) {
                 $(".modal-body").LoadingOverlay("hide");
-                $("#mensajeError").text("Error al guardar el usuario: " + (xhr.responseJSON?.mensaje || error)).show();
+                $("#mensajeError").text(T.errorAlGuardar + ": " + (xhr.responseJSON?.mensaje || error)).show();
             });
         }
     </script>

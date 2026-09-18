@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,7 @@ namespace CASTIglesias.Controllers
             _cnSala   = cnSala;
         }
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Index()
         {
             int sedeId = ObtenerIdSedeUsuario();
@@ -34,6 +36,7 @@ namespace CASTIglesias.Controllers
 
         // FullCalendar llama a este endpoint con ?start=...&end=...
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult ObtenerEventos(string start, string end)
         {
             try
@@ -49,6 +52,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarEvento([FromBody] EventoCalendarioDTO dto)
         {
             try
@@ -62,6 +66,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarEvento(int idEvento)
         {
             try

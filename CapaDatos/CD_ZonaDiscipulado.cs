@@ -243,6 +243,21 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Tipo de la zona (hombres, mujeres, ninos...) a la que pertenece una asignación.
+        /// </summary>
+        /// <remarks>
+        /// Lo usa el controlador para exigir el permiso de la zona real del registro y no
+        /// el de la pantalla desde la que llega la petición, que el navegador puede cambiar.
+        /// </remarks>
+        public string? ObtenerTipoZonaDeRegistro(int idZgm)
+        {
+            return (from zgm in _context.Miembros_Zona_Grupo_Ministerio
+                    join z in _context.Zona on zgm.ID_zona equals z.ID_zona
+                    where zgm.ID == idZgm
+                    select z.tipo).FirstOrDefault();
+        }
+
         public bool EditarGrupoMiembroZona(int idZgm, int idGrupo, int idSede, out string mensaje)
         {
             mensaje = string.Empty;

@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,7 @@ namespace CASTIglesias.Controllers
             _cnZonas  = cnZonas;
         }
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Index()
         {
             int sedeId = ObtenerIdSedeUsuario();
@@ -32,6 +34,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult Listar()
         {
             try
@@ -57,6 +60,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult Guardar(int idSala, string nombreSala, string reservado,
                                    int? idZonaReserva, string? fechaReserva)
         {
@@ -87,6 +91,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult Eliminar(int idSala)
         {
             try

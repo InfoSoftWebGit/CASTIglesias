@@ -18,7 +18,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalDiezmos()">@L["Añadir nuevo diezmo"]</button>
+                <button data-permiso="DiezmosCrearEditar" type="button" class="btn btn-success" onclick="abrirModalDiezmos()">@L["Añadir nuevo diezmo"]</button>
             </div>
         </div>
         <hr />
@@ -247,10 +247,10 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarDiezmo">
+                                <button data-permiso="DiezmosCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarDiezmo">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarDiezmo">
+                                <button data-permiso="DiezmosEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarDiezmo">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -294,7 +294,7 @@
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error en la búsqueda de miembros:", error);
+                            console.error(T.mErrorBuscarMiembros, error);
                             response([]);
                         }
                     });
@@ -379,8 +379,8 @@
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.error("Error en la búsqueda por ID:", error);
-                        $("#mensajeError").removeClass("d-none").text("Error al buscar el miembro por ID.");
+                        console.error(T.mErrorBuscarPorId, error);
+                        $("#mensajeError").removeClass("d-none").text(T.mErrorBuscarMiembroId);
                     }
                 });
             });
@@ -417,7 +417,7 @@
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error("Error en la búsqueda de miembros:", error);
+                            console.error(T.mErrorBuscarMiembros, error);
                             response([]);
                         }
                     });
@@ -467,7 +467,7 @@
                                 }
                             },
                             error: function () {
-                                Swal.fire(T.error, "No se pudo eliminar", "error");
+                                Swal.fire(T.error, T.mNoEliminar, "error");
                             }
                         });
                     }
@@ -578,7 +578,7 @@
                 nombre_concepto: nombreConceptoSeleccionado
             };
 
-            // Validación: Si el miembro es 'Anónimo' o '0', no se requiere Apellido, sino que los dos deben ser Anónimo.
+            // Validación: Si el miembro es T.mAnonimo o '0', no se requiere Apellido, sino que los dos deben ser Anónimo.
             const esAnonimo = $("#chkAnonimo").is(':checked') || Diezmo.numero_miembro === 0;
 
             // Validación: La cantidad, el concepto y el nombre (si no es anónimo) no pueden ser vacíos o cero.
@@ -637,7 +637,7 @@
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
+                    $("#mensajeError").removeClass("d-none").text(T.mErrorAjax);
                 }
             });
         }
@@ -660,11 +660,11 @@
                             }));
                         });
                     } else if (response.error) {
-                        console.error("Error al cargar conceptos:", response.error);
+                        console.error(T.mErrorCargarConceptos, response.error);
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error en la petición de conceptos:", error);
+                    console.error(T.mErrorPeticionConceptos, error);
                 }
             });
         }

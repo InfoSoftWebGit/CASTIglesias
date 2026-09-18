@@ -147,6 +147,10 @@ namespace CapaNegocio
         }
 
         // ¡CORRECCIÓN CLAVE! Cambiar el tipo de retorno de List<Miembro> a Miembro
+        /// <summary>Estado actual del congregante, para comprobar permisos (ver CD_Miembros).</summary>
+        public string? ObtenerEstadoMiembro(int idMiembro, out bool existe) =>
+            _capaDatos.ObtenerEstadoMiembro(idMiembro, out existe);
+
         public Miembro ObtenerMiembroPorId(int idMiembro)
         {
             // Solo obtenemos el primer elemento, que es lo que devuelve CD_Miembros.

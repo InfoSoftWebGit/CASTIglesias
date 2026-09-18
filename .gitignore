@@ -14,7 +14,7 @@ appsettings*.json
 *.xlsx
 *.txt
 *.ps1
-
+*.sql
 # User-specific files
 *.rsuser
 *.suo

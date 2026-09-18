@@ -25,7 +25,7 @@
     <div class="table-responsive">
         <div class="row">
             @* <div class="col-12 mb-2">
-                <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">@L["Añadir nuevo miembro"]</button>
+                <button data-permiso="SimpatizantesCrearEditar" type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">@L["Añadir nuevo miembro"]</button>
             </div> *@
             <div class="col-12 mb-2 text-end">
                 <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
@@ -409,7 +409,7 @@
                 }
                 return "";
             } catch (e) {
-                console.error("Error al formatear fecha:", e);
+                console.error(T.mErrorFormatearFecha, e);
                 return "";
             }
         }
@@ -450,10 +450,10 @@
                     {
                             defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarMiembro">
+                                <button data-permiso="SimpatizantesCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarMiembro">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
+                                <button data-permiso="SimpatizantesEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>`,

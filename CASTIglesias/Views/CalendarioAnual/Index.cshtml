@@ -123,7 +123,7 @@
             </div>
             <div class="modal-footer d-flex justify-content-between flex-wrap gap-2">
                 <div class="d-flex gap-2">
-                    <button class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
+                    <button data-permiso="AjustesEliminar" class="btn btn-danger d-none" id="btnEliminarEvento" onclick="eliminarEvento()">
                         <i class="fas fa-trash me-1"></i> @L["Eliminar"]
                     </button>
                     <div class="d-none d-flex gap-2" id="grpExportEvento">
@@ -137,7 +137,7 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
-                    <button class="btn btn-primary" onclick="guardarEvento()">
+                    <button data-permiso="AjustesCrearEditar" class="btn btn-primary" onclick="guardarEvento()">
                         <i class="fas fa-save me-1"></i> @L["Guardar"]
                     </button>
                 </div>
@@ -257,8 +257,8 @@ function selectColor(hex, btn) {
 function guardarEvento() {
     const nombre = $('#txtNombreEvento').val().trim();
     const fecha  = $('#txtFechaEvento').val();
-    if (!nombre) { $('#errEvento').removeClass('d-none').text('El nombre es obligatorio.'); return; }
-    if (!fecha)  { $('#errEvento').removeClass('d-none').text('La fecha es obligatoria.'); return; }
+    if (!nombre) { $('#errEvento').removeClass('d-none').text(T.mNombreObligatorio); return; }
+    if (!fecha)  { $('#errEvento').removeClass('d-none').text(T.mFechaObligatoria); return; }
 
     const payload = {
         id_evento:    parseInt($('#hdnIdEvento').val()) || 0,
@@ -286,7 +286,7 @@ function guardarEvento() {
                 $('#errEvento').removeClass('d-none').text(res.mensaje);
             }
         },
-        error() { $('#errEvento').removeClass('d-none').text('Error de conexión.'); }
+        error() { $('#errEvento').removeClass('d-none').text(T.mErrorConexionPunto); }
     });
 }
 
@@ -295,7 +295,7 @@ function abrirGoogleCalendar() {
     const titulo    = $('#txtNombreEvento').val().trim();
     const fechaIni  = $('#txtFechaEvento').val();
     if (!titulo || !fechaIni) {
-        Swal.fire({ icon: 'warning', title: 'Completa el nombre y la fecha primero.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+        Swal.fire({ icon: 'warning', title: T.mCompletaNombreFecha, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
         return;
     }
     const fechaFin  = $('#txtFechaFin').val();
@@ -329,7 +329,7 @@ function descargarIcs() {
     const titulo    = $('#txtNombreEvento').val().trim();
     const fechaIni  = $('#txtFechaEvento').val();
     if (!titulo || !fechaIni) {
-        Swal.fire({ icon: 'warning', title: 'Completa el nombre y la fecha primero.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+        Swal.fire({ icon: 'warning', title: T.mCompletaNombreFecha, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
         return;
     }
     const fechaFin  = $('#txtFechaFin').val();
@@ -383,8 +383,8 @@ function eliminarEvento() {
     const id = parseInt($('#hdnIdEvento').val());
     if (!id) return;
     Swal.fire({
-        title: '¿Eliminar evento?', icon: 'warning',
-        showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'No'
+        title: T.mEliminarEvento, icon: 'warning',
+        showCancelButton: true, confirmButtonText: T.mSiEliminar, cancelButtonText: 'No'
     }).then(r => {
         if (!r.isConfirmed) return;
         $.post(urlEliminar, { idEvento: id }, res => {

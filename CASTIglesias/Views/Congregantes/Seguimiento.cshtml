@@ -45,7 +45,7 @@
     <div class="table-responsive p-3">
         <div class="row mb-2">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModal(null)">
+                <button data-permiso="MiembrosCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(null)">
                     <i class="fas fa-plus me-1"></i> @L["Nuevo seguimiento"]
                 </button>
             </div>
@@ -190,9 +190,9 @@
                     data: null,
                     orderable: false,
                     render: function (data) {
-                        return '<button class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
+                        return '<button data-permiso="MiembrosCrearEditar" class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
-                               '<button class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
+                               '<button data-permiso="MiembrosEliminar" class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
                                '<i class="fas fa-trash"></i></button>';
                     }
                 }
@@ -246,34 +246,34 @@
         var personaCargo = $('#txtPersonaCargo').val().trim();
 
         if (idMiembro <= 0 || nombre === '') {
-            Swal.fire('Atención', 'Debes seleccionar un miembro de la lista.', 'warning');
+            Swal.fire(T.mAtencion, T.mDebesSeleccionarMiembro, 'warning');
             return;
         }
         if (!tipo) {
-            Swal.fire('Atención', 'El tipo de seguimiento es obligatorio.', 'warning');
+            Swal.fire(T.mAtencion, T.mTipoSeguimientoObligatorio, 'warning');
             return;
         }
         if (!fecha) {
-            Swal.fire('Atención', 'La fecha del seguimiento es obligatoria.', 'warning');
+            Swal.fire(T.mAtencion, T.mFechaSeguimientoObligatoria, 'warning');
             return;
         }
         if (personaCargo === '') {
-            Swal.fire('Atención', 'La persona a cargo es obligatoria.', 'warning');
+            Swal.fire(T.mAtencion, T.mPersonaCargoObligatoria, 'warning');
             return;
         }
         if (parseInt($('#hiddenIdPersonaCargo').val()) === 0) {
-            Swal.fire('Atención', 'La persona a cargo debe seleccionarse de la lista.', 'warning');
+            Swal.fire(T.mAtencion, T.mPersonaCargoLista, 'warning');
             $('#txtPersonaCargo').focus();
             return;
         }
 
         var esEdicion = parseInt($('#hiddenID').val()) > 0;
         Swal.fire({
-            title: '¿Confirmar?',
-            text: esEdicion ? '¿Deseas guardar los cambios?' : '¿Deseas registrar este seguimiento?',
+            title: T.mConfirmar,
+            text: esEdicion ? T.mDeseasGuardarCambios : T.mDeseasRegistrarSeguimiento,
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Sí, guardar',
+            confirmButtonText: T.mSiGuardar,
             cancelButtonText: 'Cancelar'
         }).then(function (result) {
             if (!result.isConfirmed) return;
@@ -296,15 +296,15 @@
                 data: JSON.stringify(payload),
                 success: function (res) {
                     if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
-                        Swal.fire('Éxito', res.mensaje, 'success');
+                        Swal.fire(T.mExito, res.mensaje, 'success');
                         $('#modalSeguimiento').modal('hide');
                         tablaSeguimiento.ajax.reload();
                     } else {
-                        Swal.fire('Error', res.mensaje || 'No se pudo guardar.', 'error');
+                        Swal.fire('Error', res.mensaje || T.mNoGuardar, 'error');
                     }
                 },
                 error: function () {
-                    Swal.fire('Error', 'Error de conexión.', 'error');
+                    Swal.fire('Error', T.mErrorConexionPunto, 'error');
                 }
             });
         });
@@ -313,11 +313,11 @@
     // ─── ELIMINAR ─────────────────────────────────────────────────
     function eliminarSeguimiento(id) {
         Swal.fire({
-            title: '¿Estás seguro?',
-            text: '¿Deseas eliminar este seguimiento?',
+            title: T.mEstasSeguro,
+            text: T.mDeseasEliminarSeguimiento,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: T.mSiEliminar,
             cancelButtonText: 'Cancelar',
             confirmButtonColor: '#d33'
         }).then(function (result) {
@@ -335,7 +335,7 @@
                     }
                 },
                 error: function () {
-                    Swal.fire('Error', 'Error de conexión.', 'error');
+                    Swal.fire('Error', T.mErrorConexionPunto, 'error');
                 }
             });
         });

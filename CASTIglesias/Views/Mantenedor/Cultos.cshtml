@@ -16,7 +16,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModal(0)">
+                <button data-permiso="AjustesCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(0)">
                     <i class="fas fa-plus me-1"></i> @L["Añadir nuevo culto"]
                 </button>
             </div>
@@ -101,7 +101,7 @@
     const urlGuardar       = '@Url.Action("GuardarCulto",       "Mantenedor")';
     const urlEliminar      = '@Url.Action("EliminarCulto",      "Mantenedor")';
 
-    const dias = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = window.TDIAS;
 
     let tabla;
     // cache de bloques por culto para mostrarlos en la tabla
@@ -239,7 +239,7 @@
     function guardarCulto() {
         const nombre = $('#txtNombre').val().trim();
         if (!nombre) {
-            $('#mensajeError').removeClass('d-none').text('El nombre es obligatorio.');
+            $('#mensajeError').removeClass('d-none').text(T.mNombreObligatorio);
             return;
         }
 
@@ -271,13 +271,13 @@
 
     function eliminarCulto(id) {
         Swal.fire({
-            title: '¿Eliminar este culto?',
-            text: 'Se eliminarán también sus bloques y los roles configurados.',
+            title: T.mEliminarEsteCulto,
+            text: T.mSeEliminaranBloques,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonText: 'Cancelar',
-            confirmButtonText: 'Sí, eliminar'
+            confirmButtonText: T.mSiEliminar
         }).then(result => {
             if (!result.isConfirmed) return;
             $.post(urlEliminar, { id }, function (res) {

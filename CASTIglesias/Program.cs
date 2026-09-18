@@ -2,6 +2,7 @@
 using CapaNegocio;
 using CASTIglesias.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -103,6 +104,9 @@ builder.Services.AddScoped<CN_EventoCalendario>();
 
 builder.Services.AddScoped<CD_Plataforma>();
 builder.Services.AddScoped<CN_Plataforma>();
+// Acceso de cada usuario a varias sedes (tabla usuario_sedes)
+builder.Services.AddScoped<CD_UsuarioSedes>();
+builder.Services.AddScoped<CN_UsuarioSedes>();
 
 // Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
 // y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.
@@ -117,6 +121,30 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+
+// Correo saliente: la cuenta y su contraseña están en la sección "Correo" de
+// appsettings (fuera del repositorio), no en el código.
+CN_Recursos.ConfigurarCorreo(builder.Configuration.GetSection("Correo").Get<CN_Recursos.ConfiguracionCorreo>());
+
+// Claves con las que ASP.NET cifra la cookie de sesión y los tokens antifalsificación.
+// Sin guardarlas en disco, en IIS (App Pool sin perfil de usuario) viven en memoria:
+// cada reinicio del App Pool o cada publicación cerraba la sesión de todo el mundo.
+// La carpeta se indica en "DataProtection:RutaClaves" (appsettings o variable de
+// entorno DataProtection__RutaClaves) y debe ser distinta en producción y en QA.
+var proteccionDatos = builder.Services.AddDataProtection()
+    .SetApplicationName("Congrega-" + builder.Environment.EnvironmentName);
+var rutaClaves = builder.Configuration["DataProtection:RutaClaves"];
+if (!string.IsNullOrWhiteSpace(rutaClaves))
+{
+    proteccionDatos.PersistKeysToFileSystem(new DirectoryInfo(rutaClaves));
+    // En Windows las claves se guardan cifradas con DPAPI de la máquina: un fichero
+    // copiado a otro servidor no sirve para descifrar las cookies.
+    if (OperatingSystem.IsWindows())
+        proteccionDatos.ProtectKeysWithDpapi(protectToLocalMachine: true);
+}
+
+// Las llamadas AJAX envían el token antifalsificación en esta cabecera (ver _Layout)
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 
 // ✅ Agregar autenticación con cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

@@ -113,7 +113,7 @@
     const urlEliminarReq = '@Url.Action("EliminarRequerimiento",    "Ajustes")';
     const urlRoles       = '@Url.Action("ObtenerRolesExistentes",   "Ajustes")';
 
-    const dias = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = window.TDIAS;
 
     // Roles comunes predefinidos — siempre disponibles en el autocomplete
     const rolesBase = [
@@ -148,7 +148,7 @@
         // Cargar cultos
         $.get(urlCultos, function (res) {
             if (!res.success) {
-                console.error('Error al cargar cultos:', res.mensaje);
+                console.error(T.mErrorCargarCultos, res.mensaje);
                 return;
             }
             const cbo = $('#cboCulto');
@@ -162,7 +162,7 @@
                 cbo.append($('<option>').val(c.id_culto).text(`${c.nombre} — ${dia}`));
             });
         }).fail(function (xhr) {
-            console.error('Fallo al cargar cultos:', xhr.statusText);
+            console.error(T.mFalloCargarCultos, xhr.statusText);
         });
 
         // Enriquecer autocomplete con roles ya guardados en BD
@@ -231,7 +231,7 @@
             tabsContent.append(`
                 <div class="tab-pane fade ${show}" id="pane-${tab.id}" role="tabpanel">
                     <div class="d-flex justify-content-end mb-2">
-                        <button class="btn btn-success btn-sm"
+                        <button class="btn btn-success btn-sm" data-permiso="AjustesCrearEditar"
                                 onclick="abrirModalRol(0, ${tab.id_bloque === null ? 'null' : tab.id_bloque})">
                             <i class="fas fa-plus me-1"></i> Añadir rol
                         </button>
@@ -239,6 +239,10 @@
                     ${renderTablaRoles(reqsFiltrados, `tabla-${tab.id}`)}
                 </div>`);
         });
+
+        // Estas pestañas se crean por JavaScript: hay que quitar aquí los botones
+        // sin permiso, porque el barrido del layout ya ha pasado (ver _Layout).
+        if (window.aplicarPermisosEnDom) aplicarPermisosEnDom();
     }
 
     function renderTablaRoles(lista, tablaId) {
@@ -250,11 +254,11 @@
                 <td>${r.rol_nombre}</td>
                 <td class="text-center">${r.cantidad}</td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-warning me-1"
+                    <button data-permiso="AjustesCrearEditar" class="btn btn-sm btn-warning me-1"
                             onclick='abrirModalRol(${r.id_req}, ${r.id_bloque === null ? "null" : r.id_bloque}, ${JSON.stringify(r)})'>
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="eliminarRol(${r.id_req})">
+                    <button data-permiso="AjustesEliminar" class="btn btn-sm btn-danger" onclick="eliminarRol(${r.id_req})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -289,7 +293,7 @@
         const idBloque   = idBloqueRaw === '' || idBloqueRaw === 'null' ? null : parseInt(idBloqueRaw);
 
         if (!rolNombre) {
-            $('#mensajeErrorRol').removeClass('d-none').text('El nombre del rol es obligatorio.');
+            $('#mensajeErrorRol').removeClass('d-none').text(T.mNombreRolObligatorio);
             return;
         }
         if (!cultoActual) return;
@@ -324,7 +328,7 @@
 
     function eliminarRol(id) {
         Swal.fire({
-            title: '¿Eliminar este rol?',
+            title: T.mEliminarEsteRol,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',

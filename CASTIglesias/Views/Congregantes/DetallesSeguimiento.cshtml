@@ -154,7 +154,7 @@
             ],
             language: {
                 url: window.dtLang || undefined,
-                emptyTable: 'No hay registros de seguimiento para este miembro.'
+                emptyTable: T.mSinSeguimientos
             },
             responsive: true,
             order: [[1, 'desc']]
@@ -223,7 +223,7 @@
     function cargarTabla() {
         var idMiembro = parseInt($('#hiddenFiltroIdMiembro').val());
         if (idMiembro <= 0) {
-            Swal.fire('Atención', 'Primero selecciona un miembro de la lista.', 'warning');
+            Swal.fire(T.mAtencion, T.mPrimeroSeleccionaMiembro, 'warning');
             return;
         }
 
@@ -248,7 +248,7 @@
                 tablaDetalles.clear().rows.add(res.data || []).draw();
             },
             error: function () {
-                Swal.fire('Error', 'No se pudieron cargar los datos.', 'error');
+                Swal.fire('Error', T.mNoCargarDatos, 'error');
             }
         });
     }

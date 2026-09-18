@@ -1,6 +1,7 @@
 ﻿using CapaDatos;
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace CASTIglesias.Controllers
         }
 
         // GET: AsistenciaController/Asistencia
+        [RequierePermiso(nameof(Permisos.Asistencia))]
         public IActionResult Asistencia()
         {
             return View();
@@ -35,6 +37,7 @@ namespace CASTIglesias.Controllers
         // ----------------------------------------------------
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Asistencia))]
         public IActionResult ListarAsistencias()
         {
             // Usamos el parámetro de C# 'sedeID' como lo solicitaste.
@@ -66,6 +69,7 @@ namespace CASTIglesias.Controllers
         /// </summary>
         /// <param name="obj">Datos de la nueva asistencia.</param>
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AsistenciaCrearEditar))]
         public IActionResult RegistrarAsistencia([FromBody] Asistencia_culto obj)
         {
             string Mensaje;
@@ -93,6 +97,7 @@ namespace CASTIglesias.Controllers
         /// </summary>
         /// <param name="obj">Datos de la asistencia a editar.</param>
         [HttpPut] // Usamos HttpPut para seguir las convenciones RESTful (aunque HttpPost también funcionaría)
+        [RequierePermiso(nameof(Permisos.AsistenciaCrearEditar))]
         public IActionResult EditarAsistencia([FromBody] Asistencia_culto obj)
         {
             string Mensaje;
@@ -125,6 +130,7 @@ namespace CASTIglesias.Controllers
         /// </summary>
         /// <param name="idAsistencia">ID de la asistencia a eliminar.</param>
         [HttpDelete] // Usamos HttpDelete para seguir las convenciones RESTful
+        [RequierePermiso(nameof(Permisos.AsistenciaEliminar))]
         public IActionResult EliminarAsistencia(int idAsistencia)
         {
             string Mensaje;

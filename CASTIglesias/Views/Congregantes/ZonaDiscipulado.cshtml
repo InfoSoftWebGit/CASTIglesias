@@ -7,14 +7,31 @@
     var grupos = ViewBag.GruposZona as List<Grupos> ?? new List<Grupos>();
     bool esSedeGlobal = ViewBag.EsSedeGlobal as bool? ?? false;
 
-    ViewBag.Title = titulo;
+    // El controlador manda el nombre de la zona en español ("Hombres", "Mujeres",
+    // "Niños"); sirve de clave para traducirlo, igual que en el menú lateral.
+    var tituloTraducido = L[titulo].Value;
+
+    ViewBag.Title = tituloTraducido;
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Esta vista sirve para Hombres, Mujeres y Niños, y cada una tiene su propio
+    // permiso. Los nombres deben coincidir con las propiedades de Permisos, igual
+    // que en ModuloPorTipoZona de CongregantesController.
+    var moduloZona = tipo switch
+    {
+        "hombres" => nameof(Permisos.Hombres),
+        "mujeres" => nameof(Permisos.Mujeres),
+        "ninos" => nameof(Permisos.Ninos),
+        _ => nameof(Permisos.Miembros)
+    };
+    var permisoCrearEditar = moduloZona + "CrearEditar";
+    var permisoEliminar = moduloZona + "Eliminar";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
-    <li class="breadcrumb-item active">@titulo</li>
+    <li class="breadcrumb-item active">@tituloTraducido</li>
 </ol>
 
 @if (esSedeGlobal)
@@ -27,15 +44,17 @@
 
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span><i class="@icono me-1"></i> Lista de @titulo
+        @* El nombre de la zona va como argumento y no concatenado, para que el inglés
+           pueda ordenarlo a su manera ("Men list") sin tocar la vista. *@
+        <span><i class="@icono me-1"></i> @L["Lista de {0}", tituloTraducido]
             @if (!string.IsNullOrWhiteSpace(zona?.nombre_lider))
             {
-                <span>&nbsp;<span class="badge bg-secondary">Líder: @zona.nombre_lider</span></span>
+                <span>&nbsp;<span class="badge bg-secondary">@L["Líder"]: @zona.nombre_lider</span></span>
             }
         </span>
         @if (zona != null)
         {
-            <button type="button" class="btn btn-success btn-sm" onclick="abrirModalMiembroZona()">
+            <button type="button" class="btn btn-success btn-sm" data-permiso="@permisoCrearEditar" onclick="abrirModalMiembroZona()">
                 <i class="fas fa-plus me-1"></i> @L["Añadir miembro"]
             </button>
         }
@@ -98,7 +117,7 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header text-white" style="background-color: #1E3A8A;">
-                <h5 class="modal-title">Añadir miembro a @titulo</h5>
+                <h5 class="modal-title">@L["Añadir miembro a {0}", tituloTraducido]</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
             </div>
             <div class="modal-body">
@@ -197,10 +216,10 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-warning btn-sm btn-editarGrupo" title="Cambiar grupo">
+                                <button type="button" class="btn btn-warning btn-sm btn-editarGrupo" data-permiso="@permisoCrearEditar" title="${T.mCambiarGrupo}">
                                     <i class="fas fa-users-cog"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembroZona" title="Quitar de la zona">
+                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembroZona" data-permiso="@permisoEliminar" title="${T.mQuitarDeZona}">
                                     <i class="fas fa-user-minus"></i>
                                 </button>
                             </div>`,
@@ -297,14 +316,14 @@
                 }
             }).fail(function () {
                 $(".modal-body").LoadingOverlay("hide");
-                $("#mensajeErrorEditar").removeClass("d-none").text("Error en la solicitud.");
+                $("#mensajeErrorEditar").removeClass("d-none").text(T.mErrorSolicitud);
             });
         }
 
         function guardarMiembroZona() {
             const idMiembro = parseInt($("#hdnIdMiembroZona").val()) || 0;
             if (idMiembro === 0) {
-                $("#mensajeErrorMiembroZona").removeClass("d-none").text("Selecciona un miembro de la lista.");
+                $("#mensajeErrorMiembroZona").removeClass("d-none").text(T.mSeleccionaMiembroLista);
                 return;
             }
 
@@ -321,7 +340,7 @@
                 }
             }).fail(function () {
                 $(".modal-body").LoadingOverlay("hide");
-                $("#mensajeErrorMiembroZona").removeClass("d-none").text("Error en la solicitud.");
+                $("#mensajeErrorMiembroZona").removeClass("d-none").text(T.mErrorSolicitud);
             });
         }
     </script>

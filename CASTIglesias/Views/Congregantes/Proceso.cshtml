@@ -25,7 +25,7 @@
     <div class="table-responsive">
         @* <div class="row">
             <div class="col-12 mb-2">
-                <button type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">@L["Añadir nuevo miembro"]</button>
+                <button data-permiso="ProcesoCrearEditar" type="button" class="btn btn-success" onclick="abrirModalMiembros(null)">@L["Añadir nuevo miembro"]</button>
             </div>
         </div> *@
         <div class="row">
@@ -478,6 +478,7 @@
             retrocederTexto:     @Json.Serialize(L["Esto cambiará el estado del miembro al anterior."].Value),
             siRetroceder:        @Json.Serialize(L["Sí, retroceder"].Value),
             estadoRetrocedido:   @Json.Serialize(L["El estado fue retrocedido."].Value),
+            cambiosGuardadosYAvanzado: @Json.Serialize(L["Los cambios se guardaron y el estado fue avanzado."].Value),
             noSeRetrocedio:      @Json.Serialize(L["No se pudo retroceder el estado."].Value),
             avanzarEstado:       @Json.Serialize(L["¿Avanzar estado?"].Value),
             avanzarTexto:        @Json.Serialize(L["Esto cambiará el estado del miembro al siguiente."].Value),
@@ -513,7 +514,7 @@
                 }
                 return "";
             } catch (e) {
-                console.error("Error al formatear fecha:", e);
+                console.error(T.mErrorFormatearFecha, e);
                 return "";
             }
         }
@@ -556,13 +557,13 @@
                     {
                             defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarMiembro">
+                                <button data-permiso="ProcesoCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarMiembro">
                                     <i class="fas fa-pen"></i>
                                 </button>
                                 <button type="button" class="btn btn-info btn-sm btn-abrirModalZonasGruposMinisterios">
                                     <i class="fas fa-sitemap"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
+                                <button data-permiso="ProcesoEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>`,
@@ -967,13 +968,13 @@
             idGrupo = idGrupo || 0;
             idMinisterio = idMinisterio || 0;
 
-            const zonaSelect = construirSelectZGM(opcionesZonas, 'iD_zona', 'nombre_zona', idZona, '— Sin zona —');
+            const zonaSelect = construirSelectZGM(opcionesZonas, 'iD_zona', 'nombre_zona', idZona, T.mGuionSinZona);
             const gruposMapeados = opcionesGrupos.map(g => ({
                 ...g,
                 labelGrupo: g.encargados ? `${g.descripcion} (${g.encargados})` : g.descripcion
             }));
-            const grupoSelect = construirSelectZGM(gruposMapeados, 'iD_grupo', 'labelGrupo', idGrupo, '— Sin grupo —');
-            const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'id', 'descripcion', idMinisterio, '— Sin ministerio —');
+            const grupoSelect = construirSelectZGM(gruposMapeados, 'iD_grupo', 'labelGrupo', idGrupo, T.mGuionSinGrupo);
+            const ministerioSelect = construirSelectZGM(opcionesMinisterios, 'id', 'descripcion', idMinisterio, T.mGuionSinMinisterio);
 
             $('#bodyZGM').append(`
                 <tr>
@@ -1130,7 +1131,7 @@
                                     $("#FormModalMiembros").modal("hide");
                                     tabladata.ajax.reload(null, false);
                                     const numero = res.data && res.data.numero_miembro ? " " + fmt(T.numeroDeMiembro, formatearNumeroMiembro(res.data.numero_miembro)) : "";
-                                    Swal.fire(T.perfecto, `Los cambios se guardaron y el estado fue avanzado.${numero}`, "success");
+                                    Swal.fire(T.perfecto, `${T.cambiosGuardadosYAvanzado}${numero}`, "success");
                                 } else {
                                     Swal.fire(T.error, res.mensaje, "error");
                                 }

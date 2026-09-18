@@ -501,6 +501,62 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         .btn-plan-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
         .btn-plan-outline:hover { background: var(--primary); color: white; }
 
+        /* Oferta de lanzamiento: aviso encima de los planes y precio anterior tachado */
+        .oferta-lanzamiento {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap;
+            max-width: 720px; margin: 0 auto 44px; padding: 18px 28px;
+            border-radius: 18px; color: white; text-align: center;
+            background: linear-gradient(120deg, #DC2626 0%, #F97316 55%, #F59E0B 100%);
+            box-shadow: 0 16px 40px rgba(220,38,38,0.28);
+        }
+        /* Brillo que cruza el aviso para llamar la atención sin distraer */
+        .oferta-lanzamiento::after {
+            content: ""; position: absolute; top: 0; left: -60%;
+            width: 40%; height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-20deg);
+            animation: ofertaBrillo 3.5s ease-in-out infinite;
+        }
+        @@keyframes ofertaBrillo {
+            0%, 55% { left: -60%; }
+            100%    { left: 130%; }
+        }
+        .oferta-icono {
+            width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.2); font-size: 1.5rem;
+            animation: ofertaLatido 1.8s ease-in-out infinite;
+        }
+        @@keyframes ofertaLatido {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.12); }
+        }
+        .oferta-titulo { font-size: 1.45rem; font-weight: 800; letter-spacing: 0.06em; line-height: 1.1; }
+        .oferta-validez {
+            display: inline-block; margin-top: 6px; padding: 3px 14px;
+            border-radius: 20px; background: rgba(255,255,255,0.22);
+            font-size: 0.85rem; font-weight: 600;
+        }
+        @@media (prefers-reduced-motion: reduce) {
+            .oferta-lanzamiento::after, .oferta-icono { animation: none; }
+        }
+
+        /* Etiqueta de a quién va dirigido el plan (antes era un estilo en línea) */
+        .plan-etiqueta {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #92680a;
+            border-radius: 20px; padding: 3px 12px; margin-bottom: 10px;
+            font-size: 0.77rem; font-weight: 700;
+        }
+        .plan-iva { margin-top: 6px; font-size: 0.78rem; color: var(--text-light); }
+
+        .plan-precios { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+        .plan-price-old {
+            font-size: 1.35rem; font-weight: 700; color: #DC2626;
+            text-decoration: line-through; text-decoration-color: #DC2626; text-decoration-thickness: 2px;
+        }
+
         /* ── CONTACT ── */
         .contact-info-icon {
             width: 46px; height: 46px; background: rgba(30,58,138,0.07);
@@ -1377,73 +1433,135 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 @L["Planes flexibles para iglesias de cualquier tamaño. Sin permanencia, cancela cuando quieras."]
             </p>
         </div>
+        @{
+            // Precios en un solo sitio. La oferta de lanzamiento se muestra hasta el
+            // 31/12/2026 inclusive; a partir del 1/1/2027 la página enseña sola el
+            // precio normal, sin tener que volver a publicar.
+            // Cuando exista la pasarela de pago, estos importes deberán coincidir con
+            // la tabla planes y con los precios creados en Stripe.
+            var finOferta = new DateTime(2026, 12, 31);
+            // Quien se da de alta con la oferta conserva el precio en los cobros hasta esta
+            // fecha inclusive; desde el día siguiente paga el precio normal. Debe coincidir
+            // con la fecha que use la pasarela para retirar el descuento.
+            var finPrecioOferta = new DateTime(2027, 2, 28);
+            bool ofertaActiva = DateTime.Today <= finOferta;
+            var precioNormal = new Dictionary<string, int> { ["basico"] = 25, ["standard"] = 60, ["premium"] = 90 };
+            var precioOferta = new Dictionary<string, int> { ["basico"] = 18, ["standard"] = 35, ["premium"] = 60 };
+            int Precio(string plan) => ofertaActiva ? precioOferta[plan] : precioNormal[plan];
+        }
+
+        @if (ofertaActiva)
+        {
+            <div class="oferta-lanzamiento" role="note">
+                <div class="oferta-icono"><i class="fas fa-gift"></i></div>
+                <div>
+                    <div class="oferta-titulo">@L["OFERTA POR LANZAMIENTO"]</div>
+                    <div class="oferta-validez">
+                        <i class="far fa-calendar-alt me-1"></i>@L["Válido hasta {0}", finOferta.ToString("dd/MM/yyyy")]
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="row g-4 align-items-center justify-content-center">
 
-            <!-- Miembro S+ -->
+            <!-- Básico -->
             <div class="col-md-6 col-lg-4">
                 <div class="pricing-card">
                     <div class="plan-name">
-                        <i class="fas fa-leaf me-2" style="color:#10B981;"></i>@L["Miembro S+"]
+                        <i class="fas fa-leaf me-2" style="color:#10B981;"></i>@L["Básico"]
                     </div>
-                    <div class="plan-price"><sup>€</sup>17,99 <span class="period">/mes</span></div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("basico") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            @* Precio normal tachado: la etiqueta oculta aclara a los lectores de pantalla qué es *@
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["basico"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
                     <div class="plan-desc">
                         @L["Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización."]
                     </div>
                     <hr />
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Acceso a"] <strong>@L["3 módulos"]</strong> a elegir</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>15 horas</strong> @L["de soporte incluidas"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar S+"]</a>
+                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar Básico"]</a>
                 </div>
             </div>
 
-            <!-- Miembro P+ (popular) -->
+            <!-- Standard (popular) -->
             <div class="col-md-6 col-lg-4">
                 <div class="pricing-card popular">
                     <div class="popular-badge"><i class="fas fa-fire me-1"></i> @L["Más popular"]</div>
                     <div class="plan-name">
-                        <i class="fas fa-rocket me-2" style="color:#3B82F6;"></i>@L["Miembro P+"]
+                        <i class="fas fa-rocket me-2" style="color:#3B82F6;"></i>@L["Standard"]
                     </div>
-                    <div class="plan-price"><sup>€</sup>22,99 <span class="period">/mes</span></div>
+                    <div class="plan-etiqueta">
+                        <i class="fas fa-cross"></i> @L["Ideal para pastores de sede"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("standard") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["standard"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
                     <div class="plan-desc">
-                        @L["La opción más elegida. Acceso ampliado para iglesias en crecimiento que necesitan mayor flexibilidad."]
-                    </div>
-                    <hr />
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Acceso a"] <strong>@L["5 módulos"]</strong> a elegir</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>30 horas</strong> @L["de soporte incluidas"]</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Dashboard con gráficas avanzadas"]</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-primary">@L["Contratar P+"]</a>
-                </div>
-            </div>
-
-            <!-- Miembro Max+ -->
-            <div class="col-md-6 col-lg-4">
-                <div class="pricing-card">
-                    <div class="plan-name">
-                        <i class="fas fa-crown me-2" style="color:#F59E0B;"></i>@L["Miembro Max+"]
-                    </div>
-                    <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#92680a;border-radius:20px;padding:3px 12px;font-size:0.77rem;font-weight:700;margin-bottom:10px;">
-                        <i class="fas fa-cross"></i> @L["Especial para Pastores"]
-                    </div>
-                    <div class="plan-price"><sup>€</sup>39,99 <span class="period">/mes</span></div>
-                    <div class="plan-desc">
-                        @L["El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación."]
+                        @L["El plan ideal para empezar: todos los módulos para el pastor que dirige una sede."]
                     </div>
                     <hr />
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Multi-sede"]</strong> incluido</span></div>
-                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>45 horas</strong> @L["de soporte incluidas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Dashboard con gráficas avanzadas"]</span></div>
+                    <a href="#contacto" class="btn btn-plan btn-plan-primary">@L["Contratar Standard"]</a>
+                </div>
+            </div>
+
+            <!-- Premium -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card">
+                    <div class="plan-name">
+                        <i class="fas fa-crown me-2" style="color:#F59E0B;"></i>@L["Premium"]
+                    </div>
+                    <div class="plan-etiqueta">
+                        <i class="fas fa-church"></i> @L["Para pastores con varias sedes"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("premium") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["premium"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["Para el pastor que dirige varias sedes y necesita verlas todas desde un mismo panel."]
+                    </div>
+                    <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Multi-sede"]</strong>: @L["varias sedes en una misma cuenta"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Soporte prioritario"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Personalización de módulos"]</span></div>
-                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar Max+"]</a>
+                    <a href="#contacto" class="btn btn-plan btn-plan-outline">@L["Contratar Premium"]</a>
                 </div>
             </div>
 
         </div>
+        @if (ofertaActiva)
+        {
+            @* Condiciones de la oferta a la vista antes de pagar: evita sorpresas y
+               reclamaciones cuando se pase al precio normal. *@
+            <p class="text-center mt-4 mb-0 fw-semibold" style="font-size:0.9rem;color:#B91C1C;">
+                <i class="fas fa-tag me-1"></i>
+                @L["Contrata antes del {0} y mantén el precio de oferta hasta el {1}. Después se aplica el precio normal.",
+                   finOferta.ToString("dd/MM/yyyy"), finPrecioOferta.ToString("dd/MM/yyyy")]
+            </p>
+        }
         <p class="text-center text-muted mt-4" style="font-size:0.87rem;">
             <i class="fas fa-info-circle me-1"></i>
             @L["¿Necesitas una solución personalizada?"]
@@ -1604,7 +1722,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         var campos = ['cNombre','cApellidos','cEmail','cPais','cCiudad','cIglesia','cMensaje'];
         for (var i = 0; i < campos.length; i++) {
             if (!document.getElementById(campos[i]).value.trim()) {
-                Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Por favor, completa todos los campos obligatorios.', confirmButtonColor: '#1E3A8A' });
+                Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: T.mCompletaObligatorios, confirmButtonColor: '#1E3A8A' });
                 return;
             }
         }
@@ -1629,17 +1747,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 if (res.ok) {
                     Swal.fire({
                         icon: 'success',
-                        title: '¡Mensaje enviado!',
-                        text: 'Nos pondremos en contacto contigo en menos de 24 horas.',
+                        title: T.mMensajeEnviado,
+                        text: T.mContactoEn24h,
                         confirmButtonColor: '#1E3A8A'
                     });
                     document.getElementById('frmContacto').reset();
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Error', text: res.mensaje || 'No se pudo enviar.', confirmButtonColor: '#1E3A8A' });
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.mensaje || T.mNoEnviar, confirmButtonColor: '#1E3A8A' });
                 }
             },
             error: function () {
-                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo enviar el mensaje. Inténtalo de nuevo.', confirmButtonColor: '#1E3A8A' });
+                Swal.fire({ icon: 'error', title: T.mErrorConexion, text: T.mNoEnviarMensaje, confirmButtonColor: '#1E3A8A' });
             }
         });
     }

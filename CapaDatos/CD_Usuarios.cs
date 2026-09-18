@@ -262,6 +262,17 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>
+        /// Rol de un usuario de la iglesia activa, o null si no existe en ella.
+        /// </summary>
+        public string? ObtenerRolDeUsuario(int ID_usuario)
+        {
+            return _context.Usuarios
+                .Where(u => u.ID_usuario == ID_usuario)
+                .Select(u => u.Rol)
+                .FirstOrDefault();
+        }
+
         public int ObtenerSedeDeUsuario(int ID_usuario)
         {
             // Usado por CN_Usuarios para obtener el ID_sede real del usuario a editar para sincronizar Permisos.
@@ -468,9 +479,14 @@ namespace CapaDatos
                     return false;
                 }
                 // Si sedeID es 1000, el AdminGlobal puede eliminar el usuario.
+                // Todo en una transacción: las filas de usuario_sedes tienen FK hacia
+                // usuarios y se borran con ExecuteDelete, que va fuera de SaveChanges.
+                using var transaccion = _context.Database.BeginTransaction();
+                new CD_UsuarioSedes(_context).LimpiarAntesDeEliminarUsuario(id);
                 EliminarPermisos(id);
                 _context.Usuarios.Remove(u);
                 _context.SaveChanges();
+                transaccion.Commit();
                 mensaje = "Usuario eliminado";
                 return true;
             }
@@ -558,6 +574,20 @@ namespace CapaDatos
             return _context.Usuarios.IgnoreQueryFilters()
                 .AsNoTracking()
                 .FirstOrDefault(u => u.correo_electronico == correo);
+        }
+
+        /// <summary>
+        /// Sustituye el hash de la contraseña de un usuario (migración al formato nuevo en el login).
+        /// </summary>
+        /// <remarks>
+        /// Sin filtro por iglesia porque se ejecuta durante el login, antes de que exista
+        /// la sesión. Solo cambia la columna de la contraseña.
+        /// </remarks>
+        public void ActualizarHashClave(int idUsuario, string nuevoHash)
+        {
+            _context.Usuarios.IgnoreQueryFilters()
+                .Where(u => u.ID_usuario == idUsuario)
+                .ExecuteUpdate(s => s.SetProperty(u => u.contrasenia, nuevoHash));
         }
 
         /// <summary>

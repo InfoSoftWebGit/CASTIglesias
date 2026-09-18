@@ -25,7 +25,7 @@
     <div class="card shadow-sm" style="border:none; border-radius:12px; overflow:hidden">
         <div class="card-header card-header-sala d-flex justify-content-between align-items-center">
             <span><i class="fas fa-door-open me-2"></i>@L["Gestión de Salas"]</span>
-            <button class="btn btn-light btn-sm fw-semibold" onclick="abrirModalNueva()">
+            <button data-permiso="AjustesCrearEditar" class="btn btn-light btn-sm fw-semibold" onclick="abrirModalNueva()">
                 <i class="fas fa-plus me-1"></i> @L["Nueva sala"]
             </button>
         </div>
@@ -172,10 +172,10 @@ $(document).ready(function () {
                         <button class="btn btn-sm btn-info text-white btn-eventos" data-id="${d.id_sala}" title="Ver reservas">
                             <i class="fas fa-calendar-check"></i>
                         </button>
-                        <button class="btn btn-sm btn-primary btn-editar" data-id="${d.id_sala}" title="Editar">
+                        <button data-permiso="AjustesCrearEditar" class="btn btn-sm btn-primary btn-editar" data-id="${d.id_sala}" title="Editar">
                             <i class="fas fa-pen"></i>
                         </button>
-                        <button class="btn btn-sm btn-danger btn-eliminar" data-id="${d.id_sala}" title="Eliminar">
+                        <button data-permiso="AjustesEliminar" class="btn btn-sm btn-danger btn-eliminar" data-id="${d.id_sala}" title="Eliminar">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>`
@@ -211,10 +211,10 @@ $(document).ready(function () {
         const row = dt.row($(this).closest('tr')).data();
         if (!row) return;
         Swal.fire({
-            title: '¿Eliminar sala?',
+            title: T.mEliminarSala,
             text: `${T.eliminarSala} "${row.nombre_sala}"?`,
             icon: 'warning', showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar', cancelButtonText: 'No'
+            confirmButtonText: T.mSiEliminar, cancelButtonText: 'No'
         }).then(r => {
             if (!r.isConfirmed) return;
             $.post(urlEliminar, { idSala: row.id_sala }, res => {
@@ -271,7 +271,7 @@ function toggleReservaFields() {
 
 function guardarSala() {
     const nombre = $('#txtNombreSala').val().trim();
-    if (!nombre) { $('#errSala').removeClass('d-none').text('El nombre es obligatorio.'); return; }
+    if (!nombre) { $('#errSala').removeClass('d-none').text(T.mNombreObligatorio); return; }
 
     $('#errSala').addClass('d-none');
     $.post(urlGuardar, {

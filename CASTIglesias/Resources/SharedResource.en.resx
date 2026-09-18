@@ -1097,9 +1097,6 @@
   <data name="Congregantes — Listado" xml:space="preserve"><value>Congregants — List</value></data>
   <data name="Conoce a cada persona de tu iglesia" xml:space="preserve"><value>Know every person in your church</value></data>
   <data name="Contacto" xml:space="preserve"><value>Contact</value></data>
-  <data name="Contratar Max+" xml:space="preserve"><value>Get Max+</value></data>
-  <data name="Contratar P+" xml:space="preserve"><value>Get P+</value></data>
-  <data name="Contratar S+" xml:space="preserve"><value>Get S+</value></data>
   <data name="Control de diezmos y ofrendas por concepto y miembro. Gráficas mensuales y anuales. Exportación a Excel." xml:space="preserve"><value>Track tithes and offerings by category and member. Monthly and yearly charts. Excel export.</value></data>
   <data name="Control económico" xml:space="preserve"><value>Financial control</value></data>
   <data name="Control total de las finanzas de tu iglesia" xml:space="preserve"><value>Full control of your church finances</value></data>
@@ -1224,9 +1221,6 @@
   <data name="May" xml:space="preserve"><value>May</value></data>
   <data name="Mensaje" xml:space="preserve"><value>Message</value></data>
   <data name="Mensual" xml:space="preserve"><value>Monthly</value></data>
-  <data name="Miembro Max+" xml:space="preserve"><value>Max+ Member</value></data>
-  <data name="Miembro P+" xml:space="preserve"><value>P+ Member</value></data>
-  <data name="Miembro S+" xml:space="preserve"><value>S+ Member</value></data>
   <data name="Miembro que registra" xml:space="preserve"><value>Recorded by</value></data>
   <data name="Miembros activos" xml:space="preserve"><value>Active members</value></data>
   <data name="Miembros del ministerio:" xml:space="preserve"><value>Ministry members:</value></data>
@@ -1378,4 +1372,348 @@
   <data name="Pastor de Sede" xml:space="preserve"><value>Campus Pastor</value></data>
   <data name="Total en zona {0}" xml:space="preserve"><value>Total in {0} zone</value></data>
   <data name="Invitados / Visitantes" xml:space="preserve"><value>Guests / Visitors</value></data>
+  <!-- ══ Permisos y sedes por usuario (usuario_sedes) ═══════════════ -->
+  <data name="No tienes permiso para acceder a esta sección." xml:space="preserve"><value>You do not have permission to access this section.</value></data>
+  <data name="Sedes con acceso" xml:space="preserve"><value>Campuses with access</value></data>
+  <data name="La sede principal del usuario siempre está incluida." xml:space="preserve"><value>The user's main campus is always included.</value></data>
+  <data name="Todas las sedes (también las que se abran en el futuro)" xml:space="preserve"><value>All campuses (including those opened in the future)</value></data>
+  <!-- ══ Planes y oferta de lanzamiento ═══════════════════════════════ -->
+  <data name="OFERTA POR LANZAMIENTO" xml:space="preserve"><value>LAUNCH OFFER</value></data>
+  <data name="Válido hasta {0}" xml:space="preserve"><value>Valid until {0}</value></data>
+  <data name="Básico" xml:space="preserve"><value>Basic</value></data>
+  <data name="Standard" xml:space="preserve"><value>Standard</value></data>
+  <data name="Premium" xml:space="preserve"><value>Premium</value></data>
+  <data name="/mes" xml:space="preserve"><value>/month</value></data>
+  <data name="Antes:" xml:space="preserve"><value>Before:</value></data>
+  <data name="Contratar Básico" xml:space="preserve"><value>Get Basic</value></data>
+  <data name="Contratar Standard" xml:space="preserve"><value>Get Standard</value></data>
+  <data name="Contratar Premium" xml:space="preserve"><value>Get Premium</value></data>
+  <data name="IVA (21 %) incluido" xml:space="preserve"><value>VAT (21%) included</value></data>
+  <data name="Ideal para pastores de sede" xml:space="preserve"><value>Ideal for campus pastors</value></data>
+  <data name="El plan ideal para empezar: todos los módulos para el pastor que dirige una sede." xml:space="preserve"><value>The ideal plan to get started: every module for the pastor leading one campus.</value></data>
+  <data name="Para pastores con varias sedes" xml:space="preserve"><value>For multi-campus pastors</value></data>
+  <data name="Para el pastor que dirige varias sedes y necesita verlas todas desde un mismo panel." xml:space="preserve"><value>For the pastor leading several campuses who needs to see them all from one dashboard.</value></data>
+  <data name="varias sedes en una misma cuenta" xml:space="preserve"><value>several campuses in one account</value></data>
+  <data name="Contrata antes del {0} y mantén el precio de oferta hasta el {1}. Después se aplica el precio normal." xml:space="preserve"><value>Sign up before {0} and keep the offer price until {1}. The regular price applies afterwards.</value></data>
+  <data name="Iglesia" xml:space="preserve">
+    <value>Church</value>
+  </data>
+  <data name="Líder" xml:space="preserve">
+    <value>Leader</value>
+  </data>
+  <data name="Lista de {0}" xml:space="preserve">
+    <value>{0} list</value>
+  </data>
+  <data name="El usuario fue eliminado" xml:space="preserve">
+    <value>The user was deleted</value>
+  </data>
+  <data name="No se pudo eliminar el usuario" xml:space="preserve">
+    <value>The user could not be deleted</value>
+  </data>
+  <data name="Usuario creado con éxito" xml:space="preserve">
+    <value>User created successfully</value>
+  </data>
+  <data name="Compruebe su bandeja de entrada para obtener la contraseña &lt;b&gt;temporal&lt;/b&gt;." xml:space="preserve">
+    <value>Check your inbox for the &lt;b&gt;temporary&lt;/b&gt; password.</value>
+  </data>
+  <data name="Error al guardar el usuario" xml:space="preserve">
+    <value>Error saving the user</value>
+  </data>
+  <data name="Los cambios se guardaron y el estado fue avanzado." xml:space="preserve">
+    <value>The changes were saved and the status was advanced.</value>
+  </data>
+  <data name="Error en la solicitud." xml:space="preserve">
+    <value>Request error.</value>
+  </data>
+  <data name="Error en la solicitud AJAX." xml:space="preserve">
+    <value>AJAX request error.</value>
+  </data>
+  <data name="Error en la solicitud AJAX al guardar." xml:space="preserve">
+    <value>AJAX request error while saving.</value>
+  </data>
+  <data name="Error de conexión" xml:space="preserve">
+    <value>Connection error</value>
+  </data>
+  <data name="Error desconocido." xml:space="preserve">
+    <value>Unknown error.</value>
+  </data>
+  <data name="Error al procesar la solicitud." xml:space="preserve">
+    <value>The request could not be processed.</value>
+  </data>
+  <data name="Error al guardar." xml:space="preserve">
+    <value>Error while saving.</value>
+  </data>
+  <data name="No se pudo eliminar." xml:space="preserve">
+    <value>It could not be deleted.</value>
+  </data>
+  <data name="No se pudo eliminar" xml:space="preserve">
+    <value>It could not be deleted</value>
+  </data>
+  <data name="No se pudo guardar." xml:space="preserve">
+    <value>It could not be saved.</value>
+  </data>
+  <data name="No se pudo enviar." xml:space="preserve">
+    <value>It could not be sent.</value>
+  </data>
+  <data name="No se pudo eliminar el concepto." xml:space="preserve">
+    <value>The concept could not be deleted.</value>
+  </data>
+  <data name="No se pudo eliminar el ministerio." xml:space="preserve">
+    <value>The ministry could not be deleted.</value>
+  </data>
+  <data name="No se pudo eliminar la Zona." xml:space="preserve">
+    <value>The zone could not be deleted.</value>
+  </data>
+  <data name="No se pudo quitar el miembro." xml:space="preserve">
+    <value>The member could not be removed.</value>
+  </data>
+  <data name="No se pudo obtener el usuario para editar" xml:space="preserve">
+    <value>The user to edit could not be loaded</value>
+  </data>
+  <data name="No se pudieron cargar los datos." xml:space="preserve">
+    <value>The data could not be loaded.</value>
+  </data>
+  <data name="No se pudieron cargar los permisos del usuario." xml:space="preserve">
+    <value>The user's permissions could not be loaded.</value>
+  </data>
+  <data name="No se pudo generar el calendario." xml:space="preserve">
+    <value>The calendar could not be generated.</value>
+  </data>
+  <data name="No se pudo generar el Excel." xml:space="preserve">
+    <value>The Excel file could not be generated.</value>
+  </data>
+  <data name="No se pudo generar el Excel combinado." xml:space="preserve">
+    <value>The combined Excel file could not be generated.</value>
+  </data>
+  <data name="No se pudo descargar el archivo." xml:space="preserve">
+    <value>The file could not be downloaded.</value>
+  </data>
+  <data name="No se pudo descargar el archivo combinado." xml:space="preserve">
+    <value>The combined file could not be downloaded.</value>
+  </data>
+  <data name="No se pudo enviar el mensaje. Inténtalo de nuevo." xml:space="preserve">
+    <value>The message could not be sent. Please try again.</value>
+  </data>
+  <data name="Error al asignar el miembro." xml:space="preserve">
+    <value>The member could not be assigned.</value>
+  </data>
+  <data name="Error al buscar el miembro por ID." xml:space="preserve">
+    <value>Error looking up the member by ID.</value>
+  </data>
+  <data name="Error al guardar el ministerio." xml:space="preserve">
+    <value>Error saving the ministry.</value>
+  </data>
+  <data name="Error al guardar la Zona." xml:space="preserve">
+    <value>Error saving the zone.</value>
+  </data>
+  <data name="Error al cargar conceptos:" xml:space="preserve">
+    <value>Error loading concepts:</value>
+  </data>
+  <data name="Error al cargar cultos:" xml:space="preserve">
+    <value>Error loading services:</value>
+  </data>
+  <data name="Fallo al cargar cultos:" xml:space="preserve">
+    <value>Failed to load services:</value>
+  </data>
+  <data name="Error al cargar datos de DataTables:" xml:space="preserve">
+    <value>Error loading DataTables data:</value>
+  </data>
+  <data name="Error al formatear fecha:" xml:space="preserve">
+    <value>Error formatting date:</value>
+  </data>
+  <data name="Error al obtener permisos:" xml:space="preserve">
+    <value>Error loading permissions:</value>
+  </data>
+  <data name="Error en la búsqueda de miembros:" xml:space="preserve">
+    <value>Error searching members:</value>
+  </data>
+  <data name="Error en la búsqueda por ID:" xml:space="preserve">
+    <value>Error searching by ID:</value>
+  </data>
+  <data name="Error en la petición de conceptos:" xml:space="preserve">
+    <value>Error requesting concepts:</value>
+  </data>
+  <data name="Asistencia guardada correctamente." xml:space="preserve">
+    <value>Attendance saved successfully.</value>
+  </data>
+  <data name="Asistencia eliminada correctamente." xml:space="preserve">
+    <value>Attendance deleted successfully.</value>
+  </data>
+  <data name="El concepto fue eliminado correctamente." xml:space="preserve">
+    <value>The concept was deleted successfully.</value>
+  </data>
+  <data name="El ministerio fue eliminado correctamente." xml:space="preserve">
+    <value>The ministry was deleted successfully.</value>
+  </data>
+  <data name="La Zona fue eliminada correctamente." xml:space="preserve">
+    <value>The zone was deleted successfully.</value>
+  </data>
+  <data name="Rol eliminado." xml:space="preserve">
+    <value>Role deleted.</value>
+  </data>
+  <data name="El nombre es obligatorio." xml:space="preserve">
+    <value>The name is required.</value>
+  </data>
+  <data name="El nombre del rol es obligatorio." xml:space="preserve">
+    <value>The role name is required.</value>
+  </data>
+  <data name="El campo Nombres es obligatorio." xml:space="preserve">
+    <value>The first name field is required.</value>
+  </data>
+  <data name="La fecha es obligatoria." xml:space="preserve">
+    <value>The date is required.</value>
+  </data>
+  <data name="La fecha del gasto es obligatoria." xml:space="preserve">
+    <value>The expense date is required.</value>
+  </data>
+  <data name="La fecha del seguimiento es obligatoria." xml:space="preserve">
+    <value>The follow-up date is required.</value>
+  </data>
+  <data name="El tipo de seguimiento es obligatorio." xml:space="preserve">
+    <value>The follow-up type is required.</value>
+  </data>
+  <data name="La persona a cargo es obligatoria." xml:space="preserve">
+    <value>The person in charge is required.</value>
+  </data>
+  <data name="La persona a cargo debe seleccionarse de la lista." xml:space="preserve">
+    <value>The person in charge must be picked from the list.</value>
+  </data>
+  <data name="El turno y la fecha son obligatorios." xml:space="preserve">
+    <value>The shift and the date are required.</value>
+  </data>
+  <data name="La cantidad debe ser mayor que cero." xml:space="preserve">
+    <value>The amount must be greater than zero.</value>
+  </data>
+  <data name="Razón obligatoria" xml:space="preserve">
+    <value>Reason required</value>
+  </data>
+  <data name="Cantidad mayor que 0" xml:space="preserve">
+    <value>Amount greater than 0</value>
+  </data>
+  <data name="Edad fuera del rango" xml:space="preserve">
+    <value>Age out of range</value>
+  </data>
+  <data name="Debe ingresar el nombre del miembro a cargo." xml:space="preserve">
+    <value>Enter the name of the member in charge.</value>
+  </data>
+  <data name="Debes seleccionar un miembro de la lista." xml:space="preserve">
+    <value>You must pick a member from the list.</value>
+  </data>
+  <data name="Selecciona un miembro de la lista." xml:space="preserve">
+    <value>Pick a member from the list.</value>
+  </data>
+  <data name="Primero selecciona un miembro de la lista." xml:space="preserve">
+    <value>First pick a member from the list.</value>
+  </data>
+  <data name="Selecciona el miembro que registra el gasto." xml:space="preserve">
+    <value>Pick the member who records the expense.</value>
+  </data>
+  <data name="Debes seleccionar un rol." xml:space="preserve">
+    <value>You must pick a role.</value>
+  </data>
+  <data name="Todos los campos de Nombre, Apellido y Correo son obligatorios." xml:space="preserve">
+    <value>First name, last name and e-mail are all required.</value>
+  </data>
+  <data name="Por favor, completa todos los campos obligatorios." xml:space="preserve">
+    <value>Please fill in all the required fields.</value>
+  </data>
+  <data name="Completa el nombre y la fecha primero." xml:space="preserve">
+    <value>Fill in the name and the date first.</value>
+  </data>
+  <data name="Genera primero el calendario." xml:space="preserve">
+    <value>Generate the calendar first.</value>
+  </data>
+  <data name="Guarda o cancela la línea actual antes de añadir otra." xml:space="preserve">
+    <value>Save or cancel the current row before adding another one.</value>
+  </data>
+  <data name="El Administrador Global debe seleccionar una sede." xml:space="preserve">
+    <value>The global administrator must pick a campus.</value>
+  </data>
+  <data name="¿Confirmar?" xml:space="preserve">
+    <value>Confirm?</value>
+  </data>
+  <data name="¿Deseas guardar los cambios?" xml:space="preserve">
+    <value>Do you want to save the changes?</value>
+  </data>
+  <data name="¿Deseas registrar este líder?" xml:space="preserve">
+    <value>Do you want to register this leader?</value>
+  </data>
+  <data name="¿Deseas eliminar este líder?" xml:space="preserve">
+    <value>Do you want to delete this leader?</value>
+  </data>
+  <data name="¿Deseas registrar este seguimiento?" xml:space="preserve">
+    <value>Do you want to register this follow-up?</value>
+  </data>
+  <data name="¿Deseas eliminar este seguimiento?" xml:space="preserve">
+    <value>Do you want to delete this follow-up?</value>
+  </data>
+  <data name="¿Eliminar este culto?" xml:space="preserve">
+    <value>Delete this service?</value>
+  </data>
+  <data name="¿Eliminar este rol?" xml:space="preserve">
+    <value>Delete this role?</value>
+  </data>
+  <data name="¿Eliminar evento?" xml:space="preserve">
+    <value>Delete event?</value>
+  </data>
+  <data name="¿Eliminar sala?" xml:space="preserve">
+    <value>Delete room?</value>
+  </data>
+  <data name="Se eliminarán también sus bloques y los roles configurados." xml:space="preserve">
+    <value>Its blocks and the roles set up for it will be deleted too.</value>
+  </data>
+  <data name="Sí, guardar" xml:space="preserve">
+    <value>Yes, save</value>
+  </data>
+  <data name="¡Mensaje enviado!" xml:space="preserve">
+    <value>Message sent!</value>
+  </data>
+  <data name="Nos pondremos en contacto contigo en menos de 24 horas." xml:space="preserve">
+    <value>We will get in touch with you within 24 hours.</value>
+  </data>
+  <data name="Editar líder" xml:space="preserve">
+    <value>Edit leader</value>
+  </data>
+  <data name="Editar rol del miembro" xml:space="preserve">
+    <value>Edit member role</value>
+  </data>
+  <data name="Editar gasto" xml:space="preserve">
+    <value>Edit expense</value>
+  </data>
+  <data name="Datos de la nueva Zona" xml:space="preserve">
+    <value>New zone details</value>
+  </data>
+  <data name="Datos del nuevo ministerio" xml:space="preserve">
+    <value>New ministry details</value>
+  </data>
+  <data name="Quitar de la familia" xml:space="preserve">
+    <value>Remove from family</value>
+  </data>
+  <data name="Quitar de la zona" xml:space="preserve">
+    <value>Remove from zone</value>
+  </data>
+  <data name="Selecciona un miembro" xml:space="preserve">
+    <value>Pick a member</value>
+  </data>
+  <data name="Selecciona un culto" xml:space="preserve">
+    <value>Pick a service</value>
+  </data>
+  <data name="No hay cultos disponibles." xml:space="preserve">
+    <value>No services available.</value>
+  </data>
+  <data name="No hay registros de seguimiento para este miembro." xml:space="preserve">
+    <value>No follow-up records for this member.</value>
+  </data>
+  <data name="No se encontraron permisos específicos para el usuario. Permisos por defecto: ninguno." xml:space="preserve">
+    <value>No specific permissions found for the user. Default permissions: none.</value>
+  </data>
+  <data name="Sin zona" xml:space="preserve">
+    <value>No zone</value>
+  </data>
+  <data name="Pendiente de configurar" xml:space="preserve">
+    <value>Pending setup</value>
+  </data>
+  <data name="Añadir miembro a {0}" xml:space="preserve">
+    <value>Add member to {0}</value>
+  </data>
 </root>

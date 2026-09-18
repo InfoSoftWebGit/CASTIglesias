@@ -17,6 +17,9 @@ namespace CapaNegocio
 
         public bool EsTipoValido(string tipo) => CD_ZonaDiscipulado.EsTipoValido(tipo);
 
+        /// <summary>Tipo de zona de una asignación miembro-zona (null si no existe).</summary>
+        public string? ObtenerTipoZonaDeRegistro(int idZgm) => _capaDatos.ObtenerTipoZonaDeRegistro(idZgm);
+
         /// <summary>
         /// Garantiza que la sede tenga las seis zonas por defecto de la aplicación.
         /// </summary>

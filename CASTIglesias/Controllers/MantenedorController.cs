@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using System.Security.Claims;
 using System;
 using System.IO;
 using CASTIglesias.Controllers; // Importación necesaria para MemoryStream
+using CASTIglesias.Models; // SesionClaims
 
 namespace CapaPresentaciónAdmin.Controllers
 {
@@ -28,6 +30,7 @@ namespace CapaPresentaciónAdmin.Controllers
         private readonly CN_Paises _cnPaises;
         private readonly CN_Culto _cnCulto;
         private readonly CN_ZonaDiscipulado _cnZonaDiscipulado;
+        private readonly CN_UsuarioSedes _cnUsuarioSedes;
 
         // Constructor con inyección de dependencias
         public MantenedorController(CN_Miembros negocioMiembros,
@@ -41,8 +44,10 @@ namespace CapaPresentaciónAdmin.Controllers
             CN_Paises cnPaises,
             CN_Culto cnCulto,
             CN_ZonaDiscipulado cnZonaDiscipulado,
+            CN_UsuarioSedes cnUsuarioSedes,
             CN_Permisos negocioPermisos) : base(cnSedes, negocioPermisos)
         {
+            _cnUsuarioSedes = cnUsuarioSedes;
             _cnMiembros = negocioMiembros;
             _cnDiezmo = negocioDiezmo;
             _cnUsuarios = negocioUsuarios;
@@ -60,6 +65,7 @@ namespace CapaPresentaciónAdmin.Controllers
         // ------------------------------------------------------------------------------------------------
         ///////////////////////////// APARTADO DE ZONAS //////////////////////////////
         #region Zonas
+        [RequierePermiso(nameof(Permisos.Zonas))]
         public IActionResult Zonas() => View();
 
         [HttpGet]
@@ -98,6 +104,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ZonasCrearEditar))]
         public JsonResult GuardarZona(Zona objeto)
         {
             object resultado;
@@ -122,6 +129,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ZonasEliminar))]
         public JsonResult EliminarZona(int id)
         {
             try
@@ -139,6 +147,7 @@ namespace CapaPresentaciónAdmin.Controllers
         // ------------------------------------------------------------------------------------------------
         ///////////////////////////// APARTADO DE GRUPOS //////////////////////////////
         #region Grupos
+        [RequierePermiso(nameof(Permisos.Grupos))]
         public IActionResult Grupos() => View();
 
         [HttpGet]
@@ -190,6 +199,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GruposCrearEditar))]
         public JsonResult GuardarGrupos(Grupos objeto)
         {
             object resultado;
@@ -214,6 +224,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GruposEliminar))]
         public JsonResult EliminarGrupo(int id)
         {
             try
@@ -231,6 +242,7 @@ namespace CapaPresentaciónAdmin.Controllers
         #endregion Grupos
         // ------------------------------------------------------------------------------------------------
         #region MINISTERIOS
+        [RequierePermiso(nameof(Permisos.Ministerio))]
         public IActionResult Ministerios() => View();
 
         [HttpGet]
@@ -268,6 +280,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MinisterioCrearEditar))]
         public JsonResult GuardarMinisterio(Ministerio objeto)
         {
             object resultado;
@@ -293,6 +306,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MinisterioEliminar))]
         public JsonResult EliminarMinisterio(int id)
         {
             try
@@ -369,6 +383,7 @@ namespace CapaPresentaciónAdmin.Controllers
             return "fas fa-users-cog";
         }
 
+        [RequierePermiso(nameof(Permisos.Ministerio))]
         public IActionResult Servicios(int id)
         {
             int sedeID = ObtenerIdSedeUsuario();
@@ -389,6 +404,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ministerio))]
         public JsonResult ListarMiembrosServicio(int idMinisterio)
         {
             try
@@ -404,6 +420,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MinisterioCrearEditar))]
         public JsonResult GuardarMiembroServicio(int idMiembro, int idMinisterio, string rol,
                                                   string esMinistra = "No", int idAsignacion = 0)
         {
@@ -427,6 +444,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MinisterioEliminar))]
         public JsonResult EliminarMiembroServicio(int idAsignacion)
         {
             try
@@ -446,6 +464,7 @@ namespace CapaPresentaciónAdmin.Controllers
         ///////////////////////////// APARTADO DE CULTOS //////////////////////////////
         #region Cultos
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Cultos() => View();
 
         [HttpGet]
@@ -478,6 +497,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarCulto([FromBody] CapaEntidad.CultoConBloquesDTO dto)
         {
             try
@@ -493,6 +513,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarCulto(int id)
         {
             try
@@ -512,6 +533,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
         ///////////////////////////// APARTADO DE USUARIOS //////////////////////////////
         #region Usuarios
+        [RequierePermiso(nameof(Permisos.Usuarios))]
         public IActionResult Usuarios()
         {
             // Obtener el ID y Nombre de la Sede del usuario logueado
@@ -522,10 +544,33 @@ namespace CapaPresentaciónAdmin.Controllers
             ViewBag.sedeID = sedeID;
             ViewBag.nombre_sede = nombre_sede;
 
+            // Sedes que quien edita puede conceder: nadie da acceso a lo que no tiene
+            ViewBag.SedesAsignables = (_cnSedes.ListarSedes() ?? new List<Sedes>())
+                .Where(s => AccesoSedesActual.Permite(s.ID))
+                .ToList();
+            ViewBag.PuedeAsignarTodas = AccesoSedesActual.TodasLasSedes;
+
             return View();
         }
 
+        /// <summary>
+        /// Sedes guardadas de un usuario, para marcar las casillas al editarlo.
+        /// </summary>
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Usuarios))]
+        public JsonResult ObtenerSedesUsuario(int id)
+        {
+            // El filtro por iglesia impide leer las sedes de un usuario de otra iglesia
+            var sedes = _cnUsuarioSedes.ListarSedesDeUsuario(id);
+            return Json(new
+            {
+                todas = sedes.Any(s => s == null),
+                sedes = sedes.Where(s => s != null).Select(s => s!.Value)
+            });
+        }
+
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Usuarios))]
         public JsonResult ListarUsuarios()
         {
             try
@@ -544,6 +589,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.UsuariosCrearEditar))]
         public JsonResult GuardarUsuario(UsuarioDTO_Permisos objeto)
         {
             try
@@ -558,9 +604,41 @@ namespace CapaPresentaciónAdmin.Controllers
                 string mensaje;
 
                 // 3. Usar sedeID INT directamente.
-                object resultado = objeto.ID_usuario == 0
+                bool esNuevo = objeto.ID_usuario == 0;
+                int idUsuarioEditado = objeto.ID_usuario;
+
+                // Nadie puede crear o editar a alguien por encima de su rol, ni dar permisos
+                // que él mismo no tiene. Si no, un Miembro con "Usuarios: crear/editar"
+                // podría convertirse en pastor o darse todos los permisos.
+                if (!esNuevo && !PuedeGestionarUsuario(idUsuarioEditado, out string motivo))
+                    return Json(new { resultado = false, mensaje = motivo });
+                if (!PuedeAsignarRol(objeto.Rol))
+                    return Json(new { resultado = false, mensaje = "No puedes asignar ese rol." });
+                if (EsRol(objeto.Rol, "Miembro") && !PermisosDentroDeLosPropios(objeto.Permisos))
+                    return Json(new { resultado = false, mensaje = "No puedes conceder permisos que tú no tienes." });
+
+                // En la edición, la sede principal es la que ya tiene el usuario en la BBDD
+                // (EditarUsuario no la cambia); se lee antes porque el DTO la sobrescribe.
+                int sedePrincipal = esNuevo ? sedeID : _cnUsuarios.ObtenerSedeDeUsuario(idUsuarioEditado);
+
+                object resultado = esNuevo
         ? _cnUsuarios.RegistrarUsuario(objeto, sedeID, out mensaje) // 👈 Debe aceptar UsuarioRecibido
         : _cnUsuarios.EditarUsuario(objeto, sedeID, out mensaje);
+
+                bool guardado = esNuevo ? (int)resultado > 0 : (bool)resultado;
+                if (esNuevo) idUsuarioEditado = (int)resultado;
+
+                // Sedes adicionales (usuario_sedes). Si fallan, el usuario ya está guardado:
+                // se avisa en el mensaje en lugar de dar toda la operación por fallida.
+                if (guardado && sedePrincipal > 0)
+                {
+                    if (!_cnUsuarioSedes.GuardarSedesDeUsuario(idUsuarioEditado, sedePrincipal,
+                            objeto.TodasLasSedes, objeto.SedesAdicionales, AccesoSedesActual,
+                            SesionClaims.ObtenerIdUsuario(User), out string mensajeSedes))
+                    {
+                        mensaje += ". " + mensajeSedes;
+                    }
+                }
 
                 return Json(new { resultado, mensaje });
             }
@@ -571,6 +649,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.UsuariosEliminar))]
         public JsonResult EliminarUsuario(int id)
         {
             try
@@ -582,6 +661,11 @@ namespace CapaPresentaciónAdmin.Controllers
                     throw new UnauthorizedAccessException("El usuario es Administrador Global. Debe seleccionar una sede específica para eliminar usuarios.");
                 }
 
+                if (id == SesionClaims.ObtenerIdUsuario(User))
+                    return Json(new { resultado = false, mensaje = "No puedes eliminar tu propio usuario." });
+                if (!PuedeGestionarUsuario(id, out string motivo))
+                    return Json(new { resultado = false, mensaje = motivo });
+
                 string mensaje;
                 // 3. Usar sedeID INT directamente.
                 bool resultado = _cnUsuarios.EliminarUsuario(id, sedeID, out mensaje);
@@ -592,7 +676,76 @@ namespace CapaPresentaciónAdmin.Controllers
                 return Json(new { resultado = false, mensaje = ErrorHelper.Mensaje(ex), error = true });
             }
         }
+        #region Reglas de jerarquía al gestionar usuarios
+        // Nivel de cada rol: cuanto menor, más alto. Coincide con los IDs del script de la vista.
+        private static readonly Dictionary<string, int> NivelRol = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AdminGlobal"] = 1,
+            ["PastorGeneral"] = 2,
+            ["PastorSede"] = 3,
+            ["Miembro"] = 4
+        };
+
+        private static bool EsRol(string? rol, string nombre) =>
+            string.Equals(rol?.Trim(), nombre, StringComparison.OrdinalIgnoreCase);
+
+        // Roles desconocidos cuentan como Miembro, el nivel más bajo
+        private static int NivelDe(string? rol) =>
+            rol != null && NivelRol.TryGetValue(rol.Trim(), out var nivel) ? nivel : NivelRol["Miembro"];
+
+        // El administrador de plataforma está por encima de todos (nivel 0)
+        private int NivelEditor() =>
+            SesionClaims.EsAdminPlataforma(User) ? 0 : NivelDe(User.FindFirst(ClaimTypes.Role)?.Value);
+
+        /// <summary>
+        /// Un rol se puede asignar si es igual o inferior al de quien edita. Un Miembro
+        /// solo puede crear Miembros.
+        /// </summary>
+        private bool PuedeAsignarRol(string? rol)
+        {
+            if (string.IsNullOrWhiteSpace(rol) || !NivelRol.ContainsKey(rol.Trim())) return false;
+            int editor = NivelEditor();
+            return editor == NivelRol["Miembro"] ? EsRol(rol, "Miembro") : NivelDe(rol) >= editor;
+        }
+
+        /// <summary>Solo se edita o elimina a usuarios de nivel igual o inferior.</summary>
+        private bool PuedeGestionarUsuario(int idUsuario, out string motivo)
+        {
+            motivo = string.Empty;
+            // El filtro por iglesia devuelve null para usuarios de otra iglesia
+            var rolDestino = _cnUsuarios.ObtenerRolDeUsuario(idUsuario);
+            if (rolDestino == null)
+            {
+                motivo = "Usuario no encontrado.";
+                return false;
+            }
+
+            int editor = NivelEditor();
+            bool permitido = editor == NivelRol["Miembro"]
+                ? EsRol(rolDestino, "Miembro")
+                : NivelDe(rolDestino) >= editor;
+
+            if (!permitido) motivo = "No puedes gestionar un usuario con un rol superior al tuyo.";
+            return permitido;
+        }
+
+        /// <summary>
+        /// Los permisos marcados para un Miembro deben ser un subconjunto de los de quien
+        /// edita. Los roles con acceso total los tienen todos, así que siempre pasan.
+        /// </summary>
+        private bool PermisosDentroDeLosPropios(Permisos? solicitados)
+        {
+            if (solicitados == null) return true;
+            var propios = RequierePermisoAttribute.ObtenerPermisos(HttpContext);
+
+            return typeof(Permisos).GetProperties()
+                .Where(p => p.PropertyType == typeof(bool))
+                .All(p => !(bool)p.GetValue(solicitados)! || (bool)p.GetValue(propios)!);
+        }
+        #endregion
+
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Usuarios))]
         public IActionResult ObtenerPermisosUsuario(int id) // 👈 1. Cambiar JsonResult a IActionResult
         {
             try
@@ -617,9 +770,11 @@ namespace CapaPresentaciónAdmin.Controllers
         // ------------------------------------------------------------------------------------------------
         ///////////////////////////// APARTADO DE DIEZMOS //////////////////////////////
         #region Diezmos
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public IActionResult Diezmos() => View();
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public JsonResult ListarDiezmos()
         {
             try
@@ -647,6 +802,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.DiezmosCrearEditar))]
         public JsonResult IngresarDiezmo(Diezmo objeto)
         {
             string mensaje;
@@ -671,6 +827,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.DiezmosEliminar))]
         public JsonResult EliminarDiezmo(int id)
         {
             string mensaje;
@@ -689,6 +846,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public IActionResult ExportarHistorialDiezmo(string fechainicio, string fechafin)
         {
             try

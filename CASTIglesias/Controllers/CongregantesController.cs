@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,9 +44,57 @@ namespace CASTIglesias.Controllers
         private readonly CN_ConfigJovenes _cnConfigJovenes = cnConfigJovenes;
         private readonly CN_ZonaDiscipulado _cnZonaDiscipulado = cnZonaDiscipulado;
         #endregion Constructor
+
+        #region Permisos por registro
+        // Visitantes, Simpatizantes, En proceso y Miembros comparten acciones (eliminar,
+        // avanzar/retroceder estado, guardar). El permiso se decide por el estado REAL del
+        // congregante en la BBDD, no por la pantalla que hace la llamada: si no, quien solo
+        // puede eliminar visitantes podría eliminar miembros llamando a la misma acción.
+        private static readonly Dictionary<string, string> ModuloPorEstado = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Visitante"] = nameof(Permisos.Visitantes),
+            ["Simpatizante"] = nameof(Permisos.Simpatizantes),
+            ["Proceso"] = nameof(Permisos.Proceso),
+            ["Miembro"] = nameof(Permisos.Miembros)
+        };
+
+        // Las zonas de discipulado comparten vista y acciones; cada tipo tiene su permiso
+        private static readonly Dictionary<string, string> ModuloPorTipoZona = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["hombres"] = nameof(Permisos.Hombres),
+            ["mujeres"] = nameof(Permisos.Mujeres),
+            ["ninos"] = nameof(Permisos.Ninos)
+        };
+
+        /// <param name="estado">Estado del congregante (Visitante, Simpatizante...).</param>
+        /// <param name="sufijo">"CrearEditar" o "Eliminar".</param>
+        private bool TienePermisoSobreEstado(string? estado, string sufijo)
+        {
+            // Estados desconocidos se tratan como Miembro, el permiso más restrictivo
+            var modulo = estado != null && ModuloPorEstado.TryGetValue(estado.Trim(), out var m)
+                ? m
+                : nameof(Permisos.Miembros);
+            return TienePermiso(modulo + sufijo);
+        }
+
+        private bool TienePermisoSobreCongregante(int idMiembro, string sufijo)
+        {
+            // El filtro por iglesia hace que un ID de otra iglesia "no exista": se deniega
+            var estado = _cnMiembros.ObtenerEstadoMiembro(idMiembro, out bool existe);
+            return existe && TienePermisoSobreEstado(estado, sufijo);
+        }
+
+        private bool TienePermisoSobreZona(string? tipo, string sufijo) =>
+            tipo != null && ModuloPorTipoZona.TryGetValue(tipo, out var modulo) && TienePermiso(modulo + sufijo);
+
+        private const string CrearEditar = "CrearEditar";
+        private const string Eliminar = "Eliminar";
+        #endregion Permisos por registro
+
         // GET: Congregamtes
         #region Miembros
         #region MÉTODOS COMUNES
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public IActionResult Miembros()
         {
             try
@@ -67,6 +116,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ListarMiembros(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
@@ -105,6 +155,13 @@ namespace CASTIglesias.Controllers
                 if (data == null)
                     return Json(new { resultado = 0, mensaje = "Los datos del miembro son inválidos." });
 
+                // Alta: permiso del estado con el que se crea. Edición: permiso del estado
+                // que tiene ahora en la BBDD (el que envía el navegador no es fiable).
+                bool permitido = data.id_miembro == 0
+                    ? TienePermisoSobreEstado(data.estado ?? "Miembro", CrearEditar)
+                    : TienePermisoSobreCongregante(data.id_miembro, CrearEditar);
+                if (!permitido) return SinPermiso();
+
                 // Asignamos sede desde backend
                 data.id_sede = sedeID;
 
@@ -137,6 +194,8 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                if (!TienePermisoSobreCongregante(id, Eliminar)) return SinPermiso();
+
                 int? sedeID_Nullable = ObtenerIdSedeUsuario();
 
                 // 🌟 CORRECCIÓN: Convertir NULL a 0 para el método de CN_Miembros (Eliminar)
@@ -158,6 +217,7 @@ namespace CASTIglesias.Controllers
 
         #region CONTADORES
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ContadorMiembros()
         {
             try
@@ -181,6 +241,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ContadorMiembrosBaja()
         {
             try
@@ -241,6 +302,7 @@ namespace CASTIglesias.Controllers
             }
         }
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Visitantes))]
         public JsonResult ContadorVisitantes()
         {
             try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Visitante") }); }
@@ -249,6 +311,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Simpatizantes))]
         public JsonResult ContadorSimpatizantes()
         {
             try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Simpatizante") }); }
@@ -257,6 +320,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Proceso))]
         public JsonResult ContadorEnProceso()
         {
             try { return Json(new { resultado = _cnMiembros.ContadorPorEstado(ObtenerIdSedeUsuario(), "Proceso") }); }
@@ -265,6 +329,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Familias))]
         public JsonResult ContadorFamilias()
         {
             try { return Json(new { resultado = _cnFamilias.ContadorFamilias(ObtenerIdSedeUsuario()) }); }
@@ -273,6 +338,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Matrimonios))]
         public JsonResult ContadorMatrimonios()
         {
             try { return Json(new { resultado = _cnMatrimonio.ContadorMatrimonios(ObtenerIdSedeUsuario()) }); }
@@ -281,6 +347,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Mujeres))]
         public JsonResult ContadorMujeresActivas()
         {
             try { return Json(new { resultado = _cnMiembros.ContadorMujeresActivas(ObtenerIdSedeUsuario()) }); }
@@ -289,6 +356,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Hombres))]
         public JsonResult ContadorHombres()
         {
             try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "hombres") }); }
@@ -299,6 +367,7 @@ namespace CASTIglesias.Controllers
         // La zona de jóvenes se cuenta por tipo igual que las demás de discipulado:
         // la configuración de edades solo filtra la vista, no la pertenencia.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Jovenes))]
         public JsonResult ContadorJovenes()
         {
             try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "jovenes") }); }
@@ -307,6 +376,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ninos))]
         public JsonResult ContadorNinos()
         {
             try { return Json(new { resultado = _cnZonaDiscipulado.ContadorMiembrosZona(ObtenerIdSedeUsuario(), "ninos") }); }
@@ -315,6 +385,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ContadorLideresActivos()
         {
             try { return Json(new { resultado = _cnLideres.ContadorLideresActivos(ObtenerIdSedeUsuario()) }); }
@@ -339,6 +410,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult GuardarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
             if (lista == null || lista.Count == 0)
@@ -353,6 +425,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult EditarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
             if (lista == null || lista.Count == 0)
@@ -365,6 +438,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult EliminarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
             if (lista == null || lista.Count == 0)
@@ -421,6 +495,7 @@ namespace CASTIglesias.Controllers
         #endregion OTROS MÉTODOS MIEMBROS
 
         #region Visitantes
+        [RequierePermiso(nameof(Permisos.Visitantes))]
         public IActionResult Visitantes() {
             try
             {
@@ -440,6 +515,7 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Visitantes))]
         public JsonResult ListarVisitantes(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
@@ -470,6 +546,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.VisitantesCrearEditar))]
         public JsonResult RegistrarMiembroVisitante([FromBody] MiembroDetalleDTO data)
         {
             try
@@ -507,6 +584,7 @@ namespace CASTIglesias.Controllers
         #endregion Visitantes
 
         #region Simpatizantes
+        [RequierePermiso(nameof(Permisos.Simpatizantes))]
         public IActionResult Simpatizantes() {
             try
             {
@@ -526,6 +604,7 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Simpatizantes))]
         public JsonResult ListarSimpatizantes(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
@@ -557,6 +636,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.SimpatizantesCrearEditar))]
         public JsonResult EditarMiembroSimpatizante([FromBody] MiembroDetalleDTO data)
         {
             try
@@ -592,6 +672,7 @@ namespace CASTIglesias.Controllers
         #endregion Simpatizantes
 
         #region Proceso
+        [RequierePermiso(nameof(Permisos.Proceso))]
         public IActionResult Proceso() {
             try
             {
@@ -611,6 +692,7 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Proceso))]
         public JsonResult ListarMiembrosProceso(bool bajas = false)
         {
             int sedeID = ObtenerIdSedeUsuario();
@@ -662,6 +744,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ProcesoCrearEditar))]
         public JsonResult EditarMiembroProceso([FromBody] MiembroDetalleDTO data)
         {
             try
@@ -722,6 +805,9 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                // Cambiar de estado es editar el congregante en la pantalla donde está ahora
+                if (!TienePermisoSobreCongregante(idMiembro, CrearEditar)) return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 var resultado = _cnMiembros.AvanzarEstado(sedeID, idMiembro);
 
@@ -741,6 +827,8 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                if (!TienePermisoSobreCongregante(idMiembro, CrearEditar)) return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 var resultado = _cnMiembros.RetrocederEstado(sedeID, idMiembro);
 
@@ -833,6 +921,7 @@ namespace CASTIglesias.Controllers
         }
 
         #region Seguimiento
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public IActionResult Seguimiento()
         {
             try
@@ -848,6 +937,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ListarSeguimientos()
         {
             try
@@ -863,6 +953,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarSeguimiento([FromBody] CapaEntidad.Seguimiento data)
         {
             try
@@ -888,6 +979,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarSeguimiento(int id)
         {
             try
@@ -920,6 +1012,7 @@ namespace CASTIglesias.Controllers
         #endregion Seguimiento
 
         #region DetallesSeguimiento
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public IActionResult DetallesSeguimiento()
         {
             try
@@ -932,6 +1025,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult ListarDetallesSeguimiento(int idMiembro, string? tipo, string? fechaDesde, string? fechaHasta)
         {
             try
@@ -949,6 +1043,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarDetalleSeguimiento([FromBody] CapaEntidad.DetalleSeguimiento data)
         {
             try
@@ -974,6 +1069,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarDetalleSeguimiento(int id)
         {
             try
@@ -991,6 +1087,7 @@ namespace CASTIglesias.Controllers
         #endregion DetallesSeguimiento
 
         #region Lideres
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public IActionResult Lideres()
         {
             try
@@ -1019,6 +1116,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarLider([FromBody] CapaEntidad.Lider data)
         {
             try
@@ -1044,6 +1142,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarLider(int id)
         {
             try
@@ -1061,6 +1160,7 @@ namespace CASTIglesias.Controllers
         #endregion Lideres
 
         #region Familias
+        [RequierePermiso(nameof(Permisos.Familias))]
         public IActionResult Familias()
         {
             try { ViewBag.ListaProvincias = _cnProvincias.ListarProvincias(); }
@@ -1069,6 +1169,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Familias))]
         public JsonResult ListarFamilias()
         {
             try
@@ -1084,6 +1185,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult GuardarFamilia([FromBody] CapaEntidad.Familia objeto)
         {
             object resultado;
@@ -1105,6 +1207,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.FamiliasEliminar))]
         public JsonResult EliminarFamilia(int id)
         {
             try
@@ -1120,6 +1223,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Familias))]
         public JsonResult ListarMiembrosPorFamilia(int idFamilia)
         {
             try
@@ -1150,6 +1254,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion)
         {
             try
@@ -1165,6 +1270,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult QuitarMiembroFamilia(int idMiembro)
         {
             try
@@ -1181,6 +1287,7 @@ namespace CASTIglesias.Controllers
         #endregion Familias
 
         #region Jovenes
+        [RequierePermiso(nameof(Permisos.Jovenes))]
         public IActionResult Jovenes()
         {
             try
@@ -1206,6 +1313,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Jovenes))]
         public JsonResult ListarJovenes()
         {
             try
@@ -1221,6 +1329,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Jovenes))]
         public JsonResult ListarJovenesProximosSalir()
         {
             try
@@ -1258,6 +1367,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.JovenesCrearEditar))]
         public JsonResult AgregarJoven(int idMiembro, int idGrupo)
         {
             try
@@ -1274,6 +1384,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.JovenesEliminar))]
         public JsonResult EliminarJoven(int idZgm)
         {
             try
@@ -1290,6 +1401,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.JovenesCrearEditar))]
         public JsonResult CambiarGrupoJoven(int idZgm, int idGrupo)
         {
             try
@@ -1316,8 +1428,11 @@ namespace CASTIglesias.Controllers
             ["ninos"] = ("Niños", "fas fa-child")
         };
 
+        [RequierePermiso(nameof(Permisos.Hombres))]
         public IActionResult Hombres() => VistaZonaDiscipulado("hombres");
+        [RequierePermiso(nameof(Permisos.Mujeres))]
         public IActionResult Mujeres() => VistaZonaDiscipulado("mujeres");
+        [RequierePermiso(nameof(Permisos.Ninos))]
         public IActionResult Ninos() => VistaZonaDiscipulado("ninos");
 
         private IActionResult VistaZonaDiscipulado(string tipo)
@@ -1368,6 +1483,8 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                if (!TienePermisoSobreZona(tipo, CrearEditar)) return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 string mensaje;
                 int resultado = _cnZonaDiscipulado.AgregarMiembroZona(idMiembro, idGrupo, sedeID, tipo ?? string.Empty, out mensaje);
@@ -1384,6 +1501,10 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                // Permiso de la zona real del registro, no del tipo que diga la pantalla
+                if (!TienePermisoSobreZona(_cnZonaDiscipulado.ObtenerTipoZonaDeRegistro(idZgm), Eliminar))
+                    return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 string mensaje;
                 bool resultado = _cnZonaDiscipulado.EliminarMiembroZona(idZgm, sedeID, out mensaje);
@@ -1400,6 +1521,9 @@ namespace CASTIglesias.Controllers
         {
             try
             {
+                if (!TienePermisoSobreZona(_cnZonaDiscipulado.ObtenerTipoZonaDeRegistro(idZgm), CrearEditar))
+                    return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 string mensaje;
                 bool resultado = _cnZonaDiscipulado.EditarGrupoMiembroZona(idZgm, idGrupo, sedeID, out mensaje);
@@ -1414,9 +1538,11 @@ namespace CASTIglesias.Controllers
         #endregion Zonas de Discipulado (Hombres, Mujeres, Niños)
 
         #region Matrimonios
+        [RequierePermiso(nameof(Permisos.Matrimonios))]
         public IActionResult Matrimonios() => View();
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Matrimonios))]
         public JsonResult ListarMatrimonios()
         {
             try
@@ -1432,6 +1558,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MatrimoniosCrearEditar))]
         public JsonResult GuardarMatrimonio([FromBody] CapaEntidad.Matrimonio objeto)
         {
             object resultado;
@@ -1453,6 +1580,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.MatrimoniosEliminar))]
         public JsonResult EliminarMatrimonio(int id)
         {
             try

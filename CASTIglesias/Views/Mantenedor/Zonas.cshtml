@@ -21,7 +21,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalZonas()">@L["Añadir nueva Zona"]</button>
+                <button data-permiso="ZonasCrearEditar" type="button" class="btn btn-success" onclick="abrirModalZonas()">@L["Añadir nueva Zona"]</button>
             </div>
         </div>
 
@@ -150,11 +150,11 @@
                             const esPorDefecto = row.tipo && row.tipo !== 'general';
                             return `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarZona">
+                                <button data-permiso="ZonasCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarZona">
                                     <i class="fas fa-pen"></i>
                                 </button>
                                 ${esPorDefecto ? '' : `
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarZona">
+                                <button data-permiso="ZonasEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarZona">
                                     <i class="fas fa-trash"></i>
                                 </button>`}
                             </div>`;
@@ -205,9 +205,9 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila.tr).remove().draw(false);
-                                    Swal.fire("Eliminada", "La Zona fue eliminada correctamente.", "success");
+                                    Swal.fire("Eliminada", T.mZonaEliminada, "success");
                                 } else {
-                                    Swal.fire(T.error, res.mensaje || "No se pudo eliminar la Zona.", "error");
+                                    Swal.fire(T.error, res.mensaje || T.mNoEliminarZona, "error");
                                 }
                             },
                             error: function () {
@@ -238,7 +238,7 @@
                 $("#txtNombreZona").val("");
                 $("#txtNombreLider").val("");
                 $("#txtDescripcion").val("");
-                $("#exampleModalLabel").text("Datos de la nueva Zona");
+                $("#exampleModalLabel").text(T.mDatosNuevaZona);
             }
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalZonas"));
@@ -290,12 +290,12 @@
                         bootstrap.Modal.getInstance(document.getElementById("FormModalZonas")).hide();
                         $("#txtid").val("0");
                     } else {
-                        $("#mensajeError").removeClass("d-none").text(data.mensaje || "Error al guardar la Zona.");
+                        $("#mensajeError").removeClass("d-none").text(data.mensaje || T.mErrorGuardarZona);
                     }
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX al guardar.");
+                    $("#mensajeError").removeClass("d-none").text(T.mErrorAjaxGuardar);
                 }
             });
         }

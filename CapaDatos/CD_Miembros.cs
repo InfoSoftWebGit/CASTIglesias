@@ -638,6 +638,25 @@ namespace CapaDatos
         /// </summary>
         /// <param name="id_miembro"></param>
         /// <returns></returns>
+        /// <summary>
+        /// Estado del congregante (Visitante, Simpatizante, Proceso, Miembro) o null si no
+        /// existe en la iglesia activa.
+        /// </summary>
+        /// <remarks>
+        /// Solo proyecta la columna, así no deja la entidad en seguimiento: el controlador
+        /// lo usa para comprobar permisos justo antes de editar el mismo registro.
+        /// </remarks>
+        /// <param name="existe">false si el congregante no existe.</param>
+        public string? ObtenerEstadoMiembro(int id_miembro, out bool existe)
+        {
+            var fila = _context.Miembros
+                .Where(m => m.id_miembro == id_miembro)
+                .Select(m => new { m.estado })
+                .FirstOrDefault();
+            existe = fila != null;
+            return fila?.estado;
+        }
+
         public Miembro ObtenerMiembroPorId(int id_miembro)
         {
             try

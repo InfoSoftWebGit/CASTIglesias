@@ -16,7 +16,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalConcepto()">@L["Añadir nuevo concepto"]</button>
+                <button data-permiso="ConceptosCrearEditar" type="button" class="btn btn-success" onclick="abrirModalConcepto()">@L["Añadir nuevo concepto"]</button>
             </div>
         </div>
         <hr />
@@ -152,10 +152,10 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarConcepto">
+                                <button data-permiso="ConceptosCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarConcepto">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarConcepto">
+                                <button data-permiso="ConceptosEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarConcepto">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -199,9 +199,9 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila.tr).remove().draw(false);
-                                    Swal.fire(T.eliminado, "El concepto fue eliminado correctamente.", "success");
+                                    Swal.fire(T.eliminado, T.mConceptoEliminado, "success");
                                 } else {
-                                    Swal.fire(T.error, res.mensaje || "No se pudo eliminar el concepto.", "error");
+                                    Swal.fire(T.error, res.mensaje || T.mNoEliminarConcepto, "error");
                                 }
                             },
                             error: function () {
@@ -236,7 +236,7 @@
                 // Modo Nuevo
                 $("#txtNombreConcepto").val("");
                 $("#txtSedeConcepto").val(NOMBRE_SEDE_ACTUAL);
-                $("#exampleModalLabel").text("Datos del nuevo Concepto");
+                $("#exampleModalLabel").text(T.mDatosNuevoConcepto);
             }
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalConceptos"));
@@ -287,12 +287,12 @@
                         $("#txtNombreConcepto").val("");
                         bootstrap.Modal.getInstance(document.getElementById("FormModalConceptos")).hide();
                     } else {
-                        $("#mensajeErrorConcepto").removeClass("d-none").text(data.mensaje || "Error al procesar la solicitud.");
+                        $("#mensajeErrorConcepto").removeClass("d-none").text(data.mensaje || T.mErrorProcesar);
                     }
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeErrorConcepto").removeClass("d-none").text("Error en la solicitud AJAX.");
+                    $("#mensajeErrorConcepto").removeClass("d-none").text(T.mErrorAjax);
                 }
             });
         }

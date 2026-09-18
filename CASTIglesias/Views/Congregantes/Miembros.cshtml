@@ -512,7 +512,7 @@
                 }
                 return "";
             } catch (e) {
-                console.error("Error al formatear fecha:", e);
+                console.error(T.mErrorFormatearFecha, e);
                 return "";
             }
         }
@@ -556,13 +556,13 @@
                     {
                             defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarMiembro">
+                                <button data-permiso="MiembrosCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarMiembro">
                                     <i class="fas fa-pen"></i>
                                 </button>
                                 <button type="button" class="btn btn-info btn-sm btn-abrirModalZonasGruposMinisterios">
                                     <i class="fas fa-sitemap"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
+                                <button data-permiso="MiembrosEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarMiembro">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>`,
@@ -598,7 +598,7 @@
                 tabladata.ajax.url('@Url.Action("ListarMiembros", "Congregantes")' + '?bajas=' + mostrandoBajas).load();
             });
 
-            // La tarjeta "Total de Miembros de Baja" del dashboard enlaza aquí con
+            // La tarjeta T.mTotalMiembrosBaja del dashboard enlaza aquí con
             // ?bajas=true: se pulsa el propio botón para no duplicar su lógica.
             if (new URLSearchParams(window.location.search).get('bajas') === 'true') {
                 $("#btnToggleBajas").trigger("click");

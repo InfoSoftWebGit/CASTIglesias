@@ -66,6 +66,43 @@ namespace CASTIglesias.Controllers
             return sede?.nombre_sede ?? "Sede Desconocida";
         }
 
+        /// <summary>
+        /// Sedes a las que puede entrar el usuario en esta petición.
+        /// </summary>
+        /// <remarks>
+        /// Lo rellena OnActionExecuting; si algo falla se queda en "ninguna", de modo que
+        /// ante la duda se deniega (por ejemplo, en CambiarSede).
+        /// </remarks>
+        protected AccesoSedes AccesoSedesActual { get; private set; } = AccesoSedes.Ninguna;
+
+        /// <summary>
+        /// Comprueba permisos dentro de la acción, cuando dependen del registro (por
+        /// ejemplo, del estado de un congregante) y no bastan con [RequierePermiso].
+        /// </summary>
+        /// <returns>true si tiene al menos uno de los permisos indicados.</returns>
+        protected bool TienePermiso(params string[] permisos) =>
+            Filters.RequierePermisoAttribute.TieneAlguno(
+                Filters.RequierePermisoAttribute.ObtenerPermisos(HttpContext), permisos);
+
+        /// <summary>Respuesta JSON estándar de "sin permiso" (ver RequierePermisoAttribute).</summary>
+        protected JsonResult SinPermiso() => Filters.RequierePermisoAttribute.JsonSinPermiso();
+
+        private AccesoSedes CalcularAccesoSedes()
+        {
+            // Roles globales y administrador de plataforma: sin consulta. Para este último
+            // es obligatorio, porque su fila de usuario es de la iglesia interna de Congrega
+            // y no tiene nada que ver con la iglesia en la que está trabajando.
+            // El claim Multisede NO se usa aquí: viene de usuario_sedes y, si se retira,
+            // debe dejar de valer sin esperar a que el usuario vuelva a entrar.
+            var usuario = HttpContext.User;
+            if (SesionClaims.EsAdminPlataforma(usuario) || usuario.IsInRole("AdminGlobal") || usuario.IsInRole("PastorGeneral"))
+                return AccesoSedes.Todas(ObtenerIdSedeUsuario());
+
+            // Se pide al contenedor para no cambiar el constructor de todos los controladores
+            var negocioUsuarioSedes = HttpContext.RequestServices.GetRequiredService<CN_UsuarioSedes>();
+            return negocioUsuarioSedes.ObtenerAcceso(SesionClaims.ObtenerIdUsuario(HttpContext.User));
+        }
+
         // ✅ Se ejecuta antes de cada acción para preparar ViewBag
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -88,9 +125,17 @@ namespace CASTIglesias.Controllers
                     string nombreSedeActual;
                     List<Sedes> listaSedes;
 
-                    // PastorSede ya no cuenta como multisede: es pastor de UNA sede y antes
-                    // recibía la lista completa. Ver SesionClaims.TieneAccesoATodasLasSedes.
-                    var esMultiSede = SesionClaims.TieneAccesoATodasLasSedes(HttpContext.User);
+                    // Sedes permitidas en esta petición. Se recalculan siempre para que un
+                    // cambio en usuario_sedes se aplique sin tener que volver a entrar.
+                    AccesoSedesActual = CalcularAccesoSedes();
+
+                    // Si le han quitado la sede en la que está trabajando, se cierra la
+                    // sesión: al volver a entrar recibe su sede principal.
+                    if (!AccesoSedesActual.Permite(sedeIDActual))
+                    {
+                        context.Result = RedirectToAction("CerrarSesion", "Acceso");
+                        return;
+                    }
 
                     var nombreClaim = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "NombreSedeActual");
 
@@ -103,7 +148,7 @@ namespace CASTIglesias.Controllers
                         nombreSedeActual = ObtenerNombreSede(sedeIDActual);
                     }
 
-                    if (esMultiSede)
+                    if (AccesoSedesActual.TodasLasSedes)
                     {
                         // ListarSedes ya viene limitado a la iglesia activa y sin la fila 1000;
                         // la opción "Todas las Sedes" se añade aquí para que siempre signifique
@@ -113,6 +158,14 @@ namespace CASTIglesias.Controllers
                             new Sedes { ID = Sedes.TodasLasSedes, nombre_sede = "Todas las Sedes" }
                         };
                         listaSedes.AddRange(_negocioSedes.ListarSedes() ?? new List<Sedes>());
+                    }
+                    else if (AccesoSedesActual.Sedes.Count > 1)
+                    {
+                        // Varias sedes concretas: sin "Todas las Sedes", porque las consultas
+                        // solo saben filtrar por una sede o por todas, no por un grupo.
+                        listaSedes = (_negocioSedes.ListarSedes() ?? new List<Sedes>())
+                            .Where(s => AccesoSedesActual.Sedes.Contains(s.ID))
+                            .ToList();
                     }
                     else
                     {
@@ -133,7 +186,10 @@ namespace CASTIglesias.Controllers
                     ViewBag.SedeIDActual = sedeIDActual;
                     ViewBag.NombreSedeActual = nombreSedeActual;
                     ViewBag.ListaSedes = listaSedes;
+                    ViewBag.MostrarSelectorSedes = listaSedes.Count > 1;
                     ViewBag.PermisosMiembro = permisosUsuario ?? new Permisos();
+                    // Lo reutiliza [RequierePermiso], que se ejecuta después de este método
+                    HttpContext.Items[Filters.RequierePermisoAttribute.ClaveItems] = ViewBag.PermisosMiembro;
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -154,6 +210,7 @@ namespace CASTIglesias.Controllers
 
         // ✅ Acción para cambiar de sede dinámicamente
         [HttpPost]
+        [ValidateAntiForgeryToken] // el token lo envía el ajaxPrefilter de _Layout
         public async Task<IActionResult> CambiarSede(int nuevoSedeID, string returnUrl)
         {
 
@@ -166,11 +223,10 @@ namespace CASTIglesias.Controllers
 
                 // El ID de sede llega del navegador: antes se guardaba en la cookie sin
                 // comprobar nada y cualquiera podía ponerse una sede de otra iglesia o 1000.
-                bool accesoTotal = SesionClaims.TieneAccesoATodasLasSedes(HttpContext.User);
-
+                // OnActionExecuting ya ha calculado AccesoSedesActual para esta petición.
                 if (nuevoSedeID == Sedes.TodasLasSedes)
                 {
-                    if (!accesoTotal)
+                    if (!AccesoSedesActual.TodasLasSedes)
                         return Json(new { success = false, message = "No tienes acceso a todas las sedes." });
                 }
                 else
@@ -179,14 +235,9 @@ namespace CASTIglesias.Controllers
                     if (!_negocioSedes.ExisteSedeEnIglesiaActual(nuevoSedeID))
                         return Json(new { success = false, message = "Sede desconocida." });
 
-                    // Sin acceso total, solo se admite la sede propia (leída de la BBDD)
-                    if (!accesoTotal)
-                    {
-                        var negocioUsuarios = HttpContext.RequestServices.GetRequiredService<CN_Usuarios>();
-                        var usuario = negocioUsuarios.ObtenerUsuarioSinFiltro(SesionClaims.ObtenerIdUsuario(HttpContext.User));
-                        if (usuario == null || usuario.ID_sede != nuevoSedeID)
-                            return Json(new { success = false, message = "No tienes acceso a esa sede." });
-                    }
+                    // Sin acceso total, solo sus sedes: la principal o las de usuario_sedes
+                    if (!AccesoSedesActual.Permite(nuevoSedeID))
+                        return Json(new { success = false, message = "No tienes acceso a esa sede." });
                 }
 
                 string nuevoNombreSede = nuevoSedeID == Sedes.TodasLasSedes

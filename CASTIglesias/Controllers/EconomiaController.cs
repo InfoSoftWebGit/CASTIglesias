@@ -1,6 +1,7 @@
 ﻿using CapaDatos;
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,6 +47,7 @@ namespace CASTIglesias.Controllers
         // ------------------------------------------------------------------------------------------------
         #region Diezmos
 
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public IActionResult Diezmos()
         {
             // 🎉 Lógica de Permisos para la Vista Diezmos
@@ -69,6 +71,7 @@ namespace CASTIglesias.Controllers
             return View();
         }
 
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public JsonResult ListarDiezmos()
         {
             try
@@ -112,6 +115,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.DiezmosCrearEditar))]
         public JsonResult IngresarDiezmo(Diezmo objeto)
         {
             string mensaje = "";
@@ -185,6 +189,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.DiezmosEliminar))]
         public JsonResult EliminarDiezmo(int id)
         {
             try
@@ -258,6 +263,7 @@ namespace CASTIglesias.Controllers
         // ------------------------------------------------------------------------------------------------
         #region Conceptos
 
+        [RequierePermiso(nameof(Permisos.Conceptos))]
         public IActionResult Conceptos()
         {
 
@@ -277,6 +283,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Conceptos))]
         public JsonResult ListarConceptos()
         {
             try
@@ -307,6 +314,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult IngresarConcepto(Concepto obj)
         {
             string mensaje = string.Empty;
@@ -352,6 +360,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult EditarConcepto(Concepto obj)
         {
             string mensaje = string.Empty;
@@ -395,6 +404,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ConceptosEliminar))]
         public JsonResult EliminarConcepto(int id)
         {
             try
@@ -427,6 +437,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult GuardarConcepto(Concepto obj)
         {
             if (obj.ID_concepto == 0)
@@ -468,6 +479,7 @@ namespace CASTIglesias.Controllers
         // ------------------------------------------------------------------------------------------------
         #region Gastos
 
+        [RequierePermiso(nameof(Permisos.Gastos))]
         public IActionResult Gastos()
         {
             var permisos = ViewBag.PermisosMiembro as Permisos;
@@ -484,6 +496,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Gastos))]
         public JsonResult ListarGastos()
         {
             try
@@ -499,6 +512,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GastosCrearEditar))]
         public JsonResult GuardarGasto(Gasto obj)
         {
             try
@@ -527,6 +541,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GastosEliminar))]
         public JsonResult EliminarGasto(int id)
         {
             try
@@ -547,6 +562,7 @@ namespace CASTIglesias.Controllers
         #region DetallePago
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Gastos))]
         public JsonResult ListarDetallePagos(int? numeroPago = null)
         {
             try
@@ -564,6 +580,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GastosCrearEditar))]
         public JsonResult GuardarDetallePago(DetallePago obj)
         {
             try
@@ -592,6 +609,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.GastosEliminar))]
         public JsonResult EliminarDetallePago(int id)
         {
             try

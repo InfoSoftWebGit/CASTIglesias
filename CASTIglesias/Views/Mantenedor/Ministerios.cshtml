@@ -18,7 +18,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalMinisterios()">@L["Añadir nuevo Ministerio"]</button>
+                <button data-permiso="MinisterioCrearEditar" type="button" class="btn btn-success" onclick="abrirModalMinisterios()">@L["Añadir nuevo Ministerio"]</button>
             </div>
         </div>
 
@@ -137,10 +137,10 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarMinisterio">
+                                <button data-permiso="MinisterioCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarMinisterio">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMinisterio">
+                                <button data-permiso="MinisterioEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarMinisterio">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>`,
@@ -190,9 +190,9 @@
                             success: function (res) {
                                 if (res.resultado) {
                                     tabladata.row(fila.tr).remove().draw(false);
-                                    Swal.fire("Eliminada", "El ministerio fue eliminado correctamente.", "success");
+                                    Swal.fire("Eliminada", T.mMinisterioEliminado, "success");
                                 } else {
-                                    Swal.fire(T.error, res.mensaje || "No se pudo eliminar el ministerio.", "error");
+                                    Swal.fire(T.error, res.mensaje || T.mNoEliminarMinisterio, "error");
                                 }
                             },
                             error: function () {
@@ -220,7 +220,7 @@
                 $("#txtNombreMinisterio").val("");
                 $("#txtNombreLider").val("");
                 $("#txtDescripcion").val("");
-                $("#exampleModalLabel").text("Datos del nuevo ministerio");
+                $("#exampleModalLabel").text(T.mDatosNuevoMinisterio);
             }
 
             const modal = new bootstrap.Modal(document.getElementById("FormModalMinisterios"));
@@ -269,12 +269,12 @@
                         bootstrap.Modal.getInstance(document.getElementById("FormModalMinisterios")).hide();
                         $("#txtid").val("0");
                     } else {
-                        $("#mensajeError").removeClass("d-none").text(data.mensaje || "Error al guardar el ministerio.");
+                        $("#mensajeError").removeClass("d-none").text(data.mensaje || T.mErrorGuardarMinisterio);
                     }
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX al guardar.");
+                    $("#mensajeError").removeClass("d-none").text(T.mErrorAjaxGuardar);
                 }
             });
         }

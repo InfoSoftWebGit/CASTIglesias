@@ -1,6 +1,6 @@
-Ese UPDATE falla porque la columna ID_iglesia todavía no existe en permisos. El 4.1 solo genera los ALTER, y hay que ejecutar lo que devuelve; además, las variables @pastorales se pierden si Workbench se reconecta. Para evitar ese lío, ahora que conozco tus 23 tablas, te paso el paso 4 completo con las sentencias escritas, sin generadores.
+-- NOTA: Ese UPDATE falla porque la columna ID_iglesia todavía no existe en permisos. El 4.1 solo genera los ALTER, y hay que ejecutar lo que devuelve; además, las variables @pastorales se pierden si Workbench se reconecta. Para evitar ese lío, ahora que conozco tus 23 tablas, te paso el paso 4 completo con las sentencias escritas, sin generadores.
 
-Uso los nombres exactos de tus tablas (Lideres con mayúscula, porque en la NAS importan las mayúsculas).
+-- NOTA: Uso los nombres exactos de tus tablas (Lideres con mayúscula, porque en la NAS importan las mayúsculas).
 
 
 -- =====================================================================

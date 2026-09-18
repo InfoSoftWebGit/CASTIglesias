@@ -405,7 +405,7 @@
     const urlGenerar              = '@Url.Action("GenerarCalendario",      "Calendario")';
     const urlExportarExcel        = '@Url.Action("ExportarExcel",          "Calendario")';
     const urlExportarExcelAgrupado = '@Url.Action("ExportarExcelAgrupado", "Calendario")';
-    const dias             = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const dias = window.TDIAS;
 
     let requestActual = null;
 
@@ -429,7 +429,7 @@
     function obtenerRequest() {
         const idCulto = parseInt($('#cboCulto').val());
         if (!idCulto) {
-            Swal.fire({ icon: 'warning', title: 'Selecciona un culto', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            Swal.fire({ icon: 'warning', title: T.mSeleccionaCulto, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
             return null;
         }
         return {
@@ -470,7 +470,7 @@
             },
             error() {
                 btn.prop('disabled', false).html('<i class="fas fa-calendar-check me-1"></i> Generar calendario');
-                Swal.fire('Error', 'No se pudo generar el calendario.', 'error');
+                Swal.fire('Error', T.mNoGenerarCalendario, 'error');
             }
         });
     }
@@ -480,7 +480,7 @@
         const tipo = cal.tipoCalendario;
         const [icono, tipoLabel, color] = tipo === TIPO_AUDIOVISUALES
             ? ['<i class="fas fa-video me-2"></i>', 'Audiovisuales', '#0e7490']
-            : ['<i class="fas fa-shield-alt me-2"></i>', 'Seguridad y Bienvenida', '#b45309'];
+            : ['<i class="fas fa-shield-alt me-2"></i>', T.mSeguridadBienvenida, '#b45309'];
 
         actualizarCabeceras(cal,
             `${icono}Calendario de ${tipoLabel} — ${esc(cal.nombreCulto)}`);
@@ -569,7 +569,7 @@
         }).get().filter(Boolean);
 
         if (!idsCultos.length) {
-            Swal.fire({ icon: 'warning', title: 'No hay cultos disponibles.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            Swal.fire({ icon: 'warning', title: T.mSinCultos, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
             return;
         }
         const req = {
@@ -587,10 +587,10 @@
             const ct = resp.headers.get('Content-Type') || '';
             if (ct.includes('application/json')) {
                 const json = await resp.json();
-                Swal.fire('Error', json.mensaje || 'Error desconocido.', 'error');
+                Swal.fire('Error', json.mensaje || T.mErrorDesconocido, 'error');
                 return;
             }
-            if (!resp.ok) { Swal.fire('Error', 'No se pudo generar el Excel combinado.', 'error'); return; }
+            if (!resp.ok) { Swal.fire('Error', T.mNoGenerarExcelComb, 'error'); return; }
             const blob   = await resp.blob();
             const cd     = resp.headers.get('Content-Disposition') || '';
             const match  = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -601,13 +601,13 @@
             document.body.appendChild(a); a.click(); a.remove();
             URL.revokeObjectURL(url);
         } catch {
-            Swal.fire('Error', 'No se pudo descargar el archivo combinado.', 'error');
+            Swal.fire('Error', T.mNoDescargarComb, 'error');
         }
     }
 
     async function exportarExcel() {
         if (!requestActual) {
-            Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            Swal.fire({ icon: 'warning', title: T.mGeneraCalendarioPrimero, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
             return;
         }
         try {
@@ -616,7 +616,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestActual)
             });
-            if (!resp.ok) { Swal.fire('Error', 'No se pudo generar el Excel.', 'error'); return; }
+            if (!resp.ok) { Swal.fire('Error', T.mNoGenerarExcel, 'error'); return; }
             const blob  = await resp.blob();
             const cd    = resp.headers.get('Content-Disposition') || '';
             const match = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
@@ -627,13 +627,13 @@
             document.body.appendChild(a); a.click(); a.remove();
             URL.revokeObjectURL(url);
         } catch {
-            Swal.fire('Error', 'No se pudo descargar el archivo.', 'error');
+            Swal.fire('Error', T.mNoDescargar, 'error');
         }
     }
 
     function exportarPdf() {
         if (!requestActual) {
-            Swal.fire({ icon: 'warning', title: 'Genera primero el calendario.', toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            Swal.fire({ icon: 'warning', title: T.mGeneraCalendarioPrimero, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
             return;
         }
         window.print();

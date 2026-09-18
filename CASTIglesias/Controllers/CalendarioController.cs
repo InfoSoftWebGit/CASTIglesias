@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +23,11 @@ namespace CASTIglesias.Controllers
             _cnCulto = cnCulto;
         }
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Calendarios() => View();
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult ObtenerCultos()
         {
             try
@@ -42,6 +45,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult GenerarCalendario([FromBody] CalendarioRequest req)
         {
             try
@@ -59,6 +63,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult ExportarExcelAgrupado([FromBody] CalendarioAgrupadoRequest req)
         {
             try
@@ -90,6 +95,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult ExportarExcel([FromBody] CalendarioRequest req)
         {
             try

@@ -3,6 +3,7 @@
 using CapaDatos;
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -89,6 +90,7 @@ namespace CASTIglesias.Controllers
 
         #region GRÁFICO DE ASISTENCIA
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Asistencia))]
         public JsonResult ObtenerGraficoAsistencia(string modo = "anual", int? anio = null, int? mes = null, int? dia = null, string turno = "todos")
         {
             try
@@ -205,6 +207,7 @@ namespace CASTIglesias.Controllers
 
         #region GRÁFICO DE DIEZMOS
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Diezmos))]
         public JsonResult ObtenerGraficoDiezmos(string modo = "anual", int? anio = null, int? mes = null)
         {
             try
@@ -277,6 +280,7 @@ namespace CASTIglesias.Controllers
 
         #region GRÁFICO DE GASTOS
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Gastos))]
         public JsonResult ObtenerGraficoGastos(string modo = "anual", int? anio = null, int? mes = null)
         {
             try
@@ -377,6 +381,7 @@ namespace CASTIglesias.Controllers
 
         #region MÉTODOS PARA LAS TARJETAS DEL DASHBOARD
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Zonas))]
         public IActionResult ObtenerZonasConMiembros()
         {
             try

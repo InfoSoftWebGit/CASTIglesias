@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,6 +38,7 @@ namespace CASTIglesias.Controllers
 
         #region Diezmos
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Diezmos() => View();
 
         [HttpGet]
@@ -59,6 +61,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarConfigDiezmo([FromBody] ConfigDiezmo obj)
         {
             try
@@ -77,9 +80,11 @@ namespace CASTIglesias.Controllers
 
         #region Jovenes
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Jovenes() => View();
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult ObtenerConfigJovenes()
         {
             try
@@ -108,6 +113,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarConfigJovenes([FromBody] ConfigJovenes obj)
         {
             try
@@ -126,9 +132,11 @@ namespace CASTIglesias.Controllers
 
         #region Servicios
 
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Servicios() => View();
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult ObtenerCultosParaAjustes()
         {
             try
@@ -146,6 +154,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult ListarRequerimientos(int idCulto)
         {
             try
@@ -177,6 +186,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarRequerimiento([FromBody] RequerimientoCulto obj)
         {
             try
@@ -197,6 +207,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarRequerimiento(int id)
         {
             try

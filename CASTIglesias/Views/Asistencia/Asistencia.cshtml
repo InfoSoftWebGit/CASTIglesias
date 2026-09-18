@@ -16,7 +16,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalAsistencia()">@L["Añadir nueva asistencia"]</button>
+                <button data-permiso="AsistenciaCrearEditar" type="button" class="btn btn-success" onclick="abrirModalAsistencia()">@L["Añadir nueva asistencia"]</button>
             </div>
         </div>
         <hr />
@@ -206,8 +206,8 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button class="btn btn-primary btn-sm btn-editarAsistencia"><i class="fas fa-pen"></i></button>
-                                <button class="btn btn-danger btn-sm btn-eliminarAsistencia"><i class="fas fa-trash"></i></button>
+                                <button data-permiso="AsistenciaCrearEditar" class="btn btn-primary btn-sm btn-editarAsistencia"><i class="fas fa-pen"></i></button>
+                                <button data-permiso="AsistenciaEliminar" class="btn btn-danger btn-sm btn-eliminarAsistencia"><i class="fas fa-trash"></i></button>
                             </div>`,
                         orderable: false,
                         searchable: false
@@ -232,7 +232,7 @@
             $("#mensajeErrorAsistencia").addClass("d-none").text("");
 
             if (!json && LOGGED_IN_SEDE_ID === ID_ADMIN_GLOBAL) {
-                Swal.fire(T.restriccion, "El Administrador Global debe seleccionar una sede.", "warning");
+                Swal.fire(T.restriccion, T.mAdminGlobalSede, "warning");
                 return;
             }
 
@@ -269,11 +269,11 @@
             };
 
             if (!Asistencia.turno_culto || !Asistencia.fecha_asistencia_culto) {
-                $("#mensajeErrorAsistencia").removeClass("d-none").text("El turno y la fecha son obligatorios.");
+                $("#mensajeErrorAsistencia").removeClass("d-none").text(T.mTurnoFechaObligatorios);
                 return;
             }
             if (!Asistencia.miembro_registra_asistencia) {
-                $("#mensajeErrorAsistencia").removeClass("d-none").text("Debe ingresar el nombre del miembro a cargo.");
+                $("#mensajeErrorAsistencia").removeClass("d-none").text(T.mNombreMiembroCargo);
                 return;
             }
 
@@ -296,9 +296,9 @@
                     if (res.success) {
                         tabladata.ajax.reload(null, false);
                         $("#FormModalAsistencias").modal("hide");
-                        Swal.fire(T.exito, "Asistencia guardada correctamente.", "success");
+                        Swal.fire(T.exito, T.mAsistenciaGuardada, "success");
                     } else {
-                        $("#mensajeErrorAsistencia").removeClass("d-none").text(res.message || "Error al guardar.");
+                        $("#mensajeErrorAsistencia").removeClass("d-none").text(res.message || T.mErrorGuardar);
                     }
                 },
                 error: jqXHR => {
@@ -324,9 +324,9 @@
                         success: res => {
                             if (res.success) {
                                 tabladata.row(filaTabla).remove().draw(false);
-                                Swal.fire(T.eliminado, "Asistencia eliminada correctamente.", "success");
+                                Swal.fire(T.eliminado, T.mAsistenciaEliminada, "success");
                             } else {
-                                Swal.fire(T.error, res.message || "No se pudo eliminar.", "error");
+                                Swal.fire(T.error, res.message || T.mNoEliminarPunto, "error");
                             }
                         },
                         error: () => Swal.fire(T.error, T.errorEliminacion, "error")

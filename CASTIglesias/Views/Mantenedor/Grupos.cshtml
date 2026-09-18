@@ -17,7 +17,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalGrupos()">@L["Añadir nuevo grupo"]</button>
+                <button data-permiso="GruposCrearEditar" type="button" class="btn btn-success" onclick="abrirModalGrupos()">@L["Añadir nuevo grupo"]</button>
             </div>
         </div>
 
@@ -167,16 +167,16 @@
                     dataSrc: "data"
                 },
                 columns: [
-                    { data: "nombre_zona", defaultContent: "Sin zona" },
+                    { data: "nombre_zona", defaultContent: T.mSinZona },
                     { data: "descripcion", defaultContent: "" },
                     { data: "encargados", defaultContent: "" },
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarGrupo">
+                                <button data-permiso="GruposCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarGrupo">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarGrupo">
+                                <button data-permiso="GruposEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarGrupo">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -196,7 +196,7 @@
                             $(rows).eq(i).before(
                                 '<tr style="background-color:#EEF2FB;">' +
                                 '<td colspan="4" style="color:#1E3A8A; font-weight:700; padding:8px 12px; border-bottom:2px solid #1E3A8A;">' +
-                                '<i class="fas fa-map-marker-alt me-2"></i>' + (zona || 'Sin zona') +
+                                '<i class="fas fa-map-marker-alt me-2"></i>' + (zona || T.mSinZona) +
                                 '</td></tr>'
                             );
                             lastZona = zona;
@@ -244,7 +244,7 @@
                                 }
                             },
                             error: function () {
-                                Swal.fire(T.error, "No se pudo eliminar", "error");
+                                Swal.fire(T.error, T.mNoEliminar, "error");
                             }
                         });
                     }
@@ -297,7 +297,7 @@
             }
 
             const idZona = parseInt($("#cboZona").val()) || 0;
-            const nombreZona = idZona > 0 ? $("#cboZona option:selected").text() : "Sin zona";
+            const nombreZona = idZona > 0 ? $("#cboZona option:selected").text() : T.mSinZona;
 
             const Grupo = {
                 iD_grupo: parseInt($("#txtid").val()) || 0,
@@ -337,7 +337,7 @@
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeError").removeClass("d-none").text("Error en la solicitud AJAX.");
+                    $("#mensajeError").removeClass("d-none").text(T.mErrorAjax);
                 }
             });
         }

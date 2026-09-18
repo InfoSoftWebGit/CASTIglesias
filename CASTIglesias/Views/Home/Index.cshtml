@@ -8,8 +8,49 @@
     <li class="breadcrumb-item active"></li>
 </ol>
 
+@{
+    // Permisos de la sesión que prepara BaseController. Ocultar una tarjeta solo evita
+    // enseñar enlaces inútiles: la seguridad real está en [RequierePermiso], que vuelve
+    // a comprobar el permiso en cada acción (vista y contador) en el servidor.
+    var permisos = ViewBag.PermisosMiembro as CapaEntidad.Permisos ?? new CapaEntidad.Permisos();
+
+    // Cada tarjeta lleva el permiso que exige su vista, igual que el menú lateral.
+    // Las bajas no tienen vista propia: son un modo de la de Miembros (?bajas=true).
+    // Líderes cuelga del permiso de Miembros, como en el menú.
+    var tarjetasEstado = new[]
+    {
+        new { Ver = permisos.Visitantes,    Accion = "Visitantes",    Bajas = false, Texto = L["Total de Visitantes"].Value,       Id = "totalvisitantes",    Color = "#6B7280", Icono = "fas fa-user-clock", Contador = "ContadorVisitantes",    Orden = 0 },
+        new { Ver = permisos.Simpatizantes, Accion = "Simpatizantes", Bajas = false, Texto = L["Total de Simpatizantes"].Value,    Id = "totalsimpatizantes", Color = "#00BFA5", Icono = "fas fa-user-tag",   Contador = "ContadorSimpatizantes", Orden = 0 },
+        new { Ver = permisos.Proceso,       Accion = "Proceso",       Bajas = false, Texto = L["Total En Proceso"].Value,          Id = "totalenproceso",     Color = "#1E3A8A", Icono = "fas fa-user-cog",   Contador = "ContadorEnProceso",     Orden = 0 },
+        new { Ver = permisos.Miembros,      Accion = "Miembros",      Bajas = false, Texto = L["Total de Miembros"].Value,         Id = "totalmiembros",      Color = "#0D1B3D", Icono = "fas fa-user",       Contador = "ContadorMiembros",      Orden = 0 },
+        new { Ver = permisos.Miembros,      Accion = "Miembros",      Bajas = true,  Texto = L["Total de Miembros de Baja"].Value, Id = "totalmiembrosbaja",  Color = "#B91C1C", Icono = "fas fa-user-slash", Contador = "ContadorMiembrosBaja",  Orden = 0 }
+    }.Where(t => t.Ver).ToList();
+
+    // Las siete tarjetas por defecto ocupan los huecos 1..7; las zonas propias de cada
+    // iglesia se añaden detrás desde cargarTarjetasZonas().
+    var tarjetasDiscipulado = new[]
+    {
+        new { Ver = permisos.Hombres,     Accion = "Hombres",     Bajas = false, Texto = L["Total de Hombres"].Value,     Id = "totalhombres",        Color = "#1D4ED8", Icono = "fas fa-mars",        Contador = "ContadorHombres",        Orden = 1 },
+        new { Ver = permisos.Mujeres,     Accion = "Mujeres",     Bajas = false, Texto = L["Total de Mujeres"].Value,     Id = "totalmujeresactivas", Color = "#A21CAF", Icono = "fas fa-venus",       Contador = "ContadorMujeresActivas", Orden = 2 },
+        new { Ver = permisos.Jovenes,     Accion = "Jovenes",     Bajas = false, Texto = L["Total de Jóvenes"].Value,     Id = "totaljovenes",        Color = "#0E7490", Icono = "fas fa-user-group",  Contador = "ContadorJovenes",        Orden = 3 },
+        new { Ver = permisos.Ninos,       Accion = "Ninos",       Bajas = false, Texto = L["Total de Niños"].Value,       Id = "totalninos",          Color = "#D97706", Icono = "fas fa-child",       Contador = "ContadorNinos",          Orden = 4 },
+        new { Ver = permisos.Matrimonios, Accion = "Matrimonios", Bajas = false, Texto = L["Total de Matrimonios"].Value, Id = "totalmatrimonios",    Color = "#BE185D", Icono = "fas fa-heart",       Contador = "ContadorMatrimonios",    Orden = 5 },
+        new { Ver = permisos.Familias,    Accion = "Familias",    Bajas = false, Texto = L["Total de Familias"].Value,    Id = "totalfamilias",       Color = "#6D28D9", Icono = "fas fa-people-roof", Contador = "ContadorFamilias",       Orden = 6 },
+        new { Ver = permisos.Miembros,    Accion = "Lideres",     Bajas = false, Texto = L["Total de Líderes"].Value,     Id = "totallideresactivos", Color = "#047857", Icono = "fas fa-user-tie",    Contador = "ContadorLideresActivos", Orden = 7 }
+    }.Where(t => t.Ver).ToList();
+}
+
+@* Aviso que deja [RequierePermiso] al devolver aquí a quien intentó entrar sin permiso *@
+@if (TempData["MensajeAcceso"] is string mensajeAcceso)
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-lock me-1"></i> @L[mensajeAcceso]
+    </div>
+}
+
 @* Cada tarjeta es un enlace a su vista: el <a> envuelve la tarjeta entera para
-   que toda su superficie sea clicable y siga siendo accesible por teclado. *@
+   que toda su superficie sea clicable y siga siendo accesible por teclado.
+   El número lo rellena el JavaScript a partir de data-contador. *@
 <style>
     .tarjeta-enlace { display: block; text-decoration: none; color: inherit; }
     .tarjeta-enlace .card { transition: transform .15s ease, box-shadow .15s ease; }
@@ -17,223 +58,62 @@
     .tarjeta-enlace:focus-visible .card { outline: 3px solid #0d6efd; outline-offset: 2px; }
 </style>
 
-<div class="row">
-    <div class="col-xl-3 col-md-6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Visitantes">
-            <div class="card text-white mb-4" style="background-color: #6B7280;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Visitantes"]</h6>
-                            <h6 id="totalvisitantes"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-clock fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Simpatizantes">
-            <div class="card text-white mb-4" style="background-color: #00BFA5;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Simpatizantes"]</h6>
-                            <h6 id="totalsimpatizantes"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-tag fa-2x"></i>
+@if (tarjetasEstado.Count > 0)
+{
+    <div class="row">
+        @foreach (var t in tarjetasEstado)
+        {
+            <div class="col-xl-3 col-md-6">
+                <a class="tarjeta-enlace" href="@Url.Action(t.Accion, "Congregantes", t.Bajas ? new { bajas = true } : null)">
+                    <div class="card text-white mb-4" style="background-color: @t.Color;">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-9">
+                                    <h6>@L[t.Texto]</h6>
+                                    <h6 id="@t.Id" data-contador="@Url.Action(t.Contador, "Congregantes")"></h6>
+                                </div>
+                                <div class="col-sm-3">
+                                    <i class="@t.Icono fa-2x"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-        </a>
+        }
     </div>
-    <div class="col-xl-3 col-md-6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Proceso">
-            <div class="card text-white mb-4" style="background-color: #1E3A8A;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total En Proceso"]</h6>
-                            <h6 id="totalenproceso"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-cog fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Miembros">
-            <div class="card text-white mb-4" style="background-color: #0D1B3D;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Miembros"]</h6>
-                            <h6 id="totalmiembros"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    @* Las bajas no tienen vista propia: son un modo de la de Miembros, que se
-       activa al llegar con ?bajas=true. *@
-    <div class="col-xl-3 col-md-6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Miembros" asp-route-bajas="true">
-            <div class="card text-white mb-4" style="background-color: #B91C1C;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Miembros de Baja"]</h6>
-                            <h6 id="totalmiembrosbaja"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-slash fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-</div>
 
-<hr class="my-4" />
+    <hr class="my-4" />
+}
 
-@* Bloque inferior: las siete tarjetas por defecto de la aplicación son fijas y
-   están siempre presentes (aunque su contador sea 0). Las zonas que crea cada
-   iglesia se añaden al final desde cargarTarjetasZonas(). *@
+@* Bloque inferior: cada tarjeta por defecto aparece siempre que haya permiso, aunque
+   su contador sea 0. El contenedor se pinta aunque quede vacío porque
+   cargarTarjetasZonas() añade ahí las zonas propias de la iglesia. *@
 <div class="row" id="contenedor-tarjetas">
-    <div class="col-xl-3 col-md-6" data-orden="1">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Hombres">
-            <div class="card text-white mb-4" style="background-color: #1D4ED8;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Hombres"]</h6>
-                            <h6 id="totalhombres"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-mars fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="2">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Mujeres">
-            <div class="card text-white mb-4" style="background-color: #A21CAF;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Mujeres"]</h6>
-                            <h6 id="totalmujeresactivas"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-venus fa-2x"></i>
+    @foreach (var t in tarjetasDiscipulado)
+    {
+        <div class="col-xl-3 col-md-6" data-orden="@t.Orden">
+            <a class="tarjeta-enlace" href="@Url.Action(t.Accion, "Congregantes")">
+                <div class="card text-white mb-4" style="background-color: @t.Color;">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <h6>@L[t.Texto]</h6>
+                                <h6 id="@t.Id" data-contador="@Url.Action(t.Contador, "Congregantes")"></h6>
+                            </div>
+                            <div class="col-sm-3">
+                                <i class="@t.Icono fa-2x"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="3">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Jovenes">
-            <div class="card text-white mb-4" style="background-color: #0E7490;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Jóvenes"]</h6>
-                            <h6 id="totaljovenes"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-group fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="4">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Ninos">
-            <div class="card text-white mb-4" style="background-color: #D97706;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Niños"]</h6>
-                            <h6 id="totalninos"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-child fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="5">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Matrimonios">
-            <div class="card text-white mb-4" style="background-color: #BE185D;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Matrimonios"]</h6>
-                            <h6 id="totalmatrimonios"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-heart fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="6">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Familias">
-            <div class="card text-white mb-4" style="background-color: #6D28D9;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Familias"]</h6>
-                            <h6 id="totalfamilias"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-people-roof fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl-3 col-md-6" data-orden="7">
-        <a class="tarjeta-enlace" asp-controller="Congregantes" asp-action="Lideres">
-            <div class="card text-white mb-4" style="background-color: #047857;">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-sm-9">
-                            <h6>@L["Total de Líderes"]</h6>
-                            <h6 id="totallideresactivos"></h6>
-                        </div>
-                        <div class="col-sm-3">
-                            <i class="fas fa-user-tie fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
+            </a>
+        </div>
+    }
 </div>
 
+@if (permisos.Asistencia)
+{
 <hr class="my-4" />
 
 <div class="card mb-4">
@@ -298,7 +178,10 @@
         </p>
     </div>
 </div>
+}
 
+@if (permisos.Gastos)
+{
 <hr class="my-4" />
 
 <div class="card mb-4">
@@ -350,7 +233,10 @@
         </p>
     </div>
 </div>
+}
 
+@if (permisos.Diezmos)
+{
 <hr class="my-4" />
 
 <div class="card mb-4">
@@ -402,6 +288,7 @@
         </p>
     </div>
 </div>
+}
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -458,56 +345,25 @@
             });
         }
 
+        // Cada tarjeta visible lleva en data-contador la URL de su contador. Las que el
+        // usuario no puede ver no se pintan, así que tampoco se piden (el servidor las
+        // rechazaría igualmente con un 403).
+        function cargarContadores() {
+            $('[data-contador]').each(function () {
+                const $destino = $(this);
+                $.get($destino.data('contador'), function (data) {
+                    $destino.text(data.resultado ?? 0);
+                }).fail(function () { $destino.text('Error'); });
+            });
+        }
+
         $(document).ready(function () {
-            $.get('@Url.Action("ContadorMiembros", "Congregantes")', function (data) {
-                $("#totalmiembros").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalmiembros").text('Error'); });
+            cargarContadores();
 
-            $.get('@Url.Action("ContadorMiembrosBaja", "Congregantes")', function (data) {
-                $("#totalmiembrosbaja").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalmiembrosbaja").text('Error'); });
-
-            $.get('@Url.Action("ContadorVisitantes", "Congregantes")', function (data) {
-                $("#totalvisitantes").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalvisitantes").text('Error'); });
-
-            $.get('@Url.Action("ContadorSimpatizantes", "Congregantes")', function (data) {
-                $("#totalsimpatizantes").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalsimpatizantes").text('Error'); });
-
-            $.get('@Url.Action("ContadorEnProceso", "Congregantes")', function (data) {
-                $("#totalenproceso").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalenproceso").text('Error'); });
-
-            $.get('@Url.Action("ContadorFamilias", "Congregantes")', function (data) {
-                $("#totalfamilias").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalfamilias").text('Error'); });
-
-            $.get('@Url.Action("ContadorMatrimonios", "Congregantes")', function (data) {
-                $("#totalmatrimonios").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalmatrimonios").text('Error'); });
-
-            $.get('@Url.Action("ContadorHombres", "Congregantes")', function (data) {
-                $("#totalhombres").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalhombres").text('Error'); });
-
-            $.get('@Url.Action("ContadorMujeresActivas", "Congregantes")', function (data) {
-                $("#totalmujeresactivas").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalmujeresactivas").text('Error'); });
-
-            $.get('@Url.Action("ContadorJovenes", "Congregantes")', function (data) {
-                $("#totaljovenes").text(data.resultado ?? 0);
-            }).fail(function () { $("#totaljovenes").text('Error'); });
-
-            $.get('@Url.Action("ContadorNinos", "Congregantes")', function (data) {
-                $("#totalninos").text(data.resultado ?? 0);
-            }).fail(function () { $("#totalninos").text('Error'); });
-
-            $.get('@Url.Action("ContadorLideresActivos", "Congregantes")', function (data) {
-                $("#totallideresactivos").text(data.resultado ?? 0);
-            }).fail(function () { $("#totallideresactivos").text('Error'); });
-
-            cargarTarjetasZonas();
+            // Las zonas propias solo se piden con permiso de Zonas
+            if (@Json.Serialize(permisos.Zonas)) {
+                cargarTarjetasZonas();
+            }
         });
     </script>
 
@@ -527,6 +383,9 @@
         }
 
         function cargarGraficoAsistencia() {
+            // Sin permiso de Asistencia el gráfico no se pinta: no hay nada que pedir
+            if (!document.getElementById('graficoAsistencia')) return;
+
             const modo = $('#modoGrafico').val();
             const anio = $('#anioGrafico').val();
             const mes  = $('#mesGrafico').val();
@@ -644,6 +503,9 @@
         });
 
         function cargarGraficoDiezmos() {
+            // Sin permiso de Diezmos el gráfico no se pinta: no hay nada que pedir
+            if (!document.getElementById('graficoDiezmos')) return;
+
             const modo = $('#modoDiezmo').val();
             const anio = $('#anioDiezmo').val();
             const mes  = $('#mesDiezmo').val();
@@ -733,6 +595,9 @@
         });
 
         function cargarGraficoGastos() {
+            // Sin permiso de Gastos el gráfico no se pinta: no hay nada que pedir
+            if (!document.getElementById('graficoGastos')) return;
+
             const modo = $('#modoGasto').val();
             const anio = $('#anioGasto').val();
             const mes  = $('#mesGasto').val();

@@ -18,12 +18,15 @@ namespace CASTIglesias.Controllers
         private readonly CN_Usuarios _negocioUsuarios;
         private readonly CN_Permisos _negocioPermisos;
         private readonly CN_Plataforma _negocioPlataforma;
+        private readonly CN_UsuarioSedes _negocioUsuarioSedes;
 
-        public AccesoController(CN_Usuarios negocioUsuarios, CN_Permisos negocioPermisos, CN_Plataforma negocioPlataforma)
+        public AccesoController(CN_Usuarios negocioUsuarios, CN_Permisos negocioPermisos,
+                                CN_Plataforma negocioPlataforma, CN_UsuarioSedes negocioUsuarioSedes)
         {
             _negocioUsuarios = negocioUsuarios;
             _negocioPermisos = negocioPermisos;
             _negocioPlataforma = negocioPlataforma;
+            _negocioUsuarioSedes = negocioUsuarioSedes;
         }
 
         public IActionResult Login() => View();
@@ -67,12 +70,11 @@ namespace CASTIglesias.Controllers
                 return RedirectToAction("CambiarClave");
             }
 
-            // Lógica de asignación de sede
-            int sedeDelUsuarioLogueado = oUsuario.ID_sede;
-            if (oUsuario.Rol == "AdminGlobal" || oUsuario.Rol == "PastorGeneral")
-            {
-                sedeDelUsuarioLogueado = 1000;
-            }
+            // Sedes permitidas (rol, sede 1000 o filas de usuario_sedes). Quien tiene todas
+            // entra en "Todas las Sedes"; el resto entra en su sede principal y, si tiene
+            // más, las elige después en el selector.
+            var accesoSedes = _negocioUsuarioSedes.ObtenerAcceso(oUsuario.ID_usuario);
+            int sedeDelUsuarioLogueado = accesoSedes.TodasLasSedes ? Sedes.TodasLasSedes : oUsuario.ID_sede;
 
             // 🔹 Obtener permisos desde la capa de negocio
             var permisosUsuario = _negocioPermisos.ObtenerPermisosDeSesion(oUsuario.ID_usuario);
@@ -88,7 +90,7 @@ namespace CASTIglesias.Controllers
                 new Claim(SesionClaims.NombreIglesia, iglesia.nombre_iglesia ?? string.Empty),
                 new Claim(SesionClaims.IdSede, sedeDelUsuarioLogueado.ToString()),
                 // En minúsculas: el layout compara con HasClaim("Multisede", "true")
-                new Claim(SesionClaims.Multisede, (sedeDelUsuarioLogueado == 1000) ? "true" : "false")
+                new Claim(SesionClaims.Multisede, accesoSedes.TodasLasSedes ? "true" : "false")
             };
 
             if (oUsuario.es_admin_plataforma)
@@ -178,30 +180,17 @@ namespace CASTIglesias.Controllers
             if (!oUsuario.Es_primera_vez.GetValueOrDefault())
                 return RedirectToAction("Index", "Home");
 
-            if (oUsuario.contrasenia != CN_Recursos.ConvertirSha256(claveactual))
+            // Validaciones y hash nuevo (PBKDF2) en la capa de negocio
+            var error = _negocioUsuarios.CambiarClavePropia(id, claveactual, nuevaclave, confirmarclave);
+            if (error != null)
             {
-                ViewBag.Error = "La contraseña actual no es correcta.";
+                ViewBag.Error = error;
                 return View();
             }
 
-            if (nuevaclave != confirmarclave)
-            {
-                ViewBag.Error = "Las contraseñas no coinciden.";
-                return View();
-            }
-
-            string nuevaClaveHash = CN_Recursos.ConvertirSha256(nuevaclave);
-
-            bool respuesta = _negocioUsuarios.CambiarClave(id, nuevaClaveHash, oUsuario.ID_sede);
-
-            if (!respuesta)
-            {
-                ViewBag.Error = "No se pudo actualizar la contraseña.";
-                return View();
-            }
-
-            oUsuario.contrasenia = nuevaClaveHash;
-            return RedirectToAction("Bienvenida", "Home");
+            // Tras cambiarla vuelve al login para entrar con la clave nueva: esta acción no
+            // abre sesión, y Bienvenida la exige.
+            return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> CerrarSesion()

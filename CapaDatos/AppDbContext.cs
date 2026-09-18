@@ -55,6 +55,7 @@ namespace CapaDatos
         // Plataforma (no filtradas por iglesia: las usa el administrador de Congrega)
         public DbSet<Iglesia> Iglesias { get; set; }
         public DbSet<AccesoPlataforma> AccesosPlataforma { get; set; }
+        public DbSet<UsuarioSede> UsuarioSedes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

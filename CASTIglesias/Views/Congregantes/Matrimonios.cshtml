@@ -16,7 +16,7 @@
     <div class="table-responsive">
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">@L["Añadir matrimonio"]</button>
+                <button data-permiso="MatrimoniosCrearEditar" type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">@L["Añadir matrimonio"]</button>
             </div>
         </div>
 
@@ -136,10 +136,10 @@
                     {
                         defaultContent: `
                             <div class="d-flex justify-content-center gap-2">
-                                <button type="button" class="btn btn-primary btn-sm btn-editarMatrimonio">
+                                <button data-permiso="MatrimoniosCrearEditar" type="button" class="btn btn-primary btn-sm btn-editarMatrimonio">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <button type="button" class="btn btn-danger btn-sm btn-eliminarMatrimonio">
+                                <button data-permiso="MatrimoniosEliminar" type="button" class="btn btn-danger btn-sm btn-eliminarMatrimonio">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>`,
@@ -190,7 +190,7 @@
                                 }
                             },
                             error: function () {
-                                Swal.fire(T.error, "No se pudo eliminar.", "error");
+                                Swal.fire(T.error, T.mNoEliminarPunto, "error");
                             }
                         });
                     }
@@ -240,7 +240,7 @@
             };
 
             if (!obj.nombres) {
-                $("#mensajeErrorMatrimonio").removeClass("d-none").text("El campo Nombres es obligatorio.");
+                $("#mensajeErrorMatrimonio").removeClass("d-none").text(T.mCampoNombresObligatorio);
                 return;
             }
 
@@ -265,7 +265,7 @@
                 },
                 error: function () {
                     $(".modal-body").LoadingOverlay("hide");
-                    $("#mensajeErrorMatrimonio").removeClass("d-none").text("Error en la solicitud.");
+                    $("#mensajeErrorMatrimonio").removeClass("d-none").text(T.mErrorSolicitud);
                 }
             });
         }
