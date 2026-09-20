@@ -117,8 +117,17 @@ builder.Services.AddScoped<CD_Fondos>();
 builder.Services.AddScoped<CN_Fondos>();
 builder.Services.AddScoped<CD_Tesoreria>();
 builder.Services.AddScoped<CN_Tesoreria>();
+// Cifrado de los campos sensibles (NIF del donante, IBAN). Va antes que las
+// capas que lo usan. AVISO: sin la ruta de claves de DataProtection en disco,
+// cada reinicio deja ilegible lo cifrado antes (ver Pendiente-en-Produccion).
+builder.Services.AddScoped<CapaEntidad.ICifradoCampos, CASTIglesias.Services.CifradoCampos>();
+
+builder.Services.AddScoped<CD_Terceros>();
+builder.Services.AddScoped<CN_Terceros>();
 builder.Services.AddScoped<CD_ConceptosFinancieros>();
 builder.Services.AddScoped<CN_ConceptosFinancieros>();
+builder.Services.AddScoped<CD_Operaciones>();
+builder.Services.AddScoped<CN_Operaciones>();
 
 // Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
 // y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.
@@ -126,11 +135,21 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IContextoIglesia, ContextoIglesiaHttp>();
 
 // ✅ Configurar EF Core
+//
+// La versión del motor se detecta al arrancar en lugar de escribirla aquí.
+// El motivo es que NO es la misma en todas partes: desarrollo y QA corren
+// sobre MariaDB 10.3 y producción sobre MySQL 8, y Pomelo genera SQL distinto
+// para cada uno. Antes esta línea decía MySqlServerVersion(10, 3, 32), que es
+// una versión de MariaDB declarada como si fuera de MySQL: no existe, y al ser
+// mayor que 8 hacía que Pomelo diera por buenas todas las funciones de MySQL 8
+// aunque hablara con MariaDB.
+//
+// AutoDetect abre una conexión al iniciar para preguntar la versión. Es un
+// coste asumible: sin base de datos la aplicación no arranca de todos modos.
+var cadenaConexion = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(10, 3, 32)) // Ajusta la versión de tu MySQL
-    )
+    options.UseMySql(cadenaConexion, ServerVersion.AutoDetect(cadenaConexion))
 );
 
 

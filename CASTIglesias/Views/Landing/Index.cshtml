@@ -557,6 +557,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             text-decoration: line-through; text-decoration-color: #DC2626; text-decoration-thickness: 2px;
         }
 
+        /* Complemento (área financiera). Va aparte de la fila de planes y con
+           otro color a propósito: no es una alternativa a ellos, se suma a uno.
+           Presentarlo como una cuarta tarjeta igual haría pensar que se puede
+           contratar suelto, y no es así. */
+        .complemento-card {
+            position: relative; max-width: 860px; margin: 48px auto 0;
+            padding: 34px 32px 30px; background: white; border-radius: 20px;
+            border: 2px solid rgba(13,148,136,0.28);
+            box-shadow: 0 12px 44px rgba(13,148,136,0.13);
+        }
+        .complemento-badge {
+            position: absolute; top: -14px; left: 32px;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 16px; border-radius: 20px; color: white;
+            background: linear-gradient(120deg,#0D9488,#0F766E);
+            font-size: 0.76rem; font-weight: 800; letter-spacing: 0.06em;
+        }
+        /* Dos columnas que se apilan solas en móvil gracias al flex-basis */
+        .complemento-grid { display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; }
+        .complemento-col { flex: 1 1 290px; min-width: 0; }
+        .complemento-aviso {
+            margin-top: 16px; padding: 10px 14px; border-radius: 12px;
+            background: rgba(13,148,136,0.07); border: 1px solid rgba(13,148,136,0.22);
+            font-size: 0.82rem; font-weight: 600; color: #0F766E;
+        }
+        .btn-complemento { background: transparent; color: #0F766E; border: 2px solid #0D9488; }
+        .btn-complemento:hover { background: #0D9488; border-color: #0D9488; color: white; }
+
         /* ── CONTACT ── */
         .contact-info-icon {
             width: 46px; height: 46px; background: rgba(30,58,138,0.07);
@@ -1445,8 +1473,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             // con la fecha que use la pasarela para retirar el descuento.
             var finPrecioOferta = new DateTime(2027, 2, 28);
             bool ofertaActiva = DateTime.Today <= finOferta;
-            var precioNormal = new Dictionary<string, int> { ["basico"] = 25, ["standard"] = 60, ["premium"] = 90 };
-            var precioOferta = new Dictionary<string, int> { ["basico"] = 18, ["standard"] = 35, ["premium"] = 60 };
+            // "financiero" no es un plan: es el complemento que se contrata SOBRE un
+            // Standard o un Premium. Vive en el mismo diccionario para que la oferta de
+            // lanzamiento y la fecha de fin le apliquen igual que a los planes.
+            var precioNormal = new Dictionary<string, int> { ["basico"] = 25, ["standard"] = 60, ["premium"] = 90, ["financiero"] = 70 };
+            var precioOferta = new Dictionary<string, int> { ["basico"] = 18, ["standard"] = 35, ["premium"] = 60, ["financiero"] = 50 };
             int Precio(string plan) => ofertaActiva ? precioOferta[plan] : precioNormal[plan];
         }
 
@@ -1513,6 +1544,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         @L["El plan ideal para empezar: todos los módulos para el pastor que dirige una sede."]
                     </div>
                     <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Incluye todo lo básico de la aplicación"]</strong></span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
@@ -1542,6 +1574,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         @L["Para el pastor que dirige varias sedes y necesita verlas todas desde un mismo panel."]
                     </div>
                     <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Incluye todo lo básico de la aplicación"]</strong></span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Multi-sede"]</strong>: @L["varias sedes en una misma cuenta"]</span></div>
                     <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
@@ -1552,6 +1585,48 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
 
         </div>
+
+        @* ── Complemento: área financiera ───────────────────────────────────────
+           No es un cuarto plan. Se contrata SOBRE un Standard o un Premium, y no
+           está disponible con el Básico porque ese plan limita el número de vistas.
+           Por eso va fuera de la fila, con otro color y diciéndolo explícitamente:
+           si alguien contrata esperando llevarlo suelto, la reclamación es segura. *@
+        <div class="complemento-card">
+            <div class="complemento-badge">
+                <i class="fas fa-plus-circle"></i> @L["COMPLEMENTO"]
+            </div>
+            <div class="complemento-grid">
+                <div class="complemento-col">
+                    <div class="plan-name">
+                        <i class="fas fa-calculator me-2" style="color:#0D9488;"></i>@L["Área financiera"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("financiero") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["financiero"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["La contabilidad de la iglesia en la misma aplicación: ingresos, gastos, fondos y ejercicios contables, con la trazabilidad que hace falta para rendir cuentas."]
+                    </div>
+                    <div class="complemento-aviso">
+                        <i class="fas fa-info-circle me-1"></i>
+                        @L["Se suma a los planes Standard y Premium. No está disponible con el plan Básico."]
+                    </div>
+                </div>
+                <div class="complemento-col">
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Panel financiero con ingresos, gastos y reparto por concepto"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Ejercicios y periodos contables, con cierre"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Plan de cuentas, fondos, cajas y bancos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Numeración correlativa de documentos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Datos fiscales de los donantes cifrados"]</span></div>
+                    <a href="#contacto" class="btn btn-plan btn-complemento">@L["Añadir área financiera"]</a>
+                </div>
+            </div>
+        </div>
+
         @if (ofertaActiva)
         {
             @* Condiciones de la oferta a la vista antes de pagar: evita sorpresas y

@@ -2112,4 +2112,205 @@
   <data name="Configuración" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Un tercero es cualquiera con quien hay movimiento de dinero: un donante, un proveedor o quien recibe una ayuda. Marcando a alguien como donante se guarda su NIF, que es lo que hará falta para los certificados de donación." xml:space="preserve">
+    <value>A third party is anyone money moves to or from: a donor, a supplier, or someone receiving help. Marking someone as a donor stores their tax ID, which is what donation certificates will need.</value>
+  </data>
+  <data name="No tienes permiso para ver los datos personales de los donantes, así que el NIF, el correo y el teléfono aparecen ocultos." xml:space="preserve">
+    <value>You do not have permission to see donors' personal details, so the tax ID, e-mail and phone are hidden.</value>
+  </data>
+  <data name="Nuevo tercero" xml:space="preserve">
+    <value>New third party</value>
+  </data>
+  <data name="Editar tercero" xml:space="preserve">
+    <value>Edit third party</value>
+  </data>
+  <data name="NIF" xml:space="preserve">
+    <value>Tax ID</value>
+  </data>
+  <data name="Donante" xml:space="preserve">
+    <value>Donor</value>
+  </data>
+  <data name="Miembro de la iglesia" xml:space="preserve">
+    <value>Church member</value>
+  </data>
+  <data name="Persona externa" xml:space="preserve">
+    <value>External person</value>
+  </data>
+  <data name="Empresa" xml:space="preserve">
+    <value>Company</value>
+  </data>
+  <data name="Proveedor" xml:space="preserve">
+    <value>Supplier</value>
+  </data>
+  <data name="Beneficiario de una ayuda" xml:space="preserve">
+    <value>Aid beneficiary</value>
+  </data>
+  <data name="Otra entidad" xml:space="preserve">
+    <value>Other entity</value>
+  </data>
+  <data name="Datos personales. Se guardan cifrados en la base de datos." xml:space="preserve">
+    <value>Personal details. They are stored encrypted in the database.</value>
+  </data>
+  <data name="Es donante" xml:space="preserve">
+    <value>Is a donor</value>
+  </data>
+  <data name="Puede recibir certificados de donación" xml:space="preserve">
+    <value>Can receive donation certificates</value>
+  </data>
+  <data name="Hace falta el NIF." xml:space="preserve">
+    <value>The tax ID is required.</value>
+  </data>
+  <data name="El nombre del tercero es obligatorio." xml:space="preserve">
+    <value>The third party name is required.</value>
+  </data>
+  <data name="Un tercero de tipo miembro tiene que estar vinculado a un miembro." xml:space="preserve">
+    <value>A member-type third party must be linked to a member.</value>
+  </data>
+  <data name="¿Eliminar este tercero?" xml:space="preserve">
+    <value>Delete this third party?</value>
+  </data>
+  <data name="Oculto" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="Filtrar" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="Número" xml:space="preserve">
+    <value>Number</value>
+  </data>
+  <data name="Importe" xml:space="preserve">
+    <value>Amount</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Nuevo ingreso" xml:space="preserve">
+    <value>New income</value>
+  </data>
+  <data name="Nuevo gasto" xml:space="preserve">
+    <value>New expense</value>
+  </data>
+  <data name="Editar operación" xml:space="preserve">
+    <value>Edit transaction</value>
+  </data>
+  <data name="No hay ningún ejercicio abierto, así que todavía no se puede registrar nada." xml:space="preserve">
+    <value>There is no open financial year yet, so nothing can be recorded.</value>
+  </data>
+  <data name="Ir a ejercicios y periodos" xml:space="preserve">
+    <value>Go to financial years and periods</value>
+  </data>
+  <data name="No hay conceptos de este tipo, así que no se puede registrar nada." xml:space="preserve">
+    <value>There are no concepts of this kind, so nothing can be recorded.</value>
+  </data>
+  <data name="Ir a conceptos" xml:space="preserve">
+    <value>Go to concepts</value>
+  </data>
+  <data name="Forma de cobro" xml:space="preserve">
+    <value>Payment method received</value>
+  </data>
+  <data name="Forma de pago" xml:space="preserve">
+    <value>Payment method</value>
+  </data>
+  <data name="Efectivo" xml:space="preserve">
+    <value>Cash</value>
+  </data>
+  <data name="Domiciliación" xml:space="preserve">
+    <value>Direct debit</value>
+  </data>
+  <data name="Entra en" xml:space="preserve">
+    <value>Goes into</value>
+  </data>
+  <data name="Sale de" xml:space="preserve">
+    <value>Comes out of</value>
+  </data>
+  <data name="Aportación anónima" xml:space="preserve">
+    <value>Anonymous contribution</value>
+  </data>
+  <data name="Cuenta para la caja y la contabilidad, pero no puede generar certificado." xml:space="preserve">
+    <value>It counts towards cash and accounting, but cannot produce a certificate.</value>
+  </data>
+  <data name="Sin permiso para ver datos de donantes, solo se muestra el nombre." xml:space="preserve">
+    <value>Without permission to see donor details, only the name is shown.</value>
+  </data>
+  <data name="Referencia externa" xml:space="preserve">
+    <value>External reference</value>
+  </data>
+  <data name="Número de factura, referencia del banco…" xml:space="preserve">
+    <value>Invoice number, bank reference…</value>
+  </data>
+  <data name="Hay que elegir un concepto." xml:space="preserve">
+    <value>You must pick a concept.</value>
+  </data>
+  <data name="El importe tiene que ser mayor que cero." xml:space="preserve">
+    <value>The amount must be greater than zero.</value>
+  </data>
+  <data name="¿Eliminar esta operación?" xml:space="preserve">
+    <value>Delete this transaction?</value>
+  </data>
+  <data name="Borrador" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Pendiente de aprobación" xml:space="preserve">
+    <value>Pending approval</value>
+  </data>
+  <data name="Aprobada" xml:space="preserve">
+    <value>Approved</value>
+  </data>
+  <data name="Contabilizada" xml:space="preserve">
+    <value>Posted</value>
+  </data>
+  <data name="Revertida" xml:space="preserve">
+    <value>Reversed</value>
+  </data>
+  <data name="Todavía no hay ningún ejercicio abierto" xml:space="preserve">
+    <value>There is no open financial year yet</value>
+  </data>
+  <data name="El ejercicio es el año contable. Hay que crearlo, generar sus periodos y abrirlo antes de poder registrar nada." xml:space="preserve">
+    <value>The financial year is the accounting year. It must be created, have its periods generated and be opened before anything can be recorded.</value>
+  </data>
+  <data name="Ejercicio" xml:space="preserve">
+    <value>Financial year</value>
+  </data>
+  <data name="Diferencia" xml:space="preserve">
+    <value>Difference</value>
+  </data>
+  <data name="Ingresos por concepto" xml:space="preserve">
+    <value>Income by concept</value>
+  </data>
+  <data name="Todavía no hay ingresos registrados en este ejercicio." xml:space="preserve">
+    <value>No income has been recorded in this financial year yet.</value>
+  </data>
+  <data name="Los importes de arriba son los registrados, todavía sin contabilizar: el motor contable, los saldos por caja y el control de presupuesto llegan en la siguiente fase." xml:space="preserve">
+    <value>The amounts above are what has been recorded, not yet posted: the accounting engine, cash balances and budget control come in the next phase.</value>
+  </data>
+  <data name="Incluye todo lo básico de la aplicación" xml:space="preserve">
+    <value>Includes everything the app does as standard</value>
+  </data>
+  <data name="COMPLEMENTO" xml:space="preserve">
+    <value>ADD-ON</value>
+  </data>
+  <data name="La contabilidad de la iglesia en la misma aplicación: ingresos, gastos, fondos y ejercicios contables, con la trazabilidad que hace falta para rendir cuentas." xml:space="preserve">
+    <value>The church's accounts in the same app: income, expenses, funds and financial years, with the audit trail you need to account for it all.</value>
+  </data>
+  <data name="Se suma a los planes Standard y Premium. No está disponible con el plan Básico." xml:space="preserve">
+    <value>Added to the Standard and Premium plans. Not available with the Basic plan.</value>
+  </data>
+  <data name="Panel financiero con ingresos, gastos y reparto por concepto" xml:space="preserve">
+    <value>Financial dashboard with income, expenses and a breakdown by category</value>
+  </data>
+  <data name="Ejercicios y periodos contables, con cierre" xml:space="preserve">
+    <value>Financial years and accounting periods, with closing</value>
+  </data>
+  <data name="Plan de cuentas, fondos, cajas y bancos" xml:space="preserve">
+    <value>Chart of accounts, funds, cash and bank accounts</value>
+  </data>
+  <data name="Numeración correlativa de documentos" xml:space="preserve">
+    <value>Gap-free document numbering</value>
+  </data>
+  <data name="Datos fiscales de los donantes cifrados" xml:space="preserve">
+    <value>Donors' tax details encrypted</value>
+  </data>
+  <data name="Añadir área financiera" xml:space="preserve">
+    <value>Add the finance area</value>
+  </data>
 </root>

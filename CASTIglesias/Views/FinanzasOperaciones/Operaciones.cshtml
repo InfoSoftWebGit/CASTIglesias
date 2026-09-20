@@ -1,0 +1,430 @@
+@using System.Text.Json
+@using CapaEntidad.Financiero
+@{
+    bool esIngreso = ViewBag.EsIngreso as bool? ?? true;
+    bool puedeVerDonantes = ViewBag.PuedeVerDonantes as bool? ?? false;
+    bool hayEjercicioAbierto = ViewBag.HayEjercicioAbierto as bool? ?? false;
+    var conceptos = ViewBag.Conceptos as List<FinancialConcept> ?? new List<FinancialConcept>();
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    var cajas = ViewBag.Cajas as List<TreasuryAccount> ?? new List<TreasuryAccount>();
+
+    var titulo = esIngreso ? L["Ingresos y aportaciones"].Value : L["Gastos"].Value;
+    ViewBag.Title = titulo;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@titulo</li>
+</ol>
+
+@* Sin ejercicio abierto no se puede registrar nada: se dice antes de que el
+   usuario rellene un formulario que después no va a poder guardar. *@
+@if (!hayEjercicioAbierto)
+{
+    <div class="alert alert-warning d-flex align-items-start">
+        <i class="fas fa-triangle-exclamation me-2 mt-1"></i>
+        <div>
+            @L["No hay ningún ejercicio abierto, así que todavía no se puede registrar nada."]
+            <a href="@Url.Action("Index", "FinanzasEjercicios")" class="alert-link ms-1">@L["Ir a ejercicios y periodos"]</a>
+        </div>
+    </div>
+}
+else if (conceptos.Count == 0)
+{
+    <div class="alert alert-warning d-flex align-items-start">
+        <i class="fas fa-triangle-exclamation me-2 mt-1"></i>
+        <div>
+            @L["No hay conceptos de este tipo, así que no se puede registrar nada."]
+            <a href="@Url.Action("Index", "FinanzasConceptos")" class="alert-link ms-1">@L["Ir a conceptos"]</a>
+        </div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>
+            <i class="fas @(esIngreso ? "fa-hand-holding-heart" : "fa-receipt") me-1"></i> @titulo
+        </span>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <input type="date" id="txtDesde" class="form-control form-control-sm" style="width:auto" />
+            <input type="date" id="txtHasta" class="form-control form-control-sm" style="width:auto" />
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="recargar()">
+                <i class="fas fa-filter me-1"></i> @L["Filtrar"]
+            </button>
+            <button type="button" class="btn btn-success btn-sm" onclick="abrirModalOperacion(null)"
+                    @(hayEjercicioAbierto && conceptos.Count > 0 ? "" : "disabled")>
+                <i class="fas fa-plus me-1"></i> @(esIngreso ? L["Nuevo ingreso"] : L["Nuevo gasto"])
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaOperaciones" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Número"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Concepto"]</th>
+                    <th>@(esIngreso ? L["Donante"] : L["Proveedor"])</th>
+                    <th>@L["Fondo"]</th>
+                    <th class="text-end">@L["Importe"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5" class="text-end">@L["Total"]</th>
+                    <th class="text-end" id="pieTotal">0,00 €</th>
+                    <th colspan="2"></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL OPERACIÓN -->
+<div class="modal fade" id="modalOperacion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalOperacion"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdOperacion" value="0" />
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtFecha" class="form-label">@L["Fecha"] <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFecha" />
+                    </div>
+                    <div class="col-sm-8 mb-3">
+                        <label for="cboConcepto" class="form-label">@L["Concepto"] <span class="text-danger">*</span></label>
+                        <select id="cboConcepto" class="form-select" onchange="cambiarConcepto()">
+                            @foreach (var c in conceptos)
+                            {
+                                <option value="@c.id"
+                                        data-donante="@(c.requires_donor ? "1" : "0")"
+                                        data-anonimo="@(c.allows_anonymous ? "1" : "0")"
+                                        data-fondo="@c.default_fund_id">@c.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtImporte" class="form-label">@L["Importe"] <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="txtImporte" step="0.01" min="0.01" />
+                            <span class="input-group-text">€</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboMedioPago" class="form-label">@(esIngreso ? L["Forma de cobro"] : L["Forma de pago"])</label>
+                        <select id="cboMedioPago" class="form-select">
+                            <option value="cash">@L["Efectivo"]</option>
+                            <option value="transfer">@L["Transferencia"]</option>
+                            <option value="card">@L["Tarjeta"]</option>
+                            <option value="direct_debit">@L["Domiciliación"]</option>
+                            <option value="other">@L["Otro"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboCaja" class="form-label">@(esIngreso ? L["Entra en"] : L["Sale de"])</label>
+                        <select id="cboCaja" class="form-select">
+                            <option value="">@L["— Sin especificar —"]</option>
+                            @foreach (var c in cajas)
+                            {
+                                <option value="@c.id">@c.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (esIngreso)
+                    {
+                        <div class="col-12 mb-2" id="bloqueAnonimo">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="chkAnonimo" onchange="cambiarAnonimo()" />
+                                <label class="form-check-label" for="chkAnonimo">@L["Aportación anónima"]</label>
+                            </div>
+                            <div class="form-text">@L["Cuenta para la caja y la contabilidad, pero no puede generar certificado."]</div>
+                        </div>
+                    }
+
+                    <div class="col-sm-8 mb-3" id="bloqueTercero">
+                        <label for="cboTercero" class="form-label">@(esIngreso ? L["Donante"] : L["Proveedor"])</label>
+                        <select id="cboTercero" class="form-select">
+                            <option value="">@L["— Sin especificar —"]</option>
+                        </select>
+                        @if (!puedeVerDonantes)
+                        {
+                            <div class="form-text">@L["Sin permiso para ver datos de donantes, solo se muestra el nombre."]</div>
+                        }
+                    </div>
+
+                    <div class="col-sm-4 mb-3">
+                        <label for="cboFondoOperacion" class="form-label">@L["Fondo"]</label>
+                        <select id="cboFondoOperacion" class="form-select">
+                            <option value="">@L["— Ninguno —"]</option>
+                            @foreach (var f in fondos)
+                            {
+                                <option value="@f.id">@f.name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label for="txtDescripcion" class="form-label">@L["Descripción"]</label>
+                        <input type="text" class="form-control" id="txtDescripcion" maxlength="500" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label for="txtReferencia" class="form-label">@L["Referencia externa"]</label>
+                        <input type="text" class="form-control" id="txtReferencia" maxlength="100" autocomplete="off" />
+                        <div class="form-text">@L["Número de factura, referencia del banco…"]</div>
+                    </div>
+                </div>
+
+                <div id="errorOperacion" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarOperacion()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            fechaObligatoria:    @Json.Serialize(L["La fecha es obligatoria."].Value),
+            conceptoObligatorio: @Json.Serialize(L["Hay que elegir un concepto."].Value),
+            importeMayorCero:    @Json.Serialize(L["El importe tiene que ser mayor que cero."].Value),
+            confirmarBorrarOp:   @Json.Serialize(L["¿Eliminar esta operación?"].Value),
+            nuevoIngreso:        @Json.Serialize(L["Nuevo ingreso"].Value),
+            nuevoGasto:          @Json.Serialize(L["Nuevo gasto"].Value),
+            editarOperacion:     @Json.Serialize(L["Editar operación"].Value),
+            editar:              @Json.Serialize(L["Editar"].Value),
+            eliminar:            @Json.Serialize(L["Eliminar"].Value),
+            anonimo:             @Json.Serialize(L["Anónimo"].Value)
+        });
+
+        const ESTADOS_OP = {
+            draft:                 { texto: @Json.Serialize(L["Borrador"].Value),               clase: "bg-secondary" },
+            pending_approval:      { texto: @Json.Serialize(L["Pendiente de aprobación"].Value), clase: "bg-warning text-dark" },
+            approved:              { texto: @Json.Serialize(L["Aprobada"].Value),               clase: "bg-info text-dark" },
+            posted:                { texto: @Json.Serialize(L["Contabilizada"].Value),          clase: "bg-success" },
+            reversed:              { texto: @Json.Serialize(L["Revertida"].Value),              clase: "bg-dark" }
+        };
+
+        const ES_INGRESO = @Json.Serialize(esIngreso);
+        let tablaOperaciones;
+
+        // Importes siempre con el formato del idioma activo
+        const FORMATO = new Intl.NumberFormat(document.documentElement.lang || 'es', {
+            style: 'currency', currency: 'EUR'
+        });
+
+        $(document).ready(function () {
+            tablaOperaciones = $('#tablaOperaciones').DataTable({
+                responsive: true,
+                pageLength: 25,
+                ajax: {
+                    url: '@Url.Action("Listar", "FinanzasOperaciones")',
+                    data: function (d) {
+                        d.esIngreso = ES_INGRESO;
+                        d.desde = $('#txtDesde').val();
+                        d.hasta = $('#txtHasta').val();
+                    },
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'transaction_number' },
+                    {
+                        data: 'operation_date',
+                        render: function (v) {
+                            const f = new Date(v);
+                            return isNaN(f) ? '' : f.toLocaleDateString();
+                        }
+                    },
+                    { data: 'concepto' },
+                    {
+                        data: 'tercero',
+                        render: function (v, tipo, fila) {
+                            if (fila.is_anonymous) return '<em class="text-muted">' + T.anonimo + '</em>';
+                            return v || '';
+                        }
+                    },
+                    { data: 'fondo' },
+                    {
+                        data: 'total_amount', className: 'text-end',
+                        render: function (v, tipo) {
+                            // En modo ordenación se devuelve el número crudo, si no
+                            // ordenaría alfabéticamente por el texto con el símbolo
+                            return tipo === 'display' ? FORMATO.format(v || 0) : (v || 0);
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_OP[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            // Lo contabilizado no se edita ni se borra: se revierte
+                            if (fila.status === 'posted' || fila.status === 'reversed') {
+                                return '<i class="fas fa-lock text-muted" title="' + ESTADOS_OP[fila.status].texto + '"></i>';
+                            }
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                // El pie suma lo que se está viendo, que es lo que el usuario espera
+                // al filtrar por fechas
+                drawCallback: function () {
+                    let total = 0;
+                    this.api().rows({ search: 'applied' }).data().each(function (fila) {
+                        total += parseFloat(fila.total_amount) || 0;
+                    });
+                    $('#pieTotal').text(FORMATO.format(total));
+                },
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaOperaciones tbody').on('click', '.btn-editar', function () {
+                abrirModalOperacion(tablaOperaciones.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaOperaciones tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarOp, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasOperaciones")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaOperaciones.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+
+            cargarTerceros();
+        });
+
+        function recargar() {
+            tablaOperaciones.ajax.reload();
+        }
+
+        function cargarTerceros(seleccionado) {
+            return $.get('@Url.Action("ListarTerceros", "FinanzasOperaciones")', function (r) {
+                const cbo = $('#cboTercero');
+                cbo.find('option:not(:first)').remove();
+                if (r.resultado) {
+                    r.data.forEach(function (t) {
+                        cbo.append($('<option>').val(t.id).text(t.display_name));
+                    });
+                }
+                if (seleccionado) cbo.val(seleccionado);
+            });
+        }
+
+        // El concepto manda: si exige donante, no se puede marcar anónimo, y el
+        // fondo por defecto se propone solo.
+        function cambiarConcepto() {
+            const opcion = $('#cboConcepto option:selected');
+            const exigeDonante = opcion.data('donante') === 1 || opcion.data('donante') === '1';
+            const permiteAnonimo = opcion.data('anonimo') === 1 || opcion.data('anonimo') === '1';
+
+            if (ES_INGRESO) {
+                $('#chkAnonimo').prop('disabled', !permiteAnonimo);
+                if (!permiteAnonimo) $('#chkAnonimo').prop('checked', false);
+                cambiarAnonimo();
+            }
+
+            const fondoPorDefecto = opcion.data('fondo');
+            if (fondoPorDefecto && !$('#cboFondoOperacion').val()) {
+                $('#cboFondoOperacion').val(fondoPorDefecto);
+            }
+
+            $('#cboTercero').prop('required', exigeDonante);
+        }
+
+        function cambiarAnonimo() {
+            const anonimo = $('#chkAnonimo').is(':checked');
+            $('#bloqueTercero').toggleClass('d-none', anonimo);
+            if (anonimo) $('#cboTercero').val('');
+        }
+
+        function abrirModalOperacion(fila) {
+            $('#errorOperacion').addClass('d-none').text('');
+
+            $('#tituloModalOperacion').text(
+                fila ? T.editarOperacion : (ES_INGRESO ? T.nuevoIngreso : T.nuevoGasto));
+            $('#txtIdOperacion').val(fila ? fila.id : 0);
+            $('#txtFecha').val(fila ? (fila.operation_date || '').substring(0, 10)
+                                    : new Date().toISOString().substring(0, 10));
+            $('#txtImporte').val(fila ? fila.total_amount : '');
+            $('#txtDescripcion').val(fila ? (fila.description || '') : '');
+            $('#txtReferencia').val('');
+            $('#cboFondoOperacion').val(fila && fila.fund_id ? fila.fund_id : '');
+            $('#cboCaja').val(fila && fila.treasury_account_id ? fila.treasury_account_id : '');
+            if (fila && fila.concept_id) $('#cboConcepto').val(fila.concept_id);
+            if (ES_INGRESO) $('#chkAnonimo').prop('checked', fila ? !!fila.is_anonymous : false);
+
+            cargarTerceros(fila ? fila.party_id : null);
+            cambiarConcepto();
+            new bootstrap.Modal(document.getElementById('modalOperacion')).show();
+        }
+
+        function guardarOperacion() {
+            const fecha = $('#txtFecha').val();
+            const concepto = $('#cboConcepto').val();
+            const importe = parseFloat($('#txtImporte').val());
+
+            if (!fecha) { errorOperacion(T.fechaObligatoria); return; }
+            if (!concepto) { errorOperacion(T.conceptoObligatorio); return; }
+            if (!importe || importe <= 0) { errorOperacion(T.importeMayorCero); return; }
+
+            $.post('@Url.Action("Guardar", "FinanzasOperaciones")', {
+                id: $('#txtIdOperacion').val(),
+                operation_date: fecha,
+                concept_id: concepto,
+                total_amount: importe,
+                party_id: $('#cboTercero').val() || '',
+                is_anonymous: ES_INGRESO ? $('#chkAnonimo').is(':checked') : false,
+                fund_id: $('#cboFondoOperacion').val() || '',
+                treasury_account_id: $('#cboCaja').val() || '',
+                payment_method: $('#cboMedioPago').val(),
+                description: $('#txtDescripcion').val(),
+                external_reference: $('#txtReferencia').val()
+            }, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalOperacion')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 2200, showConfirmButton: false });
+                    tablaOperaciones.ajax.reload(null, false);
+                } else {
+                    errorOperacion(respuesta.mensaje);
+                }
+            }).fail(function () { errorOperacion(T.mErrorConexionPunto); });
+        }
+
+        function errorOperacion(texto) {
+            $('#errorOperacion').removeClass('d-none').text(texto);
+        }
+    </script>
+}

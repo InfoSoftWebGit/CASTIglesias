@@ -28,15 +28,13 @@
                         </a>
                         <div class="collapse" id="collapseFinOperaciones" data-bs-parent="#sidenavAccordion">
                             <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Ingresos", "FinanzasOperaciones")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-heart"></i></div>
                                     @L["Ingresos y aportaciones"]
-                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
                                 </a>
-                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "FinanzasOperaciones")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
                                     @L["Gastos"]
-                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
                                 </a>
                             </nav>
                         </div>
@@ -69,10 +67,9 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
                                     @L["Ejercicios y periodos"]
                                 </a>
-                                <a class="nav-link collapsed-sub-item disabled text-white-50" href="#" tabindex="-1" aria-disabled="true">
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTerceros")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
                                     @L["Terceros"]
-                                    <span class="badge bg-secondary ms-2">@L["Pronto"]</span>
                                 </a>
                             </nav>
                         </div>

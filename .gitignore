@@ -9,6 +9,7 @@ appsettings*.json
 **/launchsettings.json
 *.pdf
 *.md
+*.sql
 # data ignore
 *.csv
 *.xlsx
@@ -428,3 +429,4 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+Queries/IglesiasEnTablasPastorales1609.sql

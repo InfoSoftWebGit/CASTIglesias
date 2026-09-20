@@ -1,0 +1,348 @@
+@using System.Text.Json
+@{
+    ViewBag.Title = L["Terceros"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool puedeVerDatosFiscales = ViewBag.PuedeVerDatosFiscales as bool? ?? false;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Terceros"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Un tercero es cualquiera con quien hay movimiento de dinero: un donante, un proveedor o quien recibe una ayuda. Marcando a alguien como donante se guarda su NIF, que es lo que hará falta para los certificados de donación."]
+    </div>
+</div>
+
+@if (!puedeVerDatosFiscales)
+{
+    <div class="alert alert-secondary d-flex align-items-start">
+        <i class="fas fa-user-shield me-2 mt-1"></i>
+        <div>
+            @L["No tienes permiso para ver los datos personales de los donantes, así que el NIF, el correo y el teléfono aparecen ocultos."]
+        </div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-address-book me-1"></i> @L["Terceros"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalTercero(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nuevo tercero"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaTerceros" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Tipo"]</th>
+                    @if (puedeVerDatosFiscales)
+                    {
+                        <th>@L["NIF"]</th>
+                    }
+                    <th>@L["Donante"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL TERCERO -->
+<div class="modal fade" id="modalTercero" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalTercero">@L["Nuevo tercero"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdTercero" value="0" />
+                <div class="row">
+                    <div class="col-sm-7 mb-3">
+                        <label for="txtNombreTercero" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreTercero" maxlength="200" autocomplete="off" />
+                    </div>
+                    <div class="col-sm-5 mb-3">
+                        <label for="cboTipoTercero" class="form-label">@L["Tipo"] <span class="text-danger">*</span></label>
+                        <select id="cboTipoTercero" class="form-select" onchange="cambiarTipoTercero()">
+                            <option value="member">@L["Miembro de la iglesia"]</option>
+                            <option value="external_person">@L["Persona externa"]</option>
+                            <option value="company">@L["Empresa"]</option>
+                            <option value="supplier">@L["Proveedor"]</option>
+                            <option value="beneficiary">@L["Beneficiario de una ayuda"]</option>
+                            <option value="other_entity">@L["Otra entidad"]</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 mb-3 d-none" id="bloqueMiembro">
+                        <label for="txtBuscarMiembroTercero" class="form-label">@L["Miembro"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtBuscarMiembroTercero"
+                               placeholder="@L["Escribe el nombre…"]" autocomplete="off" />
+                        <input type="hidden" id="hdnIdMiembroTercero" value="" />
+                        <div id="listaMiembros" class="list-group position-absolute w-50" style="z-index:1080;"></div>
+                    </div>
+                </div>
+
+                @if (puedeVerDatosFiscales)
+                {
+                    <hr />
+                    <p class="text-muted mb-2">
+                        @L["Datos personales. Se guardan cifrados en la base de datos."]
+                    </p>
+                    <div class="row">
+                        <div class="col-sm-4 mb-3">
+                            <label for="txtNif" class="form-label">@L["NIF"]</label>
+                            <input type="text" class="form-control" id="txtNif" maxlength="20" autocomplete="off" />
+                        </div>
+                        <div class="col-sm-4 mb-3">
+                            <label for="txtEmailTercero" class="form-label">@L["Correo"]</label>
+                            <input type="email" class="form-control" id="txtEmailTercero" maxlength="150" autocomplete="off" />
+                        </div>
+                        <div class="col-sm-4 mb-3">
+                            <label for="txtTelefonoTercero" class="form-label">@L["Teléfono"]</label>
+                            <input type="text" class="form-control" id="txtTelefonoTercero" maxlength="30" autocomplete="off" />
+                        </div>
+                    </div>
+                }
+
+                <hr />
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="chkEsDonante" onchange="cambiarDonante()" />
+                    <label class="form-check-label" for="chkEsDonante">@L["Es donante"]</label>
+                </div>
+                <div class="form-check form-switch" id="bloqueCertificados">
+                    <input class="form-check-input" type="checkbox" id="chkCertificados" />
+                    <label class="form-check-label" for="chkCertificados">@L["Puede recibir certificados de donación"]</label>
+                    <div class="form-text">@L["Hace falta el NIF."]</div>
+                </div>
+
+                <div class="mt-3">
+                    <label for="cboEstadoTercero" class="form-label">@L["Estado"]</label>
+                    <select id="cboEstadoTercero" class="form-select w-auto">
+                        <option value="active">@L["Activo"]</option>
+                        <option value="inactive">@L["Inactivo"]</option>
+                    </select>
+                </div>
+
+                <div id="errorTercero" class="alert alert-danger d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarTercero()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            nombreTerceroObligatorio: @Json.Serialize(L["El nombre del tercero es obligatorio."].Value),
+            miembroObligatorio:       @Json.Serialize(L["Un tercero de tipo miembro tiene que estar vinculado a un miembro."].Value),
+            confirmarBorrarTercero:   @Json.Serialize(L["¿Eliminar este tercero?"].Value),
+            nuevoTercero:             @Json.Serialize(L["Nuevo tercero"].Value),
+            editarTercero:            @Json.Serialize(L["Editar tercero"].Value),
+            editar:                   @Json.Serialize(L["Editar"].Value),
+            eliminar:                 @Json.Serialize(L["Eliminar"].Value),
+            oculto:                   @Json.Serialize(L["Oculto"].Value)
+        });
+
+        const TIPOS_TERCERO = {
+            member:          @Json.Serialize(L["Miembro de la iglesia"].Value),
+            external_person: @Json.Serialize(L["Persona externa"].Value),
+            company:         @Json.Serialize(L["Empresa"].Value),
+            supplier:        @Json.Serialize(L["Proveedor"].Value),
+            beneficiary:     @Json.Serialize(L["Beneficiario de una ayuda"].Value),
+            other_entity:    @Json.Serialize(L["Otra entidad"].Value)
+        };
+        const ESTADOS_TERCERO = {
+            active:   { texto: @Json.Serialize(L["Activo"].Value),   clase: "bg-success" },
+            inactive: { texto: @Json.Serialize(L["Inactivo"].Value), clase: "bg-secondary" }
+        };
+        const PUEDE_VER_FISCALES = @Json.Serialize(puedeVerDatosFiscales);
+
+        let tablaTerceros;
+
+        $(document).ready(function () {
+            const columnas = [
+                { data: 'display_name' },
+                { data: 'party_type', render: function (v) { return TIPOS_TERCERO[v] || v; } }
+            ];
+
+            // La columna del NIF solo existe si se puede ver: no se pinta vacía
+            if (PUEDE_VER_FISCALES) {
+                columnas.push({ data: 'nif', defaultContent: '' });
+            }
+
+            columnas.push({
+                data: 'es_donante', className: 'text-center',
+                render: function (v, tipo, fila) {
+                    if (!v) return '<i class="fas fa-minus text-muted"></i>';
+                    return fila.admite_certificados
+                        ? '<i class="fas fa-certificate text-success" title="' + T.oculto + '"></i>'
+                        : '<i class="fas fa-check text-success"></i>';
+                }
+            });
+            columnas.push({
+                data: 'status',
+                render: function (v) {
+                    const e = ESTADOS_TERCERO[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                    return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                }
+            });
+            columnas.push({
+                data: null, orderable: false, className: 'text-center',
+                render: function (fila) {
+                    return '<div class="d-flex justify-content-center gap-1">' +
+                           '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                           '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                           '</div>';
+                }
+            });
+
+            tablaTerceros = $('#tablaTerceros').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasTerceros")', dataSrc: 'data' },
+                columns: columnas,
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaTerceros tbody').on('click', '.btn-editar', function () {
+                abrirModalTercero(tablaTerceros.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaTerceros tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrarTercero, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasTerceros")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaTerceros.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+
+            // Buscador de miembros: reutiliza la búsqueda del área de congregación
+            $('#txtBuscarMiembroTercero').on('input', function () {
+                const texto = $(this).val().trim();
+                $('#hdnIdMiembroTercero').val('');
+                if (texto.length < 3) { $('#listaMiembros').empty(); return; }
+
+                // El parámetro se llama "term" y la respuesta viene envuelta en "data"
+                $.get('@Url.Action("BuscarMiembros", "Congregantes")', { term: texto }, function (respuesta) {
+                    const lista = $('#listaMiembros').empty();
+                    ((respuesta && respuesta.data) || []).slice(0, 8).forEach(function (m) {
+                        const nombre = (m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '');
+                        $('<button type="button" class="list-group-item list-group-item-action">')
+                            .text(nombre.trim())
+                            .on('click', function () {
+                                $('#txtBuscarMiembroTercero').val(nombre.trim());
+                                $('#hdnIdMiembroTercero').val(m.iD_miembro || m.id_miembro || m.ID_miembro);
+                                // El nombre del tercero se rellena solo si está vacío
+                                if ($('#txtNombreTercero').val().trim() === '') {
+                                    $('#txtNombreTercero').val(nombre.trim());
+                                }
+                                lista.empty();
+                            })
+                            .appendTo(lista);
+                    });
+                });
+            });
+        });
+
+        function cambiarTipoTercero() {
+            $('#bloqueMiembro').toggleClass('d-none', $('#cboTipoTercero').val() !== 'member');
+        }
+
+        // Los certificados solo tienen sentido si es donante
+        function cambiarDonante() {
+            const esDonante = $('#chkEsDonante').is(':checked');
+            $('#bloqueCertificados').toggleClass('d-none', !esDonante);
+            if (!esDonante) $('#chkCertificados').prop('checked', false);
+        }
+
+        function abrirModalTercero(fila) {
+            $('#errorTercero').addClass('d-none').text('');
+            $('#listaMiembros').empty();
+
+            $('#tituloModalTercero').text(fila ? T.editarTercero : T.nuevoTercero);
+            $('#txtIdTercero').val(fila ? fila.id : 0);
+            $('#txtNombreTercero').val(fila ? fila.display_name : '');
+            $('#cboTipoTercero').val(fila ? fila.party_type : 'member');
+            $('#hdnIdMiembroTercero').val(fila && fila.member_id ? fila.member_id : '');
+            $('#txtBuscarMiembroTercero').val(fila && fila.member_id ? fila.display_name : '');
+            $('#cboEstadoTercero').val(fila ? fila.status : 'active');
+            $('#chkEsDonante').prop('checked', fila ? !!fila.es_donante : false);
+            $('#chkCertificados').prop('checked', fila ? !!fila.admite_certificados : false);
+
+            if (PUEDE_VER_FISCALES) {
+                $('#txtNif').val(fila ? (fila.nif || '') : '');
+                $('#txtEmailTercero').val(fila ? (fila.email || '') : '');
+                $('#txtTelefonoTercero').val(fila ? (fila.telefono || '') : '');
+            }
+
+            cambiarTipoTercero();
+            cambiarDonante();
+            new bootstrap.Modal(document.getElementById('modalTercero')).show();
+        }
+
+        function guardarTercero() {
+            const nombre = $('#txtNombreTercero').val().trim();
+            const tipo = $('#cboTipoTercero').val();
+
+            if (nombre === '') { errorTercero(T.nombreTerceroObligatorio); return; }
+            if (tipo === 'member' && !$('#hdnIdMiembroTercero').val()) {
+                errorTercero(T.miembroObligatorio);
+                return;
+            }
+
+            const datos = {
+                id: $('#txtIdTercero').val(),
+                display_name: nombre,
+                party_type: tipo,
+                member_id: $('#hdnIdMiembroTercero').val() || '',
+                status: $('#cboEstadoTercero').val(),
+                esDonante: $('#chkEsDonante').is(':checked'),
+                admiteCertificados: $('#chkCertificados').is(':checked')
+            };
+
+            if (PUEDE_VER_FISCALES) {
+                datos.nif = $('#txtNif').val();
+                datos.email = $('#txtEmailTercero').val();
+                datos.telefono = $('#txtTelefonoTercero').val();
+            }
+
+            $.post('@Url.Action("Guardar", "FinanzasTerceros")', datos, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalTercero')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaTerceros.ajax.reload(null, false);
+                } else {
+                    errorTercero(respuesta.mensaje);
+                }
+            }).fail(function () { errorTercero(T.mErrorConexionPunto); });
+        }
+
+        function errorTercero(texto) {
+            $('#errorTercero').removeClass('d-none').text(texto);
+        }
+    </script>
+}
