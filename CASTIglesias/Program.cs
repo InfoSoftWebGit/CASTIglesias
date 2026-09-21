@@ -136,20 +136,23 @@ builder.Services.AddScoped<IContextoIglesia, ContextoIglesiaHttp>();
 
 // ✅ Configurar EF Core
 //
-// La versión del motor se detecta al arrancar en lugar de escribirla aquí.
-// El motivo es que NO es la misma en todas partes: desarrollo y QA corren
-// sobre MariaDB 10.3 y producción sobre MySQL 8, y Pomelo genera SQL distinto
-// para cada uno. Antes esta línea decía MySqlServerVersion(10, 3, 32), que es
-// una versión de MariaDB declarada como si fuera de MySQL: no existe, y al ser
-// mayor que 8 hacía que Pomelo diera por buenas todas las funciones de MySQL 8
-// aunque hablara con MariaDB.
+// La versión va escrita aquí a propósito. Se probó ServerVersion.AutoDetect y se
+// descartó el 21/09/2026: abre una conexión a la base de datos al construir el
+// DbContext, así que un corte de red deja TODAS las páginas en error 500 en lugar
+// de fallar solo las que leen datos. No compensa.
 //
-// AutoDetect abre una conexión al iniciar para preguntar la versión. Es un
-// coste asumible: sin base de datos la aplicación no arranca de todos modos.
-var cadenaConexion = builder.Configuration.GetConnectionString("DefaultConnection");
-
+// Aviso para quien toque esto: los entornos NO usan el mismo motor. Producción es
+// MySQL 8.0.46 y la NAS (desarrollo y QA) es MariaDB 10.3.32. Este valor declara
+// una versión de MariaDB como si fuera de MySQL; al ser mayor que 8, Pomelo activa
+// las funciones de MySQL 8, que es lo que producción entiende. Funciona en ambos
+// sitios, pero si algún día aparece SQL generado que un motor no acepta, es aquí
+// donde hay que mirar: lo correcto sería leer la versión de appsettings y declarar
+// MariaDbServerVersion o MySqlServerVersion según el entorno.
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(cadenaConexion, ServerVersion.AutoDetect(cadenaConexion))
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlServerVersion(new Version(10, 3, 32))
+    )
 );
 
 

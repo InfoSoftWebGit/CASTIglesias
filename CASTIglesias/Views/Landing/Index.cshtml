@@ -1790,6 +1790,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     });
 
+    // Textos traducidos del formulario de contacto. Esta vista no usa _Layout
+    // (Layout = null), así que window.T no existe aquí: sin este bloque,
+    // T.mMensajeEnviado lanzaba un ReferenceError al recibir la respuesta y
+    // ni se mostraba la confirmación ni se vaciaba el formulario.
+    window.T = Object.assign(window.T || {}, {
+        mCompletaObligatorios: @Json.Serialize(L["Por favor, completa todos los campos obligatorios."].Value),
+        mMensajeEnviado:       @Json.Serialize(L["¡Mensaje enviado!"].Value),
+        mContactoEn24h:        @Json.Serialize(L["Nos pondremos en contacto contigo en menos de 24 horas."].Value),
+        mNoEnviar:             @Json.Serialize(L["No se pudo enviar."].Value),
+        mErrorConexion:        @Json.Serialize(L["Error de conexión"].Value),
+        mNoEnviarMensaje:      @Json.Serialize(L["No se pudo enviar el mensaje. Inténtalo de nuevo."].Value)
+    });
+
     // Contact form
     function enviarContacto(e) {
         e.preventDefault();
