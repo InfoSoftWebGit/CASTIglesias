@@ -85,6 +85,15 @@ namespace CapaDatos
         /// </summary>
         /// <param name="sedeID">El ID de la sede a buscar.</param>
         /// <returns>El nombre de la sede o null si no se encuentra.</returns>
+        /// <summary>Código corto de la sede (FUE, TOL...), o null si no tiene.</summary>
+        public string? ObtenerCodigoSedePorID(int sedeID)
+        {
+            return _context.Sedes
+                .Where(s => s.ID == sedeID)
+                .Select(s => s.codigo)
+                .FirstOrDefault();
+        }
+
         public string ObtenerNombreSedePorID(int sedeID)
         {
             try

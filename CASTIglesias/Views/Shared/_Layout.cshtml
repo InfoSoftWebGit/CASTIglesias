@@ -169,6 +169,14 @@
         </button>
 
         <ul class="navbar-nav ms-auto me-0 me-md-3 my-2 my-md-0">
+            @* Salir a la web pública: cierra sesión igual que la opción del
+               desplegable, pero aterriza en la landing en vez de en el login. *@
+            <li class="nav-item">
+                <a class="nav-link" href="@Url.Action("CerrarSesion", "Acceso", new { volverALanding = true })"
+                   title="@L["Cerrar sesión y volver a la web"]" style="color: rgba(255,255,255,0.7);">
+                    <i class="fas fa-home fa-fw"></i>
+                </a>
+            </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" id="opcionesUsuario" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color: rgba(255,255,255,0.7);">
                     <i class="fas fa-user fa-fw"></i>

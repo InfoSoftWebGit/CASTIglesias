@@ -23,6 +23,11 @@ namespace CapaEntidad
 
         public string? nombre_sede { get; set; }
 
+        // Código corto de la sede (FUE, TOL...). Va delante de los números de las
+        // operaciones financieras para que no se repitan entre sedes de la misma
+        // iglesia, que es donde la BBDD exige que sean únicos.
+        public string? codigo { get; set; }
+
         public int? MaxUsuarios { get; set; }
     }
 }

@@ -90,6 +90,9 @@
   <data name="Cerrar sesión" xml:space="preserve">
     <value>Sign out</value>
   </data>
+  <data name="Cerrar sesión y volver a la web" xml:space="preserve">
+    <value>Sign out and return to the website</value>
+  </data>
   <data name="Idioma" xml:space="preserve">
     <value>Language</value>
   </data>

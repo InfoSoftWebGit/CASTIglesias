@@ -193,7 +193,16 @@ namespace CASTIglesias.Controllers
             return RedirectToAction("Login");
         }
 
-        public async Task<IActionResult> CerrarSesion()
+        /// <summary>
+        /// Cierra la sesión del usuario.
+        /// </summary>
+        /// <param name="volverALanding">
+        /// Si es true, tras cerrar sesión se va a la landing pública en lugar de al
+        /// login. Es un parámetro opcional (y no otra acción) para que el cierre de
+        /// sesión viva en un único sitio; las redirecciones de BaseController no lo
+        /// pasan y siguen yendo al login.
+        /// </param>
+        public async Task<IActionResult> CerrarSesion(bool volverALanding = false)
         {
             // Si era el administrador de plataforma, se cierra su acceso abierto a la iglesia
             // para que el registro de auditoría refleje cuándo terminó.
@@ -203,6 +212,12 @@ namespace CASTIglesias.Controllers
             }
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            if (volverALanding)
+            {
+                return RedirectToAction("Index", "Landing");
+            }
+
             return RedirectToAction("Login");
         }
 

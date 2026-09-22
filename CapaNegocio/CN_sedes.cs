@@ -41,5 +41,7 @@ namespace CapaNegocio
             // Sin lógica de negocio, simplemente llama a la capa de datos.
             return _cdSedes.ObtenerNombreSedePorID(sedeID);
         }
+
+        public string? ObtenerCodigoSede(int sedeID) => _cdSedes.ObtenerCodigoSedePorID(sedeID);
     }
 }

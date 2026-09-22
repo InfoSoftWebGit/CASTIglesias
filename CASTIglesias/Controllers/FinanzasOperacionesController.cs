@@ -114,11 +114,10 @@ namespace CASTIglesias.Controllers
             operacion.site_id = sedeID;
             operacion.created_by = SesionClaims.ObtenerIdUsuario(User);
 
-            // Prefijo de la numeración: tipo y año, p. ej. ING-2026-000001
-            string prefijo = (CN_Operaciones.TiposIngreso.Contains(operacion.transaction_kind) ? "ING" : "GAS")
-                             + "-" + operacion.operation_date.Year;
-
-            int id = _negocioOperaciones.Guardar(operacion, prefijo, out string mensaje);
+            // El prefijo de la numeración (sede, tipo y año) lo monta la capa de
+            // negocio: aquí todavía no se sabe si es ingreso o gasto.
+            int id = _negocioOperaciones.Guardar(operacion, _negocioSedes.ObtenerCodigoSede(sedeID),
+                                                 out string mensaje);
             return Json(new { resultado = id > 0, id, mensaje });
         }
 

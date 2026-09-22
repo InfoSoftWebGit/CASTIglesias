@@ -44,8 +44,8 @@ namespace CapaNegocio
         /// <summary>
         /// Guarda una operación.
         /// </summary>
-        /// <param name="prefijoSede">Prefijo de la numeración, p. ej. "ING-2026".</param>
-        public int Guardar(FinancialTransaction operacion, string prefijoSede, out string mensaje)
+        /// <param name="codigoSede">Código corto de la sede (FUE, TOL...). Puede venir vacío.</param>
+        public int Guardar(FinancialTransaction operacion, string? codigoSede, out string mensaje)
         {
             mensaje = string.Empty;
 
@@ -120,8 +120,21 @@ namespace CapaNegocio
 
             if (operacion.id == 0)
             {
-                string tipoDocumento = TiposIngreso.Contains(operacion.transaction_kind) ? "income" : "expense";
-                return _cdOperaciones.Registrar(operacion, tipoDocumento, prefijoSede, out mensaje);
+                bool esIngreso = TiposIngreso.Contains(operacion.transaction_kind);
+                string tipoDocumento = esIngreso ? "income" : "expense";
+
+                // Prefijo: sede, tipo y año, p. ej. FUE-ING-2026. Se calcula aquí y no
+                // en el controlador porque el tipo sale del concepto (arriba).
+                // - Sin la sede, dos sedes de la misma iglesia generarían el mismo
+                //   número y chocarían con el UNIQUE (organization_id, transaction_number).
+                // - Sin el tipo, el primer ingreso y el primer gasto del año también.
+                // Si la sede no tiene código se usa su ID, que también es único.
+                string sede = string.IsNullOrWhiteSpace(codigoSede)
+                    ? operacion.site_id.ToString()
+                    : codigoSede.Trim().ToUpperInvariant();
+                string prefijo = $"{sede}-{(esIngreso ? "ING" : "GAS")}-{operacion.operation_date.Year}";
+
+                return _cdOperaciones.Registrar(operacion, tipoDocumento, prefijo, out mensaje);
             }
 
             var actual = _cdOperaciones.Obtener(operacion.id);
