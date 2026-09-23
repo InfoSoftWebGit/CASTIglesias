@@ -45,9 +45,14 @@ namespace CapaNegocio
             return _capaDatos.ListarMiembrosZona(sedeID, tipo);
         }
 
+        /// <summary>
+        /// Cuenta los miembros de una zona por defecto. Vale para las seis (también
+        /// Jóvenes, Matrimonios y Familias, que tienen su propia vista): el dashboard
+        /// tiene una tarjeta para cada una.
+        /// </summary>
         public int ContadorMiembrosZona(int sedeID, string tipo)
         {
-            if (!EsTipoValido(tipo))
+            if (!CD_ZonaDiscipulado.EsTipoZonaPorDefecto(tipo))
                 return 0;
 
             return _capaDatos.ContadorMiembrosZona(sedeID, tipo);

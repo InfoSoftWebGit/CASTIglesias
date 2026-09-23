@@ -34,7 +34,18 @@ namespace CapaDatos
             ["familias"] = "Familias"
         };
 
+        /// <summary>Tipos que usan la vista genérica de discipulado (Hombres, Mujeres, Niños).</summary>
         public static bool EsTipoValido(string tipo) => NombresPorTipo.ContainsKey(tipo);
+
+        /// <summary>
+        /// Tipos de zona que existen por defecto, incluidos los que tienen vista propia.
+        /// </summary>
+        /// <remarks>
+        /// Contar NO es lo mismo que pintar la vista genérica: el dashboard tiene tarjeta
+        /// para las seis zonas. Validar el contador contra la lista de tres hacía que la
+        /// tarjeta de Jóvenes devolviera siempre 0 aunque la zona tuviera gente.
+        /// </remarks>
+        public static bool EsTipoZonaPorDefecto(string tipo) => ZonasPorDefecto.ContainsKey(tipo);
 
         /// <summary>
         /// Garantiza que la sede tenga las seis zonas por defecto de la aplicación.

@@ -1,6 +1,7 @@
 using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
+using CASTIglesias.Models;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,6 +63,121 @@ namespace CASTIglesias.Controllers
             }
         }
 
+        // ── Calendarios guardados ────────────────────────────────────────────────────
+        // Guardar evita tener que regenerar el calendario cada vez que alguien quiere
+        // consultarlo, y es lo que permite cambiar a un servidor por otro y que el
+        // cambio quede. Los caducados se borran solos (ver CN_Calendario.DiasDeCortesia).
+
+        [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        public JsonResult Guardar([FromBody] CalendarioRequest req)
+        {
+            try
+            {
+                int id = _cnCalendario.Guardar(req, ObtenerIdSedeUsuario(),
+                                               SesionClaims.ObtenerIdUsuario(User), out string mensaje);
+                return Json(new { success = id > 0, id, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
+        public JsonResult ListarGuardados()
+        {
+            try
+            {
+                var datos = _cnCalendario.ListarGuardados(ObtenerIdSedeUsuario())
+                    .Select(c => new
+                    {
+                        c.ID,
+                        c.nombre_culto,
+                        c.tipo_calendario,
+                        c.periodicidad,
+                        fecha_inicio = c.fecha_inicio.ToString("yyyy-MM-dd"),
+                        fecha_fin = c.fecha_fin.ToString("yyyy-MM-dd"),
+                        fecha_caducidad = c.fecha_caducidad.ToString("yyyy-MM-dd"),
+                        modificado = c.actualizado_en != null
+                    })
+                    .ToList();
+                return Json(new { success = true, data = datos });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
+        public JsonResult ObtenerGuardado(int id)
+        {
+            try
+            {
+                var cal = _cnCalendario.ObtenerGuardado(id, ObtenerIdSedeUsuario(), out string error);
+                if (cal == null)
+                    return Json(new { success = false, mensaje = error });
+                return Json(new { success = true, data = cal });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes))]
+        public JsonResult ObtenerCandidatos(int idAsignacion)
+        {
+            try
+            {
+                var lista = _cnCalendario.ObtenerCandidatos(idAsignacion, ObtenerIdSedeUsuario(), out string error)
+                    .Select(c => new { id = c.Id, nombre = c.Nombre })
+                    .ToList();
+                return Json(new { success = string.IsNullOrEmpty(error), data = lista, mensaje = error });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        public JsonResult CambiarServidor([FromBody] CambioServidorRequest req)
+        {
+            try
+            {
+                bool hecho = _cnCalendario.CambiarServidor(req.IdAsignacion, req.IdMiembro,
+                                                           ObtenerIdSedeUsuario(),
+                                                           SesionClaims.ObtenerIdUsuario(User),
+                                                           out string mensaje);
+                return Json(new { success = hecho, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpPost]
+        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
+        public JsonResult EliminarGuardado(int id)
+        {
+            try
+            {
+                bool hecho = _cnCalendario.Eliminar(id, ObtenerIdSedeUsuario(), out string mensaje);
+                return Json(new { success = hecho, mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
         [HttpPost]
         [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult ExportarExcelAgrupado([FromBody] CalendarioAgrupadoRequest req)
@@ -101,9 +217,16 @@ namespace CASTIglesias.Controllers
             try
             {
                 int sedeId = ObtenerIdSedeUsuario();
-                var cal = _cnCalendario.Generar(req, sedeId, out string error);
-                if (!string.IsNullOrEmpty(error))
-                    return Json(new { success = false, mensaje = error });
+
+                // Un calendario guardado se exporta tal cual está, con las sustituciones
+                // que se hayan hecho; uno sin guardar se genera al vuelo.
+                string error;
+                var cal = req.IdGuardado > 0
+                    ? _cnCalendario.ObtenerGuardado(req.IdGuardado, sedeId, out error)
+                    : _cnCalendario.Generar(req, sedeId, out error);
+
+                if (!string.IsNullOrEmpty(error) || cal == null)
+                    return Json(new { success = false, mensaje = string.IsNullOrEmpty(error) ? "Calendario no encontrado." : error });
 
                 return req.TipoCalendario == CN_Calendario.TIPO_ALABANZA
                     ? ExcelAlabanza(cal, req)

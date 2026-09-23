@@ -564,6 +564,21 @@
                 plantilla);
         };
 
+        // Importes: SIEMPRE con dos decimales y con el separador del idioma
+        // activo. Sin esto, 30,10 € se pinta como "30.1" (el valor que llega
+        // del servidor en JSON) y parece que se han perdido los céntimos.
+        // Uso: importe(30.1) -> "30,10"   importeEuro(30.1) -> "30,10 €"
+        window.importe = function (valor) {
+            const n = parseFloat(valor);
+            return isNaN(n)
+                ? '0,00'
+                : n.toLocaleString('@System.Globalization.CultureInfo.CurrentCulture.Name',
+                                   { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+        window.importeEuro = function (valor) {
+            return window.importe(valor) + ' €';
+        };
+
         document.addEventListener('DOMContentLoaded', function () {
             // Sidebar toggle
             const sidebarToggle = document.getElementById('sidebarToggle');

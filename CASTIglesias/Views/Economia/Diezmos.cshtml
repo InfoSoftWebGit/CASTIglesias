@@ -243,7 +243,17 @@
                     { data: "nombre_miembro" },
                     { data: "apellidos_miembro" },
                     { data: "nombre_concepto" },
-                    { data: "cantidad_diezmo" },
+                    {
+                        data: "cantidad_diezmo",
+                        // Se pinta con importeEuro (layout) para no perder los céntimos
+                        // por el camino: el JSON trae 30.1, no 30,10.
+                        render: function (data, tipo) {
+                            // En "sort" y "filter" devuelve el número crudo, o DataTables
+                            // ordenaría por texto y 100 iría antes que 30.
+                            return tipo === 'display' ? window.importeEuro(data) : data;
+                        },
+                        className: "text-end"
+                    },
                     { data: "sede" },
                     {
                         defaultContent: `

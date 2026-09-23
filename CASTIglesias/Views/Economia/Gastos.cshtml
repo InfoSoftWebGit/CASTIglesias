@@ -250,7 +250,7 @@
                 const d = tablaGastos.row($(this).closest("tr")).data();
                 Swal.fire({
                     title: T.eliminarGasto,
-                    text: fmt(T.eliminarGastoDetalle, d.numero_pago, parseFloat(d.cantidad).toFixed(2), d.nombre_miembro_completo),
+                    text: fmt(T.eliminarGastoDetalle, d.numero_pago, window.importe(d.cantidad), d.nombre_miembro_completo),
                     icon: "warning", showCancelButton: true,
                     confirmButtonText: T.siEliminar, cancelButtonText: T.cancelar
                 }).then(r => {
@@ -361,7 +361,7 @@
             $("#hdnIdMiembro").val(data ? data.id_miembro : 0);
             $("#txtBuscarMiembro").val(data ? data.nombre_miembro_completo : '');
             $("#txtFechaGasto").val(data ? data.fechaFormateada : '');
-            $("#txtCantidad").val(data ? parseFloat(data.cantidad).toFixed(2) : '');
+            $("#txtCantidad").val(data ? window.importe(data.cantidad) : '');
             $("#cboZona").val(data && data.id_zona ? data.id_zona : 0);
             $("#txtRazon").val(data ? data.razon : '');
             $("#cboTipoCuenta").val(data ? data.tipo_cuenta : 'Cuenta Congregacional');
@@ -456,7 +456,7 @@
 
         function crearFilaVista(d) {
             const fechaDisplay = d.fechaFormateada ? d.fechaFormateada.split('-').reverse().join('/') : '—';
-            const cantidadDisplay = parseFloat(d.cantidad || 0).toFixed(2) + ' €';
+            const cantidadDisplay = window.importeEuro(d.cantidad || 0);
 
             const tipoBadge = d.tipo_cuenta === 'Cuenta Propia'
                 ? '<span class="badge bg-warning text-dark">Cuenta Propia</span>'
@@ -524,7 +524,7 @@
             // Celda Cantidad
             const inpCantidad = $('<input type="text" inputmode="decimal" placeholder="0,00">')
                 .addClass('form-control form-control-sm inp-cantidad')
-                .val(d.cantidad ? parseFloat(d.cantidad).toFixed(2) : '');
+                .val(d.cantidad ? window.importe(d.cantidad) : '');
             const errCantidad = $('<div class="invalid-feedback">').text(T.mCantidadMayorQue0);
             tr.append($('<td>').append(inpCantidad, errCantidad));
 

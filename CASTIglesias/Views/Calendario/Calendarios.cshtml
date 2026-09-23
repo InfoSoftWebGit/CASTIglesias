@@ -68,7 +68,7 @@
                                     <input class="form-check-input" type="radio" name="periodicidad"
                                            id="perSemanal" value="semanal" />
                                     <label class="form-check-label" for="perSemanal">
-                                        @L["Semanal"] <small class="text-muted">(4 semanas)</small>
+                                        @L["Semanal"] <small class="text-muted">(1 semana)</small>
                                     </label>
                                 </div>
                                 <div class="form-check">
@@ -114,6 +114,10 @@
                             <span id="lblTituloCalendario">@L["Calendario"]</span>
                         </span>
                         <div class="d-flex gap-2 no-print flex-wrap">
+                            <button class="btn btn-primary btn-sm" id="btnGuardarCalendario" data-permiso="AjustesCrearEditar"
+                                    onclick="guardarCalendario()" title="@L["Guardar este calendario para consultarlo después"]">
+                                <i class="fas fa-save me-1"></i> @L["Guardar"]
+                            </button>
                             <button class="btn btn-success btn-sm" onclick="exportarExcel()" title="@L["Exportar solo este culto"]">
                                 <i class="fas fa-file-excel me-1"></i> Excel
                             </button>
@@ -133,6 +137,35 @@
                                 <tbody id="tbodyCalendario"></tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendarios guardados: se consultan sin volver a generarlos -->
+            <div class="card mb-4 no-print">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-folder-open me-1"></i> @L["Calendarios guardados"]</span>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="cargarGuardados()">
+                        <i class="fas fa-rotate"></i>
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>@L["Culto / Servicio"]</th>
+                                    <th>@L["Tipo de calendario"]</th>
+                                    <th>@L["Periodicidad"]</th>
+                                    <th>@L["Período"]</th>
+                                    <th class="text-end">@L["Acciones"]</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyGuardados"></tbody>
+                        </table>
+                    </div>
+                    <div class="px-3 py-2 text-muted small fst-italic">
+                        @L["Los calendarios se borran solos unos días después de terminar su período."]
                     </div>
                 </div>
             </div>
@@ -238,6 +271,17 @@
     .badge-vacio {
         color: #94a3b8; font-style: italic; font-size: 13px;
     }
+
+    /* Persona sustituible (solo en los calendarios guardados) */
+    .servidor-editable {
+        cursor: pointer; border-radius: 6px; padding: 1px 4px;
+        display: inline-block;
+    }
+    .servidor-editable:hover { background-color: #eff6ff; }
+    .servidor-editable i { opacity: .35; }
+    .servidor-editable:hover i { opacity: 1; }
+    /* Al imprimir no se ve el lapicero: el papel no se puede pinchar */
+    @@media print { .servidor-editable i { display: none; } }
 
     /* Card resultado */
     #panelCalendario .card {
@@ -398,16 +442,34 @@
         // Textos traducidos de esta vista. Se AMPLÍA window.T (ya declarado
         // en el layout): un segundo "const T" lanzaría SyntaxError.
         window.T = Object.assign(window.T || {}, {
-            periodo: @Json.Serialize(L["Período"].Value)
+            periodo: @Json.Serialize(L["Período"].Value),
+            mCambiarServidor:         @Json.Serialize(L["Cambiar a quien sirve"].Value),
+            mDejarSinCubrir:          @Json.Serialize(L["— Dejar sin cubrir —"].Value),
+            mSeleccionaPersona:       @Json.Serialize(L["Selecciona una persona"].Value),
+            mGuardarCambio:           @Json.Serialize(L["Guardar cambio"].Value),
+            mNoGuardarCalendario:     @Json.Serialize(L["No se pudo guardar el calendario."].Value),
+            mSinCalendariosGuardados: @Json.Serialize(L["Todavía no hay calendarios guardados."].Value),
+            mEliminarCalendario:      @Json.Serialize(L["¿Eliminar este calendario guardado?"].Value),
+            mModificado:              @Json.Serialize(L["Modificado"].Value)
         });
 
     const urlCultos               = '@Url.Action("ObtenerCultos",          "Calendario")';
     const urlGenerar              = '@Url.Action("GenerarCalendario",      "Calendario")';
     const urlExportarExcel        = '@Url.Action("ExportarExcel",          "Calendario")';
     const urlExportarExcelAgrupado = '@Url.Action("ExportarExcelAgrupado", "Calendario")';
+    const urlGuardar              = '@Url.Action("Guardar",                "Calendario")';
+    const urlListarGuardados      = '@Url.Action("ListarGuardados",        "Calendario")';
+    const urlObtenerGuardado      = '@Url.Action("ObtenerGuardado",        "Calendario")';
+    const urlCandidatos           = '@Url.Action("ObtenerCandidatos",      "Calendario")';
+    const urlCambiarServidor      = '@Url.Action("CambiarServidor",        "Calendario")';
+    const urlEliminarGuardado     = '@Url.Action("EliminarGuardado",       "Calendario")';
     const dias = window.TDIAS;
 
     let requestActual = null;
+    // ID del calendario guardado que se está viendo. 0 = recién generado, sin guardar.
+    // Solo en uno guardado se puede sustituir a una persona: el cambio necesita saber
+    // qué fila de la BBDD tocar.
+    let calendarioGuardadoId = 0;
 
     const TIPO_SEGURIDAD     = 1;
     const TIPO_ALABANZA      = 2;
@@ -423,6 +485,13 @@
                 $('#cboCulto').append($('<option>').val(c.id_culto)
                     .text(`${c.nombre} — ${dias[c.dia_semana] || ''}`));
             });
+        });
+
+        cargarGuardados();
+
+        // Delegado: las celdas se repintan cada vez, así que el clic se escucha en la tabla
+        $('#tbodyCalendario').on('click', '.servidor-editable', function () {
+            sustituirServidor($(this).data('asig'));
         });
     });
 
@@ -444,6 +513,7 @@
         const req = obtenerRequest();
         if (!req) return;
         requestActual = req;
+        calendarioGuardadoId = 0;   // lo que se genera todavía no está guardado
 
         const btn = $('#btnGenerar');
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Generando…');
@@ -497,10 +567,7 @@
             tb += `<tr>
                 <td class="text-nowrap">${formatFecha(e.fecha)}</td>
                 <td style="color:#475569">${esc(dia)}</td>`;
-            roles.forEach(r => {
-                const personas = (e.asignaciones && e.asignaciones[r]) || [];
-                tb += `<td class="text-center">${renderPersonas(personas)}</td>`;
-            });
+            roles.forEach(r => { tb += renderCelda(e, r); });
             tb += '</tr>';
         });
         $('#tbodyCalendario').html(tb);
@@ -532,10 +599,7 @@
             const claseRow   = esMinistra ? 'fila-ministra' : esZona ? 'fila-zona' : '';
 
             tb += `<tr class="${claseRow}"><td>${esc(rol)}</td>`;
-            entradas.forEach(e => {
-                const personas = (e.asignaciones && e.asignaciones[rol]) || [];
-                tb += `<td class="text-center">${renderPersonas(personas, esZona)}</td>`;
-            });
+            entradas.forEach(e => { tb += renderCelda(e, rol, esZona); });
             tb += '</tr>';
         });
         $('#tbodyCalendario').html(tb);
@@ -555,11 +619,146 @@
     function renderPersonas(personas, esZona = false) {
         if (!personas || !personas.length)
             return '<span class="badge-vacio">—</span>';
-        return personas.map(p => {
-            if (p === '—') return '<span class="badge-vacio">—</span>';
-            if (esZona) return `<span class="badge bg-success px-2">${esc(p)}</span>`;
-            return esc(p);
-        }).join('<br>');
+        return personas.map(p => nombreServidor(p, esZona)).join('<br>');
+    }
+
+    // Un hueco sin cubrir llega como cadena vacía desde un calendario guardado
+    function nombreServidor(p, esZona) {
+        if (!p || p === '—') return '<span class="badge-vacio">—</span>';
+        if (esZona) return `<span class="badge bg-success px-2">${esc(p)}</span>`;
+        return esc(p);
+    }
+
+    /* Celda del calendario. En uno guardado, cada persona es pinchable para
+       sustituirla; en uno recién generado no hay nada que tocar todavía. */
+    function renderCelda(entrada, rol, esZona = false) {
+        const personas = (entrada.asignaciones   && entrada.asignaciones[rol])   || [];
+        const ids      = (entrada.idsAsignacion  && entrada.idsAsignacion[rol])  || [];
+
+        if (!calendarioGuardadoId || !ids.length)
+            return `<td class="text-center">${renderPersonas(personas, esZona)}</td>`;
+
+        const contenido = ids.map((id, i) =>
+            `<span class="servidor-editable" role="button" tabindex="0" data-asig="${id}"
+                   title="${T.mCambiarServidor}">${nombreServidor(personas[i], esZona)}
+             <i class="fas fa-pen-to-square text-primary ms-1 small"></i></span>`).join('<br>');
+
+        return `<td class="text-center">${contenido}</td>`;
+    }
+
+    /* ── Guardar, consultar y sustituir ──────────────────────────────── */
+    function guardarCalendario() {
+        if (!requestActual) {
+            Swal.fire({ icon: 'warning', title: T.mGeneraCalendarioPrimero, toast: true, position: 'top-end', showConfirmButton: false, timer: 2500 });
+            return;
+        }
+        $.ajax({
+            url: urlGuardar, type: 'POST', contentType: 'application/json',
+            data: JSON.stringify(requestActual),
+            success(res) {
+                if (!res.success) { Swal.fire('Error', res.mensaje, 'error'); return; }
+                Swal.fire({ icon: 'success', title: res.mensaje, toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                cargarGuardados();
+                verGuardado(res.id);
+            },
+            error() { Swal.fire('Error', T.mNoGuardarCalendario, 'error'); }
+        });
+    }
+
+    function cargarGuardados() {
+        $.get(urlListarGuardados, res => {
+            const cuerpo = $('#tbodyGuardados').empty();
+            if (!res.success || !(res.data || []).length) {
+                cuerpo.append(`<tr><td colspan="5" class="text-center text-muted py-3">${T.mSinCalendariosGuardados}</td></tr>`);
+                return;
+            }
+            const tipos = { 1: T.mSeguridadBienvenida, 2: 'Alabanza', 3: 'Audiovisuales' };
+            const pers  = { semanal: 'Semanal', mensual: 'Mensual', trimestral: 'Trimestral' };
+            res.data.forEach(c => {
+                cuerpo.append(`<tr>
+                    <td>${esc(c.nombre_culto)}</td>
+                    <td>${esc(tipos[c.tipo_calendario] || '')}</td>
+                    <td>${esc(pers[c.periodicidad] || c.periodicidad)}</td>
+                    <td>${formatFecha(c.fecha_inicio)} – ${formatFecha(c.fecha_fin)}
+                        ${c.modificado ? `<span class="badge bg-warning text-dark ms-1">${T.mModificado}</span>` : ''}</td>
+                    <td class="text-end text-nowrap">
+                        <button class="btn btn-sm btn-outline-primary" onclick="verGuardado(${c.id})">
+                            <i class="fas fa-eye"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" data-permiso="AjustesEliminar"
+                                onclick="eliminarGuardado(${c.id})"><i class="fas fa-trash"></i></button>
+                    </td></tr>`);
+            });
+            // Vuelve a aplicar el ocultado de botones por permiso a lo recién pintado
+            if (typeof aplicarPermisosEnDom === 'function') aplicarPermisosEnDom(cuerpo[0]);
+        });
+    }
+
+    function verGuardado(id) {
+        $.get(urlObtenerGuardado, { id }, res => {
+            if (!res.success) { Swal.fire('Error', res.mensaje, 'error'); return; }
+            const cal = res.data;
+            calendarioGuardadoId = cal.id;
+            // El Excel del calendario guardado debe salir con los cambios hechos a mano,
+            // así que se exporta por ID en lugar de volver a generarlo.
+            requestActual = {
+                idCulto: cal.idCulto, periodicidad: cal.periodicidad,
+                tipoCalendario: cal.tipoCalendario, fechaInicio: cal.fechaInicio,
+                idGuardado: cal.id
+            };
+            $('#panelVacio').addClass('d-none');
+            if (cal.tipoCalendario === TIPO_ALABANZA) renderAlabanza(cal); else renderEstandar(cal);
+            $('#panelCalendario').removeClass('d-none');
+            document.getElementById('panelCalendario').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    function eliminarGuardado(id) {
+        Swal.fire({
+            title: T.mEliminarCalendario, icon: 'warning', showCancelButton: true,
+            confirmButtonText: T.siEliminar || 'Sí, eliminar', cancelButtonText: T.cancelar || 'Cancelar'
+        }).then(r => {
+            if (!r.isConfirmed) return;
+            $.post(urlEliminarGuardado, { id }, res => {
+                if (!res.success) { Swal.fire('Error', res.mensaje, 'error'); return; }
+                if (calendarioGuardadoId === id) {
+                    calendarioGuardadoId = 0;
+                    $('#panelCalendario').addClass('d-none');
+                }
+                cargarGuardados();
+            });
+        });
+    }
+
+    /* Sustituir a quien sirve: solo se puede elegir entre quienes tienen ese rol. */
+    function sustituirServidor(idAsignacion) {
+        $.get(urlCandidatos, { idAsignacion }, async res => {
+            if (!res.success) { Swal.fire('Error', res.mensaje, 'error'); return; }
+
+            const opciones = { 0: T.mDejarSinCubrir };
+            (res.data || []).forEach(c => { opciones[c.id] = c.nombre; });
+
+            const { value: idMiembro, isConfirmed } = await Swal.fire({
+                title: T.mCambiarServidor,
+                input: 'select',
+                inputOptions: opciones,
+                inputPlaceholder: T.mSeleccionaPersona,
+                showCancelButton: true,
+                confirmButtonText: T.mGuardarCambio,
+                cancelButtonText: T.cancelar || 'Cancelar'
+            });
+            if (!isConfirmed) return;
+
+            $.ajax({
+                url: urlCambiarServidor, type: 'POST', contentType: 'application/json',
+                data: JSON.stringify({ idAsignacion, idMiembro: parseInt(idMiembro) || 0 }),
+                success(r) {
+                    if (!r.success) { Swal.fire('Error', r.mensaje, 'error'); return; }
+                    verGuardado(calendarioGuardadoId);
+                    cargarGuardados();
+                },
+                error() { Swal.fire('Error', T.mNoGuardarCalendario, 'error'); }
+            });
+        });
     }
 
     async function exportarExcelTodos() {

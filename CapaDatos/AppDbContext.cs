@@ -52,6 +52,8 @@ namespace CapaDatos
         public DbSet<RequerimientoCulto> RequerimientosCulto { get; set; }
         public DbSet<Sala> Salas { get; set; }
         public DbSet<EventoCalendario> EventosCalendario { get; set; }
+        public DbSet<CalendarioServicio> CalendariosServicio { get; set; }
+        public DbSet<CalendarioServicioAsignacion> CalendarioServicioAsignaciones { get; set; }
 
         // Plataforma (no filtradas por iglesia: las usa el administrador de Congrega)
         public DbSet<Iglesia> Iglesias { get; set; }
