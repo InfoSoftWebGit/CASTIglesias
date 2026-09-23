@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +41,11 @@ namespace CASTIglesias.Controllers
         [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult Diezmos() => View();
 
+        // Configuración compartida: además de su propia pantalla de Ajustes, la leen
+        // Miembros y Proceso para saber qué campos de diezmo mostrar.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Ajustes), nameof(Permisos.Miembros),
+                         nameof(Permisos.Proceso))]
         public JsonResult ObtenerConfigDiezmo()
         {
             try
@@ -61,6 +65,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarConfigDiezmo([FromBody] ConfigDiezmo obj)
         {
@@ -113,6 +118,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarConfigJovenes([FromBody] ConfigJovenes obj)
         {
@@ -186,6 +192,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarRequerimiento([FromBody] RequerimientoCulto obj)
         {
@@ -207,6 +214,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarRequerimiento(int id)
         {

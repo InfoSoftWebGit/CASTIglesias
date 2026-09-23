@@ -429,6 +429,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ExportarHistorialDiezmo(string fechainicio, string fechafin)
         {
             try

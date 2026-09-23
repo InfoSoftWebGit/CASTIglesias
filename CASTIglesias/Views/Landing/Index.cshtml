@@ -1682,6 +1682,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="col-lg-8">
                 <div class="contact-card">
                     <form id="frmContacto" onsubmit="enviarContacto(event)" novalidate>
+                        @* Token antifalsificación. Esta página no usa el layout común, así
+                           que no hereda ni el token ni el $.ajaxPrefilter que lo envía: hay
+                           que ponerlo aquí y mandarlo a mano en la llamada de más abajo. *@
+                        @Html.AntiForgeryToken()
                         <div class="row g-3">
                             <div class="col-sm-6">
                                 <label class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
@@ -1830,6 +1834,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             url: '/Landing/EnviarContacto',
             type: 'POST',
             contentType: 'application/json',
+            // Sin layout no hay $.ajaxPrefilter, así que el token va explícito
+            headers: {
+                'RequestVerificationToken':
+                    document.querySelector('#frmContacto input[name="__RequestVerificationToken"]').value
+            },
             data: JSON.stringify(payload),
             success: function (res) {
                 if (res.ok) {

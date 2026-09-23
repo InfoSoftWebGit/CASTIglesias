@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using CapaNegocio;
 
 namespace CASTIglesias.Controllers
@@ -8,6 +8,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Index() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult EnviarContacto([FromBody] ContactoLandingModel model)
         {
             if (model == null || string.IsNullOrWhiteSpace(model.Email))

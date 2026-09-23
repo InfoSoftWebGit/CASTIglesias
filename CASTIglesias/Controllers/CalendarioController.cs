@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
 using CASTIglesias.Models;
@@ -46,6 +46,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.Ajustes))]
         public JsonResult GenerarCalendario([FromBody] CalendarioRequest req)
         {
@@ -69,6 +70,7 @@ namespace CASTIglesias.Controllers
         // cambio quede. Los caducados se borran solos (ver CN_Calendario.DiasDeCortesia).
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult Guardar([FromBody] CalendarioRequest req)
         {
@@ -146,6 +148,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult CambiarServidor([FromBody] CambioServidorRequest req)
         {
@@ -164,6 +167,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarGuardado(int id)
         {
@@ -179,6 +183,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult ExportarExcelAgrupado([FromBody] CalendarioAgrupadoRequest req)
         {
@@ -211,6 +216,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.Ajustes))]
         public IActionResult ExportarExcel([FromBody] CalendarioRequest req)
         {

@@ -32,6 +32,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Login() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string correo, string clave)
         {
             // La iglesia y la sede del usuario salen de SU fila en la BBDD, nunca de lo
@@ -125,6 +126,7 @@ namespace CASTIglesias.Controllers
         public IActionResult ReestablecerClave() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ReestablecerClave(string correo)
         {
             var oUsuario = string.IsNullOrWhiteSpace(correo) ? null : _negocioUsuarios.ObtenerUsuarioPorCorreo(correo.Trim());
@@ -158,6 +160,7 @@ namespace CASTIglesias.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult CambiarClave(string idusuario, string claveactual, string nuevaclave, string confirmarclave)
         {
             ViewBag.ID_usuario = idusuario;

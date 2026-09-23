@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -60,6 +60,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult Guardar(int idSala, string nombreSala, string reservado,
                                    int? idZonaReserva, string? fechaReserva)
@@ -91,6 +92,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult Eliminar(int idSala)
         {

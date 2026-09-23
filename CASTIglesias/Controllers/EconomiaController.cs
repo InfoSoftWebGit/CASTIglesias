@@ -115,6 +115,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.DiezmosCrearEditar))]
         public JsonResult IngresarDiezmo(Diezmo objeto)
         {
@@ -189,6 +190,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.DiezmosEliminar))]
         public JsonResult EliminarDiezmo(int id)
         {
@@ -214,7 +216,11 @@ namespace CASTIglesias.Controllers
         // ------------------------------------------------------------------------------------------------
         #region Miembros
 
+        // Pese a vivir en Economía, hoy solo lo llama la pantalla de Asistencia para
+        // buscar a quien pasa lista. Si otra pantalla empieza a usarlo, hay que añadir
+        // su permiso aquí o dejará de funcionar sin decir por qué.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Asistencia))]
         public JsonResult BuscarMiembros(string busqueda, string tipoBusqueda)
         {
             try
@@ -314,6 +320,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult IngresarConcepto(Concepto obj)
         {
@@ -360,6 +367,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult EditarConcepto(Concepto obj)
         {
@@ -404,6 +412,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ConceptosEliminar))]
         public JsonResult EliminarConcepto(int id)
         {
@@ -437,6 +446,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ConceptosCrearEditar))]
         public JsonResult GuardarConcepto(Concepto obj)
         {
@@ -512,6 +522,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GastosCrearEditar))]
         public JsonResult GuardarGasto(Gasto obj)
         {
@@ -541,6 +552,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GastosEliminar))]
         public JsonResult EliminarGasto(int id)
         {
@@ -580,6 +592,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GastosCrearEditar))]
         public JsonResult GuardarDetallePago(DetallePago obj)
         {
@@ -609,6 +622,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GastosEliminar))]
         public JsonResult EliminarDetallePago(int id)
         {

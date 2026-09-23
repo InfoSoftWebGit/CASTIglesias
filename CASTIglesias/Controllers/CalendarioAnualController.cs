@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -52,6 +52,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarEvento([FromBody] EventoCalendarioDTO dto)
         {
@@ -66,6 +67,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarEvento(int idEvento)
         {

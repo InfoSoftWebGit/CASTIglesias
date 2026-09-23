@@ -1071,7 +1071,6 @@
   <data name="Busca un miembro para ver su historial de seguimiento." xml:space="preserve"><value>Search for a member to see their follow-up history.</value></data>
   <data name="Buscar" xml:space="preserve"><value>Search</value></data>
   <data name="Buscar congregante..." xml:space="preserve"><value>Search congregant...</value></data>
-  <data name="Buscar miembro" xml:space="preserve"><value>Search member</value></data>
   <data name="Búsqueda avanzada y filtros por sede" xml:space="preserve"><value>Advanced search and filters by campus</value></data>
   <data name="Búsqueda y filtros avanzados" xml:space="preserve"><value>Advanced search and filters</value></data>
   <data name="CP:" xml:space="preserve"><value>Postal code:</value></data>
@@ -1131,7 +1130,6 @@
   <data name="El entorno de desarrollo no debe habilitarse en aplicaciones publicadas." xml:space="preserve"><value>The Development environment should not be enabled for deployed applications.</value></data>
   <data name="El plan completo para pastores y líderes que necesitan visibilidad y control total de su congregación." xml:space="preserve"><value>The complete plan for pastors and leaders who need full visibility and control of their congregation.</value></data>
   <data name="Elige el plan que mejor se adapta" xml:space="preserve"><value>Choose the plan that fits best</value></data>
-  <data name="Eliminar" xml:space="preserve"><value>Delete</value></data>
   <data name="Empieza a escribir para ver sugerencias." xml:space="preserve"><value>Start typing to see suggestions.</value></data>
   <data name="Empieza a registrar congregantes, tomar asistencia y controlar finanzas. Todo desde cualquier dispositivo." xml:space="preserve"><value>Start registering congregants, taking attendance and tracking finances. All from any device.</value></data>
   <data name="En la nube" xml:space="preserve"><value>In the cloud</value></data>
@@ -1174,7 +1172,6 @@
   <data name="Gráficas comparativas mensuales y anuales" xml:space="preserve"><value>Comparative monthly and yearly charts</value></data>
   <data name="Gráficas mensuales y anuales" xml:space="preserve"><value>Monthly and yearly charts</value></data>
   <data name="Guarda la familia primero para poder gestionar los miembros." xml:space="preserve"><value>Save the family first to manage its members.</value></data>
-  <data name="Guardar" xml:space="preserve"><value>Save</value></data>
   <data name="Guardar configuración" xml:space="preserve"><value>Save settings</value></data>
   <data name="Ha ocurrido un problema al procesar tu solicitud." xml:space="preserve"><value>A problem occurred while processing your request.</value></data>
   <data name="Historial completo por congregante" xml:space="preserve"><value>Complete history per congregant</value></data>

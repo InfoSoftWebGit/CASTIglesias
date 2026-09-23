@@ -453,6 +453,17 @@
             mModificado:              @Json.Serialize(L["Modificado"].Value)
         });
 
+    // Cabeceras para las exportaciones, que usan fetch en lugar de jQuery.
+    // El $.ajaxPrefilter del layout solo alcanza a $.ajax, así que aquí el token
+    // antifalsificación hay que añadirlo a mano o el servidor rechaza la petición.
+    function cabecerasJson() {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]');
+        return {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': token ? token.value : ''
+        };
+    }
+
     const urlCultos               = '@Url.Action("ObtenerCultos",          "Calendario")';
     const urlGenerar              = '@Url.Action("GenerarCalendario",      "Calendario")';
     const urlExportarExcel        = '@Url.Action("ExportarExcel",          "Calendario")';
@@ -780,7 +791,7 @@
         try {
             const resp = await fetch(urlExportarExcelAgrupado, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: cabecerasJson(),
                 body: JSON.stringify(req)
             });
             const ct = resp.headers.get('Content-Type') || '';
@@ -812,7 +823,7 @@
         try {
             const resp = await fetch(urlExportarExcel, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: cabecerasJson(),
                 body: JSON.stringify(requestActual)
             });
             if (!resp.ok) { Swal.fire('Error', T.mNoGenerarExcel, 'error'); return; }

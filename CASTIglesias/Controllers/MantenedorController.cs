@@ -68,7 +68,13 @@ namespace CapaPresentaciónAdmin.Controllers
         [RequierePermiso(nameof(Permisos.Zonas))]
         public IActionResult Zonas() => View();
 
+        // Listado compartido: lo usan Zonas y Grupos del mantenedor, y las pantallas de
+        // Miembros, Proceso y Líderes para rellenar sus desplegables. Por eso admite
+        // cualquiera de esos permisos en lugar de exigir solo el de Zonas, que dejaría
+        // sin desplegable a quien solo gestiona miembros.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Zonas), nameof(Permisos.Grupos),
+                         nameof(Permisos.Miembros), nameof(Permisos.Proceso))]
         public JsonResult ListarZonas()
         {
             try
@@ -104,6 +110,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ZonasCrearEditar))]
         public JsonResult GuardarZona(Zona objeto)
         {
@@ -129,6 +136,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ZonasEliminar))]
         public JsonResult EliminarZona(int id)
         {
@@ -199,6 +207,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GruposCrearEditar))]
         public JsonResult GuardarGrupos(Grupos objeto)
         {
@@ -224,6 +233,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.GruposEliminar))]
         public JsonResult EliminarGrupo(int id)
         {
@@ -280,6 +290,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MinisterioCrearEditar))]
         public JsonResult GuardarMinisterio(Ministerio objeto)
         {
@@ -306,6 +317,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MinisterioEliminar))]
         public JsonResult EliminarMinisterio(int id)
         {
@@ -420,6 +432,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MinisterioCrearEditar))]
         public JsonResult GuardarMiembroServicio(int idMiembro, int idMinisterio, string rol,
                                                   string esMinistra = "No", int idAsignacion = 0)
@@ -444,6 +457,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MinisterioEliminar))]
         public JsonResult EliminarMiembroServicio(int idAsignacion)
         {
@@ -497,6 +511,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
         public JsonResult GuardarCulto([FromBody] CapaEntidad.CultoConBloquesDTO dto)
         {
@@ -513,6 +528,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AjustesEliminar))]
         public JsonResult EliminarCulto(int id)
         {
@@ -589,6 +605,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.UsuariosCrearEditar))]
         public JsonResult GuardarUsuario(UsuarioDTO_Permisos objeto)
         {
@@ -649,6 +666,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.UsuariosEliminar))]
         public JsonResult EliminarUsuario(int id)
         {
@@ -802,6 +820,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.DiezmosCrearEditar))]
         public JsonResult IngresarDiezmo(Diezmo objeto)
         {
@@ -827,6 +846,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.DiezmosEliminar))]
         public JsonResult EliminarDiezmo(int id)
         {
@@ -846,6 +866,7 @@ namespace CapaPresentaciónAdmin.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.Diezmos))]
         public IActionResult ExportarHistorialDiezmo(string fechainicio, string fechafin)
         {

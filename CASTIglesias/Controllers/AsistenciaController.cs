@@ -69,6 +69,7 @@ namespace CASTIglesias.Controllers
         /// </summary>
         /// <param name="obj">Datos de la nueva asistencia.</param>
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.AsistenciaCrearEditar))]
         public IActionResult RegistrarAsistencia([FromBody] Asistencia_culto obj)
         {

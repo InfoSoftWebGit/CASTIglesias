@@ -146,6 +146,7 @@ namespace CASTIglesias.Controllers
             }
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult RegistrarMiembro([FromBody] MiembroDetalleDTO data)
         {
             try
@@ -190,6 +191,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult EliminarMiembro(int id)
         {
             try
@@ -410,6 +412,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult GuardarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
@@ -425,6 +428,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult EditarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
@@ -438,6 +442,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar), nameof(Permisos.ProcesoCrearEditar))]
         public IActionResult EliminarZGM([FromBody] List<Miembro_zona_grupo_ministerio> lista)
         {
@@ -452,7 +457,14 @@ namespace CASTIglesias.Controllers
 
         #endregion MIEMBROS CON ZONAS, GRUPOS Y MINISTERIOS
         #region OTROS MÉTODOS MIEMBROS
+        // Buscador compartido por casi todas las pantallas de congregantes y por las
+        // zonas de discipulado. Devuelve nombres de miembros, así que basta con tener
+        // permiso sobre alguno de los colectivos que lo consultan.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros), nameof(Permisos.Proceso),
+                         nameof(Permisos.Simpatizantes), nameof(Permisos.Visitantes),
+                         nameof(Permisos.Jovenes), nameof(Permisos.Hombres),
+                         nameof(Permisos.Mujeres), nameof(Permisos.Ninos))]
         public JsonResult BuscarMiembros(string term)
         {
             try
@@ -546,6 +558,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.VisitantesCrearEditar))]
         public JsonResult RegistrarMiembroVisitante([FromBody] MiembroDetalleDTO data)
         {
@@ -636,6 +649,7 @@ namespace CASTIglesias.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.SimpatizantesCrearEditar))]
         public JsonResult EditarMiembroSimpatizante([FromBody] MiembroDetalleDTO data)
         {
@@ -744,6 +758,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.ProcesoCrearEditar))]
         public JsonResult EditarMiembroProceso([FromBody] MiembroDetalleDTO data)
         {
@@ -801,6 +816,7 @@ namespace CASTIglesias.Controllers
         }
         #endregion
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult AvanzarEstado(int idMiembro)
         {
             try
@@ -823,6 +839,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult RetrocederEstado(int idMiembro)
         {
             try
@@ -953,6 +970,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarSeguimiento([FromBody] CapaEntidad.Seguimiento data)
         {
@@ -979,6 +997,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarSeguimiento(int id)
         {
@@ -995,7 +1014,9 @@ namespace CASTIglesias.Controllers
             }
         }
 
+        // Solo lo usa la pantalla de Seguimiento, que pide el permiso de Miembros.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
         public JsonResult BuscarLideres(string term)
         {
             try
@@ -1043,6 +1064,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarDetalleSeguimiento([FromBody] CapaEntidad.DetalleSeguimiento data)
         {
@@ -1069,6 +1091,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarDetalleSeguimiento(int id)
         {
@@ -1100,7 +1123,11 @@ namespace CASTIglesias.Controllers
             return View();
         }
 
+        // Listado compartido: lo usan Líderes, Miembros, Proceso, Simpatizantes y
+        // Visitantes para rellenar el desplegable de líder asignado.
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros), nameof(Permisos.Proceso),
+                         nameof(Permisos.Simpatizantes), nameof(Permisos.Visitantes))]
         public JsonResult ListarLideres()
         {
             try
@@ -1116,6 +1143,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
         public JsonResult RegistrarLider([FromBody] CapaEntidad.Lider data)
         {
@@ -1142,6 +1170,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
         public JsonResult EliminarLider(int id)
         {
@@ -1185,6 +1214,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult GuardarFamilia([FromBody] CapaEntidad.Familia objeto)
         {
@@ -1207,6 +1237,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.FamiliasEliminar))]
         public JsonResult EliminarFamilia(int id)
         {
@@ -1238,7 +1269,9 @@ namespace CASTIglesias.Controllers
             }
         }
 
+        // Lo usan las dos pantallas de Familias (Congregantes y Mantenedor).
         [HttpGet]
+        [RequierePermiso(nameof(Permisos.Familias))]
         public JsonResult BuscarMiembrosParaFamilia(string query = "")
         {
             try
@@ -1254,6 +1287,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult AsignarMiembroAFamilia(int idMiembro, int idFamilia, string tipoRelacion)
         {
@@ -1270,6 +1304,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.FamiliasCrearEditar))]
         public JsonResult QuitarMiembroFamilia(int idMiembro)
         {
@@ -1367,6 +1402,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.JovenesCrearEditar))]
         public JsonResult AgregarJoven(int idMiembro, int idGrupo)
         {
@@ -1384,6 +1420,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.JovenesEliminar))]
         public JsonResult EliminarJoven(int idZgm)
         {
@@ -1401,6 +1438,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.JovenesCrearEditar))]
         public JsonResult CambiarGrupoJoven(int idZgm, int idGrupo)
         {
@@ -1479,6 +1517,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult AgregarMiembroZonaDiscipulado(string tipo, int idMiembro, int idGrupo)
         {
             try
@@ -1497,6 +1536,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult EliminarMiembroZonaDiscipulado(int idZgm)
         {
             try
@@ -1517,6 +1557,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult CambiarGrupoZonaDiscipulado(int idZgm, int idGrupo)
         {
             try
@@ -1558,6 +1599,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MatrimoniosCrearEditar))]
         public JsonResult GuardarMatrimonio([FromBody] CapaEntidad.Matrimonio objeto)
         {
@@ -1580,6 +1622,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(Permisos.MatrimoniosEliminar))]
         public JsonResult EliminarMatrimonio(int id)
         {
