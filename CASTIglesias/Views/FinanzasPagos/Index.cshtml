@@ -1,0 +1,363 @@
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Facturas y pagos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cajas = ViewBag.Cajas as List<TreasuryAccount> ?? new List<TreasuryAccount>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Facturas y pagos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        <strong>@L["Gastar y pagar no son lo mismo."]</strong>
+        @L["La factura del carpintero llega en septiembre y se paga en octubre: el gasto es de septiembre, porque es cuando se recibió el servicio, y el dinero sale en octubre."]
+        <div class="mt-1">
+            @L["Las facturas aparecen aquí solas, al registrar un gasto marcando que no se paga en el momento."]
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#panelFacturas" type="button" role="tab">
+            <i class="fas fa-file-invoice me-1"></i> @L["Pendientes de pago"]
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#panelPagos" type="button" role="tab">
+            <i class="fas fa-money-check-dollar me-1"></i> @L["Pagos realizados"]
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="panelFacturas" role="tabpanel">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span>
+                    <i class="fas fa-file-invoice me-1"></i> @L["Facturas pendientes"]
+                    <span class="badge bg-secondary ms-1" id="contadorPendientes">0</span>
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="verTodas" />
+                        <label class="form-check-label small" for="verTodas">@L["Ver también las pagadas"]</label>
+                    </div>
+                    <button type="button" id="btnPagar" class="btn btn-primary btn-sm" disabled>
+                        <i class="fas fa-money-bill-transfer me-1"></i> @L["Pagar lo seleccionado"]
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="tablaFacturas" class="table table-bordered table-striped border-top" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:36px"></th>
+                            <th>@L["Factura"]</th>
+                            <th>@L["Proveedor"]</th>
+                            <th>@L["Fecha"]</th>
+                            <th>@L["Vence"]</th>
+                            <th class="text-end">@L["Total"]</th>
+                            <th class="text-end">@L["Pendiente"]</th>
+                            <th>@L["Estado"]</th>
+                        </tr>
+                    </thead>
+                    @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese
+                       colspan como un registro. El mensaje lo pone language.emptyTable. *@
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="panelPagos" role="tabpanel">
+        <div class="card mb-4">
+            <div class="card-header"><i class="fas fa-money-check-dollar me-1"></i> @L["Pagos realizados"]</div>
+            <div class="table-responsive">
+                <table id="tablaPagos" class="table table-bordered table-striped border-top" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>@L["Fecha"]</th>
+                            <th>@L["Proveedor"]</th>
+                            <th>@L["Desde"]</th>
+                            <th class="text-end">@L["Importe"]</th>
+                            <th class="text-end">@L["Facturas"]</th>
+                            <th>@L["Asiento"]</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal del pago -->
+<div class="modal fade" id="modalPago" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="formPago" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["Registrar un pago"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label for="pagoCaja" class="form-label">@L["Desde qué caja o banco"] *</label>
+                        <select id="pagoCaja" class="form-select">
+                            @foreach (var c in cajas)
+                            {
+                                <option value="@c.id">@c.name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="pagoFecha" class="form-label">@L["Fecha del pago"] *</label>
+                        <input type="date" id="pagoFecha" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>@L["Factura"]</th>
+                                <th class="text-end">@L["Pendiente"]</th>
+                                <th style="width:170px">@L["Se paga ahora"]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoPago"></tbody>
+                        <tfoot>
+                            <tr class="fw-bold border-top">
+                                <td colspan="2">@L["Total a pagar"]</td>
+                                <td class="text-end" id="totalPago">0,00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="alert alert-secondary mt-3 mb-0 small">
+                    <i class="fas fa-circle-info me-1"></i>
+                    @L["Se generará un asiento que cancela la deuda con el proveedor y saca el dinero de la caja elegida. Puedes pagar solo una parte: la factura quedará pagada en parte."]
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Registrar el pago"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinFacturas: @Json.Serialize(L["No hay facturas pendientes de pago."].Value),
+            sinPagos:    @Json.Serialize(L["Todavía no hay pagos registrados."].Value),
+            error:       @Json.Serialize(L["Error"].Value),
+            vencida:     @Json.Serialize(L["Vencida"].Value),
+            venceHoy:    @Json.Serialize(L["Vence hoy"].Value),
+            dias:        @Json.Serialize(L["días"].Value),
+            eligeAlguna: @Json.Serialize(L["Elige al menos una factura."].Value),
+            masDeLoDebido: @Json.Serialize(L["No puedes pagar más de lo que se debe."].Value)
+        });
+
+        const ESTADOS_FAC = {
+            pending:        { texto: @Json.Serialize(L["Pendiente"].Value),       clase: "bg-warning text-dark" },
+            partially_paid: { texto: @Json.Serialize(L["Pagada en parte"].Value), clase: "bg-info text-dark" },
+            paid:           { texto: @Json.Serialize(L["Pagada"].Value),          clase: "bg-success" },
+            cancelled:      { texto: @Json.Serialize(L["Anulada"].Value),         clase: "bg-secondary" }
+        };
+
+        let tablaFacturas, tablaPagos;
+
+        function dinero(v) {
+            return (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function elegidas() {
+            const filas = [];
+            $('#tablaFacturas tbody .chk-factura:checked').each(function () {
+                filas.push(tablaFacturas.row($(this).closest('tr')).data());
+            });
+            return filas;
+        }
+
+        function recalcularPago() {
+            let total = 0;
+            $('#cuerpoPago .importe-pago').each(function () {
+                total += parseFloat($(this).val()) || 0;
+            });
+            $('#totalPago').text(dinero(total));
+        }
+
+        $(document).ready(function () {
+            tablaFacturas = $('#tablaFacturas').DataTable({
+                responsive: true,
+                order: [[4, 'asc']],
+                ajax: {
+                    url: '@Url.Action("ListarFacturas", "FinanzasPagos")',
+                    data: function (d) { d.soloPendientes = !$('#verTodas').is(':checked'); },
+                    dataSrc: function (res) {
+                        const pendientes = res.data.filter(function (f) { return f.outstanding_amount > 0; });
+                        $('#contadorPendientes').text(pendientes.length);
+                        return res.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            // Lo que ya está pagado no se puede volver a pagar
+                            if (fila.outstanding_amount <= 0) return '';
+                            return '<input type="checkbox" class="form-check-input chk-factura">';
+                        }
+                    },
+                    { data: 'document_number', defaultContent: '' },
+                    { data: 'proveedor', defaultContent: '' },
+                    {
+                        data: 'document_date',
+                        render: function (d) { return d ? new Date(d).toLocaleDateString() : ''; }
+                    },
+                    {
+                        data: 'due_date',
+                        render: function (d, t, fila) {
+                            if (!d) return '—';
+                            const texto = new Date(d).toLocaleDateString();
+                            if (t !== 'display') return d;
+                            // Una factura vencida tiene que saltar a la vista: es la
+                            // razón por la que alguien abre esta pantalla.
+                            if (fila.EstaVencida) {
+                                return '<span class="text-danger fw-bold">' + texto +
+                                       ' <i class="fas fa-triangle-exclamation"></i></span>';
+                            }
+                            return texto;
+                        }
+                    },
+                    { data: 'total_amount', className: 'text-end', render: dinero },
+                    {
+                        data: 'outstanding_amount', className: 'text-end',
+                        render: function (v, t) {
+                            if (t !== 'display') return v;
+                            return '<strong>' + dinero(v) + '</strong>';
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_FAC[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinFacturas
+                }
+            });
+
+            tablaPagos = $('#tablaPagos').DataTable({
+                responsive: true,
+                order: [[0, 'desc']],
+                ajax: { url: '@Url.Action("ListarPagos", "FinanzasPagos")', dataSrc: 'data' },
+                columns: [
+                    {
+                        data: 'payment_date',
+                        render: function (d) { return d ? new Date(d).toLocaleDateString() : ''; }
+                    },
+                    { data: 'proveedor', defaultContent: '' },
+                    { data: 'caja', defaultContent: '' },
+                    { data: 'amount', className: 'text-end', render: dinero },
+                    { data: 'facturas', className: 'text-end' },
+                    {
+                        data: 'asiento',
+                        render: function (v) { return v ? '<code>' + v + '</code>' : '—'; }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinPagos
+                }
+            });
+
+            // DataTables no calcula el ancho de una tabla oculta en otra pestaña
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
+                tablaFacturas.columns.adjust();
+                tablaPagos.columns.adjust();
+            });
+
+            $('#verTodas').on('change', function () { tablaFacturas.ajax.reload(); });
+
+            $('#tablaFacturas tbody').on('change', '.chk-factura', function () {
+                $('#btnPagar').prop('disabled', elegidas().length === 0);
+            });
+
+            $('#btnPagar').on('click', function () {
+                const filas = elegidas();
+                if (filas.length === 0) { Swal.fire(T.error, T.eligeAlguna, 'error'); return; }
+
+                const hoy = new Date();
+                $('#pagoFecha').val(hoy.toISOString().substring(0, 10));
+
+                const cuerpo = $('#cuerpoPago').empty();
+                $.each(filas, function (i, f) {
+                    cuerpo.append(
+                        '<tr>' +
+                        '<td>' + $('<div>').text((f.document_number || '') + ' · ' + (f.proveedor || '')).html() + '</td>' +
+                        '<td class="text-end">' + dinero(f.outstanding_amount) + '</td>' +
+                        '<td><input type="number" step="0.01" min="0" max="' + f.outstanding_amount +
+                        '" class="form-control form-control-sm importe-pago text-end" ' +
+                        'data-id="' + f.id + '" value="' + f.outstanding_amount.toFixed(2) + '"></td>' +
+                        '</tr>');
+                });
+
+                recalcularPago();
+                new bootstrap.Modal(document.getElementById('modalPago')).show();
+            });
+
+            $(document).on('input', '.importe-pago', recalcularPago);
+
+            $('#formPago').on('submit', function (e) {
+                e.preventDefault();
+
+                const ids = [], importes = [];
+                let excedido = false;
+                $('#cuerpoPago .importe-pago').each(function () {
+                    const v = parseFloat($(this).val()) || 0;
+                    const tope = parseFloat($(this).attr('max'));
+                    if (v > tope + 0.0001) excedido = true;
+                    if (v > 0) { ids.push($(this).data('id')); importes.push(v); }
+                });
+
+                if (excedido) { Swal.fire(T.error, T.masDeLoDebido, 'error'); return; }
+                if (ids.length === 0) { Swal.fire(T.error, T.eligeAlguna, 'error'); return; }
+
+                $.post('@Url.Action("Pagar", "FinanzasPagos")', {
+                    idCaja: $('#pagoCaja').val(),
+                    fecha: $('#pagoFecha').val(),
+                    idsFactura: ids,
+                    importes: importes
+                }, function (r) {
+                    if (r.resultado) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalPago')).hide();
+                        Swal.fire({ icon: 'success', title: r.mensaje, timer: 2600, showConfirmButton: false });
+                        tablaFacturas.ajax.reload(null, false);
+                        tablaPagos.ajax.reload(null, false);
+                        $('#btnPagar').prop('disabled', true);
+                    } else {
+                        Swal.fire(T.error, r.mensaje, 'error');
+                    }
+                });
+            });
+        });
+    </script>
+}

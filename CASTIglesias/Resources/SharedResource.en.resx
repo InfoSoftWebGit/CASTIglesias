@@ -2570,4 +2570,57 @@
   <data name="¿Eliminar esta regla?" xml:space="preserve"><value>Delete this rule?</value></data>
   <data name="¿Crear las reglas básicas?" xml:space="preserve"><value>Create the basic rules?</value></data>
   <data name="Siempre" xml:space="preserve"><value>Always</value></data>
+  <data name="Webinar" xml:space="preserve"><value>Webinar</value></data>
+  <data name="Viernes 23 de octubre" xml:space="preserve"><value>Friday 23 October</value></data>
+  <data name="Sábado 24 de octubre" xml:space="preserve"><value>Saturday 24 October</value></data>
+  <data name="Más frecuentes en España" xml:space="preserve"><value>Most common in Spain</value></data>
+  <data name="Pentecostales y carismáticas" xml:space="preserve"><value>Pentecostal and charismatic</value></data>
+  <data name="Protestantes históricas" xml:space="preserve"><value>Historic Protestant</value></data>
+  <data name="Otras evangélicas" xml:space="preserve"><value>Other evangelical</value></data>
+  <data name="Otras confesiones" xml:space="preserve"><value>Other faiths</value></data>
+  <data name="Webinar gratuito — Congrega CRM" xml:space="preserve"><value>Free webinar — Congrega CRM</value></data>
+  <data name="Sesión en directo de 2 horas para conocer Congrega CRM: demostración de la aplicación y turno de preguntas." xml:space="preserve"><value>A two-hour live session to get to know Congrega CRM: a demo of the application and time for questions.</value></data>
+  <data name="Webinar gratuito · plazas limitadas" xml:space="preserve"><value>Free webinar · limited places</value></data>
+  <data name="Conoce" xml:space="preserve"><value>Discover</value></data>
+  <data name="en directo" xml:space="preserve"><value>live</value></data>
+  <data name="Dos horas como máximo para ver la aplicación funcionando, entender cómo se gestiona una iglesia con ella y preguntar todo lo que necesites." xml:space="preserve"><value>Two hours at most to see the application in action, understand how a church is run with it and ask anything you need.</value></data>
+  <data name="Reservar mi plaza" xml:space="preserve"><value>Book my place</value></data>
+  <data name="Dos fechas a elegir" xml:space="preserve"><value>Two dates to choose from</value></data>
+  <data name="Viernes 23 o sábado 24 de octubre, a las 19:00h (hora de España)" xml:space="preserve"><value>Friday 23 or Saturday 24 October, at 19:00 (Spanish time)</value></data>
+  <data name="Duración máxima de 2 horas" xml:space="preserve"><value>Two hours maximum</value></data>
+  <data name="Demostración de la aplicación y, al final, turno de preguntas y respuestas." xml:space="preserve"><value>A demo of the application and, at the end, time for questions and answers.</value></data>
+  <data name="Online por Microsoft Teams" xml:space="preserve"><value>Online on Microsoft Teams</value></data>
+  <data name="Te enviaremos el enlace de la reunión al correo que indiques en el formulario." xml:space="preserve"><value>We will send the meeting link to the email address you give in the form.</value></data>
+  <data name="El webinar" xml:space="preserve"><value>The webinar</value></data>
+  <data name="Qué veremos en la sesión" xml:space="preserve"><value>What we will cover in the session</value></data>
+  <data name="La sesión dura dos horas como máximo y se divide en una parte de demostración y otra de preguntas." xml:space="preserve"><value>The session lasts two hours at most and is split into a demo part and a questions part.</value></data>
+  <data name="La aplicación en funcionamiento" xml:space="preserve"><value>The application in action</value></data>
+  <data name="Recorremos la aplicación con datos reales de ejemplo: congregantes, familias, zonas de discipulado, asistencia, calendarios y el área financiera." xml:space="preserve"><value>We go through the application with real sample data: members, families, discipleship zones, attendance, calendars and the finance area.</value></data>
+  <data name="Primera parte" xml:space="preserve"><value>First part</value></data>
+  <data name="Cómo se usa el día a día" xml:space="preserve"><value>How it is used day to day</value></data>
+  <data name="Explicamos módulo a módulo cómo trabaja una iglesia con Congrega: quién entra, qué ve cada responsable y cómo se organiza una iglesia con varias sedes." xml:space="preserve"><value>We explain module by module how a church works with Congrega: who logs in, what each leader sees and how a church with several sites is organised.</value></data>
+  <data name="Segunda parte" xml:space="preserve"><value>Second part</value></data>
+  <data name="Preguntas y respuestas" xml:space="preserve"><value>Questions and answers</value></data>
+  <data name="Al terminar la demostración abrimos un turno para responder en directo. Si ya tienes una pregunta, puedes dejarla escrita al inscribirte y la preparamos." xml:space="preserve"><value>Once the demo is over we open the floor for live answers. If you already have a question, you can write it down when you register and we will prepare it.</value></data>
+  <data name="Tramo final" xml:space="preserve"><value>Final stretch</value></data>
+  <data name="Inscripción" xml:space="preserve"><value>Registration</value></data>
+  <data name="Reserva tu plaza" xml:space="preserve"><value>Book your place</value></data>
+  <data name="Rellena el formulario y recibirás un correo de confirmación al momento." xml:space="preserve"><value>Fill in the form and you will get a confirmation email straight away.</value></data>
+  <data name="Web" xml:space="preserve"><value>Website</value></data>
+  <data name="Tu apellido" xml:space="preserve"><value>Your surname</value></data>
+  <data name="Denominación" xml:space="preserve"><value>Denomination</value></data>
+  <data name="Selecciona una denominación..." xml:space="preserve"><value>Select a denomination...</value></data>
+  <data name="Fecha y hora del webinar" xml:space="preserve"><value>Webinar date and time</value></data>
+  <data name="19:00h (hora de España)" xml:space="preserve"><value>19:00 (Spanish time)</value></data>
+  <data name="¿Tienes alguna pregunta de antemano?" xml:space="preserve"><value>Do you have a question in advance?</value></data>
+  <data name="Opcional. Si ya tienes una duda concreta, escríbela aquí y la preparamos para el turno de preguntas." xml:space="preserve"><value>Optional. If you already have a specific question, write it here and we will prepare it for the questions part.</value></data>
+  <data name="El webinar se hace por Microsoft Teams. Unos días antes de la sesión te enviaremos al correo que has indicado el enlace para unirte a la reunión. No necesitas tener Teams instalado: se puede entrar desde el navegador." xml:space="preserve"><value>The webinar is held on Microsoft Teams. A few days before the session we will send the link to join the meeting to the email address you gave. You do not need Teams installed: you can join from your browser.</value></data>
+  <data name="Usaremos tus datos únicamente para gestionar tu asistencia al webinar y enviarte el enlace de la reunión." xml:space="preserve"><value>We will use your details only to manage your attendance at the webinar and to send you the meeting link.</value></data>
+  <data name="Confirmar inscripción" xml:space="preserve"><value>Confirm registration</value></data>
+  <data name="Campos requeridos" xml:space="preserve"><value>Required fields</value></data>
+  <data name="Elige una de las dos fechas del webinar." xml:space="preserve"><value>Choose one of the two webinar dates.</value></data>
+  <data name="¡Inscripción confirmada!" xml:space="preserve"><value>Registration confirmed!</value></data>
+  <data name="Te hemos enviado un correo de confirmación. Unos días antes del webinar recibirás el enlace de Teams en esa misma dirección." xml:space="preserve"><value>We have sent you a confirmation email. A few days before the webinar you will receive the Teams link at that same address.</value></data>
+  <data name="No se pudo completar la inscripción." xml:space="preserve"><value>The registration could not be completed.</value></data>
+  <data name="No se pudo enviar. Inténtalo de nuevo." xml:space="preserve"><value>It could not be sent. Please try again.</value></data>
 </root>

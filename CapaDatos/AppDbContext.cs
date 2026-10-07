@@ -60,6 +60,11 @@ namespace CapaDatos
         public DbSet<AccesoPlataforma> AccesosPlataforma { get; set; }
         public DbSet<UsuarioSede> UsuarioSedes { get; set; }
 
+        // Inscripciones a los webinars de presentación. Van aquí y no en el
+        // bloque por iglesia porque las rellena gente de fuera, desde la página
+        // pública, cuando todavía no hay ninguna iglesia asociada.
+        public DbSet<WebinarInscripcion> WebinarInscripciones { get; set; }
+
         // ── Módulo financiero ────────────────────────────────────────────────
         // Las 48 tablas del área financiera. Las 46 que tienen organization_id
         // implementan ITieneIglesia, así que el filtro global por iglesia se les

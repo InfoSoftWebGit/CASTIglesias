@@ -36,15 +36,29 @@ namespace CapaDatos
             public string? ministerio { get; set; }
             public decimal presupuestado { get; set; }
             public decimal ejecutado { get; set; }
+
+            /// <summary>
+            /// Aprobado pero todavía no contabilizado: reservado y ya no disponible.
+            /// </summary>
+            public decimal comprometido { get; set; }
+
             public string? notas { get; set; }
 
-            public decimal Disponible => presupuestado - ejecutado;
+            /// <summary>
+            /// Lo que queda de verdad.
+            /// </summary>
+            /// <remarks>
+            /// Resta también lo comprometido, y ese es el punto de toda la columna: sin
+            /// ella, el disponible invita a aprobar un segundo gasto contra un dinero
+            /// que ya está apalabrado para el primero.
+            /// </remarks>
+            public decimal Disponible => presupuestado - ejecutado - comprometido;
 
-            /// <summary>Porcentaje consumido. Sin presupuesto no hay porcentaje que dar.</summary>
+            /// <summary>Porcentaje consumido, contando lo comprometido.</summary>
             public decimal PorcentajeConsumido =>
-                presupuestado == 0 ? 0 : Math.Round(ejecutado / presupuestado * 100, 1);
+                presupuestado == 0 ? 0 : Math.Round((ejecutado + comprometido) / presupuestado * 100, 1);
 
-            public bool Superado => ejecutado > presupuestado;
+            public bool Superado => (ejecutado + comprometido) > presupuestado;
         }
 
         public List<Budget> Listar()
@@ -228,6 +242,13 @@ namespace CapaDatos
                                    l.credit_amount
                                }).ToList();
 
+            // Lo reservado por gastos aprobados y aún sin contabilizar
+            var comprometido = _context.BudgetCommitments.AsNoTracking()
+                .Where(c => c.budget_id == idPresupuesto && c.status == "reserved")
+                .GroupBy(c => c.budget_line_id)
+                .Select(g => new { linea = g.Key, total = g.Sum(x => x.amount) })
+                .ToDictionary(x => x.linea, x => x.total);
+
             var cuentas = _context.LedgerAccounts.AsNoTracking()
                 .ToDictionary(c => c.id, c => c);
             var fondos = _context.Funds.AsNoTracking().ToDictionary(f => f.id, f => f.name ?? "");
@@ -267,6 +288,7 @@ namespace CapaDatos
                         ? ministerios[linea.ministry_id.Value] : "",
                     presupuestado = linea.amount,
                     ejecutado = ejecutado,
+                    comprometido = comprometido.ContainsKey(linea.id) ? comprometido[linea.id] : 0,
                     notas = linea.notes
                 });
             }

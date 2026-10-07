@@ -291,7 +291,17 @@ namespace CapaDatos
 
             var porId = operaciones.ToDictionary(t => t.id, t => t);
 
-            var usuarios = _context.Usuarios.AsNoTracking()
+            // IgnoreQueryFilters en los NOMBRES de usuario, a propósito.
+            //
+            // La tabla de usuarios va filtrada por iglesia, y quien aprueba o registra
+            // puede ser el administrador de plataforma, cuya fila está en la iglesia
+            // interna de Congrega. Sin esto, justo esa persona aparecía como "#1" en
+            // lugar de con su nombre, que es lo contrario de lo que busca un registro
+            // de quién hizo qué.
+            //
+            // No es una fuga de datos: solo se traduce a nombre un id que YA está en
+            // una fila de esta iglesia. Nunca se listan usuarios de otras iglesias.
+            var usuarios = _context.Usuarios.AsNoTracking().IgnoreQueryFilters()
                 .ToDictionary(u => u.ID_usuario, u => u.nombre_usuario ?? "");
             var sedes = _context.Sedes.AsNoTracking()
                 .ToDictionary(s => s.ID, s => s.nombre_sede ?? "");

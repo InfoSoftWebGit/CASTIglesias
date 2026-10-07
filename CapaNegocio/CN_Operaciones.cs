@@ -18,13 +18,29 @@ namespace CapaNegocio
         private readonly CD_Operaciones _cdOperaciones;
         private readonly CD_Ejercicios _cdEjercicios;
         private readonly CD_ConceptosFinancieros _cdConceptos;
+        private readonly CD_Idempotencia _cdIdempotencia;
 
         public CN_Operaciones(CD_Operaciones cdOperaciones, CD_Ejercicios cdEjercicios,
-                              CD_ConceptosFinancieros cdConceptos)
+                              CD_ConceptosFinancieros cdConceptos,
+                              CD_Idempotencia cdIdempotencia)
         {
             _cdOperaciones = cdOperaciones;
             _cdEjercicios = cdEjercicios;
             _cdConceptos = cdConceptos;
+            _cdIdempotencia = cdIdempotencia;
+        }
+
+        /// <summary>
+        /// Reserva la clave anti-duplicado de un alta.
+        /// </summary>
+        /// <remarks>
+        /// Ver CD_Idempotencia. Aquí se aprovecha para ir limpiando las caducadas, que
+        /// es barato y evita tener que montar una tarea programada solo para eso.
+        /// </remarks>
+        public CD_Idempotencia.ReservaDTO ReservarClave(string clave, string operacion, string contenido)
+        {
+            _cdIdempotencia.LimpiarCaducadas();
+            return _cdIdempotencia.Reservar(clave, operacion, contenido);
         }
 
         /// <summary>Los tipos que representan dinero que entra.</summary>
@@ -32,7 +48,19 @@ namespace CapaNegocio
         public static readonly string[] TiposGasto = { "expense" };
 
         /// <summary>Formas de cobro o pago admitidas.</summary>
-        public static readonly string[] MediosPago = { "cash", "card", "transfer", "direct_debit", "other" };
+        /// <remarks>
+        /// "pending" no es una forma de pagar, sino la ausencia de pago: el gasto se
+        /// registra ahora y se paga después. Va en esta lista porque es lo que mira el
+        /// motor para elegir la regla, y una operación marcada así casa con la regla de
+        /// factura pendiente, que lleva el Haber a acreedores en vez de a la caja.
+        /// </remarks>
+        public static readonly string[] MediosPago =
+            { "cash", "card", "transfer", "direct_debit", "other", "pending" };
+
+        /// <summary>true si la operación queda a deber en lugar de pagarse ahora.</summary>
+        public static bool QuedaPendienteDePago(FinancialTransaction operacion)
+            => operacion.payment_method == "pending"
+               && TiposGasto.Contains(operacion.transaction_kind);
 
         public List<CD_Operaciones.OperacionDTO> Listar(string[] tipos, int sedeID,
                                                         DateTime? desde, DateTime? hasta,

@@ -31,14 +31,17 @@ namespace CapaNegocio
         private readonly CD_Operaciones _cdOperaciones;
         private readonly CD_Ejercicios _cdEjercicios;
         private readonly CD_ConceptosFinancieros _cdConceptos;
+        private readonly CN_Compromisos _negocioCompromisos;
 
         public CN_Asientos(CD_Asientos cdAsientos, CD_Operaciones cdOperaciones,
-                           CD_Ejercicios cdEjercicios, CD_ConceptosFinancieros cdConceptos)
+                           CD_Ejercicios cdEjercicios, CD_ConceptosFinancieros cdConceptos,
+                           CN_Compromisos negocioCompromisos)
         {
             _cdAsientos = cdAsientos;
             _cdOperaciones = cdOperaciones;
             _cdEjercicios = cdEjercicios;
             _cdConceptos = cdConceptos;
+            _negocioCompromisos = negocioCompromisos;
         }
 
         /// <summary>Origen que se guarda en el asiento para poder volver a la operación.</summary>
@@ -192,11 +195,19 @@ namespace CapaNegocio
             var movTesoreria = MovimientoTesoreria(operacion, importe, fechaContable);
             var movFondo = MovimientoFondo(operacion, importe, fechaContable);
 
-            return _cdAsientos.Contabilizar(
+            int idAsiento = _cdAsientos.Contabilizar(
                 asiento, lineas,
                 movTesoreria != null ? new List<TreasuryMovement> { movTesoreria } : new(),
                 movFondo != null ? new List<FundMovement> { movFondo } : new(),
                 operacion, idUsuario, out mensaje);
+
+            // Lo que estaba reservado en el presupuesto deja de estarlo: desde ahora es
+            // gasto ejecutado y lo cuenta el seguimiento normal. Si no se liberara, el
+            // mismo importe aparecería dos veces y el disponible saldría más bajo de lo
+            // real. Va después de contabilizar porque solo entonces es ejecutado.
+            if (idAsiento > 0) _negocioCompromisos.LiberarPorOperacion(operacion.id);
+
+            return idAsiento;
         }
 
         /// <summary>

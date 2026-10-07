@@ -12,6 +12,7 @@ appsettings*.json
 *.pdf
 *.md
 *.sql
+*.png
 # data ignore
 *.csv
 *.xlsx

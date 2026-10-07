@@ -42,15 +42,18 @@ namespace CapaNegocio
             public decimal presupuestado { get; set; }
             public decimal ejecutado { get; set; }
 
+            /// <summary>Aprobado y aún sin contabilizar: reservado, ya no disponible.</summary>
+            public decimal comprometido { get; set; }
+
             /// <summary>Líneas que ya se han pasado de lo previsto.</summary>
             public int lineas_superadas { get; set; }
 
-            public decimal Disponible => presupuestado - ejecutado;
+            public decimal Disponible => presupuestado - ejecutado - comprometido;
 
             public decimal PorcentajeConsumido =>
-                presupuestado == 0 ? 0 : Math.Round(ejecutado / presupuestado * 100, 1);
+                presupuestado == 0 ? 0 : Math.Round((ejecutado + comprometido) / presupuestado * 100, 1);
 
-            public bool Superado => ejecutado > presupuestado;
+            public bool Superado => (ejecutado + comprometido) > presupuestado;
         }
 
         /// <summary>Todo lo que pinta el panel.</summary>
@@ -78,6 +81,12 @@ namespace CapaNegocio
 
             /// <summary>Las cuentas de gasto con más peso.</summary>
             public List<CD_Informes.SaldoCuentaDTO> GastosPorCuenta { get; set; } = new();
+
+            /// <summary>Los doce meses del ejercicio, para el gráfico de evolución.</summary>
+            public List<CD_Panel.MesDTO> Meses { get; set; } = new();
+
+            /// <summary>Si hay algo que dibujar: un gráfico de doce ceros no dice nada.</summary>
+            public bool HayEvolucion => Meses.Any(m => m.ingresos != 0 || m.gastos != 0);
 
             // ---- Dónde está el dinero ----
             public List<CD_Panel.SaldoCajaDTO> Cajas { get; set; } = new();
@@ -149,6 +158,8 @@ namespace CapaNegocio
             panel.GastosPorCuenta = resultados.Gastos.Cuentas
                 .OrderByDescending(c => c.saldo).Take(6).ToList();
 
+            panel.Meses = _cdPanel.EvolucionMensual(ejercicio.start_date, ejercicio.end_date, sedeID);
+
             var pendiente = _cdPanel.SinContabilizar(ejercicio.id);
             panel.OperacionesSinContabilizar = pendiente.cuantas;
             panel.ImporteSinContabilizar = pendiente.importe;
@@ -181,6 +192,7 @@ namespace CapaNegocio
                 nombre = presupuesto.name,
                 presupuestado = lineas.Sum(l => l.presupuestado),
                 ejecutado = lineas.Sum(l => l.ejecutado),
+                comprometido = lineas.Sum(l => l.comprometido),
                 lineas_superadas = lineas.Count(l => l.Superado)
             };
         }

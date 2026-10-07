@@ -27,6 +27,10 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources")
 builder.Services.AddScoped<CD_Usuarios>();
 builder.Services.AddScoped<CN_Usuarios>();
 
+// Inscripciones al webinar de presentación (página pública, sin sesión)
+builder.Services.AddScoped<CD_Webinar>();
+builder.Services.AddScoped<CN_Webinar>();
+
 builder.Services.AddScoped<CD_Miembros>();
 builder.Services.AddScoped<CN_Miembros>();
 builder.Services.AddScoped<CD_Zona>();
@@ -159,6 +163,32 @@ builder.Services.AddScoped<CN_PlantillasPlan>();
 // Circuito de aprobación de operaciones (opcional: no existe hasta que se crea)
 builder.Services.AddScoped<CD_Aprobaciones>();
 builder.Services.AddScoped<CN_Aprobaciones>();
+// Proyectos y actividades: las dos dimensiones que faltaban
+builder.Services.AddScoped<CD_ProyectosActividades>();
+builder.Services.AddScoped<CN_ProyectosActividades>();
+// Justificantes adjuntos. El almacén es Singleton porque solo resuelve rutas:
+// no guarda estado de la petición y leer la configuración una vez basta.
+builder.Services.AddScoped<CD_Documentos>();
+builder.Services.AddScoped<CN_Documentos>();
+builder.Services.AddSingleton<CASTIglesias.Services.AlmacenDocumentos>();
+// Anti-duplicado: evita que un doble clic cree dos veces el mismo gasto
+builder.Services.AddScoped<CD_Idempotencia>();
+// Arqueos de caja: contar el efectivo y justificar la diferencia
+builder.Services.AddScoped<CD_Arqueos>();
+builder.Services.AddScoped<CN_Arqueos>();
+// Facturas pendientes y pagos: gastar y pagar son dos momentos distintos
+builder.Services.AddScoped<CD_Pagos>();
+builder.Services.AddScoped<CN_Pagos>();
+// Compromisos: lo aprobado y aún no gastado deja de estar disponible
+builder.Services.AddScoped<CD_Compromisos>();
+builder.Services.AddScoped<CN_Compromisos>();
+// Conciliación bancaria: importar el extracto (Norma 43 o CSV) y cruzarlo
+builder.Services.AddScoped<CD_Conciliacion>();
+builder.Services.AddScoped<CN_Conciliacion>();
+// Reparto de una operación entre varios fondos o conceptos
+builder.Services.AddScoped<CD_RepartoOperacion>();
+// Bandeja de salida de eventos, para futuras integraciones
+builder.Services.AddScoped<CD_Outbox>();
 
 // Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
 // y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.

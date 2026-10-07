@@ -16,16 +16,37 @@ namespace CASTIglesias.Controllers
     public class FinanzasAprobacionesController : AreaFinancieraController
     {
         private readonly CN_Aprobaciones _negocioAprobaciones;
-        private readonly CN_Usuarios _negocioUsuarios;
 
         public FinanzasAprobacionesController(CN_Sedes negocioSedes, CN_Permisos negocioPermisos,
                                               CN_Plataforma negocioPlataforma,
-                                              CN_Aprobaciones negocioAprobaciones,
-                                              CN_Usuarios negocioUsuarios)
+                                              CN_Aprobaciones negocioAprobaciones)
             : base(negocioSedes, negocioPermisos, negocioPlataforma)
         {
             _negocioAprobaciones = negocioAprobaciones;
-            _negocioUsuarios = negocioUsuarios;
+        }
+
+        /// <summary>
+        /// Si el usuario de la sesión puede aprobar en el circuito activo.
+        /// </summary>
+        /// <remarks>
+        /// El rol se lee de los CLAIMS, no de la tabla de usuarios, y eso importa: esa
+        /// tabla va filtrada por iglesia, así que a un administrador de plataforma (que
+        /// tiene su fila en la iglesia interna de Congrega) no se le encontraba al
+        /// trabajar sobre otra iglesia y se le denegaba aprobar sin motivo.
+        ///
+        /// AdminGlobal y el administrador de plataforma aprueban siempre: si no, una
+        /// iglesia podría dejarse sin nadie capaz de aprobar al configurar como
+        /// aprobador un rol que no tiene ningún usuario, y las operaciones pendientes
+        /// se quedarían atascadas, que es justo lo que este circuito debía evitar.
+        /// </remarks>
+        private bool PuedeAprobar()
+        {
+            string? rolAprobador = _negocioAprobaciones.RolAprobador();
+            if (string.IsNullOrWhiteSpace(rolAprobador)) return false;
+
+            return SesionClaims.EsAdminPlataforma(User)
+                || User.IsInRole("AdminGlobal")
+                || User.IsInRole(rolAprobador);
         }
 
         public IActionResult Index()
@@ -37,9 +58,8 @@ namespace CASTIglesias.Controllers
 
             // Si este usuario puede decidir o solo mirar. La vista oculta los botones
             // en consecuencia; quien de verdad corta el paso es Decidir, más abajo.
-            string? rol = _negocioUsuarios.ObtenerRolDeUsuario(SesionClaims.ObtenerIdUsuario(User));
-            ViewBag.PuedeAprobar = _negocioAprobaciones.PuedeAprobar(rol);
-            ViewBag.MiRol = rol;
+            ViewBag.PuedeAprobar = PuedeAprobar();
+            ViewBag.RolAprobador = _negocioAprobaciones.RolAprobador();
 
             return View();
         }
@@ -92,8 +112,7 @@ namespace CASTIglesias.Controllers
 
             // El rol se comprueba AQUÍ y no solo en la vista: ocultar un botón no
             // impide llamar a la acción por AJAX.
-            string? rol = _negocioUsuarios.ObtenerRolDeUsuario(idUsuario);
-            if (!_negocioAprobaciones.PuedeAprobar(rol))
+            if (!PuedeAprobar())
                 return Json(new { resultado = false, mensaje = "No tienes permiso para aprobar operaciones." });
 
             bool correcto = _negocioAprobaciones.Decidir(id, idUsuario, aprobar, comentarios,

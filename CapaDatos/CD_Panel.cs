@@ -139,6 +139,76 @@ namespace CapaDatos
                     }).ToList();
         }
 
+        /// <summary>Un mes del ejercicio con lo que entró y lo que salió.</summary>
+        public class MesDTO
+        {
+            public int mes { get; set; }
+            public decimal ingresos { get; set; }
+            public decimal gastos { get; set; }
+            public decimal Resultado => ingresos - gastos;
+        }
+
+        /// <summary>
+        /// Ingresos y gastos contabilizados mes a mes, para el gráfico del panel.
+        /// </summary>
+        /// <remarks>
+        /// Se mira el TIPO de la cuenta, no su código: igual que el resto del módulo,
+        /// aquí no hay ninguna cuenta contable escrita, así que esto funciona con
+        /// cualquier plan de cuentas.
+        ///
+        /// Los signos: una cuenta de ingreso es acreedora, así que suma por el Haber y
+        /// resta por el Debe; una de gasto, al revés. Las reversiones salen con el
+        /// signo contrario y se compensan solas, sin tener que excluir nada.
+        ///
+        /// Devuelve SIEMPRE los doce meses, incluso los que están a cero: un gráfico al
+        /// que le faltan meses miente sobre la forma del año.
+        /// </remarks>
+        public List<MesDTO> EvolucionMensual(DateTime desde, DateTime hasta, int sedeID)
+        {
+            var cuentas = _context.LedgerAccounts.AsNoTracking()
+                .Where(c => c.account_type == "income" || c.account_type == "expense")
+                .Select(c => new { c.id, c.account_type })
+                .ToList();
+
+            var ingreso = cuentas.Where(c => c.account_type == "income").Select(c => c.id).ToList();
+            var gasto = cuentas.Where(c => c.account_type == "expense").Select(c => c.id).ToList();
+
+            var lineas = _context.JournalEntryLines.AsNoTracking()
+                .Join(_context.JournalEntries.AsNoTracking(),
+                      l => l.journal_entry_id, a => a.id, (l, a) => new { l, a })
+                .Where(x => x.a.posting_date >= desde && x.a.posting_date <= hasta);
+
+            if (sedeID > 0 && sedeID != 1000)
+                lineas = lineas.Where(x => x.l.site_id == sedeID);
+
+            var porMes = lineas
+                .GroupBy(x => x.a.posting_date.Month)
+                .Select(g => new
+                {
+                    mes = g.Key,
+                    ingresos = g.Sum(x => ingreso.Contains(x.l.ledger_account_id)
+                        ? x.l.credit_amount - x.l.debit_amount : 0),
+                    gastos = g.Sum(x => gasto.Contains(x.l.ledger_account_id)
+                        ? x.l.debit_amount - x.l.credit_amount : 0)
+                })
+                .ToList()
+                .ToDictionary(x => x.mes, x => x);
+
+            var meses = new List<MesDTO>();
+            for (int m = 1; m <= 12; m++)
+            {
+                porMes.TryGetValue(m, out var fila);
+                meses.Add(new MesDTO
+                {
+                    mes = m,
+                    ingresos = fila?.ingresos ?? 0,
+                    gastos = fila?.gastos ?? 0
+                });
+            }
+
+            return meses;
+        }
+
         /// <summary>
         /// Cuántas operaciones del ejercicio se registraron y nunca se contabilizaron,
         /// y por cuánto importe.

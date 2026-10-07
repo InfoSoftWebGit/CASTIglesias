@@ -88,6 +88,9 @@
                     <th>@L["Ministerio"]</th>
                     <th class="text-end">@L["Presupuestado"]</th>
                     <th class="text-end">@L["Ejecutado"]</th>
+                    @* Aprobado y aún sin contabilizar: reservado, ya no disponible.
+                       Es la columna que evita aprobar dos gastos contra el mismo dinero. *@
+                    <th class="text-end">@L["Comprometido"]</th>
                     <th class="text-end">@L["Disponible"]</th>
                     <th class="text-end">@L["Consumido"]</th>
                     <th>@L["Acciones"]</th>
@@ -97,7 +100,7 @@
                 @if (Model.Lineas.Count == 0)
                 {
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-3">
+                        <td colspan="10" class="text-center text-muted py-3">
                             @L["Este presupuesto todavía no tiene líneas."]
                         </td>
                     </tr>
@@ -111,6 +114,9 @@
                         <td>@l.ministerio</td>
                         <td class="text-end">@l.presupuestado.ToString("N2") €</td>
                         <td class="text-end">@l.ejecutado.ToString("N2") €</td>
+                        <td class="text-end @(l.comprometido > 0 ? "text-warning-emphasis" : "text-muted")">
+                            @l.comprometido.ToString("N2") €
+                        </td>
                         <td class="text-end @(l.Disponible < 0 ? "text-danger fw-bold" : "")">
                             @l.Disponible.ToString("N2") €
                         </td>

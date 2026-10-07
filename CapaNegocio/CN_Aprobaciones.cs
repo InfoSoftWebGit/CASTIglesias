@@ -22,11 +22,16 @@ namespace CapaNegocio
     {
         private readonly CD_Aprobaciones _cdAprobaciones;
         private readonly CD_ConceptosFinancieros _cdConceptos;
+        private readonly CD_Operaciones _cdOperaciones;
+        private readonly CN_Compromisos _negocioCompromisos;
 
-        public CN_Aprobaciones(CD_Aprobaciones cdAprobaciones, CD_ConceptosFinancieros cdConceptos)
+        public CN_Aprobaciones(CD_Aprobaciones cdAprobaciones, CD_ConceptosFinancieros cdConceptos,
+                               CD_Operaciones cdOperaciones, CN_Compromisos negocioCompromisos)
         {
             _cdAprobaciones = cdAprobaciones;
             _cdConceptos = cdConceptos;
+            _cdOperaciones = cdOperaciones;
+            _negocioCompromisos = negocioCompromisos;
         }
 
         /// <summary>Roles que pueden figurar como aprobadores.</summary>
@@ -127,22 +132,53 @@ namespace CapaNegocio
             // se deniega: es el lado seguro.
             bool permitirAutoaprobacion = regla?.allow_self_approval ?? false;
 
-            return _cdAprobaciones.Decidir(idSolicitud, idUsuario, aprobar, comentarios,
-                                           permitirAutoaprobacion, out mensaje);
+            // Hay que saber de qué operación se trata ANTES de decidir: después, si se
+            // rechazó, la operación queda marcada y da igual, pero si se aprobó hay que
+            // reservar su importe.
+            var solicitud = _cdAprobaciones.Obtener(idSolicitud);
+
+            bool correcto = _cdAprobaciones.Decidir(idSolicitud, idUsuario, aprobar, comentarios,
+                                                     permitirAutoaprobacion, out mensaje);
+            if (!correcto || solicitud == null) return correcto;
+
+            // Al aprobar se reserva el importe en el presupuesto; al rechazar se libera
+            // lo que hubiera. Ninguna de las dos puede tumbar la decisión ya tomada.
+            var operacion = _cdOperaciones.Obtener(solicitud.entity_id);
+            if (operacion != null)
+            {
+                if (aprobar)
+                {
+                    if (_negocioCompromisos.ReservarPorOperacion(operacion))
+                        mensaje += " Su importe queda reservado en el presupuesto.";
+                }
+                else
+                {
+                    _negocioCompromisos.LiberarPorOperacion(operacion.id);
+                }
+            }
+
+            return true;
         }
 
-        /// <summary>Si un usuario con este rol puede aprobar en el circuito activo.</summary>
-        public bool PuedeAprobar(string? rolUsuario)
+        /// <summary>
+        /// Rol que el circuito activo designa como aprobador, o null si no hay circuito.
+        /// </summary>
+        /// <remarks>
+        /// Aquí se devuelve el rol y NO se decide si el usuario lo tiene, a propósito.
+        /// Quién es el usuario y qué rol lleva vive en la sesión, no en esta capa.
+        ///
+        /// Antes esto era un PuedeAprobar(rol) al que el controlador le pasaba el rol
+        /// leído de la tabla de usuarios, y estaba mal: esa tabla va filtrada por
+        /// iglesia, así que a un administrador de plataforma (cuya fila de usuario está
+        /// en la iglesia interna de Congrega) le devolvía null y se le denegaba aprobar
+        /// sin motivo. El rol se lee de los claims, como en el resto de la aplicación.
+        /// </remarks>
+        public string? RolAprobador()
         {
             var circuito = CircuitoVigente();
-            if (circuito == null || string.IsNullOrWhiteSpace(rolUsuario)) return false;
+            if (circuito == null) return null;
 
-            var regla = ReglaDe(circuito.id);
-            if (regla == null) return false;
-
-            // AdminGlobal aprueba siempre: si no, una iglesia podría dejarse sin nadie
-            // capaz de aprobar al configurar un rol que no tiene ningún usuario.
-            return rolUsuario == "AdminGlobal" || regla.approver_reference == rolUsuario;
+            return ReglaDe(circuito.id)?.approver_reference;
         }
     }
 }

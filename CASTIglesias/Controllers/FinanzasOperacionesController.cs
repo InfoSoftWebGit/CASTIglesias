@@ -26,6 +26,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_Ejercicios _negocioEjercicios;
         private readonly CN_Asientos _negocioAsientos;
         private readonly CN_Aprobaciones _negocioAprobaciones;
+        private readonly CN_Pagos _negocioPagos;
 
         public FinanzasOperacionesController(CN_Sedes negocioSedes, CN_Permisos negocioPermisos,
                                              CN_Plataforma negocioPlataforma,
@@ -34,9 +35,11 @@ namespace CASTIglesias.Controllers
                                              CN_Fondos negocioFondos, CN_Tesoreria negocioTesoreria,
                                              CN_Terceros negocioTerceros, CN_Ejercicios negocioEjercicios,
                                              CN_Asientos negocioAsientos,
-                                             CN_Aprobaciones negocioAprobaciones)
+                                             CN_Aprobaciones negocioAprobaciones,
+                                             CN_Pagos negocioPagos)
             : base(negocioSedes, negocioPermisos, negocioPlataforma)
         {
+            _negocioPagos = negocioPagos;
             _negocioOperaciones = negocioOperaciones;
             _negocioConceptos = negocioConceptos;
             _negocioFondos = negocioFondos;
@@ -113,8 +116,32 @@ namespace CASTIglesias.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasOperacionesCrearEditar))]
-        public JsonResult Guardar(FinancialTransaction operacion)
+        public JsonResult Guardar(FinancialTransaction operacion, string? claveUnica)
         {
+            // Anti-duplicado. Solo en el ALTA: al editar, repetir el guardado deja la
+            // operación igual, mientras que repetir un alta crea un gasto de más.
+            //
+            // El formulario genera la clave al abrirse. Si llega dos veces la misma
+            // (doble clic, o reintento tras un corte de red), la segunda devuelve lo que
+            // se respondió la primera sin volver a guardar nada.
+            bool esAlta = operacion.id == 0;
+            string nombreOperacion = "finanzas.operaciones.guardar";
+
+            if (esAlta && !string.IsNullOrWhiteSpace(claveUnica))
+            {
+                var reserva = _negocioOperaciones.ReservarClave(claveUnica, nombreOperacion,
+                                                                 operacion.total_amount.ToString());
+                if (!reserva.EsNueva)
+                {
+                    return Json(new
+                    {
+                        resultado = true,
+                        duplicadoEvitado = true,
+                        mensaje = "Esta operación ya se había guardado. No se ha duplicado."
+                    });
+                }
+            }
+
             int sedeID = ObtenerIdSedeUsuario();
 
             if (sedeID == CapaEntidad.Sedes.TodasLasSedes)
@@ -148,6 +175,17 @@ namespace CASTIglesias.Controllers
                 mensaje += " Queda pendiente de aprobación antes de poder contabilizarla.";
             else if (!string.IsNullOrWhiteSpace(mensajeAprobacion))
                 mensaje += " " + mensajeAprobacion;
+
+            // Gasto que no se paga ahora: nace además su factura pendiente. Igual que la
+            // aprobación, va después de guardar porque necesita el id de la operación.
+            if (esAlta && CN_Operaciones.QuedaPendienteDePago(operacion))
+            {
+                operacion.id = id;
+                int idFactura = _negocioPagos.CrearFacturaDeOperacion(operacion, out string mensajeFactura);
+                mensaje += idFactura > 0
+                    ? " Queda como factura pendiente de pago."
+                    : " " + mensajeFactura;
+            }
 
             return Json(new { resultado = true, id, mensaje, pendienteAprobacion = pendiente });
         }

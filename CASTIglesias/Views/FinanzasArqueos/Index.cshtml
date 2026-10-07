@@ -1,0 +1,416 @@
+@using CapaEntidad
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Arqueos de caja"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cajas = ViewBag.Cajas as List<TreasuryAccount> ?? new List<TreasuryAccount>();
+    var denominaciones = ViewBag.Denominaciones as decimal[] ?? new decimal[0];
+    var usuarios = ViewBag.Usuarios as List<UsuarioDTO_Permisos> ?? new List<UsuarioDTO_Permisos>();
+    int idUsuario = ViewBag.IdUsuario;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Arqueos de caja"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Contar el efectivo después del culto y dejar escrito cuánto había de verdad."]
+        <div class="mt-1">
+            <strong>@L["La diferencia no se ajusta en silencio."]</strong>
+            @L["Si falta o sobra dinero, hay que explicarlo antes de cerrar. Una caja que siempre cuadra a la primera es una caja en la que nadie ha contado nada."]
+        </div>
+    </div>
+</div>
+
+@if (cajas.Count == 0)
+{
+    <div class="card mb-4">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-cash-register fa-3x text-muted mb-3"></i>
+            <h5>@L["No hay ninguna caja de efectivo"]</h5>
+            <p class="text-muted">
+                @L["Solo se arquean las cajas de efectivo. Un banco no se cuenta a mano: se concilia con su extracto."]
+            </p>
+            <a href="@Url.Action("Index", "FinanzasTesoreria")" class="btn btn-primary">
+                @L["Ir a cajas y bancos"]
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-box-open me-1"></i> @L["Abrir un arqueo"]</div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-6">
+                    <label for="cajaAbrir" class="form-label">@L["Caja"]</label>
+                    <select id="cajaAbrir" class="form-select">
+                        @foreach (var c in cajas)
+                        {
+                            <option value="@c.id">@c.name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    <div class="small text-muted">@L["Saldo según la contabilidad"]</div>
+                    <div class="fs-5 fw-bold" id="saldoCaja">—</div>
+                </div>
+                <div class="col-sm-3">
+                    <button type="button" id="btnAbrir" class="btn btn-primary w-100">
+                        <i class="fas fa-play me-1"></i> @L["Abrir arqueo"]
+                    </button>
+                </div>
+            </div>
+            <div id="avisoAbierta" class="alert alert-warning mt-3 d-none mb-0"></div>
+        </div>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-list-check me-1"></i> @L["Arqueos"]</span>
+        <select id="filtroEstado" class="form-select form-select-sm" style="width:auto">
+            <option value="">@L["Todos"]</option>
+            <option value="open">@L["Abiertos"]</option>
+            <option value="pending_validation">@L["Pendientes de validar"]</option>
+            <option value="closed">@L["Cerrados"]</option>
+        </select>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaArqueos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Caja"]</th>
+                    <th>@L["Sede"]</th>
+                    <th>@L["Abierto"]</th>
+                    <th class="text-end">@L["Esperado"]</th>
+                    <th class="text-end">@L["Contado"]</th>
+                    <th class="text-end">@L["Diferencia"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro. El mensaje lo pone language.emptyTable. *@
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal del recuento -->
+<div class="modal fade" id="modalRecuento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="formRecuento" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["Recuento de efectivo"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="recId" />
+
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>@L["Billete o moneda"]</th>
+                                <th style="width:140px">@L["Cantidad"]</th>
+                                <th class="text-end">@L["Importe"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var d in denominaciones)
+                            {
+                                <tr>
+                                    <td>@d.ToString("N2") €</td>
+                                    <td>
+                                        <input type="number" min="0" step="1" value="0"
+                                               class="form-control form-control-sm cantidad"
+                                               data-denominacion="@d" />
+                                    </td>
+                                    <td class="text-end importe-linea">0,00</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold border-top">
+                                <td colspan="2">@L["Total contado"]</td>
+                                <td class="text-end" id="totalContado">0,00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-4">
+                        <div class="small text-muted">@L["Saldo esperado"]</div>
+                        <div class="fs-5 fw-bold" id="recEsperado">—</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="small text-muted">@L["Diferencia"]</div>
+                        <div class="fs-5 fw-bold" id="recDiferencia">—</div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="recValidador" class="form-label">@L["Segundo validador"]</label>
+                        <select id="recValidador" class="form-select">
+                            <option value="">@L["Sin validar por otra persona"]</option>
+                            @foreach (var u in usuarios.Where(u => u.ID_usuario != idUsuario)
+                                                        .OrderBy(u => u.nombre_usuario))
+                            {
+                                <option value="@u.ID_usuario">@u.nombre_usuario</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label for="recNotas" class="form-label" id="rotuloNotas">@L["Observaciones"]</label>
+                    <textarea id="recNotas" class="form-control" rows="2"
+                              placeholder="@L["Por ejemplo: falta de cambio al devolver en la mesa de libros."]"></textarea>
+                    <div class="form-text" id="avisoNotas"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Cerrar el arqueo"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinArqueos:    @Json.Serialize(L["Todavía no hay ningún arqueo."].Value),
+            error:         @Json.Serialize(L["Error"].Value),
+            si:            @Json.Serialize(L["Sí"].Value),
+            no:            @Json.Serialize(L["No"].Value),
+            contar:        @Json.Serialize(L["Contar y cerrar"].Value),
+            validar:       @Json.Serialize(L["Validar"].Value),
+            ver:           @Json.Serialize(L["Ver"].Value),
+            yaAbierta:     @Json.Serialize(L["Esta caja ya tiene un arqueo abierto. Ciérralo antes de abrir otro."].Value),
+            explicaDif:    @Json.Serialize(L["Hay diferencia: explícala antes de cerrar."].Value),
+            observOblig:   @Json.Serialize(L["Explicación de la diferencia (obligatoria)"].Value),
+            observacion:   @Json.Serialize(L["Observaciones"].Value),
+            confirmaValidar: @Json.Serialize(L["¿Dar por bueno este arqueo?"].Value),
+            cuadra:        @Json.Serialize(L["La caja cuadra"].Value)
+        });
+
+        const ESTADOS_ARQ = {
+            open:               { texto: @Json.Serialize(L["Abierto"].Value),              clase: "bg-primary" },
+            pending_validation: { texto: @Json.Serialize(L["Pendiente de validar"].Value), clase: "bg-warning text-dark" },
+            closed:             { texto: @Json.Serialize(L["Cerrado"].Value),              clase: "bg-success" }
+        };
+
+        let tablaArqueos;
+        let esperadoActual = 0;
+
+        function dinero(v) {
+            if (v === null || v === undefined) return '—';
+            return (v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function recalcular() {
+            let total = 0;
+            $('.cantidad').each(function () {
+                const d = parseFloat($(this).data('denominacion'));
+                const c = parseInt($(this).val(), 10) || 0;
+                const importe = d * c;
+                total += importe;
+                $(this).closest('tr').find('.importe-linea').text(dinero(importe));
+            });
+
+            $('#totalContado').text(dinero(total));
+            $('#recEsperado').text(dinero(esperadoActual));
+
+            const dif = total - esperadoActual;
+            // Se redondea a dos decimales antes de comparar: sumar muchos 0,01 en coma
+            // flotante deja restos como 0,000000001 que harían pedir una explicación
+            // por una diferencia que no existe.
+            const difRedondeada = Math.round(dif * 100) / 100;
+
+            $('#recDiferencia')
+                .text((difRedondeada > 0 ? '+' : '') + dinero(difRedondeada))
+                .removeClass('text-danger text-success')
+                .addClass(difRedondeada === 0 ? 'text-success' : 'text-danger');
+
+            if (difRedondeada === 0) {
+                $('#rotuloNotas').text(T.observacion);
+                $('#avisoNotas').text(T.cuadra).removeClass('text-danger');
+            } else {
+                $('#rotuloNotas').text(T.observOblig);
+                $('#avisoNotas').text(T.explicaDif).addClass('text-danger');
+            }
+        }
+
+        function cargarSaldoCaja() {
+            const idCaja = $('#cajaAbrir').val();
+            if (!idCaja) return;
+            $.get('@Url.Action("EstadoCaja", "FinanzasArqueos")', { idCaja: idCaja }, function (r) {
+                $('#saldoCaja').text(dinero(r.saldo) + ' €');
+                if (r.abierta) {
+                    $('#avisoAbierta').removeClass('d-none').text(T.yaAbierta);
+                    $('#btnAbrir').prop('disabled', true);
+                } else {
+                    $('#avisoAbierta').addClass('d-none');
+                    $('#btnAbrir').prop('disabled', false);
+                }
+            });
+        }
+
+        function abrirRecuento(id) {
+            $.get('@Url.Action("Detalle", "FinanzasArqueos")', { id: id }, function (r) {
+                if (!r.resultado) { Swal.fire(T.error, r.mensaje, 'error'); return; }
+
+                $('#recId').val(r.cabecera.id);
+                esperadoActual = r.esperado;
+
+                $('.cantidad').val(0);
+                // Se recupera lo ya contado, por si se guardó sin cerrar
+                $.each(r.lineas, function (i, l) {
+                    $('.cantidad[data-denominacion="' + l.denomination + '"]').val(l.quantity);
+                });
+
+                $('#recValidador').val('');
+                $('#recNotas').val(r.cabecera.notes || '');
+                recalcular();
+                new bootstrap.Modal(document.getElementById('modalRecuento')).show();
+            });
+        }
+
+        $(document).ready(function () {
+            cargarSaldoCaja();
+            $('#cajaAbrir').on('change', cargarSaldoCaja);
+            $(document).on('input', '.cantidad', recalcular);
+
+            tablaArqueos = $('#tablaArqueos').DataTable({
+                responsive: true,
+                order: [[2, 'desc']],
+                ajax: {
+                    url: '@Url.Action("Listar", "FinanzasArqueos")',
+                    data: function (d) { d.estado = $('#filtroEstado').val(); },
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'caja' },
+                    { data: 'sede', defaultContent: '' },
+                    {
+                        data: 'opened_at',
+                        render: function (d) { return d ? new Date(d).toLocaleString() : ''; }
+                    },
+                    { data: 'expected_balance', className: 'text-end', render: dinero },
+                    { data: 'counted_balance', className: 'text-end', render: dinero },
+                    {
+                        data: 'difference_amount', className: 'text-end',
+                        render: function (v, t) {
+                            if (v === null || v === undefined) return '—';
+                            if (t !== 'display') return v;
+                            const clase = v === 0 ? 'text-success' : 'text-danger fw-bold';
+                            return '<span class="' + clase + '">' + (v > 0 ? '+' : '') + dinero(v) + '</span>';
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_ARQ[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            if (fila.status === 'open') {
+                                return '<button class="btn btn-sm btn-primary btn-contar" data-id="' + fila.id + '">' +
+                                       '<i class="fas fa-calculator me-1"></i>' + T.contar + '</button>';
+                            }
+                            if (fila.status === 'pending_validation') {
+                                return '<button class="btn btn-sm btn-success btn-validar" data-id="' + fila.id + '">' +
+                                       '<i class="fas fa-check me-1"></i>' + T.validar + '</button>';
+                            }
+                            return '';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinArqueos
+                }
+            });
+
+            $('#filtroEstado').on('change', function () { tablaArqueos.ajax.reload(); });
+
+            $('#btnAbrir').on('click', function () {
+                $.post('@Url.Action("Abrir", "FinanzasArqueos")', { idCaja: $('#cajaAbrir').val() },
+                    function (r) {
+                        if (r.resultado) {
+                            tablaArqueos.ajax.reload(null, false);
+                            cargarSaldoCaja();
+                            abrirRecuento(r.id);
+                        } else {
+                            Swal.fire(T.error, r.mensaje, 'error');
+                        }
+                    });
+            });
+
+            $('#tablaArqueos tbody').on('click', '.btn-contar', function () {
+                abrirRecuento($(this).data('id'));
+            });
+
+            $('#tablaArqueos tbody').on('click', '.btn-validar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmaValidar, icon: 'question', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Validar", "FinanzasArqueos")', { id: id }, function (res) {
+                        if (res.resultado) {
+                            Swal.fire({ icon: 'success', title: res.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaArqueos.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, res.mensaje, 'error');
+                        }
+                    });
+                });
+            });
+
+            $('#formRecuento').on('submit', function (e) {
+                e.preventDefault();
+
+                const denominaciones = [], cantidades = [];
+                $('.cantidad').each(function () {
+                    const c = parseInt($(this).val(), 10) || 0;
+                    if (c > 0) {
+                        denominaciones.push($(this).data('denominacion'));
+                        cantidades.push(c);
+                    }
+                });
+
+                $.post('@Url.Action("Cerrar", "FinanzasArqueos")', {
+                    id: $('#recId').val(),
+                    denominaciones: denominaciones,
+                    cantidades: cantidades,
+                    idValidador: $('#recValidador').val() || null,
+                    notas: $('#recNotas').val()
+                }, function (r) {
+                    if (r.resultado) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalRecuento')).hide();
+                        Swal.fire({ icon: 'success', title: r.mensaje, timer: 2600, showConfirmButton: false });
+                        tablaArqueos.ajax.reload(null, false);
+                        cargarSaldoCaja();
+                    } else {
+                        Swal.fire(T.error, r.mensaje, 'error');
+                    }
+                });
+            });
+        });
+    </script>
+}

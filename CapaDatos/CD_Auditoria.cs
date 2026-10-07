@@ -69,7 +69,14 @@ namespace CapaDatos
 
             // Los nombres se resuelven en memoria sobre las filas ya traídas: son como
             // mucho 'tope' y así no hay un JOIN por cada consulta de la pantalla.
-            var usuarios = _context.Usuarios.AsNoTracking()
+            //
+            // IgnoreQueryFilters en los nombres a propósito: la tabla de usuarios va
+            // filtrada por iglesia y quien contabiliza puede ser el administrador de
+            // plataforma, cuya fila está en la iglesia interna de Congrega. Sin esto
+            // aparecería como "#1" en vez de con su nombre, y es precisamente de quien
+            // más interesa saber qué hizo. Solo se traduce a nombre un id que ya está
+            // en una fila de esta iglesia; nunca se listan usuarios de otras.
+            var usuarios = _context.Usuarios.AsNoTracking().IgnoreQueryFilters()
                 .ToDictionary(u => u.ID_usuario, u => u.nombre_usuario ?? "");
             var sedes = _context.Sedes.AsNoTracking()
                 .ToDictionary(s => s.ID, s => s.nombre_sede ?? "");

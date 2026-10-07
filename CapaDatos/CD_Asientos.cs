@@ -177,6 +177,22 @@ namespace CapaDatos
                                    "accounting.posted", "journal_entries", asiento.id, "post",
                                    $"{{\"numero\":\"{asiento.entry_number}\",\"origen\":\"{asiento.source_type}\",\"origen_id\":{asiento.source_id?.ToString() ?? "null"}}}");
 
+                // Evento para futuras integraciones. Se escribe DENTRO de esta misma
+                // transacción a propósito: así o se guardan el asiento y el aviso, o no
+                // se guarda ninguno de los dos. Ver CD_Outbox.
+                _context.OutboxMessages.Add(new OutboxMessage
+                {
+                    ID_iglesia = asiento.ID_iglesia,
+                    event_type = "FinancialTransactionPosted",
+                    aggregate_type = "journal_entries",
+                    aggregate_id = asiento.id,
+                    payload_json = $"{{\"numero\":\"{asiento.entry_number}\"," +
+                                   $"\"fecha\":\"{asiento.posting_date:yyyy-MM-dd}\"," +
+                                   $"\"operacion\":{operacion?.id.ToString() ?? "null"}}}",
+                    occurred_at = DateTime.UtcNow,
+                    attempts = 0
+                });
+
                 _context.SaveChanges();
                 transaccion.Commit();
 
@@ -458,8 +474,13 @@ namespace CapaDatos
         /// con dos asientos número 1. Bloquear antes la fila del ejercicio serializa
         /// esa ventana. Es un cerrojo corto y solo entre asientos del mismo ejercicio,
         /// que es justo lo que pide numerar sin huecos.
+        ///
+        /// Es público porque los pagos de facturas también generan asiento y tienen que
+        /// numerarlo DENTRO de su propia transacción, junto con el saldo de la factura.
+        /// Llamarlo desde fuera de una transacción abierta no rompe nada hoy, pero
+        /// pierde la protección contra dos usuarios simultáneos: no se haga.
         /// </remarks>
-        private string SiguienteNumeroAsiento(int idIglesia, int idEjercicio)
+        public string SiguienteNumeroAsiento(int idIglesia, int idEjercicio)
         {
             _context.Database.ExecuteSqlRaw(
                 "SELECT id FROM fiscal_years WHERE id = {0} FOR UPDATE", idEjercicio);
@@ -701,6 +722,34 @@ namespace CapaDatos
                 occurred_at = DateTime.UtcNow,
                 metadata_json = metadatos
             });
+        }
+
+        /// <summary>
+        /// Registra un hecho auditable y lo guarda en el acto.
+        /// </summary>
+        /// <remarks>
+        /// Para quien NO está dentro de una transacción: una descarga de documento, una
+        /// consulta de datos de donantes. RegistrarAuditoria por sí sola no guarda,
+        /// porque está pensada para ir dentro de la transacción del hecho que registra;
+        /// llamarla suelta dejaría el rastro sin escribir y nadie se enteraría.
+        /// </remarks>
+        public void RegistrarAuditoriaYGuardar(int idIglesia, int? sedeID, int? idUsuario,
+                                               string tipoEvento, string tipoEntidad, int? idEntidad,
+                                               string accion, string? metadatos = null)
+        {
+            try
+            {
+                RegistrarAuditoria(idIglesia, sedeID, idUsuario, tipoEvento, tipoEntidad,
+                                   idEntidad, accion, metadatos);
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                // Que falle la auditoría no puede impedir la acción que la generó: si
+                // no se pudiera descargar una factura porque no se pudo escribir el
+                // rastro, el remedio sería peor que la enfermedad. Se traga el error a
+                // propósito; lo que no se hace nunca es dejar de intentarlo.
+            }
         }
 
         // --------------------------------------------------------------------

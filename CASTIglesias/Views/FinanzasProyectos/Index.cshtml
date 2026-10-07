@@ -1,0 +1,357 @@
+@using CapaEntidad
+@{
+    ViewBag.Title = L["Proyectos y actividades"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+    var usuarios = ViewBag.Usuarios as List<UsuarioDTO_Permisos> ?? new List<UsuarioDTO_Permisos>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Proyectos y actividades"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Un proyecto tiene principio y fin: la reforma del local, la plantación de una iglesia. Una actividad se repite: el campamento de verano, la escuela dominical."]
+        <div class="mt-1">
+            <strong>@L["Ninguno sustituye al fondo."]</strong>
+            @L["El fondo dice de qué dinero sale; el proyecto dice en qué se está gastando. Una reforma puede pagarse de dos fondos a la vez y hay que poder verlo por las dos vías."]
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#panelProyectos" type="button" role="tab">
+            <i class="fas fa-diagram-project me-1"></i> @L["Proyectos"]
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#panelActividades" type="button" role="tab">
+            <i class="fas fa-calendar-week me-1"></i> @L["Actividades"]
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="panelProyectos" role="tabpanel">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-diagram-project me-1"></i> @L["Proyectos"]</span>
+                <button type="button" class="btn btn-success btn-sm" onclick="abrirModal(true, null)">
+                    <i class="fas fa-plus me-1"></i> @L["Nuevo proyecto"]
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table id="tablaProyectos" class="table table-bordered table-striped border-top" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>@L["Código"]</th>
+                            <th>@L["Nombre"]</th>
+                            <th>@L["Sede"]</th>
+                            <th>@L["Fechas"]</th>
+                            <th class="text-end">@L["Ingresado"]</th>
+                            <th class="text-end">@L["Gastado"]</th>
+                            <th>@L["Estado"]</th>
+                            <th>@L["Acciones"]</th>
+                        </tr>
+                    </thead>
+                    @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese
+                       colspan como un registro. El mensaje lo pone language.emptyTable. *@
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="panelActividades" role="tabpanel">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-calendar-week me-1"></i> @L["Actividades"]</span>
+                <button type="button" class="btn btn-success btn-sm" onclick="abrirModal(false, null)">
+                    <i class="fas fa-plus me-1"></i> @L["Nueva actividad"]
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table id="tablaActividades" class="table table-bordered table-striped border-top" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>@L["Código"]</th>
+                            <th>@L["Nombre"]</th>
+                            <th>@L["Sede"]</th>
+                            <th>@L["Fechas"]</th>
+                            <th class="text-end">@L["Ingresado"]</th>
+                            <th class="text-end">@L["Gastado"]</th>
+                            <th>@L["Estado"]</th>
+                            <th>@L["Acciones"]</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal común a los dos: mismos campos -->
+<div class="modal fade" id="modalDimension" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formDimension" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModal"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="dimId" />
+                <input type="hidden" id="dimEsProyecto" />
+
+                <div class="row">
+                    <div class="col-4 mb-3">
+                        <label for="dimCodigo" class="form-label">@L["Código"] *</label>
+                        <input type="text" id="dimCodigo" class="form-control" maxlength="20" required />
+                    </div>
+                    <div class="col-8 mb-3">
+                        <label for="dimNombre" class="form-label">@L["Nombre"] *</label>
+                        <input type="text" id="dimNombre" class="form-control" maxlength="150" required />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="dimSede" class="form-label">@L["Sede"]</label>
+                        <select id="dimSede" class="form-select">
+                            <option value="">@L["De toda la iglesia"]</option>
+                            @foreach (var s in sedes.Where(s => s.ID != Sedes.TodasLasSedes))
+                            {
+                                <option value="@s.ID">@s.nombre_sede</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="dimResponsable" class="form-label">@L["Responsable"]</label>
+                        <select id="dimResponsable" class="form-select">
+                            <option value="">@L["Sin asignar"]</option>
+                            @foreach (var u in usuarios.OrderBy(u => u.nombre_usuario))
+                            {
+                                <option value="@u.ID_usuario">@u.nombre_usuario</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="dimInicio" class="form-label">@L["Inicio"]</label>
+                        <input type="date" id="dimInicio" class="form-control" />
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="dimFin" class="form-label">@L["Fin"]</label>
+                        <input type="date" id="dimFin" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="dimEstado" class="form-label">@L["Estado"]</label>
+                    <select id="dimEstado" class="form-select">
+                        <option value="active">@L["Activo"]</option>
+                        <option value="closed">@L["Cerrado"]</option>
+                    </select>
+                    <div class="form-text">
+                        @L["Lo que ya tiene movimientos no se borra: se cierra. Así los informes de años anteriores siguen pudiendo explicarse."]
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Guardar"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinProyectos:    @Json.Serialize(L["Todavía no hay ningún proyecto."].Value),
+            sinActividades:  @Json.Serialize(L["Todavía no hay ninguna actividad."].Value),
+            nuevoProyecto:   @Json.Serialize(L["Nuevo proyecto"].Value),
+            editarProyecto:  @Json.Serialize(L["Editar proyecto"].Value),
+            nuevaActividad:  @Json.Serialize(L["Nueva actividad"].Value),
+            editarActividad: @Json.Serialize(L["Editar actividad"].Value),
+            editar:          @Json.Serialize(L["Editar"].Value),
+            eliminar:        @Json.Serialize(L["Eliminar"].Value),
+            confirmarBorrar: @Json.Serialize(L["¿Eliminar este registro?"].Value),
+            error:           @Json.Serialize(L["Error"].Value),
+            si:              @Json.Serialize(L["Sí"].Value),
+            no:              @Json.Serialize(L["No"].Value),
+            tiene:           @Json.Serialize(L["Tiene movimientos"].Value),
+            todaIglesia:     @Json.Serialize(L["De toda la iglesia"].Value)
+        });
+
+        const ESTADOS_DIM = {
+            active: { texto: @Json.Serialize(L["Activo"].Value),  clase: "bg-success" },
+            closed: { texto: @Json.Serialize(L["Cerrado"].Value), clase: "bg-secondary" }
+        };
+
+        let tablaProyectos, tablaActividades;
+
+        function dinero(v) {
+            return (v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function fechas(fila) {
+            function corta(f) { return f ? new Date(f).toLocaleDateString() : ''; }
+            const i = corta(fila.start_date), f = corta(fila.end_date);
+            if (!i && !f) return '<span class="text-muted">—</span>';
+            return (i || '…') + ' – ' + (f || '…');
+        }
+
+        function columnas(esProyecto) {
+            return [
+                { data: 'code', render: function (v) { return '<code>' + (v || '') + '</code>'; } },
+                { data: 'name' },
+                {
+                    data: 'sede',
+                    render: function (v) {
+                        return v || '<span class="text-muted small">' + T.todaIglesia + '</span>';
+                    }
+                },
+                { data: null, orderable: false, render: fechas },
+                { data: 'ingresado', className: 'text-end', render: dinero },
+                { data: 'gastado', className: 'text-end', render: dinero },
+                {
+                    data: 'status',
+                    render: function (v) {
+                        const e = ESTADOS_DIM[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                        return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                    }
+                },
+                {
+                    data: null, orderable: false, className: 'text-center',
+                    render: function (fila) {
+                        // Lo que ya tiene movimientos no ofrece botón de borrar: el
+                        // servidor lo impediría igual, pero es mejor no ofrecer algo
+                        // que va a fallar.
+                        let html = '<div class="d-flex justify-content-center gap-1">' +
+                            '<button class="btn btn-sm btn-warning btn-editar" title="' + T.editar + '"><i class="fas fa-pen"></i></button>';
+                        if (!fila.tiene_movimientos) {
+                            html += '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>';
+                        } else {
+                            html += '<span class="badge bg-light text-dark" title="' + T.tiene + '"><i class="fas fa-lock"></i></span>';
+                        }
+                        return html + '</div>';
+                    }
+                }
+            ];
+        }
+
+        function idiomaTabla(vacio) {
+            return {
+                url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                emptyTable: vacio
+            };
+        }
+
+        function abrirModal(esProyecto, fila) {
+            $('#dimEsProyecto').val(esProyecto ? '1' : '0');
+            $('#tituloModal').text(
+                esProyecto ? (fila ? T.editarProyecto : T.nuevoProyecto)
+                           : (fila ? T.editarActividad : T.nuevaActividad));
+            $('#dimId').val(fila ? fila.id : '');
+            $('#dimCodigo').val(fila ? fila.code : '');
+            $('#dimNombre').val(fila ? fila.name : '');
+            $('#dimSede').val(fila && fila.site_id ? fila.site_id : '');
+            $('#dimResponsable').val(fila && fila.responsible_user_id ? fila.responsible_user_id : '');
+            // El input date quiere aaaa-mm-dd; la fecha llega en ISO completo
+            $('#dimInicio').val(fila && fila.start_date ? fila.start_date.substring(0, 10) : '');
+            $('#dimFin').val(fila && fila.end_date ? fila.end_date.substring(0, 10) : '');
+            $('#dimEstado').val(fila ? (fila.status || 'active') : 'active');
+            new bootstrap.Modal(document.getElementById('modalDimension')).show();
+        }
+
+        $(document).ready(function () {
+            tablaProyectos = $('#tablaProyectos').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("ListarProyectos", "FinanzasProyectos")', dataSrc: 'data' },
+                columns: columnas(true),
+                language: idiomaTabla(T.sinProyectos)
+            });
+
+            tablaActividades = $('#tablaActividades').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("ListarActividades", "FinanzasProyectos")', dataSrc: 'data' },
+                columns: columnas(false),
+                language: idiomaTabla(T.sinActividades)
+            });
+
+            // DataTables no recalcula el ancho de una tabla que estaba oculta en otra
+            // pestaña; sin esto las columnas salen amontonadas al cambiar de pestaña.
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
+                tablaProyectos.columns.adjust();
+                tablaActividades.columns.adjust();
+            });
+
+            $('#tablaProyectos tbody').on('click', '.btn-editar', function () {
+                abrirModal(true, tablaProyectos.row($(this).closest('tr')).data());
+            });
+            $('#tablaActividades tbody').on('click', '.btn-editar', function () {
+                abrirModal(false, tablaActividades.row($(this).closest('tr')).data());
+            });
+
+            $('#formDimension').on('submit', function (e) {
+                e.preventDefault();
+                const esProyecto = $('#dimEsProyecto').val() === '1';
+                const datos = {
+                    id: $('#dimId').val() || 0,
+                    code: $('#dimCodigo').val(),
+                    name: $('#dimNombre').val(),
+                    site_id: $('#dimSede').val() || null,
+                    responsible_user_id: $('#dimResponsable').val() || null,
+                    start_date: $('#dimInicio').val() || null,
+                    end_date: $('#dimFin').val() || null,
+                    status: $('#dimEstado').val()
+                };
+                const url = esProyecto
+                    ? '@Url.Action("GuardarProyecto", "FinanzasProyectos")'
+                    : '@Url.Action("GuardarActividad", "FinanzasProyectos")';
+
+                $.post(url, datos, function (r) {
+                    if (r.resultado) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalDimension')).hide();
+                        Swal.fire({ icon: 'success', title: r.mensaje, timer: 1600, showConfirmButton: false });
+                        (esProyecto ? tablaProyectos : tablaActividades).ajax.reload(null, false);
+                    } else {
+                        Swal.fire(T.error, r.mensaje, 'error');
+                    }
+                });
+            });
+
+            $('#tablaProyectos tbody, #tablaActividades tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                const esProyecto = $(this).closest('table').attr('id') === 'tablaProyectos';
+                Swal.fire({
+                    title: T.confirmarBorrar, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasProyectos")',
+                        { id: id, esProyecto: esProyecto }, function (res) {
+                            if (res.resultado) {
+                                Swal.fire({ icon: 'success', title: res.mensaje, timer: 1600, showConfirmButton: false });
+                                (esProyecto ? tablaProyectos : tablaActividades).ajax.reload(null, false);
+                            } else {
+                                Swal.fire(T.error, res.mensaje, 'error');
+                            }
+                        });
+                });
+            });
+        });
+    </script>
+}

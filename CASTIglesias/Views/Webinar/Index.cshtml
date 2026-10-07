@@ -1,0 +1,780 @@
+@using CapaNegocio
+@{
+    Layout = null;
+
+    // Etiquetas de cada sesión. Se escriben como texto traducible en lugar de
+    // formatear la fecha con la cultura activa porque "viernes 23 de octubre"
+    // necesita un orden y preposiciones distintos en inglés, y el formateador
+    // no los cambia. El orden coincide con CN_Webinar.Sesiones: ese índice es
+    // lo que viaja al servidor.
+    var etiquetasSesion = new[]
+    {
+        L["Viernes 23 de octubre"],
+        L["Sábado 24 de octubre"]
+    };
+
+    // Denominaciones agrupadas, con las más frecuentes en España primero.
+    // El orden del primer grupo sale del número real de lugares de culto por
+    // afinidad del directorio de FEREDE, no de una impresión: así la mayoría
+    // encuentra la suya sin desplegar la lista entera.
+    //
+    // Los nombres NO se traducen: son nombres propios de entidades españolas y
+    // traducirlos impediría reconocerlas. Además, el valor que se guarda en la
+    // base de datos es este mismo texto, así que debe ser igual en los dos
+    // idiomas para poder agrupar las inscripciones después.
+    var denominaciones = new (string Grupo, string[] Nombres)[]
+    {
+        (L["Más frecuentes en España"].Value, new[]
+        {
+            "Iglesia Evangélica Filadelfia",
+            "Asambleas de Dios (FADE)",
+            "Unión Evangélica Bautista de España (UEBE)",
+            "Asambleas de Hermanos",
+            "Iglesia Adventista del Séptimo Día",
+            "Federación de Iglesias Evangélicas Independientes de España (FIEIDE)",
+            "Iglesia Cuerpo de Cristo",
+            "Iglesia Evangélica Española (IEE)",
+            "Federación de Iglesias de Dios de España (FIDE)",
+            "Iglesia Española Reformada Episcopal (IERE)"
+        }),
+        (L["Pentecostales y carismáticas"].Value, new[]
+        {
+            "Federación de Iglesias de Betania (FIBE)",
+            "Federación de Iglesias Apostólicas Pentecostales de España (FIAPE)",
+            "Federación de Iglesias Evangélicas Pentecostales de España (FIEPE)",
+            "Iglesia del Evangelio Cuadrangular",
+            "Iglesia de Dios Pentecostal M.I.",
+            "Iglesia Pentecostal Unida",
+            "Iglesia Elim",
+            "Iglesia Apostólica",
+            "Iglesia Vineyard",
+            "Centro Cristiano Internacional",
+            "Iglesia pentecostal independiente",
+            "Iglesia carismática independiente"
+        }),
+        (L["Protestantes históricas"].Value, new[]
+        {
+            "Iglesia Presbiteriana / Reformada",
+            "Iglesia Metodista",
+            "Iglesia Luterana",
+            "Comunión Anglicana",
+            "Iglesia Menonita / Hermanos en Cristo",
+            "Iglesia del Nazareno",
+            "Ejército de Salvación",
+            "Iglesias de Cristo",
+            "Alianza Cristiana y Misionera"
+        }),
+        (L["Otras evangélicas"].Value, new[]
+        {
+            "Iglesias Libres",
+            "Iglesias de Buenas Noticias",
+            "Iglesia Biblia Abierta",
+            "Misión Cristiana Evangélica",
+            "Iglesia Bautista independiente",
+            "Iglesia interdenominacional",
+            "Independiente / No denominacional"
+        }),
+        (L["Otras confesiones"].Value, new[]
+        {
+            "Iglesia Católica",
+            "Iglesia Ortodoxa",
+            "Otra"
+        })
+    };
+}
+<!DOCTYPE html>
+@* Esta vista tampoco usa el layout, igual que la landing, así que declara su
+   propio lang y repite los estilos compartidos. *@
+<html lang="@IdiomasSoportados.Actual">
+<head>
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-T3W99HQS');</script>
+<!-- End Google Tag Manager -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@L["Webinar gratuito — Congrega CRM"]</title>
+    <meta name="description" content="@L["Sesión en directo de 2 horas para conocer Congrega CRM: demostración de la aplicación y turno de preguntas."]" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* Mismos tokens de color que la landing: esta página es la continuación
+           de esa, y cualquier desvío de tono se nota al pasar de una a otra. */
+        :root {
+            --primary:      #1E3A8A;
+            --primary-dark: #0D1B3D;
+            --accent:       #3B82F6;
+            --teal:         #00BFA5;
+            --amber:        #F59E0B;
+            --text:         #1F2937;
+            --text-light:   #6B7280;
+            --bg-light:     #F0F4FF;
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; color: var(--text); margin: 0; }
+
+        /* ── NAVBAR ── */
+        #mainNav {
+            background: rgba(13, 27, 61, 0.96);
+            backdrop-filter: blur(12px);
+            transition: padding 0.3s ease, box-shadow 0.3s ease;
+            padding: 14px 0;
+        }
+        #mainNav.scrolled {
+            padding: 8px 0;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.35rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-brand span { color: var(--teal); }
+        .nav-link {
+            font-weight: 500;
+            color: rgba(255,255,255,0.85) !important;
+            transition: color 0.2s;
+            padding: 6px 14px !important;
+        }
+        .nav-link:hover { color: var(--teal) !important; }
+        .nav-link.activo { color: var(--teal) !important; font-weight: 600; }
+        .btn-nav-login {
+            background: var(--teal);
+            color: white !important;
+            border-radius: 8px;
+            padding: 8px 22px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-nav-login:hover { background: #009e89; transform: translateY(-1px); }
+        .navbar-toggler {
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.25) !important;
+            border-radius: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .navbar-toggler:hover { background: rgba(255,255,255,0.10); }
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.45);
+            outline: none;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.95%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        @@media (max-width: 991.98px) {
+            #navbarMenu { padding-top: 10px; }
+            #navbarMenu .lang-switch { margin-top: 10px; }
+        }
+
+        /* ── Selector de idioma ── */
+        .lang-switch {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        .lang-switch a {
+            display: block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: rgba(255,255,255,0.72);
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .lang-switch a:hover { color: white; background: rgba(255,255,255,0.10); }
+        .lang-switch a.activo { background: var(--teal); color: white; }
+
+        /* ── HERO ──
+           Más bajo que el de la landing (no 100vh): aquí lo importante es que el
+           formulario quede al alcance de un gesto, no la primera impresión. */
+        .hero-webinar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, #1e50d8 100%);
+            padding: 140px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+        .deco-ring {
+            position: absolute; border-radius: 50%; pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .dot-grid {
+            position: absolute; pointer-events: none;
+            display: grid; grid-template-columns: repeat(9,1fr); gap: 13px;
+            opacity: 0.12;
+        }
+        .dot-grid span { width: 3px; height: 3px; background: white; border-radius: 50%; display: block; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(0,191,165,0.13); border: 1px solid rgba(0,191,165,0.35);
+            color: var(--teal); border-radius: 20px; padding: 6px 16px;
+            font-size: 0.83rem; font-weight: 600; margin-bottom: 1.4rem;
+        }
+        .hero-title {
+            font-size: 2.7rem; font-weight: 800; color: white;
+            line-height: 1.15; margin-bottom: 1.2rem;
+        }
+        .hero-title span { color: var(--teal); }
+        .hero-subtitle {
+            font-size: 1.05rem; color: rgba(255,255,255,0.78);
+            line-height: 1.7; margin-bottom: 2rem;
+        }
+
+        /* Datos clave del webinar sobre el hero */
+        .dato-webinar {
+            display: flex; align-items: flex-start; gap: 13px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.13);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 14px; padding: 16px 18px; height: 100%;
+        }
+        .dato-icono {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            background: rgba(0,191,165,0.18); color: var(--teal);
+            display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+        }
+        .dato-titulo { color: white; font-weight: 700; font-size: 0.93rem; }
+        .dato-texto  { color: rgba(255,255,255,0.62); font-size: 0.82rem; line-height: 1.5; margin-top: 2px; }
+
+        /* ── SECCIONES ── */
+        .section-badge {
+            display: inline-block;
+            background: rgba(30,58,138,0.08); color: var(--primary);
+            border-radius: 20px; padding: 4px 16px;
+            font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px;
+        }
+        .section-title    { font-size: 2rem; font-weight: 800; color: var(--text); }
+        .section-subtitle { color: var(--text-light); font-size: 1rem; max-width: 560px; line-height: 1.65; }
+
+        /* Bloques del guion del webinar */
+        .bloque-card {
+            background: white; border: 1.5px solid #E9ECF3; border-radius: 16px;
+            padding: 26px 24px; height: 100%;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.04);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .bloque-card:hover { transform: translateY(-3px); box-shadow: 0 14px 38px rgba(0,0,0,0.08); }
+        .bloque-icono {
+            width: 46px; height: 46px; border-radius: 12px;
+            background: rgba(30,58,138,0.07); color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; margin-bottom: 16px;
+        }
+        .bloque-titulo { font-weight: 700; font-size: 1.02rem; margin-bottom: 8px; }
+        .bloque-texto  { color: var(--text-light); font-size: 0.9rem; line-height: 1.65; margin: 0; }
+        .bloque-duracion {
+            display: inline-block; margin-top: 14px;
+            background: rgba(0,191,165,0.10); color: #00806e;
+            border-radius: 20px; padding: 3px 12px;
+            font-size: 0.76rem; font-weight: 700;
+        }
+
+        /* ── FORMULARIO ── */
+        .contact-card {
+            background: white; border-radius: 20px; padding: 40px;
+            box-shadow: 0 12px 44px rgba(0,0,0,0.07); border: 1.5px solid #E9ECF3;
+        }
+        .form-label { font-size: 0.88rem; font-weight: 600; }
+        .form-control, .form-select {
+            border-radius: 8px; border: 1.5px solid #DDE3EE;
+            padding: 10px 14px; font-size: 0.91rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.14);
+        }
+        .btn-contact {
+            background: var(--primary); color: white; border: none;
+            border-radius: 10px; padding: 13px 34px;
+            font-weight: 600; font-size: 0.96rem;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-contact:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-contact:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+
+        /* Tarjetas de fecha.
+           Son radios de verdad (no divs con onclick) para que funcionen con
+           teclado y lector de pantalla; el input se oculta y la etiqueta hace
+           de tarjeta. */
+        .sesion-opcion input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .sesion-opcion label {
+            display: block; cursor: pointer; width: 100%;
+            border: 1.5px solid #DDE3EE; border-radius: 14px;
+            padding: 18px 20px; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .sesion-opcion label:hover { border-color: var(--accent); }
+        .sesion-opcion input:focus-visible + label {
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.25);
+        }
+        .sesion-opcion input:checked + label {
+            border-color: var(--teal);
+            background: rgba(0,191,165,0.06);
+            box-shadow: 0 0 0 1.5px var(--teal);
+        }
+        .sesion-dia  { font-weight: 700; font-size: 1rem; color: var(--text); }
+        .sesion-hora { color: var(--text-light); font-size: 0.86rem; margin-top: 3px; }
+        .sesion-check { color: #DDE3EE; font-size: 1.15rem; }
+        .sesion-opcion input:checked + label .sesion-check { color: var(--teal); }
+
+        /* Aviso del enlace de Teams: es la duda inmediata de quien se inscribe
+           ("¿y cómo entro?"), así que va destacado junto al botón de envío. */
+        .aviso-teams {
+            background: var(--bg-light); border: 1.5px solid #D6E0FF;
+            border-radius: 14px; padding: 18px 20px;
+            display: flex; gap: 14px; align-items: flex-start;
+        }
+        .aviso-teams i { color: var(--primary); font-size: 1.15rem; margin-top: 2px; }
+        .aviso-teams-texto { font-size: 0.9rem; line-height: 1.6; color: var(--text); margin: 0; }
+
+        .nota-datos { font-size: 0.78rem; color: var(--text-light); line-height: 1.55; }
+
+        /* ── FOOTER ── */
+        .site-footer {
+            background: var(--primary-dark);
+            color: rgba(255,255,255,0.65); padding: 50px 0 22px;
+        }
+        .footer-brand-text { color: white; font-weight: 800; font-size: 1.2rem; }
+        .footer-brand-text span { color: var(--teal); }
+        .site-footer a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+        .site-footer a:hover { color: var(--teal); }
+        .footer-divider { border-color: rgba(255,255,255,0.1); margin: 28px 0 18px; }
+
+        @@media (max-width: 767.98px) {
+            .hero-title { font-size: 2rem; }
+            .hero-webinar { padding: 120px 0 60px; }
+            .contact-card { padding: 24px 18px; }
+            .section-title { font-size: 1.65rem; }
+        }
+    </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T3W99HQS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
+        </a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            @* Los enlaces de sección apuntan a la landing con ancla: desde aquí
+               no existen esos destinos en la página. *@
+            <ul class="navbar-nav mx-auto gap-1">
+                <li class="nav-item"><a class="nav-link" href="/#inicio">@L["Inicio"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="/#caracteristicas">@L["Características"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="/#precios">@L["Precios"]</a></li>
+                <li class="nav-item"><a class="nav-link activo" href="/Webinar">@L["Webinar"]</a></li>
+                <li class="nav-item"><a class="nav-link" href="/#contacto">@L["Contacto"]</a></li>
+            </ul>
+            <div class="lang-switch ms-lg-3" role="group" aria-label="@L["Idioma"]">
+                @foreach (var codigo in IdiomasSoportados.Codigos)
+                {
+                    <a href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = "/Webinar" })"
+                       class="@(codigo == IdiomasSoportados.Actual ? "activo" : "")"
+                       title="@IdiomasSoportados.Nombres[codigo]"
+                       hreflang="@codigo">@codigo.ToUpperInvariant()</a>
+                }
+            </div>
+            <a href="/Login" class="btn btn-nav-login ms-lg-3">
+                <i class="fas fa-sign-in-alt me-2"></i>@L["Iniciar sesión"]
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section class="hero-webinar">
+    <div class="deco-ring" style="width:700px;height:700px;top:-260px;right:-180px;"></div>
+    <div class="deco-ring" style="width:420px;height:420px;top:-80px;right:-40px;border-color:rgba(255,255,255,0.04);"></div>
+    <div class="deco-ring" style="width:320px;height:320px;bottom:-160px;left:-110px;"></div>
+    <div class="dot-grid" style="top:100px;right:14px;width:160px;">
+        @for (int i = 0; i < 45; i++)
+        {
+            <span></span>
+        }
+    </div>
+
+    <div class="container" style="position:relative;z-index:2;">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-9">
+                <div class="hero-badge">
+                    <i class="fas fa-video"></i>@L["Webinar gratuito · plazas limitadas"]
+                </div>
+                <h1 class="hero-title">
+                    @L["Conoce"] <span>Congrega CRM</span> @L["en directo"]
+                </h1>
+                <p class="hero-subtitle mx-auto" style="max-width:640px;">
+                    @L["Dos horas como máximo para ver la aplicación funcionando, entender cómo se gestiona una iglesia con ella y preguntar todo lo que necesites."]
+                </p>
+                <a href="#inscripcion" class="btn btn-nav-login" style="padding:13px 32px;">
+                    <i class="fas fa-user-plus me-2"></i>@L["Reservar mi plaza"]
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-5">
+            <div class="col-md-4">
+                <div class="dato-webinar">
+                    <div class="dato-icono"><i class="fas fa-calendar-day"></i></div>
+                    <div>
+                        <div class="dato-titulo">@L["Dos fechas a elegir"]</div>
+                        @* Frase completa en lugar de unir las dos etiquetas con
+                           un "o" traducible: una conjunción suelta es imposible
+                           de traducir bien sin ver el resto de la frase. *@
+                        <div class="dato-texto">@L["Viernes 23 o sábado 24 de octubre, a las 19:00h (hora de España)"]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="dato-webinar">
+                    <div class="dato-icono"><i class="far fa-clock"></i></div>
+                    <div>
+                        <div class="dato-titulo">@L["Duración máxima de 2 horas"]</div>
+                        <div class="dato-texto">@L["Demostración de la aplicación y, al final, turno de preguntas y respuestas."]</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="dato-webinar">
+                    <div class="dato-icono"><i class="fas fa-link"></i></div>
+                    <div>
+                        <div class="dato-titulo">@L["Online por Microsoft Teams"]</div>
+                        <div class="dato-texto">@L["Te enviaremos el enlace de la reunión al correo que indiques en el formulario."]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ QUÉ VEREMOS ═══════════════════ -->
+<section class="py-5" style="background:#fff;">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <div class="section-badge">@L["El webinar"]</div>
+            <h2 class="section-title mt-2">@L["Qué veremos en la sesión"]</h2>
+            <p class="section-subtitle mx-auto mt-3">
+                @L["La sesión dura dos horas como máximo y se divide en una parte de demostración y otra de preguntas."]
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="bloque-card">
+                    <div class="bloque-icono"><i class="fas fa-desktop"></i></div>
+                    <div class="bloque-titulo">@L["La aplicación en funcionamiento"]</div>
+                    <p class="bloque-texto">
+                        @L["Recorremos la aplicación con datos reales de ejemplo: congregantes, familias, zonas de discipulado, asistencia, calendarios y el área financiera."]
+                    </p>
+                    <span class="bloque-duracion">@L["Primera parte"]</span>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="bloque-card">
+                    <div class="bloque-icono"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <div class="bloque-titulo">@L["Cómo se usa el día a día"]</div>
+                    <p class="bloque-texto">
+                        @L["Explicamos módulo a módulo cómo trabaja una iglesia con Congrega: quién entra, qué ve cada responsable y cómo se organiza una iglesia con varias sedes."]
+                    </p>
+                    <span class="bloque-duracion">@L["Segunda parte"]</span>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="bloque-card">
+                    <div class="bloque-icono"><i class="fas fa-comments"></i></div>
+                    <div class="bloque-titulo">@L["Preguntas y respuestas"]</div>
+                    <p class="bloque-texto">
+                        @L["Al terminar la demostración abrimos un turno para responder en directo. Si ya tienes una pregunta, puedes dejarla escrita al inscribirte y la preparamos."]
+                    </p>
+                    <span class="bloque-duracion">@L["Tramo final"]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ INSCRIPCIÓN ═══════════════════ -->
+<section id="inscripcion" class="py-5" style="background:var(--bg-light);">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="text-center mb-4">
+                    <div class="section-badge">@L["Inscripción"]</div>
+                    <h2 class="section-title mt-2">@L["Reserva tu plaza"]</h2>
+                    <p class="section-subtitle mx-auto mt-3">
+                        @L["Rellena el formulario y recibirás un correo de confirmación al momento."]
+                    </p>
+                </div>
+
+                <div class="contact-card">
+                    <form id="frmWebinar" onsubmit="inscribirWebinar(event)" novalidate>
+                        @* Token antifalsificación: esta página no usa el layout
+                           común, así que no hereda el $.ajaxPrefilter que lo
+                           manda y hay que enviarlo a mano más abajo. *@
+                        @Html.AntiForgeryToken()
+
+                        @* Campo trampa para robots. Oculto con CSS y no con
+                           type="hidden" porque los rellenadores automáticos
+                           escriben en los campos visibles del DOM: si llega con
+                           algo, el servidor descarta el envío. *@
+                        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                            <label>@L["Web"]</label>
+                            <input type="text" id="wWeb" name="website" tabindex="-1" autocomplete="off" />
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wNombre">@L["Nombre"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wNombre" placeholder="@L["Tu nombre"]" autocomplete="given-name" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wApellido">@L["Apellido"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wApellido" placeholder="@L["Tu apellido"]" autocomplete="family-name" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wTelefono">@L["Teléfono"] <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="wTelefono" placeholder="+34 600 000 000" autocomplete="tel" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wEmail">@L["Correo electrónico"] <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="wEmail" placeholder="correo@ejemplo.com" autocomplete="email" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wIglesia">@L["Nombre de la iglesia"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="wIglesia" placeholder="@L["Iglesia..."]" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label" for="wDenominacion">@L["Denominación"]</label>
+                                <select class="form-select" id="wDenominacion">
+                                    <option value="">@L["Selecciona una denominación..."]</option>
+                                    @foreach (var grupo in denominaciones)
+                                    {
+                                        <optgroup label="@grupo.Grupo">
+                                            @foreach (var nombre in grupo.Nombres)
+                                            {
+                                                <option value="@nombre">@nombre</option>
+                                            }
+                                        </optgroup>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <label class="form-label d-block mb-2">
+                                    @L["Fecha y hora del webinar"] <span class="text-danger">*</span>
+                                </label>
+                                <div class="row g-3">
+                                    @for (int i = 0; i < CN_Webinar.Sesiones.Length; i++)
+                                    {
+                                        @* El value es el índice, no la fecha: el servidor
+                                           resuelve la fecha con CN_Webinar.SesionPorIndice,
+                                           así que nadie puede inscribirse a una fecha
+                                           inventada modificando el HTML. *@
+                                        <div class="col-sm-6 sesion-opcion">
+                                            <input type="radio" name="sesion" id="wSesion@(i)" value="@i" required />
+                                            <label for="wSesion@(i)">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <div class="sesion-dia">@etiquetasSesion[i]</div>
+                                                        <div class="sesion-hora">
+                                                            <i class="far fa-clock me-1"></i>@L["19:00h (hora de España)"]
+                                                        </div>
+                                                    </div>
+                                                    <i class="fas fa-circle-check sesion-check"></i>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <label class="form-label" for="wPregunta">@L["¿Tienes alguna pregunta de antemano?"]</label>
+                                <textarea class="form-control" id="wPregunta" rows="3" maxlength="1000"
+                                          placeholder="@L["Opcional. Si ya tienes una duda concreta, escríbela aquí y la preparamos para el turno de preguntas."]"></textarea>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="aviso-teams">
+                                    <i class="fas fa-circle-info"></i>
+                                    <p class="aviso-teams-texto">
+                                        @L["El webinar se hace por Microsoft Teams. Unos días antes de la sesión te enviaremos al correo que has indicado el enlace para unirte a la reunión. No necesitas tener Teams instalado: se puede entrar desde el navegador."]
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-2">
+                                <p class="nota-datos mb-0" style="max-width:420px;">
+                                    @L["Usaremos tus datos únicamente para gestionar tu asistencia al webinar y enviarte el enlace de la reunión."]
+                                </p>
+                                <button type="submit" class="btn btn-contact" id="btnInscribir">
+                                    <i class="fas fa-paper-plane me-2"></i>@L["Confirmar inscripción"]
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="footer-brand-text mb-2">
+                    <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
+                </div>
+                <p style="font-size:0.87rem;line-height:1.65;max-width:290px;">
+                    @L["Software de gestión integral diseñado para iglesias y comunidades de fe."]
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Producto"]</div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="/#caracteristicas">@L["Características"]</a>
+                    <a href="/#precios">@L["Precios"]</a>
+                    <a href="/#contacto">@L["Contacto"]</a>
+                    <a href="/Login">@L["Iniciar sesión"]</a>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Soporte"]</div>
+                <div style="font-size:0.87rem;">soporte@congrega.es</div>
+                <div style="font-size:0.87rem;margin-top:5px;">@L["Lun – Vie · 9:00 – 18:00"]</div>
+            </div>
+        </div>
+        <hr class="footer-divider" />
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
+             style="font-size:0.84rem;">
+            <span>@L["© 2025 Congrega CRM. Todos los derechos reservados."]</span>
+            <span>@L["Desarrollado con"] <i class="fas fa-heart" style="color:#ef4444;"></i> @L["para la iglesia"]</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    // Efecto de la navbar al bajar
+    window.addEventListener('scroll', function () {
+        document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Cerrar el menú móvil al pulsar un ancla de esta misma página
+    document.querySelectorAll('#navbarMenu a[href^="#"]').forEach(function (link) {
+        link.addEventListener('click', function () {
+            var collapse = document.getElementById('navbarMenu');
+            if (collapse.classList.contains('show')) {
+                bootstrap.Collapse.getOrCreateInstance(collapse).hide();
+            }
+        });
+    });
+
+    // Textos traducidos para los avisos. Esta vista no usa _Layout, así que
+    // window.T no existe: sin este bloque, los mensajes darían ReferenceError.
+    // Se serializan con Json.Serialize y no se interpolan directamente porque
+    // las comillas y los acentos romperían el script.
+    window.T = Object.assign(window.T || {}, {
+        mCamposRequeridos:  @Json.Serialize(L["Campos requeridos"].Value),
+        mCompletaObligatorios: @Json.Serialize(L["Por favor, completa todos los campos obligatorios."].Value),
+        mEligeFecha:        @Json.Serialize(L["Elige una de las dos fechas del webinar."].Value),
+        mInscripcionHecha:  @Json.Serialize(L["¡Inscripción confirmada!"].Value),
+        mRevisaCorreo:      @Json.Serialize(L["Te hemos enviado un correo de confirmación. Unos días antes del webinar recibirás el enlace de Teams en esa misma dirección."].Value),
+        mNoInscribir:       @Json.Serialize(L["No se pudo completar la inscripción."].Value),
+        mErrorConexion:     @Json.Serialize(L["Error de conexión"].Value),
+        mReintentar:        @Json.Serialize(L["No se pudo enviar. Inténtalo de nuevo."].Value)
+    });
+
+    function inscribirWebinar(e) {
+        e.preventDefault();
+
+        var campos = ['wNombre','wApellido','wTelefono','wEmail','wIglesia'];
+        for (var i = 0; i < campos.length; i++) {
+            if (!document.getElementById(campos[i]).value.trim()) {
+                Swal.fire({ icon: 'warning', title: T.mCamposRequeridos, text: T.mCompletaObligatorios, confirmButtonColor: '#1E3A8A' });
+                return;
+            }
+        }
+
+        var sesion = document.querySelector('input[name="sesion"]:checked');
+        if (!sesion) {
+            Swal.fire({ icon: 'warning', title: T.mCamposRequeridos, text: T.mEligeFecha, confirmButtonColor: '#1E3A8A' });
+            return;
+        }
+
+        var payload = {
+            nombre:       document.getElementById('wNombre').value.trim(),
+            apellido:     document.getElementById('wApellido').value.trim(),
+            telefono:     document.getElementById('wTelefono').value.trim(),
+            email:        document.getElementById('wEmail').value.trim(),
+            iglesia:      document.getElementById('wIglesia').value.trim(),
+            denominacion: document.getElementById('wDenominacion').value,
+            sesion:       parseInt(sesion.value, 10),
+            pregunta:     document.getElementById('wPregunta').value.trim(),
+            web:          document.getElementById('wWeb').value
+        };
+
+        // Se bloquea el botón durante el envío: el guardado dispara dos correos
+        // y tarda un segundo, tiempo suficiente para que alguien pulse dos veces.
+        var boton = document.getElementById('btnInscribir');
+        boton.disabled = true;
+
+        $.ajax({
+            url: '/Webinar/Inscribir',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+                'RequestVerificationToken':
+                    document.querySelector('#frmWebinar input[name="__RequestVerificationToken"]').value
+            },
+            data: JSON.stringify(payload),
+            success: function (res) {
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: T.mInscripcionHecha,
+                        text: res.mensaje ? res.mensaje : T.mRevisaCorreo,
+                        confirmButtonColor: '#1E3A8A'
+                    });
+                    document.getElementById('frmWebinar').reset();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.mensaje || T.mNoInscribir, confirmButtonColor: '#1E3A8A' });
+                }
+            },
+            error: function () {
+                Swal.fire({ icon: 'error', title: T.mErrorConexion, text: T.mReintentar, confirmButtonColor: '#1E3A8A' });
+            },
+            complete: function () {
+                boton.disabled = false;
+            }
+        });
+    }
+</script>
+</body>
+</html>

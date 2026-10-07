@@ -15,9 +15,110 @@
     decimal mayorGasto = Model.GastosPorCuenta.Count > 0 ? Model.GastosPorCuenta.Max(c => c.saldo) : 0m;
 }
 
-<ol class="breadcrumb mb-4 mt-4">
-    <li class="breadcrumb-item active">@L["Panel financiero"]</li>
-</ol>
+@*
+    Colores del panel.
+
+    Azul = dinero que entra, naranja = dinero que sale, en TODO el panel: tarjetas,
+    gráfico y barras por cuenta. Que sea siempre el mismo par es lo que permite leerlo
+    de un vistazo sin consultar la leyenda a cada rato.
+
+    No se usa el verde/rojo habitual de contabilidad a propósito, y no es estética:
+    ese par es el que peor distingue una persona con daltonismo (es el caso más común,
+    en torno a 1 de cada 12 hombres). Medido sobre este fondo, verde/rojo queda en 6,9
+    de separación y azul/naranja en 24,7, sobre un objetivo de 8.
+
+    El rojo se reserva para lo que de verdad va mal (déficit, caja en negativo, fondo
+    sobregirado), nunca para "gastos", que no son un problema sino lo normal.
+*@
+<style>
+    .panel-fin {
+        --entra: #2a78d6;
+        --sale: #eb6834;
+        --aviso: #c2410c;
+        --tinta-suave: #52514e;
+    }
+    /* Cabecera de la página */
+    .panel-fin-cabecera {
+        border-bottom: 3px solid #0b2545;
+        padding-bottom: .75rem;
+        margin-bottom: 1.5rem;
+    }
+    .panel-fin-cabecera h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -.02em;
+        color: #0b2545;
+        margin: 0;
+    }
+    .panel-fin-cabecera .etiqueta {
+        font-size: .75rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--tinta-suave);
+    }
+    /* Tarjetas de cifras: una franja de color a la izquierda, sin bordes gruesos */
+    .panel-fin .cifra {
+        border: 1px solid rgba(11,11,11,.10);
+        border-left: 4px solid var(--color, #adb5bd);
+        border-radius: .5rem;
+        background: #fff;
+        height: 100%;
+    }
+    .panel-fin .cifra .valor {
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: #0b2545;
+    }
+    .panel-fin .cifra .rotulo {
+        font-size: .72rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--tinta-suave);
+    }
+    .panel-fin .cifra .pie {
+        font-size: .78rem;
+        color: var(--tinta-suave);
+    }
+    /* Aviso: naranja sólido y letra blanca. El bg-warning-subtle de Bootstrap es
+       #fff3cd, que con texto blanco da un contraste de 1,11 y no se lee. */
+    .panel-fin .aviso-cabecera {
+        background: var(--aviso);
+        color: #fff;
+        font-weight: 600;
+    }
+    .panel-fin .aviso-cabecera .badge {
+        background: rgba(255,255,255,.22);
+        color: #fff;
+    }
+    /* Altura fija del lienzo: sin esto Chart.js crece sin parar al redibujar */
+    .panel-fin .lienzo-grafico { position: relative; height: 280px; }
+</style>
+
+<div class="panel-fin">
+
+<div class="panel-fin-cabecera d-flex justify-content-between align-items-end flex-wrap gap-2 mt-4">
+    <div>
+        <div class="etiqueta">@L["Área financiera"]</div>
+        <h1>@L["Panel financiero"]</h1>
+    </div>
+    <div class="text-end">
+        @if (Model.Ejercicio != null)
+        {
+            <div class="fw-semibold">
+                @L["Ejercicio"] @Model.Ejercicio.code
+                <span class="badge bg-success ms-1">@L["Abierto"]</span>
+            </div>
+            <div class="small text-muted">
+                @Model.Ejercicio.start_date.ToString("d", formato) — @Model.Ejercicio.end_date.ToString("d", formato)
+            </div>
+        }
+        else
+        {
+            <span class="badge bg-secondary">@L["Sin ejercicio abierto"]</span>
+        }
+    </div>
+</div>
 
 @* ------------------------------------------------------------------
    Puesta en marcha. Va primero porque sin esto no se puede contabilizar,
@@ -93,9 +194,15 @@
    ------------------------------------------------------------------ *@
 @if (Model.TieneAvisos)
 {
-    <div class="card mb-4 border-warning">
-        <div class="card-header bg-warning-subtle">
-            <i class="fas fa-triangle-exclamation me-1"></i> @L["Requiere tu atención"]
+    @* Cuántos avisos hay, para anunciarlo en la cabecera en vez de obligar a contarlos *@
+    var cuantosAvisos = (Model.OperacionesSinContabilizar > 0 ? 1 : 0)
+                      + Model.CajasEnNegativo.Count
+                      + Model.FondosEnNegativo.Count
+                      + ((Model.Presupuesto?.Superado ?? false) ? 1 : 0);
+    <div class="card mb-4" style="border-color:#c2410c;">
+        <div class="card-header aviso-cabecera d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-triangle-exclamation me-2"></i> @L["Requiere tu atención"]</span>
+            <span class="badge rounded-pill">@cuantosAvisos</span>
         </div>
         <div class="card-body">
             <ul class="mb-0">
@@ -141,60 +248,86 @@
 
 @if (Model.Ejercicio != null)
 {
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h5 class="mb-0">
-            @L["Ejercicio"] <span class="badge bg-success">@Model.Ejercicio.code</span>
-        </h5>
-        <span class="text-muted small">
-            @Model.Ejercicio.start_date.ToString("d", formato) — @Model.Ejercicio.end_date.ToString("d", formato)
-        </span>
-    </div>
-
     @* ------------------------------------------------------------------
        Las cuatro cifras. Salen de la contabilidad, no de lo registrado.
        ------------------------------------------------------------------ *@
-    <div class="row">
-        <div class="col-md-3 mb-4">
-            <div class="card border-start border-4 border-success h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Ingresos"]</div>
-                    <div class="fs-4 fw-bold">@euros(Model.Ingresos)</div>
-                    <div class="small text-muted">@L["contabilizados"]</div>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="cifra p-3" style="--color: var(--entra);">
+                <div class="rotulo">@L["Ingresos"]</div>
+                <div class="valor">@euros(Model.Ingresos)</div>
+                <div class="pie">@L["contabilizados en el ejercicio"]</div>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="cifra p-3" style="--color: var(--sale);">
+                <div class="rotulo">@L["Gastos"]</div>
+                <div class="valor">@euros(Model.Gastos)</div>
+                <div class="pie">
+                    @* Qué parte de lo ingresado se ha gastado: dice más que el importe solo *@
+                    @if (Model.Ingresos > 0)
+                    {
+                        @(Math.Round(Model.Gastos * 100 / Model.Ingresos))<text>% </text>@L["de lo ingresado"]
+                    }
+                    else
+                    {
+                        @L["contabilizados en el ejercicio"]
+                    }
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-start border-4 border-danger h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Gastos"]</div>
-                    <div class="fs-4 fw-bold">@euros(Model.Gastos)</div>
-                    <div class="small text-muted">@L["contabilizados"]</div>
-                </div>
+        <div class="col-6 col-xl-3">
+            <div class="cifra p-3" style="--color: @(Model.EsExcedente ? "#0ca30c" : "#d03b3b");">
+                <div class="rotulo">@(Model.EsExcedente ? L["Excedente"] : L["Déficit"])</div>
+                <div class="valor @(Model.EsExcedente ? "" : "text-danger")">@euros(Model.Resultado)</div>
+                <div class="pie">@L["resultado del ejercicio"]</div>
             </div>
         </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-start border-4 @(Model.EsExcedente ? "border-primary" : "border-warning") h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">
-                        @(Model.EsExcedente ? L["Excedente"] : L["Déficit"])
-                    </div>
-                    <div class="fs-4 fw-bold @(Model.EsExcedente ? "" : "text-danger")">
-                        @euros(Model.Resultado)
-                    </div>
-                    <div class="small text-muted">@L["resultado del ejercicio"]</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-4">
-            <div class="card border-start border-4 border-info h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Tesorería"]</div>
-                    <div class="fs-4 fw-bold">@euros(Model.TotalTesoreria)</div>
-                    <div class="small text-muted">@L["en cajas y bancos"]</div>
+        <div class="col-6 col-xl-3">
+            <div class="cifra p-3" style="--color: #0b2545;">
+                <div class="rotulo">@L["Tesorería"]</div>
+                <div class="valor">@euros(Model.TotalTesoreria)</div>
+                <div class="pie">
+                    @Model.Cajas.Count @L["cajas y bancos activos"]
+                    @if (Model.TotalSinConciliar > 0)
+                    {
+                        <text> · </text>@Model.TotalSinConciliar @L["sin conciliar"]
+                    }
                 </div>
             </div>
         </div>
     </div>
+
+    @* ------------------------------------------------------------------
+       Evolución del año. Barras agrupadas: comparar entrada y salida mes a
+       mes es justo lo que se quiere ver, y las barras lo hacen mejor que
+       dos líneas cuando los meses son pocos y discretos.
+       ------------------------------------------------------------------ *@
+    @if (Model.HayEvolucion)
+    {
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span><i class="fas fa-chart-column me-1"></i> @L["Evolución del ejercicio"]</span>
+                @* Leyenda propia: dos series siempre llevan leyenda, y así el color
+                   nunca es lo único que distingue una serie de la otra. *@
+                <span class="small">
+                    <span class="d-inline-flex align-items-center me-3">
+                        <span style="width:10px;height:10px;border-radius:2px;background:var(--entra);display:inline-block;"></span>
+                        <span class="ms-1">@L["Ingresos"]</span>
+                    </span>
+                    <span class="d-inline-flex align-items-center">
+                        <span style="width:10px;height:10px;border-radius:2px;background:var(--sale);display:inline-block;"></span>
+                        <span class="ms-1">@L["Gastos"]</span>
+                    </span>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="lienzo-grafico">
+                    <canvas id="graficoEvolucion"></canvas>
+                </div>
+            </div>
+        </div>
+    }
 
     @* ------------------------------------------------------------------
        Presupuesto. Decisión D7: avisa, no bloquea.
@@ -220,7 +353,9 @@
                 </div>
                 <div class="progress mb-2" style="height:10px;" role="progressbar"
                      aria-valuenow="@ancho" aria-valuemin="0" aria-valuemax="100">
-                    <div class="progress-bar @(p.Superado ? "bg-danger" : "bg-success")" style="width:@(ancho)%"></div>
+                    @* Lo consumido del presupuesto es gasto, así que lleva el naranja
+                       de "sale"; en rojo solo cuando se ha pasado, que sí es un problema. *@
+                    <div class="progress-bar" style="width:@(ancho)%;background:@(p.Superado ? "#d03b3b" : "var(--sale)");"></div>
                 </div>
                 <div class="small text-muted">
                     @if (p.Superado)
@@ -248,7 +383,9 @@
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
-                <div class="card-header"><i class="fas fa-arrow-down me-1 text-success"></i> @L["Ingresos por cuenta"]</div>
+                <div class="card-header">
+                    <i class="fas fa-arrow-down me-1" style="color:var(--entra);"></i> @L["Ingresos por cuenta"]
+                </div>
                 <div class="card-body">
                     @if (Model.IngresosPorCuenta.Count == 0)
                     {
@@ -266,7 +403,7 @@
                                 </div>
                                 <div class="progress" style="height:8px;" role="progressbar"
                                      aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar bg-success" style="width:@(porcentaje)%"></div>
+                                    <div class="progress-bar" style="width:@(porcentaje)%;background:var(--entra);"></div>
                                 </div>
                             </div>
                         }
@@ -276,7 +413,9 @@
         </div>
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
-                <div class="card-header"><i class="fas fa-arrow-up me-1 text-danger"></i> @L["Gastos por cuenta"]</div>
+                <div class="card-header">
+                    <i class="fas fa-arrow-up me-1" style="color:var(--sale);"></i> @L["Gastos por cuenta"]
+                </div>
                 <div class="card-body">
                     @if (Model.GastosPorCuenta.Count == 0)
                     {
@@ -294,7 +433,7 @@
                                 </div>
                                 <div class="progress" style="height:8px;" role="progressbar"
                                      aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar bg-danger" style="width:@(porcentaje)%"></div>
+                                    <div class="progress-bar" style="width:@(porcentaje)%;background:var(--sale);"></div>
                                 </div>
                             </div>
                         }
@@ -411,14 +550,129 @@
 </div>
 
 @* Aviso de convivencia. Mientras existan las dos formas de registrar, lo que se
-   apunte en Diezmos y Gastos del área de congregación NO llega hasta aquí. *@
-<div class="card mb-4 border-warning">
-    <div class="card-header bg-warning-subtle">
-        <i class="fas fa-triangle-exclamation me-1"></i> @L["Importante"]
-    </div>
-    <div class="card-body">
-        <p class="mb-0">
-            @L["Las pantallas de Diezmos, Gastos y Conceptos del área de congregación siguen funcionando por separado. Lo que se registre allí no forma parte de la contabilidad ni aparece en este panel."]
-        </p>
+   apunte en Diezmos y Gastos del área de congregación NO llega hasta aquí.
+   Va en gris y no en naranja a propósito: es una advertencia permanente, no algo
+   que el tesorero tenga que resolver hoy. Si compitiera en color con los avisos de
+   arriba, se acabarían ignorando los dos. *@
+<div class="card mb-4">
+    <div class="card-body d-flex align-items-start">
+        <i class="fas fa-circle-info me-2 mt-1 text-muted"></i>
+        <div>
+            <strong>@L["Importante"]</strong>
+            <p class="mb-0 small">
+                @L["Las pantallas de Diezmos, Gastos y Conceptos del área de congregación siguen funcionando por separado. Lo que se registre allí no forma parte de la contabilidad ni aparece en este panel."]
+            </p>
+        </div>
     </div>
 </div>
+
+</div><!-- /.panel-fin -->
+
+@section scripts {
+    @* Chart.js ya se usa en el panel de congregación; misma versión para no
+       cargar dos copias distintas en la misma aplicación. *@
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var lienzo = document.getElementById('graficoEvolucion');
+            if (!lienzo) return;   // no hay movimientos todavía: no se pinta nada
+
+            var meses = @Html.Raw(Json.Serialize(Model.Meses.Select(m => new {
+                            mes = m.mes, ingresos = m.ingresos, gastos = m.gastos })));
+
+            // Nombres de los meses en el idioma activo, sin tablas escritas a mano
+            var idioma = '@System.Globalization.CultureInfo.CurrentUICulture.Name';
+            var etiquetas = meses.map(function (m) {
+                var f = new Date(2000, m.mes - 1, 1);
+                var n = f.toLocaleDateString(idioma, { month: 'short' });
+                return n.charAt(0).toUpperCase() + n.slice(1).replace('.', '');
+            });
+
+            // Los dos límites hay que darlos juntos: con 'currency' el mínimo son 2
+            // decimales por defecto, y pedir un máximo de 0 sin bajar el mínimo lanza
+            // un RangeError que dejaría el gráfico sin pintar.
+            var moneda = new Intl.NumberFormat(idioma, {
+                style: 'currency', currency: 'EUR',
+                minimumFractionDigits: 0, maximumFractionDigits: 0
+            });
+            var monedaExacta = new Intl.NumberFormat(idioma, {
+                style: 'currency', currency: 'EUR',
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+
+            // Los rótulos se serializan, no se pegan entre comillas: una traducción con
+            // apóstrofo (en inglés es corriente) rompería el JavaScript.
+            var T = {
+                ingresos:  @Json.Serialize(L["Ingresos"].Value),
+                gastos:    @Json.Serialize(L["Gastos"].Value),
+                resultado: @Json.Serialize(L["Resultado del mes"].Value)
+            };
+
+            new Chart(lienzo, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: T.ingresos,
+                            data: meses.map(function (m) { return m.ingresos; }),
+                            backgroundColor: '#2a78d6',
+                            // Extremo redondeado y apoyado en la línea de base
+                            borderRadius: 4,
+                            borderSkipped: 'bottom',
+                            maxBarThickness: 22
+                        },
+                        {
+                            label: T.gastos,
+                            data: meses.map(function (m) { return m.gastos; }),
+                            backgroundColor: '#eb6834',
+                            borderRadius: 4,
+                            borderSkipped: 'bottom',
+                            maxBarThickness: 22
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    // La leyenda se pinta en la cabecera de la tarjeta, en HTML, para
+                    // que se lea igual al imprimir el panel.
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (c) {
+                                    return c.dataset.label + ': ' + monedaExacta.format(c.parsed.y);
+                                },
+                                // Al pasar por un mes se enseña también su resultado:
+                                // es la pregunta que viene justo después de ver las barras.
+                                afterBody: function (puntos) {
+                                    var m = meses[puntos[0].dataIndex];
+                                    var r = m.ingresos - m.gastos;
+                                    var signo = r >= 0 ? '+' : '';
+                                    return T.resultado + ': ' + signo + monedaExacta.format(r);
+                                }
+                            }
+                        }
+                    },
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#898781' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false },
+                            grid: { color: '#e1e0d9' },
+                            ticks: {
+                                color: '#898781',
+                                callback: function (v) { return moneda.format(v); }
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+}

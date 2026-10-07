@@ -40,6 +40,14 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-right-left"></i></div>
                                     @L["Transferencias entre sedes"]
                                 </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPagos")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-file-invoice"></i></div>
+                                    @L["Facturas y pagos"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasArqueos")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-calculator"></i></div>
+                                    @L["Arqueos de caja"]
+                                </a>
                             </nav>
                         </div>
 
@@ -98,6 +106,10 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
                                     @L["Aprobaciones"]
                                 </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasConciliacion")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-code-compare"></i></div>
+                                    @L["Conciliación bancaria"]
+                                </a>
                                 <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasAuditoria")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
                                     @L["Auditoría"]
@@ -140,6 +152,10 @@
                                 <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTerceros")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
                                     @L["Terceros"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasProyectos")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-diagram-project"></i></div>
+                                    @L["Proyectos y actividades"]
                                 </a>
                                 <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasReglas")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-code-branch"></i></div>
