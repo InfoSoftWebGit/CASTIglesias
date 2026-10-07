@@ -64,7 +64,18 @@ namespace CapaEntidad
 
             // Entrada duplicada (índice único).
             if (d.Contains("duplicate entry"))
-                return "Ya existe un registro con ese valor. Revisa los campos que deben ser únicos.";
+            {
+                // MySQL dice qué índice ha chocado ("... for key 'uk_loquesea'") y ese
+                // nombre es lo único accionable cuando el aviso llega a soporte: sin él,
+                // "revisa los campos únicos" no dice en qué tabla ni en qué campos.
+                var clave = System.Text.RegularExpressions.Regex.Match(
+                    detalle, @"for key '([^']+)'",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                return clave.Success
+                    ? $"Ya existe un registro con ese valor. Revisa los campos que deben ser únicos. (Restricción: {clave.Groups[1].Value})"
+                    : "Ya existe un registro con ese valor. Revisa los campos que deben ser únicos.";
+            }
 
             // Campo obligatorio sin valor.
             if (d.Contains("cannot be null"))

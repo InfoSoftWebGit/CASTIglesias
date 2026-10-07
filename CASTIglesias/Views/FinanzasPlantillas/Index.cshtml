@@ -1,0 +1,300 @@
+@{
+    ViewBag.Title = L["Plantillas del plan contable"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Plantillas del plan contable"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Una plantilla es un plan de cuentas guardado para poder aplicarlo cuando quieras. La armas como te convenga: no hay ningún plan impuesto."]
+        <div class="mt-1">
+            <strong>@L["Aplicar una plantilla nunca cambia lo que ya tienes."]</strong>
+            @L["Solo crea las cuentas cuyo código todavía no exista en tu plan; las que ya están se dejan tal cual."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-layer-group me-1"></i> @L["Mis plantillas"]</span>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="btnDesdeMiPlan">
+                <i class="fas fa-copy me-1"></i> @L["Guardar mi plan actual como plantilla"]
+            </button>
+            <button type="button" class="btn btn-success btn-sm" id="btnNueva">
+                <i class="fas fa-plus me-1"></i> @L["Plantilla vacía"]
+            </button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaPlantillas" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["País"]</th>
+                    <th>@L["Régimen"]</th>
+                    <th class="text-end">@L["Cuentas"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro. El mensaje de tabla vacía lo pone language.emptyTable. *@
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de la plantilla -->
+<div class="modal fade" id="modalPlantilla" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formPlantilla" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModalPlantilla">@L["Nueva plantilla"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="plaId" />
+
+                <div class="mb-3">
+                    <label for="plaNombre" class="form-label">@L["Nombre"] *</label>
+                    <input type="text" id="plaNombre" class="form-control" maxlength="120" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="plaPais" class="form-label">@L["País"]</label>
+                        <input type="text" id="plaPais" class="form-control" maxlength="2" placeholder="ES" />
+                        <div class="form-text">@L["Solo informativo."]</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="plaRegimen" class="form-label">@L["Régimen"]</label>
+                        <input type="text" id="plaRegimen" class="form-control" maxlength="20" />
+                        <div class="form-text">@L["Por ejemplo, el marco contable que sigues."]</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="plaEstado" class="form-label">@L["Estado"]</label>
+                    <select id="plaEstado" class="form-select">
+                        <option value="draft">@L["Borrador"]</option>
+                        <option value="published">@L["Publicada"]</option>
+                    </select>
+                    <div class="form-text">@L["El estado es tuyo, para saber cuáles das por buenas. No cambia el comportamiento."]</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Guardar"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinPlantillas:     @Json.Serialize(L["Todavía no tienes ninguna plantilla."].Value),
+            nuevaPlantilla:    @Json.Serialize(L["Nueva plantilla"].Value),
+            editarPlantilla:   @Json.Serialize(L["Editar plantilla"].Value),
+            editar:            @Json.Serialize(L["Editar"].Value),
+            eliminar:          @Json.Serialize(L["Eliminar"].Value),
+            verCuentas:        @Json.Serialize(L["Ver las cuentas"].Value),
+            duplicar:          @Json.Serialize(L["Duplicar"].Value),
+            aplicar:           @Json.Serialize(L["Aplicar a mi plan"].Value),
+            error:             @Json.Serialize(L["Error"].Value),
+            si:                @Json.Serialize(L["Sí"].Value),
+            no:                @Json.Serialize(L["No"].Value),
+            cancelar:          @Json.Serialize(L["Cancelar"].Value),
+            nombreObligatorio: @Json.Serialize(L["La plantilla necesita un nombre."].Value),
+            confirmarBorrar:   @Json.Serialize(L["¿Eliminar esta plantilla? Sus cuentas se borran con ella. Tu plan de cuentas no se toca."].Value),
+            pideNombrePlan:    @Json.Serialize(L["Nombre para la plantilla con tu plan actual"].Value),
+            pideNombreCopia:   @Json.Serialize(L["Nombre para la copia"].Value),
+            confirmarAplicar:  @Json.Serialize(L["Se crearán en tu plan las cuentas de esta plantilla que todavía no existan. Lo que ya tienes no se modifica. ¿Seguir?"].Value),
+            avisosPrevios:     @Json.Serialize(L["Antes de aplicar, revisa esto:"].Value),
+            omitidas:          @Json.Serialize(L["Códigos que ya existían y no se han tocado:"].Value)
+        });
+
+        const ESTADOS_PLANTILLA = {
+            draft:     { texto: @Json.Serialize(L["Borrador"].Value),  clase: "bg-secondary" },
+            published: { texto: @Json.Serialize(L["Publicada"].Value), clase: "bg-success" }
+        };
+
+        let tablaPlantillas;
+
+        function abrirModalPlantilla(fila) {
+            $('#tituloModalPlantilla').text(fila ? T.editarPlantilla : T.nuevaPlantilla);
+            $('#plaId').val(fila ? fila.id : '');
+            $('#plaNombre').val(fila ? fila.name : '');
+            $('#plaPais').val(fila ? (fila.country_code || '') : '');
+            $('#plaRegimen').val(fila ? (fila.regime_code || '') : '');
+            $('#plaEstado').val(fila ? (fila.status || 'draft') : 'draft');
+            new bootstrap.Modal(document.getElementById('modalPlantilla')).show();
+        }
+
+        $(document).ready(function () {
+            tablaPlantillas = $('#tablaPlantillas').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasPlantillas")', dataSrc: 'data' },
+                columns: [
+                    { data: 'name' },
+                    { data: 'country_code', defaultContent: '' },
+                    { data: 'regime_code', defaultContent: '' },
+                    { data: 'cuentas', className: 'text-end' },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_PLANTILLA[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                '<a class="btn btn-sm btn-info" href="@Url.Action("Cuentas", "FinanzasPlantillas")/' + fila.id + '" title="' + T.verCuentas + '"><i class="fas fa-list"></i></a>' +
+                                '<button class="btn btn-sm btn-primary btn-aplicar" data-id="' + fila.id + '" title="' + T.aplicar + '"><i class="fas fa-wand-magic-sparkles"></i></button>' +
+                                '<button class="btn btn-sm btn-secondary btn-duplicar" data-id="' + fila.id + '" title="' + T.duplicar + '"><i class="fas fa-clone"></i></button>' +
+                                '<button class="btn btn-sm btn-warning btn-editar" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                '</div>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinPlantillas
+                }
+            });
+
+            $('#btnNueva').on('click', function () { abrirModalPlantilla(null); });
+
+            $('#tablaPlantillas tbody').on('click', '.btn-editar', function () {
+                abrirModalPlantilla(tablaPlantillas.row($(this).closest('tr')).data());
+            });
+
+            $('#formPlantilla').on('submit', function (e) {
+                e.preventDefault();
+
+                const nombre = $('#plaNombre').val().trim();
+                if (!nombre) { Swal.fire(T.error, T.nombreObligatorio, 'error'); return; }
+
+                $.post('@Url.Action("GuardarPlantilla", "FinanzasPlantillas")', {
+                    id: $('#plaId').val() || 0,
+                    name: nombre,
+                    country_code: $('#plaPais').val(),
+                    regime_code: $('#plaRegimen').val(),
+                    status: $('#plaEstado').val()
+                }, function (r) {
+                    if (r.resultado) {
+                        bootstrap.Modal.getInstance(document.getElementById('modalPlantilla')).hide();
+                        Swal.fire({ icon: 'success', title: r.mensaje, timer: 1800, showConfirmButton: false });
+                        tablaPlantillas.ajax.reload(null, false);
+                    } else {
+                        Swal.fire(T.error, r.mensaje, 'error');
+                    }
+                });
+            });
+
+            // Guardar el plan actual como plantilla
+            $('#btnDesdeMiPlan').on('click', function () {
+                Swal.fire({
+                    title: T.pideNombrePlan, input: 'text', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.cancelar
+                }).then(function (r) {
+                    if (!r.isConfirmed || !r.value) return;
+                    $.post('@Url.Action("CrearDesdeMiPlan", "FinanzasPlantillas")', { nombre: r.value },
+                        function (res) {
+                            if (res.resultado) {
+                                Swal.fire({ icon: 'success', title: res.mensaje, timer: 2600, showConfirmButton: false });
+                                tablaPlantillas.ajax.reload(null, false);
+                            } else {
+                                Swal.fire(T.error, res.mensaje, 'error');
+                            }
+                        });
+                });
+            });
+
+            $('#tablaPlantillas tbody').on('click', '.btn-duplicar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.pideNombreCopia, input: 'text', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.cancelar
+                }).then(function (r) {
+                    if (!r.isConfirmed || !r.value) return;
+                    $.post('@Url.Action("Duplicar", "FinanzasPlantillas")', { id: id, nombreNuevo: r.value },
+                        function (res) {
+                            if (res.resultado) {
+                                Swal.fire({ icon: 'success', title: res.mensaje, timer: 1800, showConfirmButton: false });
+                                tablaPlantillas.ajax.reload(null, false);
+                            } else {
+                                Swal.fire(T.error, res.mensaje, 'error');
+                            }
+                        });
+                });
+            });
+
+            $('#tablaPlantillas tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrar, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("EliminarPlantilla", "FinanzasPlantillas")', { id: id }, function (res) {
+                        if (res.resultado) {
+                            Swal.fire({ icon: 'success', title: res.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaPlantillas.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, res.mensaje, 'error');
+                        }
+                    });
+                });
+            });
+
+            // Aplicar: primero se revisa y se enseñan los avisos, luego se confirma.
+            // Nunca se aplica de un solo clic: crea cuentas en el plan contable.
+            $('#tablaPlantillas tbody').on('click', '.btn-aplicar', function () {
+                const id = $(this).data('id');
+
+                $.get('@Url.Action("Revisar", "FinanzasPlantillas")', { id: id }, function (rev) {
+                    let html = T.confirmarAplicar;
+                    if (rev.avisos && rev.avisos.length) {
+                        html = '<p class="text-start"><strong>' + T.avisosPrevios + '</strong></p><ul class="text-start small">';
+                        $.each(rev.avisos, function (i, a) {
+                            html += '<li>' + $('<div>').text(a).html() + '</li>';
+                        });
+                        html += '</ul><p class="text-start">' + T.confirmarAplicar + '</p>';
+                    }
+
+                    Swal.fire({
+                        title: T.aplicar, html: html, icon: 'question', showCancelButton: true,
+                        confirmButtonText: T.si, cancelButtonText: T.no, width: 600
+                    }).then(function (r) {
+                        if (!r.isConfirmed) return;
+                        $.post('@Url.Action("Aplicar", "FinanzasPlantillas")', { id: id }, function (res) {
+                            if (!res.resultado) { Swal.fire(T.error, res.mensaje, 'error'); return; }
+
+                            let detalle = $('<div>').text(res.mensaje).html();
+                            if (res.omitidas && res.omitidas.length) {
+                                detalle += '<p class="mt-2 mb-1 small text-start"><strong>' + T.omitidas + '</strong></p>' +
+                                           '<p class="small text-start"><code>' +
+                                           $('<div>').text(res.omitidas.join(', ')).html() + '</code></p>';
+                            }
+                            Swal.fire({ icon: 'success', title: T.aplicar, html: detalle, width: 600 });
+                        });
+                    });
+                });
+            });
+        });
+    </script>
+}

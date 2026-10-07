@@ -481,9 +481,6 @@
   <data name="Número Miembro" xml:space="preserve">
     <value>Member ID</value>
   </data>
-  <data name="Número de Miembro" xml:space="preserve">
-    <value>Member ID</value>
-  </data>
   <data name="Número de miembro" xml:space="preserve">
     <value>Member ID</value>
   </data>
@@ -834,7 +831,6 @@
   <data name="Nombre Familia" xml:space="preserve"><value>Family name</value></data>
   <data name="Nombre familiar" xml:space="preserve"><value>Family name</value></data>
   <data name="Nombre Zona" xml:space="preserve"><value>Zone name</value></data>
-  <data name="Nombre Ministerio" xml:space="preserve"><value>Ministry name</value></data>
   <data name="Nombre ministerio" xml:space="preserve"><value>Ministry name</value></data>
   <data name="Nombre del líder" xml:space="preserve"><value>Leader name</value></data>
   <data name="Nombre del culto / servicio" xml:space="preserve"><value>Service name</value></data>
@@ -889,6 +885,14 @@
   <data name="Datos del culto" xml:space="preserve"><value>Service details</value></data>
   <data name="Datos del ministerio" xml:space="preserve"><value>Ministry details</value></data>
   <data name="Datos del nuevo grupo" xml:space="preserve"><value>New group details</value></data>
+  <data name="Editar grupo" xml:space="preserve"><value>Edit group</value></data>
+  <data name="Miembros del grupo" xml:space="preserve"><value>Group members</value></data>
+  <data name="Este grupo no tiene encargados asignados." xml:space="preserve"><value>This group has no coordinators assigned.</value></data>
+  <data name="Este grupo no tiene miembros asignados." xml:space="preserve"><value>This group has no members assigned.</value></data>
+  <data name="No se ha podido cargar el detalle del grupo." xml:space="preserve"><value>The group details could not be loaded.</value></data>
+  <data name="Grupo numeroso" xml:space="preserve"><value>Large group</value></data>
+  <data name="Este grupo supera las 10 personas. Se recomienda abrir otro grupo en esta misma zona." xml:space="preserve"><value>This group has more than 10 people. Consider opening another group in this same zone.</value></data>
+  <data name="personas" xml:space="preserve"><value>people</value></data>
   <data name="Datos del usuario" xml:space="preserve"><value>User details</value></data>
   <!-- ══ Economía ═════════════════════════════════════════════════════════ -->
   <data name="Devuelto" xml:space="preserve"><value>Refunded</value></data>
@@ -1292,7 +1296,6 @@
   <data name="Roles requeridos por servicio" xml:space="preserve"><value>Roles required per service</value></data>
   <data name="Rotación automática:" xml:space="preserve"><value>Automatic rotation:</value></data>
   <data name="Se ha producido un error." xml:space="preserve"><value>An error has occurred.</value></data>
-  <data name="Seguimiento Pastoral" xml:space="preserve"><value>Pastoral Follow-up</value></data>
   <data name="Seguimiento de congregantes" xml:space="preserve"><value>Congregant follow-up</value></data>
   <data name="Seguimiento pastoral" xml:space="preserve"><value>Pastoral follow-up</value></data>
   <data name="Seguimiento — Carlos Sánchez López" xml:space="preserve"><value>Follow-up — Carlos Sánchez López</value></data>
@@ -1339,7 +1342,6 @@
   <data name="Zona Norte · Grupo Jóvenes" xml:space="preserve"><value>North Zone · Youth Group</value></data>
   <data name="Zona Norte · Sin asignar" xml:space="preserve"><value>North Zone · Unassigned</value></data>
   <data name="Zona Sur · Ministerio Alabanza" xml:space="preserve"><value>South Zone · Worship Ministry</value></data>
-  <data name="Zona de Jóvenes" xml:space="preserve"><value>Youth Zone</value></data>
   <data name="a todos los módulos" xml:space="preserve"><value>to every module</value></data>
   <!-- Titular del hero: se traduce como una sola frase partida en dos trozos
        ("Manage your church / the smart way"), por eso "de forma" no lleva aquí
@@ -2313,4 +2315,259 @@
   <data name="Añadir área financiera" xml:space="preserve">
     <value>Add the finance area</value>
   </data>
+  <data name="Contabilizar" xml:space="preserve">
+    <value>Post to the ledger</value>
+  </data>
+  <data name="Revertir" xml:space="preserve">
+    <value>Reverse</value>
+  </data>
+  <data name="Asiento generado" xml:space="preserve">
+    <value>Journal entry created</value>
+  </data>
+  <data name="¿Llevar esta operación a la contabilidad?" xml:space="preserve">
+    <value>Post this transaction to the ledger?</value>
+  </data>
+  <data name="A partir de ese momento ya no se podrá editar ni borrar: solo revertir." xml:space="preserve">
+    <value>From then on it can no longer be edited or deleted, only reversed.</value>
+  </data>
+  <data name="Sí, contabilizar" xml:space="preserve">
+    <value>Yes, post it</value>
+  </data>
+  <data name="¿Por qué se revierte?" xml:space="preserve">
+    <value>Why is it being reversed?</value>
+  </data>
+  <data name="Hay que indicar el motivo." xml:space="preserve">
+    <value>You need to give a reason.</value>
+  </data>
+  <data name="Sí, revertir" xml:space="preserve">
+    <value>Yes, reverse it</value>
+  </data>
+  <data name="Libro Diario" xml:space="preserve">
+    <value>General journal</value>
+  </data>
+  <data name="Contabilidad" xml:space="preserve">
+    <value>Accounting</value>
+  </data>
+  <data name="Aquí está todo lo que ha entrado en la contabilidad, en orden y numerado sin saltos." xml:space="preserve">
+    <value>Everything that has entered the accounts, in order and numbered without gaps.</value>
+  </data>
+  <data name="Un asiento contabilizado no se borra ni se cambia." xml:space="preserve">
+    <value>A posted journal entry is never deleted or changed.</value>
+  </data>
+  <data name="Si algo está mal, se revierte desde la operación de origen y aparece un asiento nuevo que lo anula." xml:space="preserve">
+    <value>If something is wrong, reverse it from the original transaction and a new entry appears that cancels it out.</value>
+  </data>
+  <data name="Asientos" xml:space="preserve">
+    <value>Journal entries</value>
+  </data>
+  <data name="Contabilizado" xml:space="preserve">
+    <value>Posted</value>
+  </data>
+  <data name="Revertido" xml:space="preserve">
+    <value>Reversed</value>
+  </data>
+  <data name="Asiento" xml:space="preserve">
+    <value>Journal entry</value>
+  </data>
+  <data name="Ver el asiento" xml:space="preserve">
+    <value>View the journal entry</value>
+  </data>
+  <data name="No hay asientos en ese periodo." xml:space="preserve">
+    <value>There are no journal entries in that period.</value>
+  </data>
+  <data name="Fecha contable" xml:space="preserve">
+    <value>Posting date</value>
+  </data>
+  <data name="Versión de las reglas" xml:space="preserve">
+    <value>Rule set version</value>
+  </data>
+  <data name="Cuenta" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="Tercero" xml:space="preserve">
+    <value>Third party</value>
+  </data>
+  <data name="Debe" xml:space="preserve">
+    <value>Debit</value>
+  </data>
+  <data name="Haber" xml:space="preserve">
+    <value>Credit</value>
+  </data>
+  <data name="Totales" xml:space="preserve">
+    <value>Totals</value>
+  </data>
+  <data name="Balance de Situación" xml:space="preserve"><value>Balance sheet</value></data>
+  <data name="Una foto a una fecha: a la izquierda lo que la iglesia tiene, a la derecha de dónde ha salido. Los dos lados suman lo mismo, siempre." xml:space="preserve"><value>A snapshot on a given date: on the left what the church has, on the right where it came from. Both sides always add up to the same.</value></data>
+  <data name="A fecha de" xml:space="preserve"><value>As at</value></data>
+  <data name="El balance no cuadra." xml:space="preserve"><value>The balance sheet does not add up.</value></data>
+  <data name="Diferencia:" xml:space="preserve"><value>Difference:</value></data>
+  <data name="Esto no debería pasar nunca: avisa a soporte antes de seguir registrando." xml:space="preserve"><value>This should never happen: contact support before recording anything else.</value></data>
+  <data name="Bloque" xml:space="preserve"><value>Section</value></data>
+  <data name="Saldo" xml:space="preserve"><value>Balance</value></data>
+  <data name="Resultado del ejercicio" xml:space="preserve"><value>Result for the year</value></data>
+  <data name="Total pasivo y patrimonio" xml:space="preserve"><value>Total liabilities and equity</value></data>
+  <data name="Lo que la iglesia tiene" xml:space="preserve"><value>What the church has</value></data>
+  <data name="Sin saldos." xml:space="preserve"><value>No balances.</value></data>
+  <data name="Total activo" xml:space="preserve"><value>Total assets</value></data>
+  <data name="Pasivo y patrimonio neto" xml:space="preserve"><value>Liabilities and equity</value></data>
+  <data name="De dónde ha salido" xml:space="preserve"><value>Where it came from</value></data>
+  <data name="Todavía no está en ninguna cuenta de patrimonio porque no se ha hecho el asiento de cierre." xml:space="preserve"><value>It is not in any equity account yet because the closing entry has not been made.</value></data>
+  <data name="Cierre del ejercicio" xml:space="preserve"><value>Year-end closing</value></data>
+  <data name="Congrega calcula el resultado y te dice qué falta por hacer, pero no cierra el ejercicio ni genera asientos de cierre por su cuenta." xml:space="preserve"><value>Congrega works out the result and tells you what is left to do, but it does not close the year or create closing entries on its own.</value></data>
+  <data name="La aplicación propone y tu asesoría valida." xml:space="preserve"><value>The application proposes and your accountant approves.</value></data>
+  <data name="Todavía no hay ningún ejercicio creado." xml:space="preserve"><value>No financial year has been created yet.</value></data>
+  <data name="Propuesta de cierre" xml:space="preserve"><value>Closing proposal</value></data>
+  <data name="Excedente del ejercicio" xml:space="preserve"><value>Surplus for the year</value></data>
+  <data name="Déficit del ejercicio" xml:space="preserve"><value>Deficit for the year</value></data>
+  <data name="Total ingresos" xml:space="preserve"><value>Total income</value></data>
+  <data name="Total gastos" xml:space="preserve"><value>Total expenses</value></data>
+  <data name="Resultado" xml:space="preserve"><value>Result</value></data>
+  <data name="Antes de cerrar" xml:space="preserve"><value>Before closing</value></data>
+  <data name="Todas las operaciones están contabilizadas." xml:space="preserve"><value>Every transaction has been posted.</value></data>
+  <data name="operaciones sin contabilizar." xml:space="preserve"><value>transactions not posted.</value></data>
+  <data name="Es dinero que se movió y no está en la contabilidad, así que el resultado de arriba está incompleto." xml:space="preserve"><value>That is money that moved and is not in the accounts, so the result above is incomplete.</value></data>
+  <data name="Ir a Ingresos" xml:space="preserve"><value>Go to Income</value></data>
+  <data name="Ir a Gastos" xml:space="preserve"><value>Go to Expenses</value></data>
+  <data name="Todos los periodos están cerrados." xml:space="preserve"><value>All periods are closed.</value></data>
+  <data name="periodos siguen abiertos." xml:space="preserve"><value>periods are still open.</value></data>
+  <data name="Un periodo abierto admite movimientos, así que las cifras podrían cambiar después de cerrar." xml:space="preserve"><value>An open period still accepts entries, so the figures could change after closing.</value></data>
+  <data name="El balance cuadra." xml:space="preserve"><value>The balance sheet adds up.</value></data>
+  <data name="Todo listo. Puedes cerrar el ejercicio desde Configuración → Ejercicios y periodos." xml:space="preserve"><value>All set. You can close the year from Settings → Financial years and periods.</value></data>
+  <data name="Resuelve primero lo que está marcado arriba." xml:space="preserve"><value>Sort out what is flagged above first.</value></data>
+  <data name="El asiento de regularización que lleva el resultado a patrimonio no lo genera Congrega: las cuentas que intervienen dependen del país y de tu asesoría." xml:space="preserve"><value>Congrega does not create the entry that moves the result into equity: which accounts are involved depends on the country and on your accountant.</value></data>
+  <data name="Operaciones sin contabilizar" xml:space="preserve"><value>Transactions not posted</value></data>
+  <data name="Libro Mayor" xml:space="preserve"><value>General ledger</value></data>
+  <data name="El Mayor es el Diario visto por cuenta: todo lo que ha pasado por una cuenta concreta, en orden, con el saldo acumulado." xml:space="preserve"><value>The ledger is the journal seen by account: everything that went through one account, in order, with a running balance.</value></data>
+  <data name="Saldo anterior" xml:space="preserve"><value>Opening balance</value></data>
+  <data name="Esta cuenta no tiene movimientos en el periodo elegido." xml:space="preserve"><value>This account has no entries in the chosen period.</value></data>
+  <data name="Totales del periodo" xml:space="preserve"><value>Period totals</value></data>
+  <data name="Cuenta de Resultados" xml:space="preserve"><value>Income statement</value></data>
+  <data name="Qué ha entrado y qué ha salido durante el periodo. La diferencia es el excedente o el déficit." xml:space="preserve"><value>What came in and what went out during the period. The difference is the surplus or the deficit.</value></data>
+  <data name="Sin ingresos en el periodo." xml:space="preserve"><value>No income in the period.</value></data>
+  <data name="Sin gastos en el periodo." xml:space="preserve"><value>No expenses in the period.</value></data>
+  <data name="Excedente del periodo" xml:space="preserve"><value>Surplus for the period</value></data>
+  <data name="Déficit del periodo" xml:space="preserve"><value>Deficit for the period</value></data>
+  <data name="Sumas y saldos" xml:space="preserve"><value>Trial balance</value></data>
+  <data name="Cuentas de orden" xml:space="preserve"><value>Memorandum accounts</value></data>
+  <data name="Todas las cuentas con movimiento y sus totales. Es la comprobación de que la contabilidad cuadra: el total del Debe tiene que ser igual al del Haber." xml:space="preserve"><value>Every account with activity and its totals. This is the check that the books add up: total debits must equal total credits.</value></data>
+  <data name="El Debe y el Haber no cuadran." xml:space="preserve"><value>Debits and credits do not match.</value></data>
+  <data name="No hay movimientos en el periodo elegido." xml:space="preserve"><value>There are no entries in the chosen period.</value></data>
+  <data name="Cuadra" xml:space="preserve"><value>It adds up</value></data>
+  <data name="Imprimir o guardar en PDF" xml:space="preserve"><value>Print or save as PDF</value></data>
+  <data name="CSV" xml:space="preserve"><value>CSV</value></data>
+  <data name="Puesta en marcha" xml:space="preserve"><value>Getting started</value></data>
+  <data name="La contabilidad no empieza de cero: empieza el día que elijas, con el dinero que ya tienes." xml:space="preserve"><value>The books do not start from zero: they start on the date you choose, with the money you already have.</value></data>
+  <data name="Indica cuánto hay en cada caja y banco a esa fecha y el sistema generará el asiento de apertura. Lo anterior se conserva para consulta, pero no se convierte en asientos." xml:space="preserve"><value>Enter how much is in each cash box and bank account on that date and the system will create the opening entry. Earlier records are kept for reference but are not turned into journal entries.</value></data>
+  <data name="La apertura ya está hecha." xml:space="preserve"><value>The opening entry is already done.</value></data>
+  <data name="con fecha" xml:space="preserve"><value>dated</value></data>
+  <data name="Ver en el Libro Diario" xml:space="preserve"><value>View in the general journal</value></data>
+  <data name="Si los saldos estaban mal, hay que revertir ese asiento antes de volver a generarlo." xml:space="preserve"><value>If the balances were wrong, that entry has to be reversed before creating it again.</value></data>
+  <data name="No hay ningún ejercicio abierto. Créalo en Configuración → Ejercicios y periodos antes de hacer la apertura." xml:space="preserve"><value>There is no open financial year. Create one under Settings → Financial years and periods before the opening entry.</value></data>
+  <data name="Falta una cuenta de patrimonio." xml:space="preserve"><value>An equity account is missing.</value></data>
+  <data name="El asiento de apertura necesita una cuenta de tipo Patrimonio neto como contrapartida: es donde se refleja que ese dinero viene de antes y no es un ingreso de este ejercicio. Créala en Plan de cuentas." xml:space="preserve"><value>The opening entry needs an Equity account as the balancing side: that is where it shows that the money comes from before and is not income for this year. Create one in the chart of accounts.</value></data>
+  <data name="Fecha de corte y contrapartida" xml:space="preserve"><value>Cut-off date and balancing account</value></data>
+  <data name="Fecha de corte" xml:space="preserve"><value>Cut-off date</value></data>
+  <data name="Normalmente, el primer día del ejercicio." xml:space="preserve"><value>Usually the first day of the financial year.</value></data>
+  <data name="Cuenta de contrapartida" xml:space="preserve"><value>Balancing account</value></data>
+  <data name="Qué cuenta concreta usar lo decide tu asesoría." xml:space="preserve"><value>Which account to use is your accountant's decision.</value></data>
+  <data name="Saldos iniciales" xml:space="preserve"><value>Opening balances</value></data>
+  <data name="Añadir línea" xml:space="preserve"><value>Add a line</value></data>
+  <data name="Una línea por cada caja o banco. Si en una misma cuenta hay dinero de varios fondos, añade una línea por fondo." xml:space="preserve"><value>One line per cash box or bank account. If one account holds money from several funds, add a line per fund.</value></data>
+  <data name="Caja o banco" xml:space="preserve"><value>Cash box or bank</value></data>
+  <data name="Generar el asiento de apertura" xml:space="preserve"><value>Create the opening entry</value></data>
+  <data name="¿Generar el asiento de apertura?" xml:space="preserve"><value>Create the opening entry?</value></data>
+  <data name="Solo se hace una vez. Si luego hay que corregirlo, habrá que revertir el asiento." xml:space="preserve"><value>This is done only once. Correcting it later means reversing the entry.</value></data>
+  <data name="Sí, generar" xml:space="preserve"><value>Yes, create it</value></data>
+  <data name="Añade al menos una línea con importe." xml:space="preserve"><value>Add at least one line with an amount.</value></data>
+  <data name="Quitar" xml:space="preserve"><value>Remove</value></data>
+  <data name="Sin fondo" xml:space="preserve"><value>No fund</value></data>
+  <data name="Transferencias entre sedes" xml:space="preserve"><value>Transfers between sites</value></data>
+  <data name="Mover dinero de una sede a otra no es un gasto ni un ingreso: el dinero no sale de la iglesia, solo cambia de sitio." xml:space="preserve"><value>Moving money from one site to another is neither income nor an expense: the money does not leave the church, it just changes place.</value></data>
+  <data name="Por eso una transferencia genera un único asiento de caja contra caja y no aparece en la Cuenta de Resultados." xml:space="preserve"><value>That is why a transfer creates a single cash-to-cash entry and does not appear in the income statement.</value></data>
+  <data name="Transferencias" xml:space="preserve"><value>Transfers</value></data>
+  <data name="Nueva transferencia" xml:space="preserve"><value>New transfer</value></data>
+  <data name="Origen" xml:space="preserve"><value>From</value></data>
+  <data name="Destino" xml:space="preserve"><value>To</value></data>
+  <data name="Guardar y contabilizar" xml:space="preserve"><value>Save and post</value></data>
+  <data name="El origen y el destino son la misma caja." xml:space="preserve"><value>Source and destination are the same cash account.</value></data>
+  <data name="Presupuestos" xml:space="preserve"><value>Budgets</value></data>
+  <data name="Un presupuesto reparte lo que se espera gastar por fondo, ministerio o sede, y luego se compara con lo que se gastó de verdad." xml:space="preserve"><value>A budget spreads expected spending across funds, ministries or sites, and is then compared with what was actually spent.</value></data>
+  <data name="Congrega avisa cuando se supera, pero no impide el gasto." xml:space="preserve"><value>Congrega warns you when a budget is exceeded, but it does not block the spending.</value></data>
+  <data name="La decisión sigue siendo de quien la tiene que tomar." xml:space="preserve"><value>The decision still belongs to whoever has to make it.</value></data>
+  <data name="Nuevo presupuesto" xml:space="preserve"><value>New budget</value></data>
+  <data name="Un presupuesto activo ya no se borra: se cierra." xml:space="preserve"><value>An active budget is not deleted, it is closed.</value></data>
+  <data name="El código del presupuesto es obligatorio." xml:space="preserve"><value>The budget code is required.</value></data>
+  <data name="El nombre del presupuesto es obligatorio." xml:space="preserve"><value>The budget name is required.</value></data>
+  <data name="¿Eliminar este presupuesto y todas sus líneas?" xml:space="preserve"><value>Delete this budget and all its lines?</value></data>
+  <data name="Editar presupuesto" xml:space="preserve"><value>Edit budget</value></data>
+  <data name="Ver el seguimiento" xml:space="preserve"><value>View progress</value></data>
+  <data name="Seguimiento del presupuesto" xml:space="preserve"><value>Budget progress</value></data>
+  <data name="líneas han superado su presupuesto." xml:space="preserve"><value>lines have gone over budget.</value></data>
+  <data name="Están marcadas en rojo más abajo. Es un aviso, no un bloqueo." xml:space="preserve"><value>They are marked in red below. It is a warning, not a block.</value></data>
+  <data name="Presupuestado" xml:space="preserve"><value>Budgeted</value></data>
+  <data name="Gasto ejecutado" xml:space="preserve"><value>Actual spending</value></data>
+  <data name="Disponible" xml:space="preserve"><value>Remaining</value></data>
+  <data name="Consumido" xml:space="preserve"><value>Used</value></data>
+  <data name="Líneas del presupuesto" xml:space="preserve"><value>Budget lines</value></data>
+  <data name="Ejecutado" xml:space="preserve"><value>Actual</value></data>
+  <data name="Este presupuesto todavía no tiene líneas." xml:space="preserve"><value>This budget has no lines yet.</value></data>
+  <data name="Presupuesto superado" xml:space="preserve"><value>Over budget</value></data>
+  <data name="Línea de presupuesto" xml:space="preserve"><value>Budget line</value></data>
+  <data name="Indica al menos una cuenta, un fondo, una sede o un ministerio. Cuanto más concretes, con menos gasto se compara la línea." xml:space="preserve"><value>Give at least an account, a fund, a site or a ministry. The more specific you are, the narrower the spending it is compared against.</value></data>
+  <data name="Cualquiera" xml:space="preserve"><value>Any</value></data>
+  <data name="Importe presupuestado" xml:space="preserve"><value>Budgeted amount</value></data>
+  <data name="Notas" xml:space="preserve"><value>Notes</value></data>
+  <data name="El importe presupuestado tiene que ser mayor que cero." xml:space="preserve"><value>The budgeted amount must be greater than zero.</value></data>
+  <data name="¿Eliminar esta línea?" xml:space="preserve"><value>Delete this line?</value></data>
+  <data name="Certificado de aportaciones" xml:space="preserve"><value>Giving statement</value></data>
+  <data name="Certificados de aportaciones" xml:space="preserve"><value>Giving statements</value></data>
+  <data name="Esta persona no tiene aportaciones contabilizadas en" xml:space="preserve"><value>This person has no posted contributions in</value></data>
+  <data name="Se hace constar que" xml:space="preserve"><value>This is to certify that</value></data>
+  <data name="ha realizado durante el año" xml:space="preserve"><value>made the following contributions during</value></data>
+  <data name="las siguientes aportaciones:" xml:space="preserve"><value>the year:</value></data>
+  <data name="Aportaciones" xml:space="preserve"><value>Contributions</value></data>
+  <data name="Este certificado acredita las aportaciones registradas en la contabilidad de la entidad. No constituye una certificación fiscal ni da derecho por sí mismo a deducción alguna." xml:space="preserve"><value>This statement records the contributions held in the organisation's accounts. It is not a tax certificate and does not by itself give any right to a deduction.</value></data>
+  <data name="Fecha de emisión:" xml:space="preserve"><value>Issued on:</value></data>
+  <data name="Firma y sello" xml:space="preserve"><value>Signature and stamp</value></data>
+  <data name="Información reservada." xml:space="preserve"><value>Restricted information.</value></data>
+  <data name="Lo que ha aportado cada persona solo lo pueden ver el tesorero, el administrador financiero y el pastor principal." xml:space="preserve"><value>What each person has given can only be seen by the treasurer, the finance administrator and the lead pastor.</value></data>
+  <data name="El certificado acredita lo aportado, pero no tiene efectos fiscales: no desgrava ni sustituye a ningún documento de Hacienda." xml:space="preserve"><value>The statement records what was given but has no tax effect: it does not reduce tax and does not replace any tax office document.</value></data>
+  <data name="Aportaciones de" xml:space="preserve"><value>Contributions for</value></data>
+  <data name="No hay aportaciones nominativas contabilizadas en este año." xml:space="preserve"><value>There are no named contributions posted for this year.</value></data>
+  <data name="Ver el certificado" xml:space="preserve"><value>View the statement</value></data>
+  <data name="Cambiar de iglesia" xml:space="preserve"><value>Switch church</value></data>
+  <data name="Gestión" xml:space="preserve"><value>Management</value></data>
+  <data name="Se guarda, pero todavía no tiene efecto: la pantalla de aprobaciones está por hacer." xml:space="preserve"><value>It is saved, but it has no effect yet: the approvals screen is still to be built.</value></data>
+  <data name="Reglas de contabilización" xml:space="preserve"><value>Posting rules</value></data>
+  <data name="Una regla dice, para cada tipo de operación, de dónde sale la cuenta que va al Debe y la que va al Haber." xml:space="preserve"><value>A rule says, for each kind of transaction, where the debit account and the credit account come from.</value></data>
+  <data name="Gracias a esto el programa no sabe de contabilidad española ni de ninguna otra: las cuentas concretas las pones tú en el plan de cuentas y en los conceptos." xml:space="preserve"><value>This is why the program knows nothing about Spanish accounting or any other: you set the actual accounts in the chart of accounts and in the concepts.</value></data>
+  <data name="Todavía no hay reglas de contabilización" xml:space="preserve"><value>There are no posting rules yet</value></data>
+  <data name="Sin ellas, el botón de contabilizar no sabe qué asiento generar. Puedes crear las reglas básicas de un clic y ajustarlas después." xml:space="preserve"><value>Without them the posting button does not know what entry to create. You can create the basic rules in one click and adjust them afterwards.</value></data>
+  <data name="Crear las reglas básicas" xml:space="preserve"><value>Create the basic rules</value></data>
+  <data name="Qué se va a crear:" xml:space="preserve"><value>What will be created:</value></data>
+  <data name="Los ingresos y las aportaciones entran en la caja o banco, y el concepto dice de qué son." xml:space="preserve"><value>Income and contributions go into the cash box or bank, and the concept says what they are for.</value></data>
+  <data name="Los gastos salen de la caja o banco, y el concepto dice en qué se han ido." xml:space="preserve"><value>Expenses come out of the cash box or bank, and the concept says what they went on.</value></data>
+  <data name="Conjunto de reglas" xml:space="preserve"><value>Rule set</value></data>
+  <data name="En vigor desde" xml:space="preserve"><value>In force from</value></data>
+  <data name="Con estas reglas ya se han generado asientos. No se pueden borrar, porque cada asiento guarda con qué versión se hizo y hay que poder explicarlo años después. Desactiva las que ya no valgan en vez de eliminarlas." xml:space="preserve"><value>Journal entries have already been created with these rules. They cannot be deleted, because each entry records which version made it and that has to be explainable years later. Deactivate the ones no longer in use instead of deleting them.</value></data>
+  <data name="Reglas" xml:space="preserve"><value>Rules</value></data>
+  <data name="Nueva regla" xml:space="preserve"><value>New rule</value></data>
+  <data name="Prioridad" xml:space="preserve"><value>Priority</value></data>
+  <data name="Cuando la operación es" xml:space="preserve"><value>When the transaction is</value></data>
+  <data name="Solo si" xml:space="preserve"><value>Only if</value></data>
+  <data name="Al Debe va" xml:space="preserve"><value>Debit goes to</value></data>
+  <data name="Al Haber va" xml:space="preserve"><value>Credit goes to</value></data>
+  <data name="Este conjunto no tiene reglas." xml:space="preserve"><value>This set has no rules.</value></data>
+  <data name="Gana el número más bajo." xml:space="preserve"><value>The lowest number wins.</value></data>
+  <data name="Deja estos campos vacíos para que la regla valga siempre. Rellénalos solo si quieres una regla distinta para un caso concreto." xml:space="preserve"><value>Leave these empty for the rule to always apply. Fill them in only if you want a different rule for one particular case.</value></data>
+  <data name="Solo para el concepto" xml:space="preserve"><value>Only for the concept</value></data>
+  <data name="Solo para la sede" xml:space="preserve"><value>Only for the site</value></data>
+  <data name="Solo si se cobra o paga por" xml:space="preserve"><value>Only when paid or received by</value></data>
+  <data name="La cuenta de la caja o banco" xml:space="preserve"><value>The cash box or bank account</value></data>
+  <data name="La cuenta del concepto" xml:space="preserve"><value>The concept's account</value></data>
+  <data name="Una cuenta fija" xml:space="preserve"><value>A fixed account</value></data>
+  <data name="Editar regla" xml:space="preserve"><value>Edit rule</value></data>
+  <data name="¿Eliminar esta regla?" xml:space="preserve"><value>Delete this rule?</value></data>
+  <data name="¿Crear las reglas básicas?" xml:space="preserve"><value>Create the basic rules?</value></data>
+  <data name="Siempre" xml:space="preserve"><value>Always</value></data>
 </root>

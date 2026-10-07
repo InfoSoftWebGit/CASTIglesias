@@ -1,0 +1,286 @@
+@using CapaEntidad.Financiero
+@model List<AccountingTemplateAccount>
+@{
+    var plantilla = ViewBag.Plantilla as AccountingTemplate;
+    ViewBag.Title = plantilla?.name ?? L["Cuentas de la plantilla"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var avisos = ViewBag.Avisos as List<string> ?? new List<string>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "FinanzasPlantillas")">@L["Plantillas del plan contable"]</a></li>
+    <li class="breadcrumb-item active">@plantilla?.name</li>
+</ol>
+
+@if (avisos.Count > 0)
+{
+    <div class="alert alert-warning">
+        <strong><i class="fas fa-triangle-exclamation me-1"></i> @L["Revisa esto antes de aplicar la plantilla"]</strong>
+        <ul class="mb-0 mt-2">
+            @foreach (var aviso in avisos)
+            {
+                <li>@aviso</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-sitemap me-1"></i> @L["Cuentas de"] @plantilla?.name</span>
+        <button type="button" class="btn btn-success btn-sm" id="btnNuevaCuenta">
+            <i class="fas fa-plus me-1"></i> @L["Nueva cuenta"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaCuentas" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th>@L["Saldo normal"]</th>
+                    <th>@L["Padre"]</th>
+                    <th>@L["Admite apuntes"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro. El mensaje de tabla vacía lo pone language.emptyTable. *@
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td><code>@c.code</code></td>
+                        <td>@c.name</td>
+                        <td data-tipo="@c.account_type">@c.account_type</td>
+                        <td data-saldo="@c.normal_balance">@c.normal_balance</td>
+                        <td>@(string.IsNullOrWhiteSpace(c.parent_code) ? "—" : c.parent_code)</td>
+                        <td class="text-center">
+                            @if (c.is_postable)
+                            {
+                                <i class="fas fa-check text-success"></i>
+                            }
+                            else
+                            {
+                                <i class="fas fa-minus text-muted"></i>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                <button type="button" class="btn btn-sm btn-warning btn-editar-cuenta"
+                                        data-id="@c.id"
+                                        data-codigo="@c.code"
+                                        data-nombre="@c.name"
+                                        data-tipo="@c.account_type"
+                                        data-saldo="@c.normal_balance"
+                                        data-padre="@c.parent_code"
+                                        data-apuntes="@c.is_postable.ToString().ToLowerInvariant()"
+                                        title="@L["Editar"]">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger btn-borrar-cuenta"
+                                        data-id="@c.id" title="@L["Eliminar"]">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de la cuenta -->
+<div class="modal fade" id="modalCuenta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formCuenta" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tituloModalCuenta">@L["Nueva cuenta"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cueId" />
+
+                <div class="row">
+                    <div class="col-5 mb-3">
+                        <label for="cueCodigo" class="form-label">@L["Código"] *</label>
+                        <input type="text" id="cueCodigo" class="form-control" maxlength="20" required />
+                    </div>
+                    <div class="col-7 mb-3">
+                        <label for="cueNombre" class="form-label">@L["Nombre"] *</label>
+                        <input type="text" id="cueNombre" class="form-control" maxlength="120" required />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="cueTipo" class="form-label">@L["Tipo"] *</label>
+                        <select id="cueTipo" class="form-select">
+                            <option value="asset">@L["Activo"]</option>
+                            <option value="liability">@L["Pasivo"]</option>
+                            <option value="equity">@L["Patrimonio neto"]</option>
+                            <option value="income">@L["Ingreso"]</option>
+                            <option value="expense">@L["Gasto"]</option>
+                            <option value="memorandum">@L["De orden"]</option>
+                        </select>
+                        <div class="form-text">@L["Es lo que decide dónde sale la cuenta en el Balance y en Resultados."]</div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="cueSaldo" class="form-label">@L["Saldo normal"] *</label>
+                        <select id="cueSaldo" class="form-select">
+                            <option value="debit">@L["Deudora (Debe)"]</option>
+                            <option value="credit">@L["Acreedora (Haber)"]</option>
+                        </select>
+                        <div class="form-text">@L["Es lo que decide el signo del saldo."]</div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cuePadre" class="form-label">@L["Código de la cuenta padre"]</label>
+                    <input type="text" id="cuePadre" class="form-control" maxlength="20" />
+                    <div class="form-text">
+                        @L["Se indica por código, no por nombre: así la plantilla sirve en cualquier iglesia. Déjalo vacío si es una cuenta de primer nivel."]
+                    </div>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="cueApuntes" />
+                    <label class="form-check-label" for="cueApuntes">
+                        @L["Admite apuntes"]
+                    </label>
+                    <div class="form-text">
+                        @L["Marca esto solo en las cuentas donde se contabiliza de verdad. Las cuentas que solo agrupan a otras no deben admitirlos."]
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Guardar"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinCuentas:        @Json.Serialize(L["Esta plantilla todavía no tiene cuentas."].Value),
+            nuevaCuenta:       @Json.Serialize(L["Nueva cuenta"].Value),
+            editarCuenta:      @Json.Serialize(L["Editar cuenta"].Value),
+            error:             @Json.Serialize(L["Error"].Value),
+            si:                @Json.Serialize(L["Sí"].Value),
+            no:                @Json.Serialize(L["No"].Value),
+            confirmarBorrar:   @Json.Serialize(L["¿Quitar esta cuenta de la plantilla?"].Value),
+            faltaCodigo:       @Json.Serialize(L["La cuenta necesita un código."].Value),
+            faltaNombre:       @Json.Serialize(L["La cuenta necesita un nombre."].Value)
+        });
+
+        const TIPOS_CUENTA = {
+            asset:      @Json.Serialize(L["Activo"].Value),
+            liability:  @Json.Serialize(L["Pasivo"].Value),
+            equity:     @Json.Serialize(L["Patrimonio neto"].Value),
+            income:     @Json.Serialize(L["Ingreso"].Value),
+            expense:    @Json.Serialize(L["Gasto"].Value),
+            memorandum: @Json.Serialize(L["De orden"].Value)
+        };
+        const SALDOS = {
+            debit:  @Json.Serialize(L["Deudora (Debe)"].Value),
+            credit: @Json.Serialize(L["Acreedora (Haber)"].Value)
+        };
+
+        const ID_PLANTILLA = @(plantilla?.id ?? 0);
+
+        $(document).ready(function () {
+            // Las columnas de tipo y saldo llegan del servidor con la clave técnica.
+            // Se traducen aquí en vez de en la vista para no repetir el diccionario.
+            $('#tablaCuentas tbody td[data-tipo]').each(function () {
+                const v = $(this).data('tipo');
+                $(this).text(TIPOS_CUENTA[v] || v || '');
+            });
+            $('#tablaCuentas tbody td[data-saldo]').each(function () {
+                const v = $(this).data('saldo');
+                $(this).text(SALDOS[v] || v || '');
+            });
+
+            $('#tablaCuentas').DataTable({
+                responsive: true,
+                pageLength: 50,
+                columnDefs: [{ targets: [5, 6], orderable: false }],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinCuentas
+                }
+            });
+
+            function abrirModalCuenta(b) {
+                $('#tituloModalCuenta').text(b ? T.editarCuenta : T.nuevaCuenta);
+                $('#cueId').val(b ? b.data('id') : '');
+                $('#cueCodigo').val(b ? b.data('codigo') : '');
+                $('#cueNombre').val(b ? b.data('nombre') : '');
+                $('#cueTipo').val(b ? b.data('tipo') : 'expense');
+                $('#cueSaldo').val(b ? b.data('saldo') : 'debit');
+                $('#cuePadre').val(b ? (b.data('padre') || '') : '');
+                $('#cueApuntes').prop('checked', b ? b.data('apuntes') === true || b.data('apuntes') === 'true' : true);
+                new bootstrap.Modal(document.getElementById('modalCuenta')).show();
+            }
+
+            $('#btnNuevaCuenta').on('click', function () { abrirModalCuenta(null); });
+
+            // Delegado en el documento: DataTables repagina y los botones de otras
+            // páginas no existen cuando esto se engancha.
+            $(document).on('click', '.btn-editar-cuenta', function () { abrirModalCuenta($(this)); });
+
+            $('#formCuenta').on('submit', function (e) {
+                e.preventDefault();
+
+                const codigo = $('#cueCodigo').val().trim();
+                const nombre = $('#cueNombre').val().trim();
+                if (!codigo) { Swal.fire(T.error, T.faltaCodigo, 'error'); return; }
+                if (!nombre) { Swal.fire(T.error, T.faltaNombre, 'error'); return; }
+
+                $.post('@Url.Action("GuardarCuenta", "FinanzasPlantillas")', {
+                    id: $('#cueId').val() || 0,
+                    template_id: ID_PLANTILLA,
+                    code: codigo,
+                    name: nombre,
+                    account_type: $('#cueTipo').val(),
+                    normal_balance: $('#cueSaldo').val(),
+                    parent_code: $('#cuePadre').val(),
+                    is_postable: $('#cueApuntes').is(':checked')
+                }, function (r) {
+                    if (r.resultado) {
+                        Swal.fire({ icon: 'success', title: r.mensaje, timer: 1500, showConfirmButton: false })
+                            .then(function () { location.reload(); });
+                    } else {
+                        Swal.fire(T.error, r.mensaje, 'error');
+                    }
+                });
+            });
+
+            $(document).on('click', '.btn-borrar-cuenta', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrar, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("EliminarCuenta", "FinanzasPlantillas")', { id: id }, function (res) {
+                        if (res.resultado) {
+                            location.reload();
+                        } else {
+                            Swal.fire(T.error, res.mensaje, 'error');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}

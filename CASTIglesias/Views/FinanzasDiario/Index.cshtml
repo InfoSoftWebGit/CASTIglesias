@@ -1,0 +1,264 @@
+@*
+    Libro Diario.
+
+    Solo lectura: los asientos no se crean ni se editan desde aquí. Nacen de
+    contabilizar una operación y se corrigen revirtiéndola, que es lo que dicen
+    los principios innegociables del módulo.
+*@
+@{
+    ViewBag.Title = L["Libro Diario"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Libro Diario"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Aquí está todo lo que ha entrado en la contabilidad, en orden y numerado sin saltos."]
+        <div class="mt-1">
+            <strong>@L["Un asiento contabilizado no se borra ni se cambia."]</strong>
+            @L["Si algo está mal, se revierte desde la operación de origen y aparece un asiento nuevo que lo anula."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-book me-1"></i> @L["Filtros"]
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-sm-3">
+                <label for="txtDesde" class="form-label">@L["Desde"]</label>
+                <input type="date" class="form-control" id="txtDesde" />
+            </div>
+            <div class="col-sm-3">
+                <label for="txtHasta" class="form-label">@L["Hasta"]</label>
+                <input type="date" class="form-control" id="txtHasta" />
+            </div>
+            <div class="col-sm-3">
+                <label for="cboEstado" class="form-label">@L["Estado"]</label>
+                <select id="cboEstado" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    <option value="posted">@L["Contabilizado"]</option>
+                    <option value="reversed">@L["Revertido"]</option>
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <button type="button" class="btn btn-primary w-100" onclick="recargarDiario()">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Buscar"]
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-book me-1"></i> @L["Asientos"]</span>
+        <span class="text-muted small" id="resumenDiario"></span>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaDiario" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Número"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Descripción"]</th>
+                    <th class="text-end">@L["Importe"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL DETALLE DEL ASIENTO -->
+<div class="modal fade" id="modalAsiento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalAsiento">@L["Asiento"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-3">
+                    <dt class="col-sm-3">@L["Fecha contable"]</dt>
+                    <dd class="col-sm-9" id="dtlFecha"></dd>
+                    <dt class="col-sm-3">@L["Descripción"]</dt>
+                    <dd class="col-sm-9" id="dtlDescripcion"></dd>
+                    <dt class="col-sm-3">@L["Estado"]</dt>
+                    <dd class="col-sm-9" id="dtlEstado"></dd>
+                    <dt class="col-sm-3">@L["Versión de las reglas"]</dt>
+                    <dd class="col-sm-9" id="dtlVersion"></dd>
+                </dl>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>@L["Cuenta"]</th>
+                                <th>@L["Sede"]</th>
+                                <th>@L["Fondo"]</th>
+                                <th>@L["Tercero"]</th>
+                                <th class="text-end">@L["Debe"]</th>
+                                <th class="text-end">@L["Haber"]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoLineas"></tbody>
+                        <tfoot class="table-light fw-bold">
+                            <tr>
+                                <td colspan="5" class="text-end">@L["Totales"]</td>
+                                <td class="text-end" id="totalDebe"></td>
+                                <td class="text-end" id="totalHaber"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            verAsiento:  @Json.Serialize(L["Ver el asiento"].Value),
+            asientoNum:  @Json.Serialize(L["Asiento"].Value),
+            sinAsientos: @Json.Serialize(L["No hay asientos en ese periodo."].Value)
+        });
+
+        const ESTADOS_ASIENTO = {
+            posted:   { texto: @Json.Serialize(L["Contabilizado"].Value), clase: "bg-success" },
+            reversed: { texto: @Json.Serialize(L["Revertido"].Value),     clase: "bg-secondary" },
+            draft:    { texto: @Json.Serialize(L["Borrador"].Value),      clase: "bg-warning text-dark" }
+        };
+
+        // Los importes se formatean con el idioma de la página, no con uno fijo:
+        // en español 1.234,56 y en inglés 1,234.56.
+        const MONEDA = new Intl.NumberFormat(document.documentElement.lang || 'es', {
+            style: 'currency', currency: 'EUR'
+        });
+
+        let tablaDiario;
+
+        $(document).ready(function () {
+            tablaDiario = $('#tablaDiario').DataTable({
+                responsive: true,
+                order: [],
+                ajax: {
+                    url: '@Url.Action("Listar", "FinanzasDiario")',
+                    data: function (d) {
+                        d.desde  = $('#txtDesde').val();
+                        d.hasta  = $('#txtHasta').val();
+                        d.estado = $('#cboEstado').val();
+                    },
+                    dataSrc: function (respuesta) {
+                        $('#resumenDiario').text(respuesta.data.length + ' ' + T.asientoNum.toLowerCase() + 's');
+                        return respuesta.data;
+                    }
+                },
+                columns: [
+                    { data: 'entry_number' },
+                    {
+                        data: 'posting_date',
+                        render: function (v) { return v ? v.substring(0, 10).split('-').reverse().join('/') : ''; }
+                    },
+                    { data: 'description' },
+                    {
+                        data: 'total', className: 'text-end',
+                        render: function (v) { return MONEDA.format(v || 0); }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v, tipo, fila) {
+                            const e = ESTADOS_ASIENTO[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            let html = '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                            // Un asiento que anula a otro se marca, para que se vea
+                            // de un vistazo que no es una operación nueva.
+                            if (fila.reversal_of_entry_id) {
+                                html += ' <i class="fas fa-rotate-left text-muted ms-1"></i>';
+                            }
+                            return html;
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<button class="btn btn-sm btn-info btn-ver" data-id="' + fila.id + '" title="' + T.verAsiento + '">' +
+                                   '<i class="fas fa-eye"></i></button>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinAsientos
+                }
+            });
+
+            $('#tablaDiario tbody').on('click', '.btn-ver', function () {
+                verAsiento($(this).data('id'));
+            });
+        });
+
+        function recargarDiario() {
+            tablaDiario.ajax.reload();
+        }
+
+        function verAsiento(id) {
+            $.get('@Url.Action("Detalle", "FinanzasDiario")', { id: id }, function (r) {
+                if (!r.resultado) { Swal.fire(T.error, r.mensaje, 'error'); return; }
+
+                const c = r.cabecera;
+                $('#tituloModalAsiento').text(T.asientoNum + ' ' + (c.entry_number || ''));
+                $('#dtlFecha').text((c.posting_date || '').substring(0, 10).split('-').reverse().join('/'));
+                $('#dtlDescripcion').text(c.description || '');
+                $('#dtlVersion').text(c.posting_rule_set_version || '-');
+
+                const e = ESTADOS_ASIENTO[c.status] || { texto: c.status || '', clase: 'bg-light text-dark' };
+                $('#dtlEstado').html('<span class="badge ' + e.clase + '">' + e.texto + '</span>');
+
+                let filas = '', debe = 0, haber = 0;
+                r.lineas.forEach(function (l) {
+                    debe  += l.debit_amount;
+                    haber += l.credit_amount;
+                    filas += '<tr>' +
+                             '<td>' + l.line_number + '</td>' +
+                             '<td>' + escapar(l.cuenta_codigo) + ' &middot; ' + escapar(l.cuenta_nombre) + '</td>' +
+                             '<td>' + escapar(l.sede) + '</td>' +
+                             '<td>' + escapar(l.fondo) + '</td>' +
+                             '<td>' + escapar(l.tercero) + '</td>' +
+                             '<td class="text-end">' + (l.debit_amount  ? MONEDA.format(l.debit_amount)  : '') + '</td>' +
+                             '<td class="text-end">' + (l.credit_amount ? MONEDA.format(l.credit_amount) : '') + '</td>' +
+                             '</tr>';
+                });
+
+                $('#cuerpoLineas').html(filas);
+                $('#totalDebe').text(MONEDA.format(debe));
+                $('#totalHaber').text(MONEDA.format(haber));
+
+                new bootstrap.Modal(document.getElementById('modalAsiento')).show();
+            }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+        }
+
+        // Las descripciones y los nombres de tercero los escribe el usuario, así que
+        // se escapan antes de meterlos en el HTML de la tabla.
+        function escapar(texto) {
+            return texto ? $('<div>').text(texto).html() : '';
+        }
+    </script>
+}

@@ -1,0 +1,77 @@
+@*
+    Botones de salida comunes a los cuatro informes contables, más el CSS que hace
+    que al imprimir salga solo el informe.
+
+    Decisión D4: Excel, CSV y PDF genéricos, sin conectores de programas
+    contables. El PDF sale de imprimir con el navegador ("Guardar como PDF"), que
+    respeta el CSS de abajo; así no hace falta arrastrar una librería de PDF para
+    algo que el navegador ya hace bien.
+
+    Se espera en ViewBag:
+      - TituloInforme: el nombre que va en la cabecera impresa
+      - TablaExportable: id de la tabla que se exporta a CSV
+*@
+@{
+    var tabla = ViewBag.TablaExportable as string ?? "tablaInforme";
+    var titulo = ViewBag.TituloInforme as string ?? "";
+}
+
+<div class="d-flex justify-content-end gap-2 mb-3 d-print-none">
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+        <i class="fas fa-print me-1"></i> @L["Imprimir o guardar en PDF"]
+    </button>
+    <button type="button" class="btn btn-outline-success btn-sm"
+            onclick="exportarCSV('@tabla', @Json.Serialize(titulo))">
+        <i class="fas fa-file-csv me-1"></i> @L["CSV"]
+    </button>
+</div>
+
+<style>
+    /* Al imprimir sobra todo lo que no sea el informe: menú, filtros y botones. */
+    @@media print {
+        .sb-sidenav, .sb-topnav, footer, .breadcrumb, .d-print-none { display: none !important; }
+        #layoutSidenav_content { margin: 0 !important; padding: 0 !important; }
+        .card { border: none !important; box-shadow: none !important; }
+        .card-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #000; }
+        table { font-size: 11px; }
+        .cabecera-impresion { display: block !important; }
+    }
+
+    .cabecera-impresion { display: none; }
+
+    /* Los importes se leen en columna, así que van a la derecha y monoespaciados
+       para que las comas queden alineadas unas debajo de otras. */
+    .importe {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    // El CSV se arma desde la tabla ya pintada: lo que ves es lo que te llevas, sin
+    // tener que mantener en el servidor una segunda versión del informe.
+    function exportarCSV(idTabla, nombre) {
+        const tabla = document.getElementById(idTabla);
+        if (!tabla) return;
+
+        const lineas = [];
+        tabla.querySelectorAll('tr').forEach(function (fila) {
+            const celdas = [];
+            fila.querySelectorAll('th, td').forEach(function (celda) {
+                // Las comillas se duplican, que es como el formato CSV las escapa
+                celdas.push('"' + celda.innerText.trim().replace(/"/g, '""') + '"');
+            });
+            if (celdas.length) lineas.push(celdas.join(';'));
+        });
+
+        // El BOM es lo que hace que Excel abra el fichero en UTF-8 y no destroce
+        // las tildes ni el símbolo del euro.
+        const blob = new Blob(['﻿' + lineas.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = (nombre || 'informe') + '.csv';
+        enlace.click();
+        URL.revokeObjectURL(enlace.href);
+    }
+</script>

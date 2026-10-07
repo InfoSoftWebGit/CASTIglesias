@@ -128,6 +128,37 @@ builder.Services.AddScoped<CD_ConceptosFinancieros>();
 builder.Services.AddScoped<CN_ConceptosFinancieros>();
 builder.Services.AddScoped<CD_Operaciones>();
 builder.Services.AddScoped<CN_Operaciones>();
+// Motor contable: convierte las operaciones en asientos de partida doble
+builder.Services.AddScoped<CD_Asientos>();
+builder.Services.AddScoped<CN_Asientos>();
+// Informes contables: Mayor, Sumas y saldos, Balance y Cuenta de Resultados
+builder.Services.AddScoped<CD_Informes>();
+builder.Services.AddScoped<CN_Informes>();
+// Puesta en marcha (D5), transferencias entre sedes (D2), presupuestos (D7)
+// y certificados de aportaciones (D8)
+builder.Services.AddScoped<CN_Apertura>();
+builder.Services.AddScoped<CN_Transferencias>();
+builder.Services.AddScoped<CD_Presupuestos>();
+builder.Services.AddScoped<CN_Presupuestos>();
+builder.Services.AddScoped<CD_Certificados>();
+builder.Services.AddScoped<CN_Certificados>();
+// Reglas de contabilización: la configuración que traduce operación en asiento
+builder.Services.AddScoped<CD_ReglasContabilizacion>();
+builder.Services.AddScoped<CN_ReglasContabilizacion>();
+// Panel financiero: resume lo que ya calculan los informes y la tesorería
+builder.Services.AddScoped<CD_Panel>();
+builder.Services.AddScoped<CN_Panel>();
+// Auditoría (solo lectura) y numeración de documentos
+builder.Services.AddScoped<CD_Auditoria>();
+builder.Services.AddScoped<CN_Auditoria>();
+builder.Services.AddScoped<CD_Numeraciones>();
+builder.Services.AddScoped<CN_Numeraciones>();
+// Plantillas del plan contable: guardar un plan para reutilizarlo (estilo Business Central)
+builder.Services.AddScoped<CD_PlantillasPlan>();
+builder.Services.AddScoped<CN_PlantillasPlan>();
+// Circuito de aprobación de operaciones (opcional: no existe hasta que se crea)
+builder.Services.AddScoped<CD_Aprobaciones>();
+builder.Services.AddScoped<CN_Aprobaciones>();
 
 // Iglesia activa de la petición: AppDbContext la usa para el filtro global por iglesia
 // y para rellenar ID_iglesia al guardar. Ver CapaDatos/IContextoIglesia.cs.

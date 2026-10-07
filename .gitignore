@@ -5,7 +5,9 @@
 
 ## Ignore appsettings
 appsettings*.json
-
+*.pyc
+*.py
+*.Python
 **/launchsettings.json
 *.pdf
 *.md

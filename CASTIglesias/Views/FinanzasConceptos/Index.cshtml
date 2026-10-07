@@ -136,9 +136,14 @@
                     <input class="form-check-input" type="checkbox" id="chkExigeDocumento" />
                     <label class="form-check-label" for="chkExigeDocumento">@L["Exigir adjuntar un justificante"]</label>
                 </div>
+                @* El dato se guarda, pero todavía no hace nada: el circuito de
+                   aprobación no está en la fase 1. Se avisa en vez de esconder la
+                   casilla, para que quien configure los conceptos pueda dejarlos ya
+                   preparados sin creer que el bloqueo ya funciona. *@
                 <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="chkExigeAprobacion" />
                     <label class="form-check-label" for="chkExigeAprobacion">@L["Exigir aprobación antes de contabilizar"]</label>
+                    <div class="form-text ms-4">@L["Se guarda, pero todavía no tiene efecto: la pantalla de aprobaciones está por hacer."]</div>
                 </div>
 
                 <div id="errorConcepto" class="alert alert-danger d-none mt-3 mb-0"></div>

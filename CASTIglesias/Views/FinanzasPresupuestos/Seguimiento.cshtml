@@ -1,0 +1,293 @@
+@using CapaEntidad
+@using CapaEntidad.Financiero
+@model CapaNegocio.CN_Presupuestos.SeguimientoDTO
+@{
+    ViewBag.Title = L["Seguimiento del presupuesto"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cuentas = ViewBag.Cuentas as List<LedgerAccount> ?? new List<LedgerAccount>();
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+    var ministerios = ViewBag.Ministerios as List<Ministerio> ?? new List<Ministerio>();
+}
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "FinanzasPresupuestos")">@L["Presupuestos"]</a></li>
+    <li class="breadcrumb-item active">@Model.Presupuesto?.name</li>
+</ol>
+
+@if (Model.Superadas.Count > 0)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <strong>@Model.Superadas.Count @L["líneas han superado su presupuesto."]</strong>
+        @L["Están marcadas en rojo más abajo. Es un aviso, no un bloqueo."]
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-muted small">@L["Presupuestado"]</div>
+                <div class="h4 mb-0">@Model.TotalPresupuestado.ToString("N2") €</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-muted small">@L["Gasto ejecutado"]</div>
+                <div class="h4 mb-0">@Model.TotalEjecutado.ToString("N2") €</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-muted small">@L["Disponible"]</div>
+                <div class="h4 mb-0 @(Model.TotalDisponible < 0 ? "text-danger" : "text-success")">
+                    @Model.TotalDisponible.ToString("N2") €
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <div class="text-muted small">@L["Consumido"]</div>
+                <div class="h4 mb-0">@Model.PorcentajeGlobal.ToString("N1") %</div>
+                <div class="progress mt-2" style="height:8px;">
+                    @{
+                        var ancho = Math.Min(Model.PorcentajeGlobal, 100);
+                        var color = Model.PorcentajeGlobal > 100 ? "bg-danger"
+                                  : Model.PorcentajeGlobal > 80 ? "bg-warning" : "bg-success";
+                    }
+                    <div class="progress-bar @color" style="width:@(ancho.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list me-1"></i> @L["Líneas del presupuesto"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalLinea(null)">
+            <i class="fas fa-plus me-1"></i> @L["Añadir línea"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped border-top mb-0">
+            <thead>
+                <tr>
+                    <th>@L["Cuenta"]</th>
+                    <th>@L["Fondo"]</th>
+                    <th>@L["Sede"]</th>
+                    <th>@L["Ministerio"]</th>
+                    <th class="text-end">@L["Presupuestado"]</th>
+                    <th class="text-end">@L["Ejecutado"]</th>
+                    <th class="text-end">@L["Disponible"]</th>
+                    <th class="text-end">@L["Consumido"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Lineas.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-3">
+                            @L["Este presupuesto todavía no tiene líneas."]
+                        </td>
+                    </tr>
+                }
+                @foreach (var l in Model.Lineas)
+                {
+                    <tr class="@(l.Superado ? "table-danger" : "")">
+                        <td>@l.cuenta</td>
+                        <td>@l.fondo</td>
+                        <td>@l.sede</td>
+                        <td>@l.ministerio</td>
+                        <td class="text-end">@l.presupuestado.ToString("N2") €</td>
+                        <td class="text-end">@l.ejecutado.ToString("N2") €</td>
+                        <td class="text-end @(l.Disponible < 0 ? "text-danger fw-bold" : "")">
+                            @l.Disponible.ToString("N2") €
+                        </td>
+                        <td class="text-end">
+                            @l.PorcentajeConsumido.ToString("N1") %
+                            @if (l.Superado)
+                            {
+                                <i class="fas fa-triangle-exclamation text-danger ms-1"
+                                   title="@L["Presupuesto superado"]"></i>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-1">
+                                @* El JSON va en un atributo con comillas DOBLES y sin
+                                   Html.Raw: así Razor escapa lo que haya dentro y un
+                                   nombre con apóstrofo o con comillas no rompe el HTML.
+                                   jQuery .data() lo vuelve a convertir en objeto. *@
+                                <button class="btn btn-sm btn-warning btn-editar-linea"
+                                        data-linea="@Json.Serialize(l)" title="@L["Editar"]">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger btn-borrar-linea"
+                                        data-id="@l.id" title="@L["Eliminar"]">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL LÍNEA -->
+<div class="modal fade" id="modalLinea" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title">@L["Línea de presupuesto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdLinea" value="0" />
+
+                <p class="text-muted small">
+                    @L["Indica al menos una cuenta, un fondo, una sede o un ministerio. Cuanto más concretes, con menos gasto se compara la línea."]
+                </p>
+
+                <div class="mb-3">
+                    <label for="cboCuenta" class="form-label">@L["Cuenta"]</label>
+                    <select id="cboCuenta" class="form-select">
+                        <option value="">@L["Cualquiera"]</option>
+                        @foreach (var c in cuentas)
+                        {
+                            <option value="@c.id">@c.code · @c.name</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="cboFondo" class="form-label">@L["Fondo"]</label>
+                    <select id="cboFondo" class="form-select">
+                        <option value="">@L["Cualquiera"]</option>
+                        @foreach (var f in fondos)
+                        {
+                            <option value="@f.id">@f.name</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="cboSede" class="form-label">@L["Sede"]</label>
+                    <select id="cboSede" class="form-select">
+                        <option value="">@L["Cualquiera"]</option>
+                        @foreach (var s in sedes)
+                        {
+                            <option value="@s.ID">@s.nombre_sede</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="cboMinisterio" class="form-label">@L["Ministerio"]</label>
+                    <select id="cboMinisterio" class="form-select">
+                        <option value="">@L["Cualquiera"]</option>
+                        @foreach (var m in ministerios)
+                        {
+                            <option value="@m.ID">@m.Descripcion</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="txtImporte" class="form-label">@L["Importe presupuestado"] <span class="text-danger">*</span></label>
+                    <input type="number" step="0.01" class="form-control" id="txtImporte" />
+                </div>
+                <div class="mb-3">
+                    <label for="txtNotas" class="form-label">@L["Notas"]</label>
+                    <input type="text" class="form-control" id="txtNotas" maxlength="500" />
+                </div>
+
+                <div id="errorLinea" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarLinea()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            importeMayorCero: @Json.Serialize(L["El importe presupuestado tiene que ser mayor que cero."].Value),
+            confirmarBorrarLinea: @Json.Serialize(L["¿Eliminar esta línea?"].Value)
+        });
+
+        const ID_PRESUPUESTO = @Model.Presupuesto!.id;
+
+        function abrirModalLinea(linea) {
+            $('#errorLinea').addClass('d-none').text('');
+            $('#txtIdLinea').val(linea ? linea.id : 0);
+            $('#cboCuenta').val(linea && linea.ledger_account_id ? linea.ledger_account_id : '');
+            $('#cboFondo').val(linea && linea.fund_id ? linea.fund_id : '');
+            $('#cboSede').val(linea && linea.site_id ? linea.site_id : '');
+            $('#cboMinisterio').val(linea && linea.ministry_id ? linea.ministry_id : '');
+            $('#txtImporte').val(linea ? linea.presupuestado : '');
+            $('#txtNotas').val(linea && linea.notas ? linea.notas : '');
+
+            new bootstrap.Modal(document.getElementById('modalLinea')).show();
+        }
+
+        $(document).on('click', '.btn-editar-linea', function () {
+            abrirModalLinea($(this).data('linea'));
+        });
+
+        $(document).on('click', '.btn-borrar-linea', function () {
+            const id = $(this).data('id');
+            Swal.fire({
+                title: T.confirmarBorrarLinea, icon: 'warning', showCancelButton: true,
+                confirmButtonText: T.siEliminar, cancelButtonText: T.no
+            }).then(function (r) {
+                if (!r.isConfirmed) return;
+                $.post('@Url.Action("EliminarLinea", "FinanzasPresupuestos")', {
+                    id: id,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                }, function (respuesta) {
+                    if (respuesta.resultado) { location.reload(); }
+                    else { Swal.fire(T.error, respuesta.mensaje, 'error'); }
+                }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+            });
+        });
+
+        function guardarLinea() {
+            const importe = parseFloat($('#txtImporte').val()) || 0;
+            if (importe <= 0) { errorLinea(T.importeMayorCero); return; }
+
+            const datos = {
+                id: $('#txtIdLinea').val(),
+                budget_id: ID_PRESUPUESTO,
+                ledger_account_id: $('#cboCuenta').val() || '',
+                fund_id: $('#cboFondo').val() || '',
+                site_id: $('#cboSede').val() || '',
+                ministry_id: $('#cboMinisterio').val() || '',
+                amount: importe,
+                notes: $('#txtNotas').val(),
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            };
+
+            $.post('@Url.Action("GuardarLinea", "FinanzasPresupuestos")', datos, function (respuesta) {
+                if (respuesta.resultado) { location.reload(); }
+                else { errorLinea(respuesta.mensaje); }
+            }).fail(function () { errorLinea(T.mErrorConexionPunto); });
+        }
+
+        function errorLinea(texto) {
+            $('#errorLinea').removeClass('d-none').text(texto);
+        }
+    </script>
+}

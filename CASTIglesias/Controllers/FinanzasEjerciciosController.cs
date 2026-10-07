@@ -1,5 +1,6 @@
-using CapaEntidad.Financiero;
+﻿using CapaEntidad.Financiero;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using CASTIglesias.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,6 +67,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Guardar(FiscalYear ejercicio)
         {
             int id = _negocioEjercicios.Guardar(ejercicio, out string mensaje);
@@ -74,6 +76,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult GenerarPeriodos(int idEjercicio)
         {
             bool hecho = _negocioEjercicios.GenerarPeriodosMensuales(idEjercicio, out string mensaje);
@@ -82,6 +85,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Abrir(int id)
         {
             bool hecho = _negocioEjercicios.Abrir(id, out string mensaje);
@@ -90,6 +94,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Cerrar(int id)
         {
             bool hecho = _negocioEjercicios.Cerrar(id, SesionClaims.ObtenerIdUsuario(User), out string mensaje);
@@ -98,6 +103,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Eliminar(int id)
         {
             bool hecho = _negocioEjercicios.Eliminar(id, out string mensaje);
@@ -106,6 +112,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult AbrirPeriodo(int id)
         {
             bool hecho = _negocioEjercicios.AbrirPeriodo(id, out string mensaje);
@@ -114,6 +121,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult CerrarPeriodo(int id)
         {
             bool hecho = _negocioEjercicios.CerrarPeriodo(id, SesionClaims.ObtenerIdUsuario(User), out string mensaje);

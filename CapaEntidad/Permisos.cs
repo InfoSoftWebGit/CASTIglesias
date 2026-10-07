@@ -101,5 +101,52 @@ namespace CapaEntidad
         public bool Ajustes { get; set; }
         public bool AjustesCrearEditar { get; set; }
         public bool AjustesEliminar { get; set; }
+
+        // ── Área financiera ──────────────────────────────────────────────────
+        // No siguen el patrón Ver/CrearEditar/Eliminar de los módulos de arriba, y es
+        // a propósito: aquí lo que hay que separar no son esas tres cosas, sino quién
+        // puede apuntar, quién puede meterlo en la contabilidad y quién puede ver lo
+        // que ha dado cada persona. Un permiso "eliminar" para asientos no existiría:
+        // lo contabilizado no se borra, se revierte.
+        //
+        // Los roles con acceso total los reciben solos (ObtenerPermisosTotales los
+        // pone todos a true por reflexión), así que añadirlos no cierra la puerta a
+        // nadie que hoy entre.
+
+        /// <summary>Entrar al área financiera y ver el panel y los informes.</summary>
+        public bool FinanzasVer { get; set; }
+
+        /// <summary>Registrar y editar ingresos, aportaciones y gastos.</summary>
+        public bool FinanzasOperacionesCrearEditar { get; set; }
+
+        /// <summary>Borrar operaciones que aún no se han contabilizado.</summary>
+        public bool FinanzasOperacionesEliminar { get; set; }
+
+        /// <summary>
+        /// Llevar una operación a la contabilidad. Es la frontera que importa: desde
+        /// ese momento el apunte ya no se puede editar ni borrar.
+        /// </summary>
+        public bool FinanzasContabilizar { get; set; }
+
+        /// <summary>Revertir un asiento ya contabilizado.</summary>
+        public bool FinanzasRevertir { get; set; }
+
+        /// <summary>
+        /// Tocar la configuración: plan de cuentas, cajas, fondos, conceptos, reglas de
+        /// contabilización, numeraciones, plantillas y ejercicios.
+        /// </summary>
+        public bool FinanzasConfiguracion { get; set; }
+
+        /// <summary>Aprobar o rechazar operaciones pendientes.</summary>
+        public bool FinanzasAprobar { get; set; }
+
+        /// <summary>
+        /// Ver qué ha aportado cada persona con nombre y apellidos, y sus certificados.
+        /// </summary>
+        /// <remarks>
+        /// Es el permiso más delicado del módulo: es información personal sensible de
+        /// los miembros, no un dato contable más.
+        /// </remarks>
+        public bool FinanzasDonantes { get; set; }
     }
 }

@@ -1,0 +1,194 @@
+@{
+    ViewBag.Title = L["Auditoría"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var tiposEvento = ViewBag.TiposEvento as List<string> ?? new List<string>();
+    var tiposEntidad = ViewBag.TiposEntidad as List<string> ?? new List<string>();
+    int tope = ViewBag.Tope;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Auditoría"]</li>
+</ol>
+
+<div class="alert alert-secondary d-flex align-items-start">
+    <i class="fas fa-shield-halved me-2 mt-1"></i>
+    <div>
+        <strong>@L["Este registro no se puede modificar ni borrar."]</strong>
+        @L["Cada contabilización, reversión y transferencia deja aquí constancia de quién la hizo y cuándo, dentro de la misma operación que la guardó."]
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Filtros"]</div>
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+            <div class="col-sm-6 col-lg-2">
+                <label for="desde" class="form-label">@L["Desde"]</label>
+                <input type="date" id="desde" class="form-control" />
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="hasta" class="form-label">@L["Hasta"]</label>
+                <input type="date" id="hasta" class="form-control" />
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label for="tipoEvento" class="form-label">@L["Tipo de evento"]</label>
+                <select id="tipoEvento" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    @foreach (var t in tiposEvento)
+                    {
+                        <option value="@t">@CapaNegocio.CN_Auditoria.DescribirEvento(t)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="tipoEntidad" class="form-label">@L["Afecta a"]</label>
+                <select id="tipoEntidad" class="form-select">
+                    <option value="">@L["Todo"]</option>
+                    @foreach (var t in tiposEntidad)
+                    {
+                        <option value="@t">@CapaNegocio.CN_Auditoria.DescribirEntidad(t)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="idUsuario" class="form-label">@L["Usuario"]</label>
+                <select id="idUsuario" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-1">
+                <button type="button" id="btnFiltrar" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="avisoTope" class="alert alert-warning d-none">
+    <i class="fas fa-triangle-exclamation me-1"></i>
+    <span id="textoTope"></span>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-clipboard-list me-1"></i> @L["Registro de actividad"]</div>
+    <div class="table-responsive">
+        <table id="tablaAuditoria" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Cuándo"]</th>
+                    <th>@L["Qué pasó"]</th>
+                    <th>@L["Afecta a"]</th>
+                    <th>@L["Usuario"]</th>
+                    <th>@L["Sede"]</th>
+                    <th>@L["Detalle"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro y avisaría de un parámetro desconocido. El mensaje de
+               tabla vacía lo pone language.emptyTable. *@
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        var T = {
+            sinDetalle: @Json.Serialize(L["Sin detalle"].Value),
+            tope: @Json.Serialize(L["Se enseñan los {0} registros más recientes de {1} que cumplen el filtro. Acota las fechas para ver el resto."].Value),
+            vacio: @Json.Serialize(L["No hay actividad registrada con esos filtros."].Value),
+            todos: @Json.Serialize(L["Todos"].Value)
+        };
+
+        $(document).ready(function () {
+
+            // Los usuarios del filtro se piden una sola vez al abrir
+            $.get('@Url.Action("Usuarios", "FinanzasAuditoria")', function (res) {
+                var select = $('#idUsuario');
+                $.each(res.data, function (i, u) {
+                    select.append($('<option>').val(u.ID_usuario).text(u.nombre_usuario));
+                });
+            });
+
+            var tabla = $('#tablaAuditoria').DataTable({
+                responsive: true,
+                pageLength: 25,
+                order: [[0, 'desc']],
+                ajax: {
+                    url: '@Url.Action("Listar", "FinanzasAuditoria")',
+                    data: function (d) {
+                        d.desde = $('#desde').val();
+                        d.hasta = $('#hasta').val();
+                        d.tipoEvento = $('#tipoEvento').val();
+                        d.tipoEntidad = $('#tipoEntidad').val();
+                        d.idUsuario = $('#idUsuario').val();
+                    },
+                    dataSrc: function (res) {
+                        // Aviso de tope: sin esto, alguien podría dar por hecho que no
+                        // existen más registros que los que la tabla enseña.
+                        if (res.total > res.tope) {
+                            $('#textoTope').text(
+                                T.tope.replace('{0}', res.tope).replace('{1}', res.total));
+                            $('#avisoTope').removeClass('d-none');
+                        } else {
+                            $('#avisoTope').addClass('d-none');
+                        }
+                        return res.data;
+                    }
+                },
+                columns: [
+                    {
+                        data: 'cuando',
+                        render: function (d) {
+                            if (!d) return '';
+                            // La hora se guarda en UTC; toLocaleString la pasa a la del
+                            // navegador, que es la que el usuario reconoce.
+                            var f = new Date(d);
+                            return f.toLocaleString();
+                        }
+                    },
+                    {
+                        data: 'evento',
+                        render: function (d, t, row) {
+                            if (t !== 'display') return d;
+                            return '<span class="badge bg-' + row.color + '">' + d + '</span>';
+                        }
+                    },
+                    {
+                        data: 'entidad',
+                        render: function (d, t, row) {
+                            if (t !== 'display') return d;
+                            return d + (row.entity_id ? ' <span class="text-muted">#' + row.entity_id + '</span>' : '');
+                        }
+                    },
+                    { data: 'usuario', defaultContent: '' },
+                    { data: 'sede', defaultContent: '' },
+                    {
+                        data: 'metadata_json',
+                        orderable: false,
+                        render: function (d, t) {
+                            if (t !== 'display') return d || '';
+                            if (!d) return '<span class="text-muted">' + T.sinDetalle + '</span>';
+                            // El metadato es un JSON corto que graba el motor. Se enseña
+                            // en crudo pero escapado: nunca se inyecta como HTML.
+                            return '<code class="small">' + $('<div>').text(d).html() + '</code>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.vacio
+                }
+            });
+
+            $('#btnFiltrar').on('click', function () { tabla.ajax.reload(); });
+        });
+    </script>
+}

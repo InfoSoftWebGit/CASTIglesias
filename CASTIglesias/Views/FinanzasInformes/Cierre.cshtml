@@ -1,0 +1,239 @@
+@using CapaEntidad.Financiero
+@model CapaNegocio.CN_Informes.PropuestaCierreDTO
+@{
+    ViewBag.Title = L["Cierre del ejercicio"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var ejercicios = ViewBag.Ejercicios as List<FiscalYear> ?? new List<FiscalYear>();
+    int? ejercicioID = ViewBag.EjercicioID;
+    bool sinEjercicios = ViewBag.SinEjercicios ?? false;
+
+    ViewBag.TituloInforme = L["Cierre del ejercicio"].Value;
+    ViewBag.TablaExportable = "tablaCierre";
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Cierre del ejercicio"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start d-print-none">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Congrega calcula el resultado y te dice qué falta por hacer, pero no cierra el ejercicio ni genera asientos de cierre por su cuenta."]
+        <div class="mt-1">
+            <strong>@L["La aplicación propone y tu asesoría valida."]</strong>
+        </div>
+    </div>
+</div>
+
+@if (sinEjercicios)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        @L["Todavía no hay ningún ejercicio creado."]
+    </div>
+    @* Sin ejercicio no hay nada que calcular, así que el resto de la pantalla
+       no se pinta. Va con else y no con un return dentro del if: después de
+       emitir HTML, Razor está en modo markup y escribiría "return;" como texto
+       en la página en vez de salirse de la vista. *@
+}
+else
+{
+<div class="card mb-4 d-print-none">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Ejercicio"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-6">
+                <label for="ejercicioID" class="form-label">@L["Ejercicio"]</label>
+                <select name="ejercicioID" id="ejercicioID" class="form-select">
+                    @foreach (var e in ejercicios)
+                    {
+                        <option value="@e.id" selected="@(e.id == ejercicioID)">
+                            @e.code (@e.start_date.ToShortDateString() - @e.end_date.ToShortDateString())
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AccionesInforme")
+
+<div class="cabecera-impresion mb-3">
+    <h4>@L["Propuesta de cierre"]</h4>
+    @if (Model.Ejercicio != null)
+    {
+        <div>@L["Ejercicio"] @Model.Ejercicio.code</div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-lg-5 mb-4">
+        <div class="card h-100">
+            <div class="card-header @(Model.EsExcedente ? "bg-success" : "bg-danger") text-white">
+                <i class="fas fa-calculator me-1"></i>
+                @(Model.EsExcedente ? L["Excedente del ejercicio"] : L["Déficit del ejercicio"])
+            </div>
+            <div class="card-body text-center">
+                <div class="display-5 fw-bold @(Model.EsExcedente ? "text-success" : "text-danger")">
+                    @Model.Resultado.ToString("N2") €
+                </div>
+                <table id="tablaCierre" class="table table-sm mt-3 mb-0">
+                    <tr>
+                        <td class="text-start">@L["Total ingresos"]</td>
+                        <td class="text-end">@Model.Resultados.Ingresos.Total.ToString("N2") €</td>
+                    </tr>
+                    <tr>
+                        <td class="text-start">@L["Total gastos"]</td>
+                        <td class="text-end">@Model.Resultados.Gastos.Total.ToString("N2") €</td>
+                    </tr>
+                    <tr class="fw-bold border-top">
+                        <td class="text-start">@L["Resultado"]</td>
+                        <td class="text-end">@Model.Resultado.ToString("N2") €</td>
+                    </tr>
+                    <tr>
+                        <td class="text-start">@L["Total activo"]</td>
+                        <td class="text-end">@Model.Balance.TotalActivo.ToString("N2") €</td>
+                    </tr>
+                    <tr>
+                        <td class="text-start">@L["Total pasivo y patrimonio"]</td>
+                        <td class="text-end">@Model.Balance.TotalPasivoYPatrimonio.ToString("N2") €</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-list-check me-1"></i> @L["Antes de cerrar"]</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex align-items-start">
+                        @if (Model.SinContabilizar.Count == 0)
+                        {
+                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                            <div>@L["Todas las operaciones están contabilizadas."]</div>
+                        }
+                        else
+                        {
+                            <i class="fas fa-triangle-exclamation text-warning me-2 mt-1"></i>
+                            <div>
+                                <strong>@Model.SinContabilizar.Count @L["operaciones sin contabilizar."]</strong>
+                                <div class="small text-muted">
+                                    @L["Es dinero que se movió y no está en la contabilidad, así que el resultado de arriba está incompleto."]
+                                </div>
+                                <div class="mt-1">
+                                    <a href="@Url.Action("Ingresos", "FinanzasOperaciones")" class="btn btn-sm btn-outline-warning">
+                                        @L["Ir a Ingresos"]
+                                    </a>
+                                    <a href="@Url.Action("Gastos", "FinanzasOperaciones")" class="btn btn-sm btn-outline-warning">
+                                        @L["Ir a Gastos"]
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </li>
+                    <li class="list-group-item d-flex align-items-start">
+                        @if (Model.PeriodosAbiertos.Count == 0)
+                        {
+                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                            <div>@L["Todos los periodos están cerrados."]</div>
+                        }
+                        else
+                        {
+                            <i class="fas fa-triangle-exclamation text-warning me-2 mt-1"></i>
+                            <div>
+                                <strong>@Model.PeriodosAbiertos.Count @L["periodos siguen abiertos."]</strong>
+                                <div class="small text-muted">
+                                    @L["Un periodo abierto admite movimientos, así que las cifras podrían cambiar después de cerrar."]
+                                </div>
+                                <div class="mt-1">
+                                    <a href="@Url.Action("Index", "FinanzasEjercicios")" class="btn btn-sm btn-outline-warning">
+                                        @L["Ir a Ejercicios y periodos"]
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </li>
+                    <li class="list-group-item d-flex align-items-start">
+                        @if (Model.Balance.Cuadra)
+                        {
+                            <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                            <div>@L["El balance cuadra."]</div>
+                        }
+                        else
+                        {
+                            <i class="fas fa-circle-xmark text-danger me-2 mt-1"></i>
+                            <div>
+                                <strong>@L["El balance no cuadra."]</strong>
+                                @L["Diferencia:"] @Model.Balance.Descuadre.ToString("N2") €.
+                            </div>
+                        }
+                    </li>
+                </ul>
+
+                <div class="alert @(Model.ListoParaCerrar ? "alert-success" : "alert-warning") mt-3 mb-0">
+                    @if (Model.ListoParaCerrar)
+                    {
+                        <i class="fas fa-flag-checkered me-2"></i>
+                        <span>
+                            @L["Todo listo. Puedes cerrar el ejercicio desde Configuración → Ejercicios y periodos."]
+                        </span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-hourglass-half me-2"></i>
+                        <span>@L["Resuelve primero lo que está marcado arriba."]</span>
+                    }
+                </div>
+
+                <div class="small text-muted mt-3">
+                    <i class="fas fa-circle-info me-1"></i>
+                    @L["El asiento de regularización que lleva el resultado a patrimonio no lo genera Congrega: las cuentas que intervienen dependen del país y de tu asesoría."]
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.SinContabilizar.Count > 0)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-warning">
+            <i class="fas fa-triangle-exclamation me-1"></i> @L["Operaciones sin contabilizar"]
+        </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>@L["Número"]</th>
+                        <th>@L["Fecha"]</th>
+                        <th>@L["Descripción"]</th>
+                        <th class="importe">@L["Importe"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var op in Model.SinContabilizar)
+                    {
+                        <tr>
+                            <td>@op.transaction_number</td>
+                            <td>@op.operation_date.ToShortDateString()</td>
+                            <td>@op.description</td>
+                            <td class="importe">@op.total_amount.ToString("N2") €</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+}

@@ -1,0 +1,254 @@
+@using CapaEntidad
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Transferencias entre sedes"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cajas = ViewBag.Cajas as List<TreasuryAccount> ?? new List<TreasuryAccount>();
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Transferencias entre sedes"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Mover dinero de una sede a otra no es un gasto ni un ingreso: el dinero no sale de la iglesia, solo cambia de sitio."]
+        <div class="mt-1">
+            @L["Por eso una transferencia genera un único asiento de caja contra caja y no aparece en la Cuenta de Resultados."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-right-left me-1"></i> @L["Transferencias"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalTransferencia()">
+            <i class="fas fa-plus me-1"></i> @L["Nueva transferencia"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaTransferencias" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Número"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Origen"]</th>
+                    <th>@L["Destino"]</th>
+                    <th>@L["Importe"]</th>
+                    <th>@L["Descripción"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL TRANSFERENCIA -->
+<div class="modal fade" id="modalTransferencia" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title">@L["Nueva transferencia"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtFecha" class="form-label">@L["Fecha"] <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFecha" />
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtImporte" class="form-label">@L["Importe"] <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="txtImporte" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light"><i class="fas fa-arrow-up me-1"></i> @L["Sale de"]</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="cboSedeOrigen" class="form-label">@L["Sede"] <span class="text-danger">*</span></label>
+                                    <select id="cboSedeOrigen" class="form-select">
+                                        @foreach (var s in sedes)
+                                        {
+                                            <option value="@s.ID">@s.nombre_sede</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cboCajaOrigen" class="form-label">@L["Caja o banco"] <span class="text-danger">*</span></label>
+                                    <select id="cboCajaOrigen" class="form-select">
+                                        @foreach (var c in cajas)
+                                        {
+                                            <option value="@c.id">@c.code · @c.name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="cboFondoOrigen" class="form-label">@L["Fondo"]</label>
+                                    <select id="cboFondoOrigen" class="form-select">
+                                        <option value="">@L["Sin fondo"]</option>
+                                        @foreach (var f in fondos)
+                                        {
+                                            <option value="@f.id">@f.name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light"><i class="fas fa-arrow-down me-1"></i> @L["Entra en"]</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="cboSedeDestino" class="form-label">@L["Sede"] <span class="text-danger">*</span></label>
+                                    <select id="cboSedeDestino" class="form-select">
+                                        @foreach (var s in sedes)
+                                        {
+                                            <option value="@s.ID">@s.nombre_sede</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cboCajaDestino" class="form-label">@L["Caja o banco"] <span class="text-danger">*</span></label>
+                                    <select id="cboCajaDestino" class="form-select">
+                                        @foreach (var c in cajas)
+                                        {
+                                            <option value="@c.id">@c.code · @c.name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="cboFondoDestino" class="form-label">@L["Fondo"]</label>
+                                    <select id="cboFondoDestino" class="form-select">
+                                        <option value="">@L["Sin fondo"]</option>
+                                        @foreach (var f in fondos)
+                                        {
+                                            <option value="@f.id">@f.name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="txtDescripcion" class="form-label">@L["Descripción"]</label>
+                    <input type="text" class="form-control" id="txtDescripcion" maxlength="500" />
+                </div>
+
+                <div id="errorTransferencia" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarTransferencia()">@L["Guardar y contabilizar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            importeMayorCero: @Json.Serialize(L["El importe tiene que ser mayor que cero."].Value),
+            fechaObligatoria: @Json.Serialize(L["La fecha es obligatoria."].Value),
+            mismaCaja:        @Json.Serialize(L["El origen y el destino son la misma caja."].Value)
+        });
+
+        const FORMATO = new Intl.NumberFormat(document.documentElement.lang || 'es', {
+            style: 'currency', currency: 'EUR'
+        });
+
+        let tablaTransferencias;
+
+        $(document).ready(function () {
+            tablaTransferencias = $('#tablaTransferencias').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasTransferencias")', dataSrc: 'data' },
+                columns: [
+                    { data: 'transfer_number' },
+                    {
+                        data: 'requested_date',
+                        render: function (v) { return v ? v.substring(0, 10).split('-').reverse().join('/') : ''; }
+                    },
+                    {
+                        data: null,
+                        render: function (f) { return f.sede_origen + '<br><small class="text-muted">' + f.caja_origen + '</small>'; }
+                    },
+                    {
+                        data: null,
+                        render: function (f) { return f.sede_destino + '<br><small class="text-muted">' + f.caja_destino + '</small>'; }
+                    },
+                    {
+                        data: 'amount', className: 'text-end',
+                        render: function (v, tipo) { return tipo === 'display' ? FORMATO.format(v || 0) : (v || 0); }
+                    },
+                    { data: 'description' }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+        });
+
+        function abrirModalTransferencia() {
+            $('#errorTransferencia').addClass('d-none').text('');
+            $('#txtFecha').val(new Date().toISOString().substring(0, 10));
+            $('#txtImporte').val('');
+            $('#txtDescripcion').val('');
+            new bootstrap.Modal(document.getElementById('modalTransferencia')).show();
+        }
+
+        function guardarTransferencia() {
+            const fecha = $('#txtFecha').val();
+            const importe = parseFloat($('#txtImporte').val()) || 0;
+
+            if (!fecha) { errorTransferencia(T.fechaObligatoria); return; }
+            if (importe <= 0) { errorTransferencia(T.importeMayorCero); return; }
+            if ($('#cboCajaOrigen').val() === $('#cboCajaDestino').val()) {
+                errorTransferencia(T.mismaCaja); return;
+            }
+
+            const datos = {
+                requested_date: fecha,
+                amount: importe,
+                origin_site_id: $('#cboSedeOrigen').val(),
+                destination_site_id: $('#cboSedeDestino').val(),
+                origin_treasury_account_id: $('#cboCajaOrigen').val(),
+                destination_treasury_account_id: $('#cboCajaDestino').val(),
+                origin_fund_id: $('#cboFondoOrigen').val() || '',
+                destination_fund_id: $('#cboFondoDestino').val() || '',
+                description: $('#txtDescripcion').val(),
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            };
+
+            $.post('@Url.Action("Guardar", "FinanzasTransferencias")', datos, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalTransferencia')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 2200, showConfirmButton: false });
+                    tablaTransferencias.ajax.reload(null, false);
+                } else {
+                    errorTransferencia(respuesta.mensaje);
+                }
+            }).fail(function () { errorTransferencia(T.mErrorConexionPunto); });
+        }
+
+        function errorTransferencia(texto) {
+            $('#errorTransferencia').removeClass('d-none').text(texto);
+        }
+    </script>
+}

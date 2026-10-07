@@ -96,5 +96,33 @@ namespace CapaNegocio
             return _capaDatos.BuscarGruposPorNombre(sedeID, nombre);
         }
 
+        /// <summary>
+        /// Número de miembros por grupo (clave = ID del grupo), para el aviso de
+        /// grupo demasiado grande en el listado.
+        /// </summary>
+        public Dictionary<int, int> ContarMiembrosPorGrupo(int sedeID)
+        {
+            return _capaDatos.ContarMiembrosPorGrupo(sedeID);
+        }
+
+        /// <summary>
+        /// Detalle de un grupo para la ficha desplegable de la pantalla de Grupos:
+        /// sus encargados (nombre y apellidos) y los miembros que pertenecen a él.
+        /// Devuelve false en <paramref name="encontrado"/> si el grupo no existe o no
+        /// pertenece a la sede del usuario.
+        /// </summary>
+        public (bool encontrado, List<MiembroZonaDTO> encargados, List<MiembroZonaDTO> miembros)
+            ObtenerDetalleGrupo(int idGrupo, int sedeID)
+        {
+            var grupo = _capaDatos.ObtenerGrupo(idGrupo, sedeID);
+
+            if (grupo == null)
+                return (false, new List<MiembroZonaDTO>(), new List<MiembroZonaDTO>());
+
+            return (true,
+                    _capaDatos.ResolverEncargados(grupo.Encargados, sedeID),
+                    _capaDatos.ListarMiembrosDeGrupo(idGrupo, sedeID));
+        }
+
     }
 }

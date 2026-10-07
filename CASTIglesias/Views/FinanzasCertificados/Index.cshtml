@@ -1,0 +1,107 @@
+@using CapaDatos
+@model List<CD_Certificados.ResumenDonanteDTO>
+@{
+    ViewBag.Title = L["Certificados de aportaciones"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var anios = ViewBag.Anios as List<int> ?? new List<int>();
+    int anio = ViewBag.Anio;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Certificados de aportaciones"]</li>
+</ol>
+
+<div class="alert alert-warning d-flex align-items-start">
+    <i class="fas fa-lock me-2 mt-1"></i>
+    <div>
+        <strong>@L["Información reservada."]</strong>
+        @L["Lo que ha aportado cada persona solo lo pueden ver el tesorero, el administrador financiero y el pastor principal."]
+        <div class="mt-1">
+            @L["El certificado acredita lo aportado, pero no tiene efectos fiscales: no desgrava ni sustituye a ningún documento de Hacienda."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Año"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-4">
+                <label for="anio" class="form-label">@L["Año"]</label>
+                <select name="anio" id="anio" class="form-select">
+                    @foreach (var a in anios)
+                    {
+                        <option value="@a" selected="@(a == anio)">@a</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-hand-holding-heart me-1"></i>
+        @L["Aportaciones de"] @anio
+    </div>
+    <div class="table-responsive">
+        <table id="tablaDonantes" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Donante"]</th>
+                    <th>@L["Aportaciones"]</th>
+                    <th>@L["Total"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese
+               colspan como si fuera un registro, encontraría una celda donde espera
+               cuatro y avisaría de un parámetro desconocido. El mensaje de tabla
+               vacía lo pone DataTables con language.emptyTable, más abajo. *@
+            <tbody>
+                @foreach (var d in Model)
+                {
+                    <tr>
+                        <td>@d.donante</td>
+                        <td class="text-end">@d.aportaciones</td>
+                        <td class="text-end">@d.total.ToString("N2") €</td>
+                        <td class="text-center">
+                            <a class="btn btn-sm btn-info"
+                               href="@Url.Action("Certificado", "FinanzasCertificados", new { idTercero = d.party_id, anio })"
+                               title="@L["Ver el certificado"]">
+                                <i class="fas fa-file-lines"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#tablaDonantes').DataTable({
+                responsive: true,
+                pageLength: 25,
+                columnDefs: [{ targets: [1, 2], className: 'text-end' }, { targets: 3, orderable: false }],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: @Json.Serialize(L["No hay aportaciones nominativas contabilizadas en este año."].Value)
+                }
+            });
+        });
+    </script>
+}

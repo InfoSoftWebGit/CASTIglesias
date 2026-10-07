@@ -166,6 +166,9 @@ namespace CapaPresentaciónAdmin.Controllers
                 int sedeID = ObtenerIdSedeUsuario();
                 var oListaGrupos = _cnGrupos.ListarGrupos(sedeID);
                 var oListaZonas = _cnZonas.ListarZonas(sedeID);
+                // Miembros por grupo en una sola consulta: la vista avisa cuando un grupo
+                // se hace demasiado grande y conviene abrir otro en la misma zona.
+                var totalesMiembros = _cnGrupos.ContarMiembrosPorGrupo(sedeID);
 
                 var data = oListaGrupos.Select(g => new
                 {
@@ -174,7 +177,8 @@ namespace CapaPresentaciónAdmin.Controllers
                     g.Encargados,
                     g.ID_zona,
                     g.ID_sede,
-                    nombre_zona = oListaZonas.FirstOrDefault(z => z.ID_zona == g.ID_zona)?.nombre_zona ?? ""
+                    nombre_zona = oListaZonas.FirstOrDefault(z => z.ID_zona == g.ID_zona)?.nombre_zona ?? "",
+                    total_miembros = totalesMiembros.TryGetValue(g.ID_grupo, out int total) ? total : 0
                 });
 
                 return Json(new { data });
@@ -182,6 +186,28 @@ namespace CapaPresentaciónAdmin.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        // Ficha que se despliega al pulsar sobre la fila de un grupo: encargados
+        // (nombre y apellidos) y miembros asignados a ese grupo.
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Grupos))]
+        public JsonResult DetalleGrupo(int idGrupo)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var (encontrado, encargados, miembros) = _cnGrupos.ObtenerDetalleGrupo(idGrupo, sedeID);
+
+                if (!encontrado)
+                    return Json(new { error = true, mensaje = "Grupo no encontrado." });
+
+                return Json(new { encargados, miembros });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { error = true, mensaje = ErrorHelper.Mensaje(ex) });
             }
         }
 

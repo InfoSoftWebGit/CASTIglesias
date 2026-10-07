@@ -54,6 +54,22 @@ namespace CASTIglesias.Controllers
                 return;
             }
 
+            // Permiso de entrada al área (punto 3.2). Se comprueba AQUÍ y no con
+            // [RequierePermiso] en cada controlador por el mismo motivo que el módulo:
+            // así cualquier pantalla financiera que se añada en el futuro queda
+            // protegida sin que haya que acordarse de nada.
+            //
+            // Esto solo cierra la puerta de entrada. Lo que se puede HACER dentro
+            // (contabilizar, revertir, aprobar, configurar, ver donantes) lleva su
+            // propio permiso en cada acción, porque un tesorero puede necesitar
+            // apuntar sin poder tocar el plan de cuentas.
+            if (!TienePermiso(nameof(CapaEntidad.Permisos.FinanzasVer)))
+            {
+                context.Result = Filters.RequierePermisoAttribute
+                    .RespuestaSinPermiso(HttpContext, this);
+                return;
+            }
+
             // Lo lee el _Layout para pintar el menú financiero en vez del habitual
             ViewBag.AreaFinanciera = true;
         }

@@ -41,6 +41,162 @@ namespace CapaDatos
                 return new List<Grupos>();
             }
         }
+        /// <summary>
+        /// Miembros asignados a un grupo. La relación vive en la tabla puente
+        /// miembro_zona_grupo_ministerio, no en la propia tabla de miembros.
+        /// </summary>
+        /// <param name="sedeID">Sede del usuario (1000 = Admin Global, ve todas).</param>
+        public List<MiembroZonaDTO> ListarMiembrosDeGrupo(int idGrupo, int sedeID)
+        {
+            try
+            {
+                var query = from mzgm in _context.Miembros_Zona_Grupo_Ministerio
+                            join m in _context.Miembros on mzgm.ID_miembro equals m.id_miembro
+                            where mzgm.ID_grupo == idGrupo
+                                  && (sedeID == 1000 || mzgm.ID_sede == sedeID)
+                            select new MiembroZonaDTO
+                            {
+                                id_miembro = m.id_miembro,
+                                id_zgm = mzgm.ID,
+                                nombre_miembro = m.nombre_miembro,
+                                apellidos_miembro = m.apellidos_miembro,
+                                telefono_movil = m.telefono_movil,
+                                edad = m.edad,
+                                id_grupo = mzgm.ID_grupo,
+                                estado = m.estado
+                            };
+
+                // Un mismo miembro puede tener varias filas en la puente (zona, grupo,
+                // ministerio), así que se deja una sola por miembro.
+                return query.ToList()
+                            .DistinctBy(x => x.id_miembro)
+                            .OrderBy(x => x.nombre_miembro)
+                            .ThenBy(x => x.apellidos_miembro)
+                            .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al listar los miembros del grupo: {ErrorHelper.Mensaje(ex)}");
+                return new List<MiembroZonaDTO>();
+            }
+        }
+
+        /// <summary>
+        /// Número de miembros de cada grupo de la sede, en una sola consulta, para no
+        /// pedir el detalle grupo a grupo desde el listado. La clave es el ID del grupo.
+        /// Cuenta igual que ListarMiembrosDeGrupo: un registro por miembro y solo
+        /// miembros que existen de verdad en la tabla de miembros.
+        /// </summary>
+        public Dictionary<int, int> ContarMiembrosPorGrupo(int sedeID)
+        {
+            try
+            {
+                var query = from mzgm in _context.Miembros_Zona_Grupo_Ministerio
+                            join m in _context.Miembros on mzgm.ID_miembro equals m.id_miembro
+                            where mzgm.ID_grupo != 0
+                                  && (sedeID == 1000 || mzgm.ID_sede == sedeID)
+                            select new { mzgm.ID_grupo, mzgm.ID_miembro };
+
+                return query.Distinct()
+                            .GroupBy(x => x.ID_grupo)
+                            .Select(g => new { ID_grupo = g.Key, Total = g.Count() })
+                            .ToDictionary(x => x.ID_grupo, x => x.Total);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al contar los miembros por grupo: {ErrorHelper.Mensaje(ex)}");
+                return new Dictionary<int, int>();
+            }
+        }
+
+        /// <summary>
+        /// Convierte el campo Encargados (texto libre: "Nombre Apellidos" separados por comas)
+        /// en una lista con el nombre y los apellidos por separado. Para lograrlo intenta casar
+        /// cada entrada con un miembro real de la sede; si no hay coincidencia se devuelve el
+        /// texto guardado tal cual (id_miembro = 0) para no perder información.
+        /// </summary>
+        public List<MiembroZonaDTO> ResolverEncargados(string? encargados, int sedeID)
+        {
+            var resultado = new List<MiembroZonaDTO>();
+
+            if (string.IsNullOrWhiteSpace(encargados))
+                return resultado;
+
+            try
+            {
+                var nombres = encargados.Split(',')
+                                        .Select(n => n.Trim())
+                                        .Where(n => n.Length > 0)
+                                        .ToList();
+
+                if (nombres.Count == 0)
+                    return resultado;
+
+                // Se traen los candidatos de la sede y se comparan en memoria: la comparación
+                // es sobre la concatenación nombre + apellidos, que no se puede traducir a SQL
+                // de forma fiable con acentos y espacios de más.
+                var candidatos = _context.Miembros
+                    .Where(m => sedeID == 1000 || m.id_sede == sedeID)
+                    .Select(m => new
+                    {
+                        m.id_miembro,
+                        m.nombre_miembro,
+                        m.apellidos_miembro,
+                        m.telefono_movil,
+                        m.edad,
+                        m.estado
+                    })
+                    .ToList();
+
+                foreach (var nombre in nombres)
+                {
+                    var miembro = candidatos.FirstOrDefault(c =>
+                        string.Equals($"{c.nombre_miembro} {c.apellidos_miembro}".Trim(),
+                                      nombre,
+                                      StringComparison.CurrentCultureIgnoreCase));
+
+                    if (miembro != null)
+                    {
+                        resultado.Add(new MiembroZonaDTO
+                        {
+                            id_miembro = miembro.id_miembro,
+                            nombre_miembro = miembro.nombre_miembro,
+                            apellidos_miembro = miembro.apellidos_miembro,
+                            telefono_movil = miembro.telefono_movil,
+                            edad = miembro.edad,
+                            estado = miembro.estado
+                        });
+                    }
+                    else
+                    {
+                        // Encargado escrito a mano o miembro ya dado de baja: se muestra el texto.
+                        resultado.Add(new MiembroZonaDTO
+                        {
+                            id_miembro = 0,
+                            nombre_miembro = nombre,
+                            apellidos_miembro = ""
+                        });
+                    }
+                }
+
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al resolver los encargados del grupo: {ErrorHelper.Mensaje(ex)}");
+                return resultado;
+            }
+        }
+
+        /// <summary>
+        /// Devuelve un grupo concreto respetando el filtro de sede (1000 = Admin Global).
+        /// </summary>
+        public Grupos? ObtenerGrupo(int idGrupo, int sedeID)
+        {
+            return _context.Grupos
+                .FirstOrDefault(g => g.ID_grupo == idGrupo && (sedeID == 1000 || g.ID_sede == sedeID));
+        }
+
         public List<Grupos> BuscarGruposPorNombre(int sedeID, string nombre)
         {
             var consulta = _context.Grupos.AsQueryable();

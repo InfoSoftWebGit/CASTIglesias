@@ -1,0 +1,236 @@
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Puesta en marcha"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cajas = ViewBag.Cajas as List<TreasuryAccount> ?? new List<TreasuryAccount>();
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    var cuentas = ViewBag.CuentasPatrimonio as List<LedgerAccount> ?? new List<LedgerAccount>();
+    var apertura = ViewBag.Apertura as JournalEntry;
+    var ejercicio = ViewBag.Ejercicio as FiscalYear;
+    DateTime fechaSugerida = ViewBag.FechaSugerida;
+}
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Puesta en marcha"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-flag-checkered me-2 mt-1"></i>
+    <div>
+        @L["La contabilidad no empieza de cero: empieza el día que elijas, con el dinero que ya tienes."]
+        <div class="mt-1">
+            @L["Indica cuánto hay en cada caja y banco a esa fecha y el sistema generará el asiento de apertura. Lo anterior se conserva para consulta, pero no se convierte en asientos."]
+        </div>
+    </div>
+</div>
+
+@if (apertura != null)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle me-2"></i>
+        <strong>@L["La apertura ya está hecha."]</strong>
+        @L["Asiento"] <strong>@apertura.entry_number</strong> @L["con fecha"] @apertura.posting_date.ToShortDateString().
+        <div class="mt-2">
+            <a href="@Url.Action("Index", "FinanzasDiario")" class="btn btn-sm btn-outline-success">
+                @L["Ver en el Libro Diario"]
+            </a>
+        </div>
+        <div class="mt-2 small">
+            @L["Si los saldos estaban mal, hay que revertir ese asiento antes de volver a generarlo."]
+        </div>
+    </div>
+}
+else if (ejercicio == null)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        @L["No hay ningún ejercicio abierto. Créalo en Configuración → Ejercicios y periodos antes de hacer la apertura."]
+    </div>
+}
+else if (cuentas.Count == 0)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <strong>@L["Falta una cuenta de patrimonio."]</strong>
+        @L["El asiento de apertura necesita una cuenta de tipo Patrimonio neto como contrapartida: es donde se refleja que ese dinero viene de antes y no es un ingreso de este ejercicio. Créala en Plan de cuentas."]
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header"><i class="fas fa-calendar-day me-1"></i> @L["Fecha de corte y contrapartida"]</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-sm-4">
+                    <label for="txtFechaCorte" class="form-label">@L["Fecha de corte"] <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="txtFechaCorte" value="@fechaSugerida.ToString("yyyy-MM-dd")" />
+                    <div class="form-text">@L["Normalmente, el primer día del ejercicio."]</div>
+                </div>
+                <div class="col-sm-8">
+                    <label for="cboContrapartida" class="form-label">@L["Cuenta de contrapartida"] <span class="text-danger">*</span></label>
+                    <select id="cboContrapartida" class="form-select">
+                        @foreach (var c in cuentas)
+                        {
+                            <option value="@c.id">@c.code · @c.name</option>
+                        }
+                    </select>
+                    <div class="form-text">@L["Qué cuenta concreta usar lo decide tu asesoría."]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-cash-register me-1"></i> @L["Saldos iniciales"]</span>
+            <button type="button" class="btn btn-sm btn-success" onclick="anadirFila()">
+                <i class="fas fa-plus me-1"></i> @L["Añadir línea"]
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small">
+                @L["Una línea por cada caja o banco. Si en una misma cuenta hay dinero de varios fondos, añade una línea por fondo."]
+            </p>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="tablaSaldos">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:40%">@L["Caja o banco"]</th>
+                            <th style="width:30%">@L["Fondo"]</th>
+                            <th style="width:20%">@L["Saldo"]</th>
+                            <th style="width:10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="2" class="text-end">@L["Total"]</td>
+                            <td id="totalSaldos" class="text-end">0,00 €</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div id="errorApertura" class="alert alert-danger d-none"></div>
+
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary" onclick="generarApertura()">
+                    <i class="fas fa-file-invoice me-1"></i> @L["Generar el asiento de apertura"]
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@Html.AntiForgeryToken()
+
+@section scripts {
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            confirmarApertura: @Json.Serialize(L["¿Generar el asiento de apertura?"].Value),
+            avisoApertura:     @Json.Serialize(L["Solo se hace una vez. Si luego hay que corregirlo, habrá que revertir el asiento."].Value),
+            siGenerar:         @Json.Serialize(L["Sí, generar"].Value),
+            sinSaldos:         @Json.Serialize(L["Añade al menos una línea con importe."].Value),
+            quitar:            @Json.Serialize(L["Quitar"].Value)
+        });
+
+        const CAJAS = @Html.Raw(Json.Serialize(cajas.Select(c => new { c.id, texto = c.code + " · " + c.name })));
+        const FONDOS = @Html.Raw(Json.Serialize(fondos.Select(f => new { f.id, texto = f.name })));
+
+        const FORMATO = new Intl.NumberFormat(document.documentElement.lang || 'es', {
+            style: 'currency', currency: 'EUR'
+        });
+
+        function anadirFila() {
+            let opcionesCaja = CAJAS.map(function (c) {
+                return '<option value="' + c.id + '">' + c.texto + '</option>';
+            }).join('');
+
+            let opcionesFondo = '<option value="">' + @Json.Serialize(L["Sin fondo"].Value) + '</option>' +
+                FONDOS.map(function (f) {
+                    return '<option value="' + f.id + '">' + f.texto + '</option>';
+                }).join('');
+
+            const fila = '<tr>' +
+                '<td><select class="form-select form-select-sm caja">' + opcionesCaja + '</select></td>' +
+                '<td><select class="form-select form-select-sm fondo">' + opcionesFondo + '</select></td>' +
+                '<td><input type="number" step="0.01" class="form-control form-control-sm text-end importe" value="0" /></td>' +
+                '<td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-quitar" title="' + T.quitar + '"><i class="fas fa-trash"></i></button></td>' +
+                '</tr>';
+
+            $('#tablaSaldos tbody').append(fila);
+            recalcular();
+        }
+
+        $(document).on('click', '.btn-quitar', function () {
+            $(this).closest('tr').remove();
+            recalcular();
+        });
+
+        $(document).on('input', '.importe', recalcular);
+
+        function recalcular() {
+            let total = 0;
+            $('#tablaSaldos tbody tr').each(function () {
+                total += parseFloat($(this).find('.importe').val()) || 0;
+            });
+            $('#totalSaldos').text(FORMATO.format(total));
+        }
+
+        function generarApertura() {
+            const saldos = [];
+            $('#tablaSaldos tbody tr').each(function () {
+                const importe = parseFloat($(this).find('.importe').val()) || 0;
+                if (importe === 0) return;   // las líneas a cero no aportan nada al asiento
+                saldos.push({
+                    treasury_account_id: $(this).find('.caja').val(),
+                    fund_id: $(this).find('.fondo').val() || null,
+                    importe: importe
+                });
+            });
+
+            if (saldos.length === 0) { mostrarError(T.sinSaldos); return; }
+
+            Swal.fire({
+                title: T.confirmarApertura, text: T.avisoApertura, icon: 'question',
+                showCancelButton: true, confirmButtonText: T.siGenerar, cancelButtonText: T.no
+            }).then(function (r) {
+                if (!r.isConfirmed) return;
+
+                const datos = {
+                    fechaCorte: $('#txtFechaCorte').val(),
+                    cuentaContrapartida: $('#cboContrapartida').val(),
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                };
+
+                // Las líneas van como saldos[0].campo, que es como el enlazado de
+                // modelos de ASP.NET espera una lista de objetos
+                saldos.forEach(function (s, i) {
+                    datos['saldos[' + i + '].treasury_account_id'] = s.treasury_account_id;
+                    datos['saldos[' + i + '].fund_id'] = s.fund_id || '';
+                    datos['saldos[' + i + '].importe'] = s.importe;
+                });
+
+                $.post('@Url.Action("Generar", "FinanzasApertura")', datos, function (respuesta) {
+                    if (respuesta.resultado) {
+                        Swal.fire({ icon: 'success', title: respuesta.mensaje })
+                            .then(function () { location.reload(); });
+                    } else {
+                        mostrarError(respuesta.mensaje);
+                    }
+                }).fail(function () { mostrarError(T.mErrorConexionPunto); });
+            });
+        }
+
+        function mostrarError(texto) {
+            $('#errorApertura').removeClass('d-none').text(texto);
+        }
+
+        $(document).ready(function () {
+            if ($('#tablaSaldos').length) anadirFila();
+        });
+    </script>
+}

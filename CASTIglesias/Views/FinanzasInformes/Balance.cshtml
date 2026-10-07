@@ -1,0 +1,175 @@
+@using CapaEntidad.Financiero
+@model CapaNegocio.CN_Informes.BalanceDTO
+@{
+    ViewBag.Title = L["Balance de Situación"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    DateTime hasta = ViewBag.Hasta;
+    int? fondoID = ViewBag.FondoID;
+
+    ViewBag.TituloInforme = L["Balance de Situación"].Value;
+    ViewBag.TablaExportable = "tablaBalance";
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Balance de Situación"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start d-print-none">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Una foto a una fecha: a la izquierda lo que la iglesia tiene, a la derecha de dónde ha salido. Los dos lados suman lo mismo, siempre."]
+    </div>
+</div>
+
+<div class="card mb-4 d-print-none">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Filtros"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-4">
+                <label for="hasta" class="form-label">@L["A fecha de"]</label>
+                <input type="date" class="form-control" id="hasta" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-4">
+                <label for="fondoID" class="form-label">@L["Fondo"]</label>
+                <select name="fondoID" id="fondoID" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    @foreach (var f in fondos)
+                    {
+                        <option value="@f.id" selected="@(f.id == fondoID)">@f.name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AccionesInforme")
+
+<div class="cabecera-impresion mb-3">
+    <h4>@L["Balance de Situación"]</h4>
+    <div>@L["A fecha de"] @hasta.ToShortDateString()</div>
+</div>
+
+@if (!Model.Cuadra)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <strong>@L["El balance no cuadra."]</strong>
+        @L["Diferencia:"] @Model.Descuadre.ToString("N2") €.
+        @L["Esto no debería pasar nunca: avisa a soporte antes de seguir registrando."]
+    </div>
+}
+
+<table id="tablaBalance" class="d-none">
+    @* Tabla oculta que solo existe para que el botón de CSV tenga de dónde leer:
+       el informe de abajo se pinta en dos columnas, que es cómodo de leer pero
+       malo de exportar. *@
+    <tr><th>@L["Bloque"]</th><th>@L["Código"]</th><th>@L["Cuenta"]</th><th>@L["Saldo"]</th></tr>
+    @foreach (var c in Model.Activo.Cuentas)
+    {
+        <tr><td>@L["Activo"]</td><td>@c.codigo</td><td>@c.nombre</td><td>@c.saldo.ToString("N2")</td></tr>
+    }
+    <tr><td>@L["Activo"]</td><td></td><td>@L["Total"]</td><td>@Model.TotalActivo.ToString("N2")</td></tr>
+    @foreach (var c in Model.Pasivo.Cuentas)
+    {
+        <tr><td>@L["Pasivo"]</td><td>@c.codigo</td><td>@c.nombre</td><td>@c.saldo.ToString("N2")</td></tr>
+    }
+    @foreach (var c in Model.Patrimonio.Cuentas)
+    {
+        <tr><td>@L["Patrimonio neto"]</td><td>@c.codigo</td><td>@c.nombre</td><td>@c.saldo.ToString("N2")</td></tr>
+    }
+    <tr><td>@L["Patrimonio neto"]</td><td></td><td>@L["Resultado del ejercicio"]</td><td>@Model.ResultadoDelEjercicio.ToString("N2")</td></tr>
+    <tr><td></td><td></td><td>@L["Total pasivo y patrimonio"]</td><td>@Model.TotalPasivoYPatrimonio.ToString("N2")</td></tr>
+</table>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-arrow-down me-1"></i> @L["Activo"]
+                <span class="float-end">@L["Lo que la iglesia tiene"]</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped mb-0">
+                    <tbody>
+                        @if (Model.Activo.Cuentas.Count == 0)
+                        {
+                            <tr><td class="text-muted text-center py-3">@L["Sin saldos."]</td></tr>
+                        }
+                        @foreach (var c in Model.Activo.Cuentas)
+                        {
+                            <tr>
+                                <td>@c.codigo · @c.nombre</td>
+                                <td class="importe">@c.saldo.ToString("N2") €</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td>@L["Total activo"]</td>
+                            <td class="importe">@Model.TotalActivo.ToString("N2") €</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-arrow-up me-1"></i> @L["Pasivo y patrimonio neto"]
+                <span class="float-end">@L["De dónde ha salido"]</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-striped mb-0">
+                    <tbody>
+                        @if (Model.Pasivo.Cuentas.Count > 0)
+                        {
+                            <tr class="table-light"><td colspan="2"><strong>@L["Pasivo"]</strong></td></tr>
+                            @foreach (var c in Model.Pasivo.Cuentas)
+                            {
+                                <tr>
+                                    <td>@c.codigo · @c.nombre</td>
+                                    <td class="importe">@c.saldo.ToString("N2") €</td>
+                                </tr>
+                            }
+                        }
+                        <tr class="table-light"><td colspan="2"><strong>@L["Patrimonio neto"]</strong></td></tr>
+                        @foreach (var c in Model.Patrimonio.Cuentas)
+                        {
+                            <tr>
+                                <td>@c.codigo · @c.nombre</td>
+                                <td class="importe">@c.saldo.ToString("N2") €</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>
+                                <em>@L["Resultado del ejercicio"]</em>
+                                <i class="fas fa-circle-info text-muted ms-1"
+                                   title="@L["Todavía no está en ninguna cuenta de patrimonio porque no se ha hecho el asiento de cierre."]"></i>
+                            </td>
+                            <td class="importe @(Model.ResultadoDelEjercicio < 0 ? "text-danger" : "")">
+                                @Model.ResultadoDelEjercicio.ToString("N2") €
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td>@L["Total pasivo y patrimonio"]</td>
+                            <td class="importe">@Model.TotalPasivoYPatrimonio.ToString("N2") €</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

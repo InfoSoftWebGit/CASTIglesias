@@ -61,11 +61,13 @@ namespace CapaDatos
         public DbSet<UsuarioSede> UsuarioSedes { get; set; }
 
         // ── Módulo financiero ────────────────────────────────────────────────
-        // Las 48 tablas del área financiera. Las 44 que tienen organization_id
+        // Las 48 tablas del área financiera. Las 46 que tienen organization_id
         // implementan ITieneIglesia, así que el filtro global por iglesia se les
         // aplica solo en OnModelCreating, sin listarlas aquí.
-        // Las cuatro restantes (Permission, RolePermission, AccountingTemplate y
-        // AccountingTemplateAccount) son catálogo común a todas las iglesias.
+        // Las dos restantes (Permission y RolePermission) son catálogo común a
+        // todas las iglesias.
+        // AccountingTemplate y AccountingTemplateAccount SÍ son por iglesia: las
+        // plantillas del plan contable las crea cada iglesia (ver esas entidades).
         public DbSet<FiscalYear> FiscalYears { get; set; }
         public DbSet<AccountingPeriod> AccountingPeriods { get; set; }
         public DbSet<DocumentSequence> DocumentSequences { get; set; }

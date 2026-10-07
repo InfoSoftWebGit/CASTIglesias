@@ -1,0 +1,215 @@
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Presupuestos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var ejercicios = ViewBag.Ejercicios as List<FiscalYear> ?? new List<FiscalYear>();
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Presupuestos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Un presupuesto reparte lo que se espera gastar por fondo, ministerio o sede, y luego se compara con lo que se gastó de verdad."]
+        <div class="mt-1">
+            <strong>@L["Congrega avisa cuando se supera, pero no impide el gasto."]</strong>
+            @L["La decisión sigue siendo de quien la tiene que tomar."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-chart-pie me-1"></i> @L["Presupuestos"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalPresupuesto(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nuevo presupuesto"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaPresupuestos" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Nombre"]</th>
+                    <th>@L["Ejercicio"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL PRESUPUESTO -->
+<div class="modal fade" id="modalPresupuesto" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalPresupuesto">@L["Nuevo presupuesto"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdPresupuesto" value="0" />
+                <div class="mb-3">
+                    <label for="txtCodigo" class="form-label">@L["Código"] <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="txtCodigo" maxlength="30" autocomplete="off" />
+                </div>
+                <div class="mb-3">
+                    <label for="txtNombre" class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="txtNombre" maxlength="150" autocomplete="off" />
+                </div>
+                <div class="mb-3">
+                    <label for="cboEjercicio" class="form-label">@L["Ejercicio"] <span class="text-danger">*</span></label>
+                    <select id="cboEjercicio" class="form-select">
+                        @foreach (var e in ejercicios)
+                        {
+                            <option value="@e.id">@e.code</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="cboEstado" class="form-label">@L["Estado"]</label>
+                    <select id="cboEstado" class="form-select">
+                        <option value="draft">@L["Borrador"]</option>
+                        <option value="active">@L["Activo"]</option>
+                        <option value="closed">@L["Cerrado"]</option>
+                    </select>
+                    <div class="form-text">@L["Un presupuesto activo ya no se borra: se cierra."]</div>
+                </div>
+
+                <div id="errorPresupuesto" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarPresupuesto()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            codigoObligatorio: @Json.Serialize(L["El código del presupuesto es obligatorio."].Value),
+            nombreObligatorio: @Json.Serialize(L["El nombre del presupuesto es obligatorio."].Value),
+            confirmarBorrar:   @Json.Serialize(L["¿Eliminar este presupuesto y todas sus líneas?"].Value),
+            nuevoPresupuesto:  @Json.Serialize(L["Nuevo presupuesto"].Value),
+            editarPresupuesto: @Json.Serialize(L["Editar presupuesto"].Value),
+            verSeguimiento:    @Json.Serialize(L["Ver el seguimiento"].Value),
+            editar:            @Json.Serialize(L["Editar"].Value),
+            eliminar:          @Json.Serialize(L["Eliminar"].Value)
+        });
+
+        const ESTADOS_PRES = {
+            draft:  { texto: @Json.Serialize(L["Borrador"].Value), clase: "bg-secondary" },
+            active: { texto: @Json.Serialize(L["Activo"].Value),   clase: "bg-success" },
+            closed: { texto: @Json.Serialize(L["Cerrado"].Value),  clase: "bg-dark" }
+        };
+
+        let tablaPresupuestos;
+
+        $(document).ready(function () {
+            tablaPresupuestos = $('#tablaPresupuestos').DataTable({
+                responsive: true,
+                ajax: { url: '@Url.Action("Listar", "FinanzasPresupuestos")', dataSrc: 'data' },
+                columns: [
+                    { data: 'code' },
+                    { data: 'name' },
+                    { data: 'ejercicio' },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            const e = ESTADOS_PRES[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            return '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                   '<a class="btn btn-sm btn-info" href="@Url.Action("Seguimiento", "FinanzasPresupuestos")?id=' + fila.id + '" title="' + T.verSeguimiento + '"><i class="fas fa-chart-simple"></i></a>' +
+                                   '<button class="btn btn-sm btn-warning btn-editar" data-id="' + fila.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>' +
+                                   '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + fila.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>' +
+                                   '</div>';
+                        }
+                    }
+                ],
+                language: { url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")' }
+            });
+
+            $('#tablaPresupuestos tbody').on('click', '.btn-editar', function () {
+                abrirModalPresupuesto(tablaPresupuestos.row($(this).closest('tr')).data());
+            });
+
+            $('#tablaPresupuestos tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrar, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("Eliminar", "FinanzasPresupuestos")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) {
+                            Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                            tablaPresupuestos.ajax.reload(null, false);
+                        } else {
+                            Swal.fire(T.error, respuesta.mensaje, 'error');
+                        }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        function abrirModalPresupuesto(fila) {
+            $('#errorPresupuesto').addClass('d-none').text('');
+            $('#tituloModalPresupuesto').text(fila ? T.editarPresupuesto : T.nuevoPresupuesto);
+            $('#txtIdPresupuesto').val(fila ? fila.id : 0);
+            $('#txtCodigo').val(fila ? fila.code : '');
+            $('#txtNombre').val(fila ? fila.name : '');
+            $('#cboEstado').val(fila ? fila.status : 'draft');
+            if (fila) $('#cboEjercicio').val(fila.fiscal_year_id);
+
+            new bootstrap.Modal(document.getElementById('modalPresupuesto')).show();
+        }
+
+        function guardarPresupuesto() {
+            const codigo = $('#txtCodigo').val().trim();
+            const nombre = $('#txtNombre').val().trim();
+
+            if (codigo === '') { errorPresupuesto(T.codigoObligatorio); return; }
+            if (nombre === '') { errorPresupuesto(T.nombreObligatorio); return; }
+
+            const datos = {
+                id: $('#txtIdPresupuesto').val(),
+                code: codigo,
+                name: nombre,
+                fiscal_year_id: $('#cboEjercicio').val(),
+                status: $('#cboEstado').val(),
+                scope_type: 'corporate'
+            };
+
+            $.post('@Url.Action("Guardar", "FinanzasPresupuestos")', datos, function (respuesta) {
+                if (respuesta.resultado) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalPresupuesto')).hide();
+                    Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 1800, showConfirmButton: false });
+                    tablaPresupuestos.ajax.reload(null, false);
+                } else {
+                    errorPresupuesto(respuesta.mensaje);
+                }
+            }).fail(function () { errorPresupuesto(T.mErrorConexionPunto); });
+        }
+
+        function errorPresupuesto(texto) {
+            $('#errorPresupuesto').removeClass('d-none').text(texto);
+        }
+    </script>
+}

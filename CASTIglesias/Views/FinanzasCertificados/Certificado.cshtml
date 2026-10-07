@@ -1,0 +1,100 @@
+@model CapaNegocio.CN_Certificados.CertificadoDTO
+@{
+    ViewBag.Title = L["Certificado de aportaciones"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item">
+        <a href="@Url.Action("Index", "FinanzasCertificados", new { anio = Model.Anio })">
+            @L["Certificados de aportaciones"]
+        </a>
+    </li>
+    <li class="breadcrumb-item active">@Model.Donante?.display_name</li>
+</ol>
+
+<div class="d-flex justify-content-end gap-2 mb-3 d-print-none">
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+        <i class="fas fa-print me-1"></i> @L["Imprimir o guardar en PDF"]
+    </button>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body p-4">
+        <h4 class="mb-4">@L["Certificado de aportaciones"]</h4>
+
+        @if (!Model.TieneAportaciones)
+        {
+            <div class="alert alert-secondary">
+                @L["Esta persona no tiene aportaciones contabilizadas en"] @Model.Anio.
+            </div>
+        }
+        else
+        {
+            <p>
+                @L["Se hace constar que"] <strong>@Model.Donante?.display_name</strong>
+                @L["ha realizado durante el año"] <strong>@Model.Anio</strong>
+                @L["las siguientes aportaciones:"]
+            </p>
+
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>@L["Concepto"]</th>
+                            <th class="text-end">@L["Aportaciones"]</th>
+                            <th class="text-end">@L["Importe"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var l in Model.Lineas)
+                        {
+                            <tr>
+                                <td>@l.concepto</td>
+                                <td class="text-end">@l.veces</td>
+                                <td class="text-end">@l.total.ToString("N2") €</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td>@L["TOTAL"]</td>
+                            <td class="text-end">@Model.Aportaciones</td>
+                            <td class="text-end">@Model.Total.ToString("N2") €</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            @* El aviso legal va en el propio documento, no solo en la pantalla: el
+               certificado se imprime y se entrega, y quien lo reciba tiene que saber
+               qué es y qué no es. Decisión D8: sin efectos fiscales en la fase 1. *@
+            <div class="border rounded p-3 bg-light small">
+                <i class="fas fa-circle-info me-1"></i>
+                @L["Este certificado acredita las aportaciones registradas en la contabilidad de la entidad. No constituye una certificación fiscal ni da derecho por sí mismo a deducción alguna."]
+            </div>
+
+            <div class="mt-4 pt-4">
+                <div class="row">
+                    <div class="col-6">
+                        <div>@L["Fecha de emisión:"] @DateTime.Today.ToShortDateString()</div>
+                    </div>
+                    <div class="col-6 text-end">
+                        <div style="margin-top:3rem; border-top:1px solid #000; display:inline-block; padding-top:.3rem; min-width:220px;">
+                            @L["Firma y sello"]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .sb-sidenav, .sb-topnav, footer, .breadcrumb, .d-print-none { display: none !important; }
+        #layoutSidenav_content { margin: 0 !important; padding: 0 !important; }
+        .card { border: none !important; box-shadow: none !important; }
+    }
+</style>

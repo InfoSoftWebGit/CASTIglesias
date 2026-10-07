@@ -1,0 +1,199 @@
+@using CapaDatos
+@using CapaNegocio
+@model List<CD_Numeraciones.NumeracionDTO>
+@{
+    ViewBag.Title = L["Numeración de documentos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Numeración de documentos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Cada tipo de documento lleva su propio contador por ejercicio. Los crea el programa solo, la primera vez que numera algo."]
+        <div class="mt-1">
+            <strong>@L["El número siguiente solo se puede subir."]</strong>
+            @L["Bajarlo repetiría números ya repartidos y dejaría dos documentos distintos con el mismo número, que es algo que después no se puede arreglar."]
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-hashtag me-1"></i> @L["Contadores"]</div>
+    <div class="table-responsive">
+        <table id="tablaNumeraciones" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Documento"]</th>
+                    <th>@L["Ejercicio"]</th>
+                    <th>@L["Sede"]</th>
+                    <th class="text-end">@L["Ya numerados"]</th>
+                    <th>@L["Próximo número"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro. El mensaje de tabla vacía lo pone language.emptyTable. *@
+            <tbody>
+                @foreach (var n in Model)
+                {
+                    <tr>
+                        <td>@CN_Numeraciones.DescribirTipo(n.document_type)</td>
+                        <td>@n.ejercicio</td>
+                        @* Una numeración sin sede es común a toda la iglesia, que es el
+                           caso del Diario. Hay que decirlo con palabras, porque una
+                           celda vacía parece un dato que falta. *@
+                        <td class="small text-muted">@(n.sede ?? L["Común de la iglesia"].Value)</td>
+                        <td class="text-end">@n.usados</td>
+                        <td><code>@n.ejemplo</code></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-sm btn-warning btn-editar"
+                                    data-id="@n.id"
+                                    data-prefijo="@n.prefix"
+                                    data-siguiente="@n.next_number"
+                                    data-relleno="@n.padding_length"
+                                    data-documento="@CN_Numeraciones.DescribirTipo(n.document_type)"
+                                    title="@L["Editar"]">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal de edición -->
+<div class="modal fade" id="modalNumeracion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="formNumeracion" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@L["Editar numeración"]</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="numId" />
+
+                <div class="mb-3">
+                    <label class="form-label">@L["Documento"]</label>
+                    <input type="text" id="numDocumento" class="form-control" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label for="numPrefijo" class="form-label">@L["Prefijo"]</label>
+                    <input type="text" id="numPrefijo" class="form-control" maxlength="20" />
+                    <div class="form-text">@L["Lo que va delante del número. Puede quedarse vacío."]</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="numSiguiente" class="form-label">@L["Próximo número"]</label>
+                        <input type="number" id="numSiguiente" class="form-control" min="1" />
+                        <div class="form-text" id="avisoMinimo"></div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="numRelleno" class="form-label">@L["Dígitos"]</label>
+                        <input type="number" id="numRelleno" class="form-control" min="0" max="12" />
+                        <div class="form-text">@L["Ceros por delante hasta esta longitud."]</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary mb-0">
+                    @L["Quedará así:"] <code id="numEjemplo"></code>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cancelar"]</button>
+                <button type="submit" class="btn btn-primary">@L["Guardar"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinNumeraciones:  @Json.Serialize(L["Todavía no hay ningún contador. Se crean solos al contabilizar el primer documento de un ejercicio."].Value),
+            noPuedeBajar:     @Json.Serialize(L["El número siguiente no puede bajar de {0}."].Value),
+            minimoActual:     @Json.Serialize(L["No puede bajar de {0}."].Value),
+            error:            @Json.Serialize(L["Error"].Value)
+        });
+
+        // Mínimo permitido de la fila que se está editando. Se comprueba también en el
+        // servidor, que es quien de verdad decide; esto solo evita el viaje inútil.
+        let minimoNumero = 1;
+
+        function actualizarEjemplo() {
+            const prefijo = $('#numPrefijo').val() || '';
+            const siguiente = parseInt($('#numSiguiente').val(), 10) || 0;
+            const relleno = parseInt($('#numRelleno').val(), 10) || 0;
+            let cuerpo = String(siguiente);
+            while (cuerpo.length < relleno) cuerpo = '0' + cuerpo;
+            $('#numEjemplo').text(prefijo + cuerpo);
+        }
+
+        $(document).ready(function () {
+            $('#tablaNumeraciones').DataTable({
+                responsive: true,
+                pageLength: 25,
+                columnDefs: [{ targets: 3, className: 'text-end' }, { targets: 5, orderable: false }],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinNumeraciones
+                }
+            });
+
+            // Delegado en el documento: DataTables repagina y los botones de otras
+            // páginas no existen todavía cuando esto se engancha.
+            $(document).on('click', '.btn-editar', function () {
+                const b = $(this);
+                minimoNumero = parseInt(b.data('siguiente'), 10);
+
+                $('#numId').val(b.data('id'));
+                $('#numDocumento').val(b.data('documento'));
+                $('#numPrefijo').val(b.data('prefijo'));
+                $('#numSiguiente').val(minimoNumero).attr('min', minimoNumero);
+                $('#numRelleno').val(b.data('relleno'));
+                $('#avisoMinimo').text(T.minimoActual.replace('{0}', minimoNumero));
+
+                actualizarEjemplo();
+                new bootstrap.Modal(document.getElementById('modalNumeracion')).show();
+            });
+
+            $('#numPrefijo, #numSiguiente, #numRelleno').on('input', actualizarEjemplo);
+
+            $('#formNumeracion').on('submit', function (e) {
+                e.preventDefault();
+
+                const siguiente = parseInt($('#numSiguiente').val(), 10);
+                if (!siguiente || siguiente < minimoNumero) {
+                    Swal.fire(T.error, T.noPuedeBajar.replace('{0}', minimoNumero), 'error');
+                    return;
+                }
+
+                $.post('@Url.Action("Guardar", "FinanzasNumeraciones")', {
+                    id: $('#numId').val(),
+                    prefijo: $('#numPrefijo').val(),
+                    siguiente: siguiente,
+                    relleno: parseInt($('#numRelleno').val(), 10) || 0
+                }, function (respuesta) {
+                    if (respuesta.resultado) {
+                        Swal.fire({ icon: 'success', title: respuesta.mensaje, timer: 2200, showConfirmButton: false })
+                            .then(function () { location.reload(); });
+                    } else {
+                        Swal.fire(T.error, respuesta.mensaje, 'error');
+                    }
+                });
+            });
+        });
+    </script>
+}

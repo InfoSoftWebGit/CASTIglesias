@@ -1,0 +1,342 @@
+@using CapaEntidad.Financiero
+@{
+    ViewBag.Title = L["Aprobaciones"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var circuito = ViewBag.Circuito as ApprovalWorkflow;
+    var regla = ViewBag.Regla as ApprovalRule;
+    var roles = ViewBag.Roles as string[] ?? new string[0];
+    bool puedeAprobar = ViewBag.PuedeAprobar ?? false;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Aprobaciones"]</li>
+</ol>
+
+@* ------------------------------------------------------------------
+   Configuración del circuito. Va primero porque sin circuito la lista
+   de abajo siempre estará vacía y no se entendería por qué.
+   ------------------------------------------------------------------ *@
+@if (circuito == null)
+{
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary-subtle">
+            <i class="fas fa-user-check me-1"></i> @L["Todavía no hay circuito de aprobación"]
+        </div>
+        <div class="card-body">
+            <p>
+                @L["Mientras no haya circuito, todas las operaciones se contabilizan directamente, aunque su concepto esté marcado como que necesita aprobación."]
+            </p>
+            <p>
+                @L["Si lo creas, las operaciones de conceptos marcados quedarán pendientes hasta que alguien las apruebe, y no se podrán contabilizar antes."]
+            </p>
+
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-5">
+                    <label for="nuevoRol" class="form-label">@L["Quién aprueba"]</label>
+                    <select id="nuevoRol" class="form-select">
+                        @foreach (var r in roles)
+                        {
+                            <option value="@r">@r</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-5">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="nuevoAuto" />
+                        <label class="form-check-label" for="nuevoAuto">
+                            @L["Permitir que quien registra apruebe lo suyo"]
+                        </label>
+                        <div class="form-text">
+                            @L["Déjalo sin marcar. Es lo que hace que la aprobación sirva para algo: que lo vea otra persona."]
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" id="btnCrearCircuito" class="btn btn-primary w-100">
+                        @L["Crear"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-user-check me-1"></i> @L["Circuito de aprobación"]</span>
+            <span class="badge @(circuito.status == "active" ? "bg-success" : "bg-secondary")">
+                @(circuito.status == "active" ? L["Activo"] : L["Desactivado"])
+            </span>
+        </div>
+        <div class="card-body">
+            @if (circuito.status != "active")
+            {
+                <div class="alert alert-secondary">
+                    @L["Está desactivado: las operaciones nuevas no necesitan aprobación. Las que ya estaban pendientes siguen pendientes y se pueden resolver abajo."]
+                </div>
+            }
+
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-4">
+                    <label for="rolAprobador" class="form-label">@L["Quién aprueba"]</label>
+                    <select id="rolAprobador" class="form-select">
+                        @foreach (var r in roles)
+                        {
+                            <option value="@r" selected="@(regla?.approver_reference == r)">@r</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="permitirAuto"
+                               checked="@(regla?.allow_self_approval ?? false)" />
+                        <label class="form-check-label" for="permitirAuto">
+                            @L["Permitir que quien registra apruebe lo suyo"]
+                        </label>
+                    </div>
+                </div>
+                <div class="col-sm-4 d-flex gap-2">
+                    <button type="button" id="btnGuardarCircuito" class="btn btn-primary"
+                            data-regla="@regla?.id">
+                        @L["Guardar"]
+                    </button>
+                    <button type="button" id="btnCambiarEstado" class="btn btn-outline-secondary"
+                            data-circuito="@circuito.id"
+                            data-activar="@((circuito.status != "active").ToString().ToLowerInvariant())">
+                        @(circuito.status == "active" ? L["Desactivar"] : L["Activar"])
+                    </button>
+                </div>
+            </div>
+
+            <div class="small text-muted mt-3">
+                <i class="fas fa-circle-info me-1"></i>
+                @L["AdminGlobal puede aprobar siempre, para que una iglesia no se quede sin nadie capaz de hacerlo."]
+            </div>
+        </div>
+    </div>
+
+    @if (!puedeAprobar)
+    {
+        <div class="alert alert-secondary">
+            <i class="fas fa-eye me-1"></i>
+            @L["Puedes ver lo pendiente, pero no aprobarlo: tu rol no es el aprobador del circuito."]
+        </div>
+    }
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-list-check me-1"></i> @L["Solicitudes"]</span>
+        <div>
+            <select id="filtroEstado" class="form-select form-select-sm">
+                <option value="pending">@L["Pendientes"]</option>
+                <option value="approved">@L["Aprobadas"]</option>
+                <option value="rejected">@L["Rechazadas"]</option>
+                <option value="">@L["Todas"]</option>
+            </select>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaSolicitudes" class="table table-bordered table-striped border-top" style="width:100%">
+            <thead>
+                <tr>
+                    <th>@L["Número"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Concepto"]</th>
+                    <th>@L["Sede"]</th>
+                    <th class="text-end">@L["Importe"]</th>
+                    <th>@L["Lo pidió"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Sin fila de "no hay datos" escrita a mano: DataTables leería ese colspan
+               como un registro. El mensaje de tabla vacía lo pone language.emptyTable. *@
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            sinSolicitudes:   @Json.Serialize(L["No hay solicitudes con ese filtro."].Value),
+            error:            @Json.Serialize(L["Error"].Value),
+            si:               @Json.Serialize(L["Sí"].Value),
+            no:               @Json.Serialize(L["No"].Value),
+            cancelar:         @Json.Serialize(L["Cancelar"].Value),
+            aprobar:          @Json.Serialize(L["Aprobar"].Value),
+            rechazar:         @Json.Serialize(L["Rechazar"].Value),
+            confirmarAprobar: @Json.Serialize(L["¿Aprobar esta operación? Después se podrá contabilizar."].Value),
+            motivoRechazo:    @Json.Serialize(L["Motivo del rechazo (obligatorio)"].Value),
+            faltaMotivo:      @Json.Serialize(L["Para rechazar hay que explicar el motivo."].Value),
+            comentarioOpcional: @Json.Serialize(L["Comentario (opcional)"].Value)
+        });
+
+        const ESTADOS_SOLICITUD = {
+            pending:  { texto: @Json.Serialize(L["Pendiente"].Value),  clase: "bg-warning text-dark" },
+            approved: { texto: @Json.Serialize(L["Aprobada"].Value),   clase: "bg-success" },
+            rejected: { texto: @Json.Serialize(L["Rechazada"].Value),  clase: "bg-danger" }
+        };
+
+        const PUEDE_APROBAR = @Json.Serialize(puedeAprobar);
+
+        let tablaSolicitudes;
+
+        function decidir(id, aprobar) {
+            if (aprobar) {
+                Swal.fire({
+                    title: T.aprobar, text: T.confirmarAprobar, icon: 'question',
+                    input: 'text', inputPlaceholder: T.comentarioOpcional,
+                    showCancelButton: true, confirmButtonText: T.si, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    enviarDecision(id, true, r.value);
+                });
+            } else {
+                Swal.fire({
+                    title: T.rechazar, input: 'text', inputPlaceholder: T.motivoRechazo,
+                    icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.si, cancelButtonText: T.cancelar,
+                    // El motivo se exige aquí y también en el servidor: un rechazo sin
+                    // explicación no le sirve de nada a quien registró la operación.
+                    inputValidator: function (v) { if (!v) return T.faltaMotivo; }
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    enviarDecision(id, false, r.value);
+                });
+            }
+        }
+
+        function enviarDecision(id, aprobar, comentarios) {
+            $.post('@Url.Action("Decidir", "FinanzasAprobaciones")',
+                { id: id, aprobar: aprobar, comentarios: comentarios || '' },
+                function (res) {
+                    if (res.resultado) {
+                        Swal.fire({ icon: 'success', title: res.mensaje, timer: 2200, showConfirmButton: false });
+                        tablaSolicitudes.ajax.reload(null, false);
+                    } else {
+                        Swal.fire(T.error, res.mensaje, 'error');
+                    }
+                });
+        }
+
+        $(document).ready(function () {
+            tablaSolicitudes = $('#tablaSolicitudes').DataTable({
+                responsive: true,
+                order: [[1, 'desc']],
+                ajax: {
+                    url: '@Url.Action("Listar", "FinanzasAprobaciones")',
+                    data: function (d) { d.estado = $('#filtroEstado').val(); },
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: 'numero', defaultContent: '' },
+                    {
+                        data: 'operacion_fecha',
+                        render: function (d) { return d ? new Date(d).toLocaleDateString() : ''; }
+                    },
+                    { data: 'concepto', defaultContent: '' },
+                    { data: 'sede', defaultContent: '' },
+                    {
+                        data: 'importe', className: 'text-end',
+                        render: function (d) {
+                            return (d || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    },
+                    { data: 'solicitante', defaultContent: '' },
+                    {
+                        data: 'status',
+                        render: function (v, t, row) {
+                            if (t !== 'display') return v;
+                            const e = ESTADOS_SOLICITUD[v] || { texto: v || '', clase: 'bg-light text-dark' };
+                            let html = '<span class="badge ' + e.clase + '">' + e.texto + '</span>';
+                            // Quien resolvió y por qué: es lo que se quiere saber al
+                            // mirar una solicitud ya cerrada.
+                            if (row.resuelto_por) {
+                                html += '<div class="small text-muted">' + $('<div>').text(row.resuelto_por).html() + '</div>';
+                            }
+                            if (row.comentarios) {
+                                html += '<div class="small text-muted fst-italic">' + $('<div>').text(row.comentarios).html() + '</div>';
+                            }
+                            return html;
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (fila) {
+                            if (fila.status !== 'pending' || !PUEDE_APROBAR) return '';
+                            return '<div class="d-flex justify-content-center gap-1">' +
+                                '<button class="btn btn-sm btn-success btn-aprobar" data-id="' + fila.id + '" title="' + T.aprobar + '"><i class="fas fa-check"></i></button>' +
+                                '<button class="btn btn-sm btn-danger btn-rechazar" data-id="' + fila.id + '" title="' + T.rechazar + '"><i class="fas fa-xmark"></i></button>' +
+                                '</div>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: T.sinSolicitudes
+                }
+            });
+
+            $('#filtroEstado').on('change', function () { tablaSolicitudes.ajax.reload(); });
+
+            $('#tablaSolicitudes tbody').on('click', '.btn-aprobar', function () {
+                decidir($(this).data('id'), true);
+            });
+            $('#tablaSolicitudes tbody').on('click', '.btn-rechazar', function () {
+                decidir($(this).data('id'), false);
+            });
+
+            $('#btnCrearCircuito').on('click', function () {
+                $.post('@Url.Action("CrearCircuito", "FinanzasAprobaciones")', {
+                    rolAprobador: $('#nuevoRol').val(),
+                    permitirAutoaprobacion: $('#nuevoAuto').is(':checked')
+                }, function (res) {
+                    if (res.resultado) {
+                        Swal.fire({ icon: 'success', title: res.mensaje, timer: 1800, showConfirmButton: false })
+                            .then(function () { location.reload(); });
+                    } else {
+                        Swal.fire(T.error, res.mensaje, 'error');
+                    }
+                });
+            });
+
+            $('#btnGuardarCircuito').on('click', function () {
+                $.post('@Url.Action("GuardarCircuito", "FinanzasAprobaciones")', {
+                    idRegla: $(this).data('regla'),
+                    rolAprobador: $('#rolAprobador').val(),
+                    permitirAutoaprobacion: $('#permitirAuto').is(':checked')
+                }, function (res) {
+                    if (res.resultado) {
+                        Swal.fire({ icon: 'success', title: res.mensaje, timer: 1800, showConfirmButton: false });
+                    } else {
+                        Swal.fire(T.error, res.mensaje, 'error');
+                    }
+                });
+            });
+
+            $('#btnCambiarEstado').on('click', function () {
+                const b = $(this);
+                $.post('@Url.Action("CambiarEstado", "FinanzasAprobaciones")', {
+                    idCircuito: b.data('circuito'),
+                    activo: b.data('activar') === true || b.data('activar') === 'true'
+                }, function (res) {
+                    if (res.resultado) {
+                        Swal.fire({ icon: 'success', title: res.mensaje, timer: 2600, showConfirmButton: false })
+                            .then(function () { location.reload(); });
+                    } else {
+                        Swal.fire(T.error, res.mensaje, 'error');
+                    }
+                });
+            });
+        });
+    </script>
+}

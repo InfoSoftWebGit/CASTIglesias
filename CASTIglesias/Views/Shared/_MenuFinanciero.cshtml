@@ -36,6 +36,72 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
                                     @L["Gastos"]
                                 </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTransferencias")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-right-left"></i></div>
+                                    @L["Transferencias entre sedes"]
+                                </a>
+                            </nav>
+                        </div>
+
+                        <!-- BLOQUE CONTABILIDAD -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinContabilidad" aria-expanded="false">
+                            <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
+                            @L["Contabilidad"]
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseFinContabilidad" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasDiario")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                    @L["Libro Diario"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Mayor", "FinanzasInformes")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-list-ol"></i></div>
+                                    @L["Libro Mayor"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("SumasYSaldos", "FinanzasInformes")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-scale-balanced"></i></div>
+                                    @L["Sumas y saldos"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Balance", "FinanzasInformes")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-building-columns"></i></div>
+                                    @L["Balance de Situación"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Resultados", "FinanzasInformes")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
+                                    @L["Cuenta de Resultados"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Cierre", "FinanzasInformes")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-flag-checkered"></i></div>
+                                    @L["Cierre del ejercicio"]
+                                </a>
+                            </nav>
+                        </div>
+
+                        <!-- BLOQUE GESTIÓN -->
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinGestion" aria-expanded="false">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
+                            @L["Gestión"]
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseFinGestion" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPresupuestos")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
+                                    @L["Presupuestos"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasCertificados")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-file-lines"></i></div>
+                                    @L["Certificados de aportaciones"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasAprobaciones")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
+                                    @L["Aprobaciones"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasAuditoria")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
+                                    @L["Auditoría"]
+                                </a>
                             </nav>
                         </div>
 
@@ -63,6 +129,10 @@
                                     <div class="sb-nav-link-icon"><i class="fas fa-sitemap"></i></div>
                                     @L["Plan de cuentas"]
                                 </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPlantillas")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></div>
+                                    @L["Plantillas del plan contable"]
+                                </a>
                                 <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasEjercicios")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
                                     @L["Ejercicios y periodos"]
@@ -70,6 +140,18 @@
                                 <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTerceros")">
                                     <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
                                     @L["Terceros"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasReglas")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-code-branch"></i></div>
+                                    @L["Reglas de contabilización"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasNumeraciones")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
+                                    @L["Numeración de documentos"]
+                                </a>
+                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasApertura")">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-flag-checkered"></i></div>
+                                    @L["Puesta en marcha"]
                                 </a>
                             </nav>
                         </div>

@@ -1,5 +1,6 @@
-using CapaEntidad.Financiero;
+﻿using CapaEntidad.Financiero;
 using CapaNegocio;
+using CASTIglesias.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CASTIglesias.Controllers
@@ -48,6 +49,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Guardar(Party tercero, string? nif, string? email, string? telefono,
                                   bool esDonante, bool admiteCertificados)
         {
@@ -73,6 +75,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [RequierePermiso(nameof(CapaEntidad.Permisos.FinanzasConfiguracion))]
         public JsonResult Eliminar(int id)
         {
             bool hecho = _negocioTerceros.Eliminar(id, out string mensaje);

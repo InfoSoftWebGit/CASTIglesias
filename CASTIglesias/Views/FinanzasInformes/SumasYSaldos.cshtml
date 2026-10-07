@@ -1,0 +1,141 @@
+@using CapaDatos
+@using CapaEntidad.Financiero
+@model List<CD_Informes.SaldoCuentaDTO>
+@{
+    ViewBag.Title = L["Sumas y saldos"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    DateTime desde = ViewBag.Desde;
+    DateTime hasta = ViewBag.Hasta;
+    int? fondoID = ViewBag.FondoID;
+
+    ViewBag.TituloInforme = L["Sumas y saldos"].Value;
+    ViewBag.TablaExportable = "tablaSumas";
+
+    decimal totalDebe = Model.Sum(c => c.debe);
+    decimal totalHaber = Model.Sum(c => c.haber);
+    bool cuadra = Math.Abs(totalDebe - totalHaber) < 0.01m;
+
+    var nombresTipo = new Dictionary<string, string>
+    {
+        ["asset"] = L["Activo"].Value,
+        ["liability"] = L["Pasivo"].Value,
+        ["equity"] = L["Patrimonio neto"].Value,
+        ["income"] = L["Ingresos"].Value,
+        ["expense"] = L["Gastos"].Value,
+        ["memorandum"] = L["Cuentas de orden"].Value
+    };
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Sumas y saldos"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start d-print-none">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Todas las cuentas con movimiento y sus totales. Es la comprobación de que la contabilidad cuadra: el total del Debe tiene que ser igual al del Haber."]
+    </div>
+</div>
+
+<div class="card mb-4 d-print-none">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Filtros"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-3">
+                <label for="desde" class="form-label">@L["Desde"]</label>
+                <input type="date" class="form-control" id="desde" name="desde" value="@desde.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-3">
+                <label for="hasta" class="form-label">@L["Hasta"]</label>
+                <input type="date" class="form-control" id="hasta" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-3">
+                <label for="fondoID" class="form-label">@L["Fondo"]</label>
+                <select name="fondoID" id="fondoID" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    @foreach (var f in fondos)
+                    {
+                        <option value="@f.id" selected="@(f.id == fondoID)">@f.name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AccionesInforme")
+
+<div class="cabecera-impresion mb-3">
+    <h4>@L["Sumas y saldos"]</h4>
+    <div>@L["Desde"] @desde.ToShortDateString() @L["hasta"] @hasta.ToShortDateString()</div>
+</div>
+
+@if (!cuadra)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        <strong>@L["El Debe y el Haber no cuadran."]</strong>
+        @L["Diferencia:"] @((totalDebe - totalHaber).ToString("N2")) €.
+        @L["Esto no debería pasar nunca: avisa a soporte antes de seguir registrando."]
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-scale-balanced me-1"></i> @L["Sumas y saldos"]</div>
+    <div class="table-responsive">
+        <table id="tablaSumas" class="table table-bordered table-striped border-top mb-0">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Cuenta"]</th>
+                    <th>@L["Tipo"]</th>
+                    <th class="importe">@L["Debe"]</th>
+                    <th class="importe">@L["Haber"]</th>
+                    <th class="importe">@L["Saldo"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            @L["No hay movimientos en el periodo elegido."]
+                        </td>
+                    </tr>
+                }
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.codigo</td>
+                        <td>@c.nombre</td>
+                        <td>@(nombresTipo.ContainsKey(c.tipo ?? "") ? nombresTipo[c.tipo!] : c.tipo)</td>
+                        <td class="importe">@c.debe.ToString("N2") €</td>
+                        <td class="importe">@c.haber.ToString("N2") €</td>
+                        <td class="importe">@c.saldo.ToString("N2") €</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light fw-bold">
+                <tr>
+                    <td colspan="3" class="text-end">@L["Totales"]</td>
+                    <td class="importe">@totalDebe.ToString("N2") €</td>
+                    <td class="importe">@totalHaber.ToString("N2") €</td>
+                    <td class="importe">
+                        @if (cuadra)
+                        {
+                            <span class="text-success"><i class="fas fa-check"></i> @L["Cuadra"]</span>
+                        }
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

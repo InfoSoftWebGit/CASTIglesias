@@ -1,0 +1,153 @@
+@using CapaDatos
+@using CapaEntidad.Financiero
+@model List<CD_Informes.MovimientoMayorDTO>
+@{
+    ViewBag.Title = L["Libro Mayor"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var cuentas = ViewBag.Cuentas as List<LedgerAccount> ?? new List<LedgerAccount>();
+    var cuenta = ViewBag.Cuenta as LedgerAccount;
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    decimal saldoInicial = ViewBag.SaldoInicial ?? 0m;
+    DateTime desde = ViewBag.Desde;
+    DateTime hasta = ViewBag.Hasta;
+    int? fondoID = ViewBag.FondoID;
+    int? cuentaID = ViewBag.CuentaID;
+
+    ViewBag.TituloInforme = L["Libro Mayor"].Value + (cuenta != null ? " " + cuenta.code : "");
+    ViewBag.TablaExportable = "tablaMayor";
+
+    decimal totalDebe = Model.Sum(m => m.debe);
+    decimal totalHaber = Model.Sum(m => m.haber);
+    decimal saldoFinal = Model.Count > 0 ? Model[^1].saldo : saldoInicial;
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Libro Mayor"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start d-print-none">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["El Mayor es el Diario visto por cuenta: todo lo que ha pasado por una cuenta concreta, en orden, con el saldo acumulado."]
+    </div>
+</div>
+
+<div class="card mb-4 d-print-none">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Filtros"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-4">
+                <label for="cuentaID" class="form-label">@L["Cuenta"]</label>
+                <select name="cuentaID" id="cuentaID" class="form-select">
+                    @foreach (var c in cuentas)
+                    {
+                        <option value="@c.id" selected="@(c.id == cuentaID)">@c.code · @c.name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <label for="desde" class="form-label">@L["Desde"]</label>
+                <input type="date" class="form-control" id="desde" name="desde" value="@desde.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-2">
+                <label for="hasta" class="form-label">@L["Hasta"]</label>
+                <input type="date" class="form-control" id="hasta" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-2">
+                <label for="fondoID" class="form-label">@L["Fondo"]</label>
+                <select name="fondoID" id="fondoID" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    @foreach (var f in fondos)
+                    {
+                        <option value="@f.id" selected="@(f.id == fondoID)">@f.name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AccionesInforme")
+
+<div class="cabecera-impresion mb-3">
+    <h4>@L["Libro Mayor"]</h4>
+    @if (cuenta != null)
+    {
+        <div><strong>@cuenta.code · @cuenta.name</strong></div>
+    }
+    <div>@L["Desde"] @desde.ToShortDateString() @L["hasta"] @hasta.ToShortDateString()</div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-book-open me-1"></i>
+        @if (cuenta != null)
+        {
+            <span>@cuenta.code · @cuenta.name</span>
+        }
+        else
+        {
+            <span>@L["Libro Mayor"]</span>
+        }
+    </div>
+    <div class="table-responsive">
+        <table id="tablaMayor" class="table table-bordered table-striped border-top mb-0">
+            <thead>
+                <tr>
+                    <th>@L["Asiento"]</th>
+                    <th>@L["Fecha"]</th>
+                    <th>@L["Descripción"]</th>
+                    <th>@L["Sede"]</th>
+                    <th>@L["Fondo"]</th>
+                    <th class="importe">@L["Debe"]</th>
+                    <th class="importe">@L["Haber"]</th>
+                    <th class="importe">@L["Saldo"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-light">
+                    <td colspan="5"><em>@L["Saldo anterior"]</em></td>
+                    <td class="importe"></td>
+                    <td class="importe"></td>
+                    <td class="importe"><strong>@saldoInicial.ToString("N2") €</strong></td>
+                </tr>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-3">
+                            @L["Esta cuenta no tiene movimientos en el periodo elegido."]
+                        </td>
+                    </tr>
+                }
+                @foreach (var m in Model)
+                {
+                    <tr>
+                        <td>@m.entry_number</td>
+                        <td>@m.posting_date.ToShortDateString()</td>
+                        <td>@m.descripcion</td>
+                        <td>@m.sede</td>
+                        <td>@m.fondo</td>
+                        <td class="importe">@(m.debe != 0 ? m.debe.ToString("N2") + " €" : "")</td>
+                        <td class="importe">@(m.haber != 0 ? m.haber.ToString("N2") + " €" : "")</td>
+                        <td class="importe">@m.saldo.ToString("N2") €</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light fw-bold">
+                <tr>
+                    <td colspan="5" class="text-end">@L["Totales del periodo"]</td>
+                    <td class="importe">@totalDebe.ToString("N2") €</td>
+                    <td class="importe">@totalHaber.ToString("N2") €</td>
+                    <td class="importe">@saldoFinal.ToString("N2") €</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

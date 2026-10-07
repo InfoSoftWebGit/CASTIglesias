@@ -112,11 +112,26 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(operacion.status))
                 operacion.status = CD_Operaciones.Borrador;
 
-            // Si el concepto exige aprobación, la operación no puede nacer aprobada
-            if (concepto.requires_approval && operacion.status == CD_Operaciones.Aprobada)
-            {
-                operacion.status = CD_Operaciones.PendienteAprobacion;
-            }
+            // Columnas NOT NULL que el formulario no envía. El DEFAULT de la tabla no
+            // sirve aquí: EF, al ver la propiedad en null, escribe NULL explícito en el
+            // INSERT en vez de omitir la columna, así que el DEFAULT nunca se aplica y
+            // MySQL responde "cannot be null". Hay que darles valor a mano.
+            if (string.IsNullOrWhiteSpace(operacion.currency_code))
+                operacion.currency_code = "EUR";
+            if (string.IsNullOrWhiteSpace(operacion.approval_status))
+                operacion.approval_status = "not_required";
+            if (string.IsNullOrWhiteSpace(operacion.posting_status))
+                operacion.posting_status = "not_posted";
+
+            // Estos dos sí son NOT NULL sin nulos posibles, pero llegarían a 0 desde el
+            // formulario, y un tipo de cambio 0 anularía cualquier importe convertido.
+            if (operacion.exchange_rate <= 0) operacion.exchange_rate = 1;
+            if (operacion.row_version <= 0) operacion.row_version = 1;
+
+            // concepto.requires_approval se atiende DESPUÉS de guardar, no aquí: la
+            // solicitud de aprobación necesita el id de la operación, que todavía no
+            // existe. Lo hace el controlador llamando a SolicitarAprobacionSiHaceFalta.
+            // Ver CN_Aprobaciones para cuándo bloquea y cuándo no.
 
             if (operacion.id == 0)
             {

@@ -241,6 +241,17 @@ namespace CapaDatos
                     permisoExistente.AjustesCrearEditar = objPermisosDTO.AjustesCrearEditar;
                     permisoExistente.AjustesEliminar = objPermisosDTO.AjustesEliminar;
 
+                    // Área financiera. No siguen el patrón Ver/CrearEditar/Eliminar:
+                    // ver el comentario de la clase Permisos.
+                    permisoExistente.FinanzasVer = objPermisosDTO.FinanzasVer;
+                    permisoExistente.FinanzasOperacionesCrearEditar = objPermisosDTO.FinanzasOperacionesCrearEditar;
+                    permisoExistente.FinanzasOperacionesEliminar = objPermisosDTO.FinanzasOperacionesEliminar;
+                    permisoExistente.FinanzasContabilizar = objPermisosDTO.FinanzasContabilizar;
+                    permisoExistente.FinanzasRevertir = objPermisosDTO.FinanzasRevertir;
+                    permisoExistente.FinanzasConfiguracion = objPermisosDTO.FinanzasConfiguracion;
+                    permisoExistente.FinanzasAprobar = objPermisosDTO.FinanzasAprobar;
+                    permisoExistente.FinanzasDonantes = objPermisosDTO.FinanzasDonantes;
+
                     _context.Permisos.Update(permisoExistente);
                     _context.SaveChanges();
                     return permisoExistente.ID_permiso;

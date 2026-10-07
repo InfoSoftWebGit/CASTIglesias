@@ -1,0 +1,462 @@
+@using CapaEntidad
+@using CapaEntidad.Financiero
+@using CapaDatos
+@model List<CD_ReglasContabilizacion.ReglaDTO>
+@{
+    ViewBag.Title = L["Reglas de contabilización"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var conjuntos = ViewBag.Conjuntos as List<PostingRuleSet> ?? new List<PostingRuleSet>();
+    var conjunto = ViewBag.Conjunto as PostingRuleSet;
+    var conceptos = ViewBag.Conceptos as List<FinancialConcept> ?? new List<FinancialConcept>();
+    var sedes = ViewBag.Sedes as List<Sedes> ?? new List<Sedes>();
+    var cuentas = ViewBag.Cuentas as List<LedgerAccount> ?? new List<LedgerAccount>();
+    var mediosPago = ViewBag.MediosPago as string[] ?? new string[0];
+    bool tieneAsientos = ViewBag.TieneAsientos ?? false;
+}
+
+<link href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Reglas de contabilización"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Una regla dice, para cada tipo de operación, de dónde sale la cuenta que va al Debe y la que va al Haber."]
+        <div class="mt-1">
+            @L["Gracias a esto el programa no sabe de contabilidad española ni de ninguna otra: las cuentas concretas las pones tú en el plan de cuentas y en los conceptos."]
+        </div>
+    </div>
+</div>
+
+@if (conjunto == null)
+{
+    <div class="card mb-4">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-wand-magic-sparkles fa-3x text-muted mb-3"></i>
+            <h5>@L["Todavía no hay reglas de contabilización"]</h5>
+            <p class="text-muted mb-4">
+                @L["Sin ellas, el botón de contabilizar no sabe qué asiento generar. Puedes crear las reglas básicas de un clic y ajustarlas después."]
+            </p>
+            <button type="button" class="btn btn-success btn-lg" onclick="crearBasicas()">
+                <i class="fas fa-plus me-1"></i> @L["Crear las reglas básicas"]
+            </button>
+            <div class="mt-4 text-start mx-auto" style="max-width:640px;">
+                <div class="border rounded p-3 bg-light small">
+                    <strong>@L["Qué se va a crear:"]</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>@L["Los ingresos y las aportaciones entran en la caja o banco, y el concepto dice de qué son."]</li>
+                        <li>@L["Los gastos salen de la caja o banco, y el concepto dice en qué se han ido."]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-layer-group me-1"></i> @L["Conjunto de reglas"]</span>
+        @if (conjuntos.Count > 1)
+        {
+            <form method="get" class="d-flex gap-2 align-items-center mb-0">
+                <select name="conjuntoID" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @foreach (var c in conjuntos)
+                    {
+                        <option value="@c.id" selected="@(c.id == conjunto.id)">
+                            @c.code v@c.version
+                        </option>
+                    }
+                </select>
+            </form>
+        }
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">@L["Nombre"]</dt>
+            <dd class="col-sm-9">@conjunto.name <span class="text-muted">(@conjunto.code v@conjunto.version)</span></dd>
+            <dt class="col-sm-3">@L["En vigor desde"]</dt>
+            <dd class="col-sm-9">
+                @conjunto.valid_from.ToShortDateString()
+                @if (conjunto.valid_to.HasValue)
+                {
+                    <span>@L["hasta"] @conjunto.valid_to.Value.ToShortDateString()</span>
+                }
+            </dd>
+            <dt class="col-sm-3">@L["Estado"]</dt>
+            <dd class="col-sm-9">
+                @if (conjunto.status == "active")
+                {
+                    <span class="badge bg-success">@L["Activo"]</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">@L["Inactivo"]</span>
+                }
+            </dd>
+        </dl>
+
+        @if (tieneAsientos)
+        {
+            <div class="alert alert-warning mt-3 mb-0">
+                <i class="fas fa-lock me-2"></i>
+                @L["Con estas reglas ya se han generado asientos. No se pueden borrar, porque cada asiento guarda con qué versión se hizo y hay que poder explicarlo años después. Desactiva las que ya no valgan en vez de eliminarlas."]
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-list-ol me-1"></i> @L["Reglas"]</span>
+        <button type="button" class="btn btn-success btn-sm" onclick="abrirModalRegla(null)">
+            <i class="fas fa-plus me-1"></i> @L["Nueva regla"]
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table id="tablaReglas" class="table table-bordered table-striped border-top mb-0">
+            <thead>
+                <tr>
+                    <th>@L["Prioridad"]</th>
+                    <th>@L["Cuando la operación es"]</th>
+                    <th>@L["Solo si"]</th>
+                    <th>@L["Al Debe va"]</th>
+                    <th>@L["Al Haber va"]</th>
+                    <th>@L["Estado"]</th>
+                    <th>@L["Acciones"]</th>
+                </tr>
+            </thead>
+            @* Vacío a propósito: las filas las pone DataTables desde su opción data,
+               y el mensaje de "sin reglas" lo pone language.emptyTable. Una fila con
+               colspan escrita aquí la leería como un registro y avisaría de un
+               parámetro desconocido. *@
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+}
+
+<!-- MODAL REGLA -->
+<div class="modal fade" id="modalRegla" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h5 class="modal-title" id="tituloModalRegla">@L["Nueva regla"]</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="txtIdRegla" value="0" />
+
+                <div class="row">
+                    <div class="col-sm-8 mb-3">
+                        <label for="cboTipo" class="form-label">@L["Cuando la operación es"] <span class="text-danger">*</span></label>
+                        <select id="cboTipo" class="form-select">
+                            <option value="contribution">@L["Aportación (diezmo, ofrenda)"]</option>
+                            <option value="other_income">@L["Otro ingreso"]</option>
+                            <option value="expense">@L["Gasto"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label for="txtPrioridad" class="form-label">@L["Prioridad"]</label>
+                        <input type="number" class="form-control" id="txtPrioridad" value="100" />
+                        <div class="form-text">@L["Gana el número más bajo."]</div>
+                    </div>
+                </div>
+
+                <div class="border rounded p-3 mb-3">
+                    <div class="small text-muted mb-2">
+                        @L["Deja estos campos vacíos para que la regla valga siempre. Rellénalos solo si quieres una regla distinta para un caso concreto."]
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <label for="cboConcepto" class="form-label">@L["Solo para el concepto"]</label>
+                            <select id="cboConcepto" class="form-select">
+                                <option value="">@L["Cualquiera"]</option>
+                                @foreach (var c in conceptos)
+                                {
+                                    <option value="@c.id">@c.name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <label for="cboSede" class="form-label">@L["Solo para la sede"]</label>
+                            <select id="cboSede" class="form-select">
+                                <option value="">@L["Cualquiera"]</option>
+                                @foreach (var s in sedes)
+                                {
+                                    <option value="@s.ID">@s.nombre_sede</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-4 mb-2">
+                            <label for="cboMedioPago" class="form-label">@L["Solo si se cobra o paga por"]</label>
+                            @* Los mismos rótulos que en Ingresos y Gastos: si aquí
+                               apareciera el código interno ("direct_debit"), nadie
+                               relacionaría la regla con lo que eligió al registrar. *@
+                            <select id="cboMedioPago" class="form-select">
+                                <option value="">@L["Cualquiera"]</option>
+                                <option value="cash">@L["Efectivo"]</option>
+                                <option value="transfer">@L["Transferencia"]</option>
+                                <option value="card">@L["Tarjeta"]</option>
+                                <option value="direct_debit">@L["Domiciliación"]</option>
+                                <option value="other">@L["Otro"]</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light"><strong>@L["Al Debe va"]</strong></div>
+                            <div class="card-body">
+                                <select id="cboFuenteDebe" class="form-select mb-2" onchange="cambiarFuente('Debe')">
+                                    <option value="treasury">@L["La cuenta de la caja o banco"]</option>
+                                    <option value="concept">@L["La cuenta del concepto"]</option>
+                                    <option value="fixed">@L["Una cuenta fija"]</option>
+                                </select>
+                                <select id="cboCuentaDebe" class="form-select d-none">
+                                    @foreach (var c in cuentas)
+                                    {
+                                        <option value="@c.id">@c.code · @c.name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-light"><strong>@L["Al Haber va"]</strong></div>
+                            <div class="card-body">
+                                <select id="cboFuenteHaber" class="form-select mb-2" onchange="cambiarFuente('Haber')">
+                                    <option value="concept">@L["La cuenta del concepto"]</option>
+                                    <option value="treasury">@L["La cuenta de la caja o banco"]</option>
+                                    <option value="fixed">@L["Una cuenta fija"]</option>
+                                </select>
+                                <select id="cboCuentaHaber" class="form-select d-none">
+                                    @foreach (var c in cuentas)
+                                    {
+                                        <option value="@c.id">@c.code · @c.name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cboEstadoRegla" class="form-label">@L["Estado"]</label>
+                    <select id="cboEstadoRegla" class="form-select">
+                        <option value="active">@L["Activo"]</option>
+                        <option value="inactive">@L["Inactivo"]</option>
+                    </select>
+                </div>
+
+                <div id="errorRegla" class="alert alert-danger d-none mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+                <button type="button" class="btn btn-primary" onclick="guardarRegla()">@L["Guardar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            nuevaRegla:        @Json.Serialize(L["Nueva regla"].Value),
+            editarRegla:       @Json.Serialize(L["Editar regla"].Value),
+            confirmarBorrar:   @Json.Serialize(L["¿Eliminar esta regla?"].Value),
+            confirmarBasicas:  @Json.Serialize(L["¿Crear las reglas básicas?"].Value),
+            editar:            @Json.Serialize(L["Editar"].Value),
+            eliminar:          @Json.Serialize(L["Eliminar"].Value),
+            cualquiera:        @Json.Serialize(L["Siempre"].Value)
+        });
+
+        const TIPOS = {
+            contribution: @Json.Serialize(L["Aportación (diezmo, ofrenda)"].Value),
+            other_income: @Json.Serialize(L["Otro ingreso"].Value),
+            expense:      @Json.Serialize(L["Gasto"].Value)
+        };
+        const FUENTES = {
+            treasury: @Json.Serialize(L["La cuenta de la caja o banco"].Value),
+            concept:  @Json.Serialize(L["La cuenta del concepto"].Value),
+            fixed:    @Json.Serialize(L["Una cuenta fija"].Value)
+        };
+        const MEDIOS_PAGO = {
+            cash:         @Json.Serialize(L["Efectivo"].Value),
+            transfer:     @Json.Serialize(L["Transferencia"].Value),
+            card:         @Json.Serialize(L["Tarjeta"].Value),
+            direct_debit: @Json.Serialize(L["Domiciliación"].Value),
+            other:        @Json.Serialize(L["Otro"].Value)
+        };
+
+        const REGLAS = @Html.Raw(Json.Serialize(Model));
+        const TIENE_ASIENTOS = @Json.Serialize(tieneAsientos);
+        const CONJUNTO_ID = @(conjunto?.id ?? 0);
+
+        $(document).ready(function () {
+            if (!$('#tablaReglas').length) return;
+
+            $('#tablaReglas').DataTable({
+                responsive: true,
+                data: REGLAS,
+                paging: false,
+                searching: false,
+                info: false,
+                columns: [
+                    { data: 'priority' },
+                    { data: 'transaction_kind', render: function (v) { return TIPOS[v] || v; } },
+                    {
+                        data: null,
+                        render: function (f) {
+                            // "Solo si" junta las tres condiciones opcionales: es lo que
+                            // distingue una regla general de una para un caso concreto.
+                            const partes = [];
+                            if (f.concepto) partes.push(escapar(f.concepto));
+                            if (f.sede) partes.push(escapar(f.sede));
+                            if (f.payment_method) partes.push(MEDIOS_PAGO[f.payment_method] || escapar(f.payment_method));
+                            return partes.length ? partes.join(' · ') : '<em class="text-muted">' + T.cualquiera + '</em>';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (f) {
+                            return f.debit_account_source === 'fixed'
+                                ? escapar(f.cuenta_debe)
+                                : (FUENTES[f.debit_account_source] || f.debit_account_source);
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (f) {
+                            return f.credit_account_source === 'fixed'
+                                ? escapar(f.cuenta_haber)
+                                : (FUENTES[f.credit_account_source] || f.credit_account_source);
+                        }
+                    },
+                    {
+                        data: 'status',
+                        render: function (v) {
+                            return v === 'active'
+                                ? '<span class="badge bg-success">' + @Json.Serialize(L["Activo"].Value) + '</span>'
+                                : '<span class="badge bg-secondary">' + @Json.Serialize(L["Inactivo"].Value) + '</span>';
+                        }
+                    },
+                    {
+                        data: null, orderable: false, className: 'text-center',
+                        render: function (f) {
+                            let html = '<div class="d-flex justify-content-center gap-1">' +
+                                '<button class="btn btn-sm btn-warning btn-editar" data-id="' + f.id + '" title="' + T.editar + '"><i class="fas fa-pen"></i></button>';
+                            // Con asientos hechos, borrar dejaría huérfano lo ya contabilizado
+                            if (!TIENE_ASIENTOS) {
+                                html += '<button class="btn btn-sm btn-danger btn-borrar" data-id="' + f.id + '" title="' + T.eliminar + '"><i class="fas fa-trash"></i></button>';
+                            }
+                            return html + '</div>';
+                        }
+                    }
+                ],
+                language: {
+                    url: '@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "" : "https://cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json")',
+                    emptyTable: @Json.Serialize(L["Este conjunto no tiene reglas."].Value)
+                }
+            });
+
+            $('#tablaReglas tbody').on('click', '.btn-editar', function () {
+                const id = $(this).data('id');
+                abrirModalRegla(REGLAS.find(function (r) { return r.id === id; }));
+            });
+
+            $('#tablaReglas tbody').on('click', '.btn-borrar', function () {
+                const id = $(this).data('id');
+                Swal.fire({
+                    title: T.confirmarBorrar, icon: 'warning', showCancelButton: true,
+                    confirmButtonText: T.siEliminar, cancelButtonText: T.no
+                }).then(function (r) {
+                    if (!r.isConfirmed) return;
+                    $.post('@Url.Action("EliminarRegla", "FinanzasReglas")', { id: id }, function (respuesta) {
+                        if (respuesta.resultado) { location.reload(); }
+                        else { Swal.fire(T.error, respuesta.mensaje, 'error'); }
+                    }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+                });
+            });
+        });
+
+        function crearBasicas() {
+            Swal.fire({
+                title: T.confirmarBasicas, icon: 'question',
+                showCancelButton: true, confirmButtonText: T.si, cancelButtonText: T.no
+            }).then(function (r) {
+                if (!r.isConfirmed) return;
+                $.post('@Url.Action("CrearBasicas", "FinanzasReglas")', {}, function (respuesta) {
+                    if (respuesta.resultado) { location.reload(); }
+                    else { Swal.fire(T.error, respuesta.mensaje, 'error'); }
+                }).fail(function () { Swal.fire(T.error, T.mErrorConexionPunto, 'error'); });
+            });
+        }
+
+        // La cuenta concreta solo se pide cuando el origen es "una cuenta fija":
+        // en los otros casos la pone el concepto o la caja de la propia operación.
+        function cambiarFuente(lado) {
+            const fuente = $('#cboFuente' + lado).val();
+            $('#cboCuenta' + lado).toggleClass('d-none', fuente !== 'fixed');
+        }
+
+        function abrirModalRegla(regla) {
+            $('#errorRegla').addClass('d-none').text('');
+            $('#tituloModalRegla').text(regla ? T.editarRegla : T.nuevaRegla);
+            $('#txtIdRegla').val(regla ? regla.id : 0);
+            $('#cboTipo').val(regla ? regla.transaction_kind : 'contribution');
+            $('#txtPrioridad').val(regla ? regla.priority : 100);
+            $('#cboConcepto').val(regla && regla.concept_id ? regla.concept_id : '');
+            $('#cboSede').val(regla && regla.site_id ? regla.site_id : '');
+            $('#cboMedioPago').val(regla && regla.payment_method ? regla.payment_method : '');
+            $('#cboFuenteDebe').val(regla ? regla.debit_account_source : 'treasury');
+            $('#cboFuenteHaber').val(regla ? regla.credit_account_source : 'concept');
+            $('#cboEstadoRegla').val(regla ? regla.status : 'active');
+            if (regla && regla.fixed_debit_account_id) $('#cboCuentaDebe').val(regla.fixed_debit_account_id);
+            if (regla && regla.fixed_credit_account_id) $('#cboCuentaHaber').val(regla.fixed_credit_account_id);
+
+            cambiarFuente('Debe');
+            cambiarFuente('Haber');
+
+            new bootstrap.Modal(document.getElementById('modalRegla')).show();
+        }
+
+        function guardarRegla() {
+            const fuenteDebe = $('#cboFuenteDebe').val();
+            const fuenteHaber = $('#cboFuenteHaber').val();
+
+            const datos = {
+                id: $('#txtIdRegla').val(),
+                rule_set_id: CONJUNTO_ID,
+                priority: $('#txtPrioridad').val(),
+                transaction_kind: $('#cboTipo').val(),
+                concept_id: $('#cboConcepto').val() || '',
+                site_id: $('#cboSede').val() || '',
+                payment_method: $('#cboMedioPago').val() || '',
+                debit_account_source: fuenteDebe,
+                credit_account_source: fuenteHaber,
+                fixed_debit_account_id: fuenteDebe === 'fixed' ? $('#cboCuentaDebe').val() : '',
+                fixed_credit_account_id: fuenteHaber === 'fixed' ? $('#cboCuentaHaber').val() : '',
+                status: $('#cboEstadoRegla').val()
+            };
+
+            $.post('@Url.Action("GuardarRegla", "FinanzasReglas")', datos, function (respuesta) {
+                if (respuesta.resultado) { location.reload(); }
+                else { $('#errorRegla').removeClass('d-none').text(respuesta.mensaje); }
+            }).fail(function () { $('#errorRegla').removeClass('d-none').text(T.mErrorConexionPunto); });
+        }
+
+        function escapar(texto) {
+            return texto ? $('<div>').text(texto).html() : '';
+        }
+    </script>
+}

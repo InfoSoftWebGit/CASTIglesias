@@ -43,6 +43,12 @@ namespace CapaDatos
             public string? description { get; set; }
             public string? status { get; set; }
             public int site_id { get; set; }
+
+            // Estado contable: la vista los usa para decidir si ofrece contabilizar,
+            // revertir, o solo mirar.
+            public string? posting_status { get; set; }
+            public int? journal_entry_id { get; set; }
+            public string? asiento { get; set; }
         }
 
         /// <summary>
@@ -84,6 +90,17 @@ namespace CapaDatos
                 ? _context.Parties.AsNoTracking().ToDictionary(p => p.id, p => p.display_name ?? "")
                 : new Dictionary<int, string>();
 
+            // Número del asiento de las que ya están contabilizadas, para poder
+            // enlazar desde el listado al Diario. Solo se piden los que hacen falta.
+            var idsAsiento = operaciones.Where(t => t.journal_entry_id.HasValue)
+                                        .Select(t => t.journal_entry_id!.Value)
+                                        .Distinct().ToList();
+            var asientos = idsAsiento.Count == 0
+                ? new Dictionary<int, string>()
+                : _context.JournalEntries.AsNoTracking()
+                    .Where(a => idsAsiento.Contains(a.id))
+                    .ToDictionary(a => a.id, a => a.entry_number ?? "");
+
             return operaciones.Select(t => new OperacionDTO
             {
                 id = t.id,
@@ -104,7 +121,11 @@ namespace CapaDatos
                 total_amount = t.total_amount,
                 description = t.description,
                 status = t.status,
-                site_id = t.site_id
+                site_id = t.site_id,
+                posting_status = t.posting_status,
+                journal_entry_id = t.journal_entry_id,
+                asiento = t.journal_entry_id.HasValue && asientos.ContainsKey(t.journal_entry_id.Value)
+                    ? asientos[t.journal_entry_id.Value] : ""
             }).ToList();
         }
 
@@ -129,6 +150,16 @@ namespace CapaDatos
             using var transaccion = _context.Database.BeginTransaction();
             try
             {
+                // La iglesia hay que ponerla AQUÍ, antes de numerar. El formulario no la
+                // envía (ninguna vista lo hace) y normalmente la rellena AsignarIglesia
+                // al guardar, pero eso ocurre demasiado tarde: la numeración de abajo
+                // necesita saber de qué iglesia es el contador.
+                // Con ID_iglesia a 0 se buscaba el contador de la iglesia 0, no se
+                // encontraba, se intentaba crear uno nuevo, y al guardarlo AsignarIglesia
+                // le ponía la iglesia real y chocaba con uk_document_sequences.
+                if (operacion.ID_iglesia == 0)
+                    operacion.ID_iglesia = _context.IdIglesiaActual;
+
                 operacion.transaction_number = SiguienteNumero(
                     operacion.ID_iglesia, operacion.site_id, tipoDocumento,
                     operacion.fiscal_year_id, prefijoSede);
@@ -156,16 +187,33 @@ namespace CapaDatos
         private string SiguienteNumero(int idIglesia, int idSede, string tipoDocumento,
                                        int idEjercicio, string prefijoSede)
         {
-            // FOR UPDATE bloquea la fila hasta el commit: es lo que impide que dos
-            // peticiones simultáneas se lleven el mismo número.
+            // El bloqueo y la lectura van SEPARADOS, y no es un capricho.
+            //
+            // Antes esto era un solo FromSqlRaw con el FOR UPDATE dentro. El problema
+            // es que el filtro global por iglesia se compone sobre esa consulta, y al
+            // componer, EF la envuelve en una subconsulta. La fila existente dejaba de
+            // encontrarse, el código de abajo creía que era la primera operación del
+            // ejercicio e intentaba CREAR la secuencia otra vez, chocando con
+            // uk_document_sequences ("Ya existe un registro con ese valor"). Y solo
+            // fallaba a partir de la SEGUNDA operación, porque la primera vez la
+            // secuencia de verdad no existe.
+            //
+            // Así el SQL crudo no pasa por el traductor de EF (es un comando suelto) y
+            // la lectura es LINQ normal, que EF sabe traducir y filtrar bien.
+            // El bloqueo se mantiene hasta el commit de la transacción, que es lo que
+            // impide que dos peticiones simultáneas se lleven el mismo número.
+            _context.Database.ExecuteSqlRaw(
+                @"SELECT id FROM document_sequences
+                  WHERE organization_id = {0} AND site_id = {1}
+                    AND document_type = {2} AND fiscal_year_id = {3}
+                  FOR UPDATE",
+                idIglesia, idSede, tipoDocumento, idEjercicio);
+
             var secuencia = _context.DocumentSequences
-                .FromSqlRaw(@"SELECT * FROM document_sequences
-                              WHERE organization_id = {0} AND site_id = {1}
-                                AND document_type = {2} AND fiscal_year_id = {3}
-                              FOR UPDATE",
-                            idIglesia, idSede, tipoDocumento, idEjercicio)
-                .AsEnumerable()
-                .FirstOrDefault();
+                .FirstOrDefault(s => s.ID_iglesia == idIglesia
+                                  && s.site_id == idSede
+                                  && s.document_type == tipoDocumento
+                                  && s.fiscal_year_id == idEjercicio);
 
             if (secuencia == null)
             {

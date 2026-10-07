@@ -3,7 +3,12 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/2.0.3/css/dataTables.bootstrap5.min.css" />
-<style>.ui-autocomplete { z-index: 9999 !important; }</style>
+<style>
+    .ui-autocomplete { z-index: 9999 !important; }
+    /* La fila del grupo se pulsa para abrir su ficha de encargados y miembros. */
+    #tablaGrupos tbody tr.fila-grupo { cursor: pointer; }
+    #tablaGrupos tbody tr.fila-detalle-abierta > td { background-color: #EEF2FB !important; }
+</style>
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
@@ -99,10 +104,26 @@
             error:                 @Json.Serialize(L["Error"].Value),
             estasSeguro:           @Json.Serialize(L["¿Estás seguro?"].Value),
             no:                    @Json.Serialize(L["No"].Value),
-            si:                    @Json.Serialize(L["Sí"].Value)
+            si:                    @Json.Serialize(L["Sí"].Value),
+            datosNuevoGrupo:       @Json.Serialize(L["Datos del nuevo grupo"].Value),
+            editarGrupo:           @Json.Serialize(L["Editar grupo"].Value),
+            encargados:            @Json.Serialize(L["Encargados"].Value),
+            miembrosDelGrupo:      @Json.Serialize(L["Miembros del grupo"].Value),
+            sinEncargados:         @Json.Serialize(L["Este grupo no tiene encargados asignados."].Value),
+            sinMiembrosGrupo:      @Json.Serialize(L["Este grupo no tiene miembros asignados."].Value),
+            cargando:              @Json.Serialize(L["Cargando..."].Value),
+            errorDetalleGrupo:     @Json.Serialize(L["No se ha podido cargar el detalle del grupo."].Value),
+            grupoGrande:           @Json.Serialize(L["Grupo numeroso"].Value),
+            grupoGrandeAviso:      @Json.Serialize(L["Este grupo supera las 10 personas. Se recomienda abrir otro grupo en esta misma zona."].Value),
+            personas:              @Json.Serialize(L["personas"].Value)
         });
 
         const urlBuscarMiembros = '@Url.Action("BuscarMiembros", "Economia")';
+        const urlDetalleGrupo = '@Url.Action("DetalleGrupo", "Mantenedor")';
+
+        // A partir de cuántas personas se avisa de que conviene dividir el grupo.
+        // El aviso es una recomendación pastoral: no impide guardar ni asignar a nadie.
+        const MAX_MIEMBROS_GRUPO = 10;
         let encargadosList = []; // array de nombres seleccionados
         let tabladata;
         let filaSeleccionada;
@@ -168,7 +189,18 @@
                 },
                 columns: [
                     { data: "nombre_zona", defaultContent: T.mSinZona },
-                    { data: "descripcion", defaultContent: "" },
+                    {
+                        data: "descripcion",
+                        defaultContent: "",
+                        // Junto a la descripción se muestra el aviso de grupo numeroso,
+                        // para que se vea sin tener que desplegar la ficha del grupo.
+                        render: function (dato, tipo, fila) {
+                            const descripcion = esc(dato || "");
+                            // En ordenación/búsqueda/exportación se devuelve solo el texto.
+                            if (tipo !== 'display') return dato || "";
+                            return descripcion + badgeGrupoNumeroso(fila.total_miembros);
+                        }
+                    },
                     { data: "encargados", defaultContent: "" },
                     {
                         defaultContent: `
@@ -186,6 +218,11 @@
                         width: "100px"
                     }
                 ],
+                // Marca cada fila real de grupo (las cabeceras de zona que añade el
+                // drawCallback no pasan por aquí) para que se vea que es pulsable.
+                createdRow: function (row) {
+                    $(row).addClass("fila-grupo");
+                },
                 drawCallback: function (settings) {
                     var api = this.api();
                     var rows = api.rows({ page: 'current' }).nodes();
@@ -211,6 +248,42 @@
                         'text-align': 'center'
                     });
                 }
+            });
+
+            // Pulsar sobre la fila abre/cierra la ficha del grupo (encargados y miembros).
+            $("#tablaGrupos tbody").on("click", "tr", function (e) {
+                // Los botones de acción tienen sus propios manejadores.
+                if ($(e.target).closest("button").length) return;
+
+                const fila = tabladata.row(this);
+                // Las cabeceras de zona que inserta drawCallback no son filas de la tabla.
+                if (!fila.any()) return;
+
+                if (fila.child.isShown()) {
+                    fila.child.hide();
+                    $(this).removeClass("fila-detalle-abierta");
+                    return;
+                }
+
+                const data = fila.data();
+                fila.child(`<div class="p-3 text-muted"><i class="fas fa-spinner fa-spin me-2"></i>${T.cargando}</div>`).show();
+                $(this).addClass("fila-detalle-abierta");
+
+                $.get(urlDetalleGrupo, { idGrupo: data.iD_grupo })
+                    .done(function (res) {
+                        // Si se cerró la ficha mientras cargaba, no se repinta.
+                        if (!fila.child.isShown()) return;
+
+                        if (res.error) {
+                            fila.child(`<div class="p-3 text-danger">${res.mensaje || T.errorDetalleGrupo}</div>`).show();
+                            return;
+                        }
+                        fila.child(renderDetalleGrupo(res)).show();
+                    })
+                    .fail(function () {
+                        if (!fila.child.isShown()) return;
+                        fila.child(`<div class="p-3 text-danger">${T.errorDetalleGrupo}</div>`).show();
+                    });
             });
 
             $("#tablaGrupos tbody").on("click", ".btn-editarGrupo", function () {
@@ -252,6 +325,72 @@
             });
         });
 
+        // Escapa el texto que viene de la base de datos antes de inyectarlo en el HTML.
+        function esc(valor) {
+            return $("<div>").text(valor == null ? "" : valor).html();
+        }
+
+        // Distintivo de aviso para los grupos que pasan del máximo recomendado.
+        // Devuelve cadena vacía si el grupo aún está por debajo del umbral.
+        function badgeGrupoNumeroso(totalMiembros) {
+            const total = totalMiembros || 0;
+            if (total <= MAX_MIEMBROS_GRUPO) return "";
+
+            return ` <span class="badge bg-warning text-dark ms-2" title="${esc(T.grupoGrandeAviso)}">
+                        <i class="fas fa-triangle-exclamation me-1"></i>${total} ${T.personas}
+                     </span>`;
+        }
+
+        // Ficha desplegable de un grupo: a la izquierda los encargados, a la derecha los
+        // miembros asignados al grupo. Ambos llegan ya con nombre y apellidos separados.
+        function renderDetalleGrupo(res) {
+            const encargados = res.encargados || [];
+            const miembros = res.miembros || [];
+
+            // El mismo aviso que la fila, aquí explicado en texto porque hay sitio.
+            const aviso = miembros.length > MAX_MIEMBROS_GRUPO
+                ? `<div class="alert alert-warning py-2 px-3 mb-3">
+                       <i class="fas fa-triangle-exclamation me-2"></i>
+                       <strong>${T.grupoGrande}:</strong> ${T.grupoGrandeAviso}
+                   </div>`
+                : "";
+
+            const listaEncargados = encargados.length === 0
+                ? `<div class="text-muted">${T.sinEncargados}</div>`
+                : `<ul class="list-unstyled mb-0">` + encargados.map(en => `
+                    <li class="mb-1">
+                        <i class="fas fa-user-tie me-2 text-secondary"></i>
+                        ${esc((en.nombre_miembro || '') + ' ' + (en.apellidos_miembro || '')).trim()}
+                        ${en.telefono_movil ? `<small class="text-muted ms-2">${esc(en.telefono_movil)}</small>` : ''}
+                    </li>`).join('') + `</ul>`;
+
+            const listaMiembros = miembros.length === 0
+                ? `<div class="text-muted">${T.sinMiembrosGrupo}</div>`
+                : `<ul class="list-unstyled mb-0">` + miembros.map(m => `
+                    <li class="mb-1">
+                        <i class="fas fa-user me-2 text-secondary"></i>
+                        ${esc((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim()}
+                        ${m.telefono_movil ? `<small class="text-muted ms-2">${esc(m.telefono_movil)}</small>` : ''}
+                    </li>`).join('') + `</ul>`;
+
+            return `
+                <div class="p-3" style="background:#f8f9fa;">
+                    ${aviso}
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h6 style="color:#1E3A8A; font-weight:700;">${T.encargados}</h6>
+                            ${listaEncargados}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 style="color:#1E3A8A; font-weight:700;">
+                                ${T.miembrosDelGrupo} <span class="badge bg-secondary">${miembros.length}</span>
+                            </h6>
+                            ${listaMiembros}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
         function cargarZonas(idZonaSeleccionada) {
             $.ajax({
                 url: '@Url.Action("ListarZonas", "Mantenedor")',
@@ -272,6 +411,12 @@
         }
 
         function abrirModalGrupos(json = null) {
+            // El mismo modal sirve para alta y edición (GuardarGrupos decide por el ID),
+            // así que el título se ajusta para que no diga siempre "nuevo grupo".
+            $("#exampleModalLabel").text(json?.iD_grupo
+                ? `${T.editarGrupo}: ${json.descripcion || ''}`.trim()
+                : T.datosNuevoGrupo);
+
             $("#txtid").val(json?.iD_grupo || 0);
             $("#txtDescripcion").val(json?.descripcion || "");
             $("#txtBuscarEncargado").val("");
@@ -327,7 +472,16 @@
                         }
                     } else {
                         if (data.resultado) {
-                            tabladata.row(filaSeleccionada).data(grupoDisplay).draw(false);
+                            const fila = tabladata.row(filaSeleccionada);
+                            // Se cierra la ficha desplegada: sus encargados ya no son los que muestra.
+                            if (fila.child.isShown()) {
+                                fila.child.hide();
+                                $(filaSeleccionada).removeClass("fila-detalle-abierta");
+                            }
+                            // El formulario no toca los miembros del grupo, así que se
+                            // conserva el contador para no perder el aviso de grupo numeroso.
+                            grupoDisplay.total_miembros = fila.data().total_miembros || 0;
+                            fila.data(grupoDisplay).draw(false);
                             filaSeleccionada = null;
                             bootstrap.Modal.getInstance(document.getElementById("FormModalGrupos")).hide();
                         } else {

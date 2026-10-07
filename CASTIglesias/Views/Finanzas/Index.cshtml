@@ -1,27 +1,77 @@
-@using CapaEntidad.Financiero
+﻿@using CapaNegocio
 @using System.Globalization
+@model CN_Panel.PanelDTO
 @{
     ViewBag.Title = L["Panel financiero"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var ejercicio = ViewBag.Ejercicio as FiscalYear;
-    decimal ingresos = ViewBag.Ingresos as decimal? ?? 0m;
-    decimal gastos = ViewBag.Gastos as decimal? ?? 0m;
-    decimal saldo = ViewBag.Saldo as decimal? ?? 0m;
-    var porConcepto = ViewBag.PorConcepto as List<(string concepto, decimal total)>
-                      ?? new List<(string, decimal)>();
-
     // Importes con el formato del idioma activo
     var formato = CultureInfo.CurrentUICulture;
     Func<decimal, string> euros = valor => valor.ToString("C", formato);
-    decimal mayor = porConcepto.Count > 0 ? porConcepto.Max(c => c.total) : 0m;
+
+    // Las barras se miden contra el mayor de cada bloque, no contra el total: así se
+    // compara el peso de una cuenta con las demás, que es lo que se quiere ver.
+    decimal mayorIngreso = Model.IngresosPorCuenta.Count > 0 ? Model.IngresosPorCuenta.Max(c => c.saldo) : 0m;
+    decimal mayorGasto = Model.GastosPorCuenta.Count > 0 ? Model.GastosPorCuenta.Max(c => c.saldo) : 0m;
 }
 
 <ol class="breadcrumb mb-4 mt-4">
     <li class="breadcrumb-item active">@L["Panel financiero"]</li>
 </ol>
 
-@if (ejercicio == null)
+@* ------------------------------------------------------------------
+   Puesta en marcha. Va primero porque sin esto no se puede contabilizar,
+   y es mejor saberlo aquí que al pulsar el botón y ver un error.
+   ------------------------------------------------------------------ *@
+@if (!Model.Preparado)
+{
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary-subtle">
+            <i class="fas fa-list-check me-1"></i> @L["Falta configurar algo antes de poder contabilizar"]
+        </div>
+        <div class="card-body">
+            <ul class="list-unstyled mb-3">
+                <li class="mb-2">
+                    <i class="fas @(Model.TieneCuentas ? "fa-circle-check text-success" : "fa-circle text-muted") me-2"></i>
+                    @L["Plan de cuentas con cuentas donde se pueda contabilizar"]
+                    @if (!Model.TieneCuentas)
+                    {
+                        <a class="ms-2" href="@Url.Action("Index", "FinanzasPlanCuentas")">@L["Configurar"]</a>
+                    }
+                </li>
+                <li class="mb-2">
+                    <i class="fas @(Model.TieneCajas ? "fa-circle-check text-success" : "fa-circle text-muted") me-2"></i>
+                    @L["Al menos una caja o banco activo"]
+                    @if (!Model.TieneCajas)
+                    {
+                        <a class="ms-2" href="@Url.Action("Index", "FinanzasTesoreria")">@L["Configurar"]</a>
+                    }
+                </li>
+                <li class="mb-2">
+                    <i class="fas @(Model.TieneConceptos ? "fa-circle-check text-success" : "fa-circle text-muted") me-2"></i>
+                    @L["Conceptos para clasificar lo que entra y sale"]
+                    @if (!Model.TieneConceptos)
+                    {
+                        <a class="ms-2" href="@Url.Action("Index", "FinanzasConceptos")">@L["Configurar"]</a>
+                    }
+                </li>
+                <li class="mb-2">
+                    <i class="fas @(Model.TieneReglas ? "fa-circle-check text-success" : "fa-circle text-muted") me-2"></i>
+                    @L["Reglas de contabilización activas"]
+                    @if (!Model.TieneReglas)
+                    {
+                        <a class="ms-2" href="@Url.Action("Index", "FinanzasReglas")">@L["Configurar"]</a>
+                    }
+                </li>
+            </ul>
+            <a href="@Url.Action("Index", "FinanzasApertura")" class="btn btn-primary">
+                <i class="fas fa-flag-checkered me-1"></i> @L["Ir a la puesta en marcha"]
+            </a>
+        </div>
+    </div>
+}
+
+@if (Model.Ejercicio == null)
 {
     <div class="card mb-4">
         <div class="card-body text-center py-5">
@@ -36,73 +86,329 @@
         </div>
     </div>
 }
-else
+
+@* ------------------------------------------------------------------
+   Avisos. Solo se pinta la tarjeta si hay algo que decir: un panel que
+   siempre enseña un aviso enseña a no leerlos.
+   ------------------------------------------------------------------ *@
+@if (Model.TieneAvisos)
 {
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h5 class="mb-0">
-            @L["Ejercicio"] <span class="badge bg-success">@ejercicio.code</span>
-        </h5>
-        <span class="text-muted small">
-            @ejercicio.start_date.ToString("d", formato) — @ejercicio.end_date.ToString("d", formato)
-        </span>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card border-start border-4 border-success h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Ingresos"]</div>
-                    <div class="fs-4 fw-bold">@euros(ingresos)</div>
-                </div>
-            </div>
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning-subtle">
+            <i class="fas fa-triangle-exclamation me-1"></i> @L["Requiere tu atención"]
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card border-start border-4 border-danger h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Gastos"]</div>
-                    <div class="fs-4 fw-bold">@euros(gastos)</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card border-start border-4 @(saldo >= 0 ? "border-primary" : "border-warning") h-100">
-                <div class="card-body">
-                    <div class="text-muted small text-uppercase">@L["Diferencia"]</div>
-                    <div class="fs-4 fw-bold @(saldo < 0 ? "text-danger" : "")">@euros(saldo)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-header"><i class="fas fa-chart-bar me-1"></i> @L["Ingresos por concepto"]</div>
         <div class="card-body">
-            @if (porConcepto.Count == 0)
-            {
-                <p class="text-muted mb-0">@L["Todavía no hay ingresos registrados en este ejercicio."]</p>
-            }
-            else
-            {
-                @* Barras hechas con CSS en lugar de una librería de gráficos: son
-                   ocho valores y así la página no carga nada más. *@
-                foreach (var fila in porConcepto)
+            <ul class="mb-0">
+                @if (Model.OperacionesSinContabilizar > 0)
                 {
-                    var porcentaje = mayor > 0 ? (int)Math.Round(fila.total * 100 / mayor) : 0;
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between small">
-                            <span>@fila.concepto</span>
-                            <span class="fw-bold">@euros(fila.total)</span>
-                        </div>
-                        <div class="progress" style="height:8px;" role="progressbar"
-                             aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100">
-                            <div class="progress-bar bg-success" style="width:@(porcentaje)%"></div>
-                        </div>
-                    </div>
+                    <li class="mb-2">
+                        <strong>@Model.OperacionesSinContabilizar</strong>
+                        @L["operaciones registradas sin contabilizar, por"]
+                        <strong>@euros(Model.ImporteSinContabilizar)</strong>.
+                        @L["Hasta que se contabilicen, no están en los informes."]
+                        <a href="@Url.Action("Ingresos", "FinanzasOperaciones")">@L["Ver operaciones"]</a>
+                    </li>
                 }
-            }
+                @foreach (var caja in Model.CajasEnNegativo)
+                {
+                    <li class="mb-2">
+                        @L["La caja"] <strong>@caja.nombre</strong> @L["está en negativo:"]
+                        <strong class="text-danger">@euros(caja.saldo)</strong>.
+                    </li>
+                }
+                @foreach (var fondo in Model.FondosEnNegativo)
+                {
+                    <li class="mb-2">
+                        @L["El fondo"] <strong>@fondo.nombre</strong>
+                        @L["se ha gastado por encima de lo que tiene:"]
+                        <strong class="text-danger">@euros(fondo.Disponible)</strong>.
+                    </li>
+                }
+                @if (Model.Presupuesto != null && Model.Presupuesto.Superado)
+                {
+                    <li class="mb-2">
+                        @L["El presupuesto"] <strong>@Model.Presupuesto.nombre</strong>
+                        @L["se ha superado."]
+                        <a href="@Url.Action("Seguimiento", "FinanzasPresupuestos", new { id = Model.Presupuesto.id })">
+                            @L["Ver el seguimiento"]
+                        </a>
+                    </li>
+                }
+            </ul>
         </div>
     </div>
 }
+
+@if (Model.Ejercicio != null)
+{
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="mb-0">
+            @L["Ejercicio"] <span class="badge bg-success">@Model.Ejercicio.code</span>
+        </h5>
+        <span class="text-muted small">
+            @Model.Ejercicio.start_date.ToString("d", formato) — @Model.Ejercicio.end_date.ToString("d", formato)
+        </span>
+    </div>
+
+    @* ------------------------------------------------------------------
+       Las cuatro cifras. Salen de la contabilidad, no de lo registrado.
+       ------------------------------------------------------------------ *@
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card border-start border-4 border-success h-100">
+                <div class="card-body">
+                    <div class="text-muted small text-uppercase">@L["Ingresos"]</div>
+                    <div class="fs-4 fw-bold">@euros(Model.Ingresos)</div>
+                    <div class="small text-muted">@L["contabilizados"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-start border-4 border-danger h-100">
+                <div class="card-body">
+                    <div class="text-muted small text-uppercase">@L["Gastos"]</div>
+                    <div class="fs-4 fw-bold">@euros(Model.Gastos)</div>
+                    <div class="small text-muted">@L["contabilizados"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-start border-4 @(Model.EsExcedente ? "border-primary" : "border-warning") h-100">
+                <div class="card-body">
+                    <div class="text-muted small text-uppercase">
+                        @(Model.EsExcedente ? L["Excedente"] : L["Déficit"])
+                    </div>
+                    <div class="fs-4 fw-bold @(Model.EsExcedente ? "" : "text-danger")">
+                        @euros(Model.Resultado)
+                    </div>
+                    <div class="small text-muted">@L["resultado del ejercicio"]</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-start border-4 border-info h-100">
+                <div class="card-body">
+                    <div class="text-muted small text-uppercase">@L["Tesorería"]</div>
+                    <div class="fs-4 fw-bold">@euros(Model.TotalTesoreria)</div>
+                    <div class="small text-muted">@L["en cajas y bancos"]</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ------------------------------------------------------------------
+       Presupuesto. Decisión D7: avisa, no bloquea.
+       ------------------------------------------------------------------ *@
+    @if (Model.Presupuesto != null)
+    {
+        var p = Model.Presupuesto;
+        @* El ancho de la barra se corta en 100 para que al pasarse no desborde la
+           caja; el porcentaje de verdad se sigue leyendo en el texto. *@
+        var ancho = (int)Math.Min(100, Math.Max(0, p.PorcentajeConsumido));
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-pie me-1"></i> @L["Presupuesto"]: @p.nombre</span>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="@Url.Action("Seguimiento", "FinanzasPresupuestos", new { id = p.id })">
+                    @L["Ver el detalle"]
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>@L["Ejecutado"] @euros(p.ejecutado) @L["de"] @euros(p.presupuestado)</span>
+                    <span class="fw-bold @(p.Superado ? "text-danger" : "")">@p.PorcentajeConsumido %</span>
+                </div>
+                <div class="progress mb-2" style="height:10px;" role="progressbar"
+                     aria-valuenow="@ancho" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar @(p.Superado ? "bg-danger" : "bg-success")" style="width:@(ancho)%"></div>
+                </div>
+                <div class="small text-muted">
+                    @if (p.Superado)
+                    {
+                        <span class="text-danger">
+                            @L["Pasado de presupuesto en"] @euros(-p.Disponible).
+                        </span>
+                    }
+                    else
+                    {
+                        <span>@L["Queda disponible"] @euros(p.Disponible).</span>
+                    }
+                    @if (p.lineas_superadas > 0)
+                    {
+                        <span>@p.lineas_superadas @L["líneas por encima de lo previsto."]</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ------------------------------------------------------------------
+       De dónde viene y a dónde va el dinero.
+       ------------------------------------------------------------------ *@
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-arrow-down me-1 text-success"></i> @L["Ingresos por cuenta"]</div>
+                <div class="card-body">
+                    @if (Model.IngresosPorCuenta.Count == 0)
+                    {
+                        <p class="text-muted mb-0">@L["Todavía no hay ingresos contabilizados en este ejercicio."]</p>
+                    }
+                    else
+                    {
+                        foreach (var fila in Model.IngresosPorCuenta)
+                        {
+                            var porcentaje = mayorIngreso > 0 ? (int)Math.Round(fila.saldo * 100 / mayorIngreso) : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>@fila.codigo · @fila.nombre</span>
+                                    <span class="fw-bold">@euros(fila.saldo)</span>
+                                </div>
+                                <div class="progress" style="height:8px;" role="progressbar"
+                                     aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-success" style="width:@(porcentaje)%"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header"><i class="fas fa-arrow-up me-1 text-danger"></i> @L["Gastos por cuenta"]</div>
+                <div class="card-body">
+                    @if (Model.GastosPorCuenta.Count == 0)
+                    {
+                        <p class="text-muted mb-0">@L["Todavía no hay gastos contabilizados en este ejercicio."]</p>
+                    }
+                    else
+                    {
+                        foreach (var fila in Model.GastosPorCuenta)
+                        {
+                            var porcentaje = mayorGasto > 0 ? (int)Math.Round(fila.saldo * 100 / mayorGasto) : 0;
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small">
+                                    <span>@fila.codigo · @fila.nombre</span>
+                                    <span class="fw-bold">@euros(fila.saldo)</span>
+                                </div>
+                                <div class="progress" style="height:8px;" role="progressbar"
+                                     aria-valuenow="@porcentaje" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-danger" style="width:@(porcentaje)%"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* ------------------------------------------------------------------
+   Dónde está el dinero. Fuera del bloque del ejercicio a propósito: el
+   saldo de una caja es el que es, venga del ejercicio que venga.
+   ------------------------------------------------------------------ *@
+<div class="row">
+    <div class="col-lg-7 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-cash-register me-1"></i> @L["Cajas y bancos"]</span>
+                @if (Model.TotalSinConciliar > 0)
+                {
+                    <span class="badge bg-secondary" title="@L["Movimientos sin conciliar con el banco"]">
+                        @Model.TotalSinConciliar @L["sin conciliar"]
+                    </span>
+                }
+            </div>
+            <div class="table-responsive">
+                @if (Model.Cajas.Count == 0)
+                {
+                    <div class="card-body">
+                        <p class="text-muted mb-0">@L["Todavía no hay ninguna caja ni banco activo."]</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped mb-0 border-top">
+                        <thead>
+                            <tr>
+                                <th>@L["Caja o banco"]</th>
+                                <th>@L["Sede"]</th>
+                                <th class="text-end">@L["Saldo"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var caja in Model.Cajas)
+                            {
+                                <tr>
+                                    <td>
+                                        @caja.nombre
+                                        <span class="text-muted small">@caja.codigo</span>
+                                    </td>
+                                    <td class="small text-muted">@(caja.sede ?? L["Toda la iglesia"].Value)</td>
+                                    <td class="text-end @(caja.saldo < 0 ? "text-danger fw-bold" : "")">
+                                        @euros(caja.saldo)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="fw-bold border-top">
+                                <td colspan="2">@L["Total"]</td>
+                                <td class="text-end">@euros(Model.TotalTesoreria)</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><i class="fas fa-piggy-bank me-1"></i> @L["Fondos"]</div>
+            <div class="table-responsive">
+                @if (Model.Fondos.Count == 0)
+                {
+                    <div class="card-body">
+                        <p class="text-muted mb-0">@L["Todavía no hay ningún fondo activo."]</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-sm table-striped mb-0 border-top">
+                        <thead>
+                            <tr>
+                                <th>@L["Fondo"]</th>
+                                <th class="text-end">@L["Disponible"]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var fondo in Model.Fondos)
+                            {
+                                <tr>
+                                    <td>
+                                        @fondo.nombre
+                                        @if (fondo.comprometido != 0)
+                                        {
+                                            <div class="text-muted small">
+                                                @L["Comprometido"]: @euros(fondo.comprometido)
+                                            </div>
+                                        }
+                                    </td>
+                                    <td class="text-end @(fondo.Disponible < 0 ? "text-danger fw-bold" : "")">
+                                        @euros(fondo.Disponible)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 
 @* Aviso de convivencia. Mientras existan las dos formas de registrar, lo que se
    apunte en Diezmos y Gastos del área de congregación NO llega hasta aquí. *@
@@ -114,12 +420,5 @@ else
         <p class="mb-0">
             @L["Las pantallas de Diezmos, Gastos y Conceptos del área de congregación siguen funcionando por separado. Lo que se registre allí no forma parte de la contabilidad ni aparece en este panel."]
         </p>
-    </div>
-</div>
-
-<div class="alert alert-secondary d-flex align-items-start">
-    <i class="fas fa-info-circle me-2 mt-1"></i>
-    <div>
-        @L["Los importes de arriba son los registrados, todavía sin contabilizar: el motor contable, los saldos por caja y el control de presupuesto llegan en la siguiente fase."]
     </div>
 </div>

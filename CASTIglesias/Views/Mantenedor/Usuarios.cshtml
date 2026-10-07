@@ -263,6 +263,90 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            @* ------------------------------------------------------------
+                               Área financiera, en su propia tabla y con una sola casilla
+                               por permiso.
+
+                               No encaja en la tabla de arriba, que va por Ver / Crear o
+                               editar / Eliminar. Aquí lo que hay que separar es otra cosa:
+                               quién apunta, quién lo mete en la contabilidad y quién puede
+                               ver lo que ha dado cada persona. Un "eliminar" de asientos no
+                               existe: lo contabilizado se revierte, no se borra.
+                               ------------------------------------------------------------ *@
+                            <div class="table-responsive mt-3" id="contenedorPermisosFinanzas">
+                                <h6 class="mb-2">@L["Área financiera"]</h6>
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td>@L["Entrar al área financiera y ver el panel y los informes"]</td>
+                                            <td class="text-center" style="width:60px">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasVer" data-permiso="FinanzasVer">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Registrar y editar ingresos, aportaciones y gastos"]</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasOperacionesCrearEditar" data-permiso="FinanzasOperacionesCrearEditar">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Borrar operaciones sin contabilizar"]</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasOperacionesEliminar" data-permiso="FinanzasOperacionesEliminar">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @L["Contabilizar"]
+                                                <div class="form-text">@L["Desde ese momento el apunte ya no se puede editar ni borrar."]</div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasContabilizar" data-permiso="FinanzasContabilizar">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Revertir asientos ya contabilizados"]</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasRevertir" data-permiso="FinanzasRevertir">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Aprobar o rechazar operaciones pendientes"]</td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasAprobar" data-permiso="FinanzasAprobar">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @L["Configurar: plan de cuentas, cajas, fondos, conceptos, reglas, numeraciones y ejercicios"]
+                                            </td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasConfiguracion" data-permiso="FinanzasConfiguracion">
+                                            </td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>
+                                                <strong>@L["Ver lo que ha aportado cada persona"]</strong>
+                                                <div class="form-text">
+                                                    @L["Información personal sensible: nombres, importes y certificados. Dalo solo a quien lo necesite."]
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <input class="form-check-input check-finanzas" type="checkbox"
+                                                       id="chkFinanzasDonantes" data-permiso="FinanzasDonantes">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="col-sm-6 mb-2">
@@ -402,6 +486,7 @@
                     $(`#${idVer}, #${idCrear}, #${idElim}`).prop('checked', false);
                     $(`#${idCrear}, #${idElim}`).prop('disabled', true);
                 });
+                $('.check-finanzas').prop('checked', false);
             }
         }
 
@@ -420,13 +505,19 @@
                 $(`#${idVer}, #${idCrear}, #${idElim}`).prop('checked', false);
                 $(`#${idCrear}, #${idElim}`).prop('disabled', true);
             });
+            $('.check-finanzas').prop('checked', false);
         }
 
         function cargarPermisosEnModal(permisos) {
             limpiarPermisos();
             if (!permisos) return;
 
-            // Normalize keys to lowercase for safe access
+            // Las claves se pasan a minúsculas para no depender de cómo las serialice el
+            // servidor. Al comparar hay que usarlas TAMBIÉN en minúsculas: antes se
+            // buscaba p[m + 'crearEditar'], con la E mayúscula, que nunca coincidía con
+            // la clave ya minusculizada, así que al editar un usuario la casilla de
+            // "Crear o editar" siempre aparecía desmarcada aunque el permiso estuviera
+            // concedido. Quien lo guardara de nuevo sin fijarse se lo quitaba.
             const p = {};
             Object.keys(permisos).forEach(k => p[k.toLowerCase()] = permisos[k]);
 
@@ -434,8 +525,13 @@
                 const m = modulo.toLowerCase();
                 const ver = p[m] === true;
                 $(`#${idVer}`).prop('checked', ver);
-                $(`#${idCrear}`).prop('disabled', !ver).prop('checked', ver && p[m + 'crearEditar'] === true);
+                $(`#${idCrear}`).prop('disabled', !ver).prop('checked', ver && p[m + 'creareditar'] === true);
                 $(`#${idElim}`).prop('disabled', !ver).prop('checked', ver && p[m + 'eliminar'] === true);
+            });
+
+            $('.check-finanzas').each(function () {
+                const clave = String($(this).data('permiso')).toLowerCase();
+                $(this).prop('checked', p[clave] === true);
             });
         }
 
@@ -733,6 +829,12 @@
                     permisos[modulo]                    = $(`#${idVer}`).is(':checked');
                     permisos[modulo + 'CrearEditar']    = $(`#${idCrear}`).is(':checked');
                     permisos[modulo + 'Eliminar']       = $(`#${idElim}`).is(':checked');
+                });
+
+                // Los del área financiera son una casilla por permiso, con el nombre de
+                // la propiedad de Permisos en data-permiso.
+                $('.check-finanzas').each(function () {
+                    permisos[$(this).data('permiso')] = $(this).is(':checked');
                 });
             }
 

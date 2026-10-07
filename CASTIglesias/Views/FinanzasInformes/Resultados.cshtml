@@ -1,0 +1,128 @@
+@using CapaEntidad.Financiero
+@model CapaNegocio.CN_Informes.ResultadosDTO
+@{
+    ViewBag.Title = L["Cuenta de Resultados"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fondos = ViewBag.Fondos as List<Fund> ?? new List<Fund>();
+    DateTime desde = ViewBag.Desde;
+    DateTime hasta = ViewBag.Hasta;
+    int? fondoID = ViewBag.FondoID;
+
+    ViewBag.TituloInforme = L["Cuenta de Resultados"].Value;
+    ViewBag.TablaExportable = "tablaResultados";
+}
+
+<ol class="breadcrumb mb-4 mt-4 d-print-none">
+    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Finanzas")">@L["Panel financiero"]</a></li>
+    <li class="breadcrumb-item active">@L["Cuenta de Resultados"]</li>
+</ol>
+
+<div class="alert alert-info d-flex align-items-start d-print-none">
+    <i class="fas fa-info-circle me-2 mt-1"></i>
+    <div>
+        @L["Qué ha entrado y qué ha salido durante el periodo. La diferencia es el excedente o el déficit."]
+    </div>
+</div>
+
+<div class="card mb-4 d-print-none">
+    <div class="card-header"><i class="fas fa-filter me-1"></i> @L["Filtros"]</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-sm-3">
+                <label for="desde" class="form-label">@L["Desde"]</label>
+                <input type="date" class="form-control" id="desde" name="desde" value="@desde.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-3">
+                <label for="hasta" class="form-label">@L["Hasta"]</label>
+                <input type="date" class="form-control" id="hasta" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-sm-3">
+                <label for="fondoID" class="form-label">@L["Fondo"]</label>
+                <select name="fondoID" id="fondoID" class="form-select">
+                    <option value="">@L["Todos"]</option>
+                    @foreach (var f in fondos)
+                    {
+                        <option value="@f.id" selected="@(f.id == fondoID)">@f.name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-magnifying-glass me-1"></i> @L["Ver"]
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@await Html.PartialAsync("_AccionesInforme")
+
+<div class="cabecera-impresion mb-3">
+    <h4>@L["Cuenta de Resultados"]</h4>
+    <div>@L["Desde"] @desde.ToShortDateString() @L["hasta"] @hasta.ToShortDateString()</div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-chart-line me-1"></i> @L["Cuenta de Resultados"]</div>
+    <div class="table-responsive">
+        <table id="tablaResultados" class="table table-bordered table-striped border-top mb-0">
+            <thead>
+                <tr>
+                    <th>@L["Código"]</th>
+                    <th>@L["Cuenta"]</th>
+                    <th class="importe">@L["Importe"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="table-light">
+                    <td colspan="3"><strong>@L["Ingresos"]</strong></td>
+                </tr>
+                @if (Model.Ingresos.Cuentas.Count == 0)
+                {
+                    <tr><td colspan="3" class="text-muted text-center py-2">@L["Sin ingresos en el periodo."]</td></tr>
+                }
+                @foreach (var c in Model.Ingresos.Cuentas)
+                {
+                    <tr>
+                        <td>@c.codigo</td>
+                        <td>@c.nombre</td>
+                        <td class="importe">@c.saldo.ToString("N2") €</td>
+                    </tr>
+                }
+                <tr class="fw-bold">
+                    <td colspan="2" class="text-end">@L["Total ingresos"]</td>
+                    <td class="importe">@Model.Ingresos.Total.ToString("N2") €</td>
+                </tr>
+
+                <tr class="table-light">
+                    <td colspan="3"><strong>@L["Gastos"]</strong></td>
+                </tr>
+                @if (Model.Gastos.Cuentas.Count == 0)
+                {
+                    <tr><td colspan="3" class="text-muted text-center py-2">@L["Sin gastos en el periodo."]</td></tr>
+                }
+                @foreach (var c in Model.Gastos.Cuentas)
+                {
+                    <tr>
+                        <td>@c.codigo</td>
+                        <td>@c.nombre</td>
+                        <td class="importe">@c.saldo.ToString("N2") €</td>
+                    </tr>
+                }
+                <tr class="fw-bold">
+                    <td colspan="2" class="text-end">@L["Total gastos"]</td>
+                    <td class="importe">@Model.Gastos.Total.ToString("N2") €</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold @(Model.EsExcedente ? "table-success" : "table-danger")">
+                    <td colspan="2" class="text-end">
+                        @(Model.EsExcedente ? L["Excedente del periodo"] : L["Déficit del periodo"])
+                    </td>
+                    <td class="importe">@Model.Resultado.ToString("N2") €</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
