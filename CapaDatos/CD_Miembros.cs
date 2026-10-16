@@ -80,7 +80,6 @@ namespace CapaDatos
                                 alumno_escuela_biblica = m.alumno_escuela_biblica,
                                 curso_acabado = m.curso_acabado,
                                 id_responsable = m.id_responsable,
-                                id_role = m.id_role,
                                 id_usuario = m.id_usuario,
                                 relacion_con = m.relacion_con,
                                 grupo_familiar = m.grupo_familiar,
@@ -289,7 +288,6 @@ namespace CapaDatos
                         diezmo_individual = obj.diezmo_individual,
                         diezmo_familiar = obj.diezmo_familiar,
                         id_usuario = obj.id_usuario,
-                        id_role = obj.id_role,
                         numero_hijos = obj.numero_hijos,
                         grupo_familiar = obj.grupo_familiar,
                         relacion_con = obj.relacion_con,
@@ -1421,7 +1419,6 @@ namespace CapaDatos
                             alumno_escuela_biblica = m.alumno_escuela_biblica,
                             curso_acabado = m.curso_acabado,
                             id_responsable = m.id_responsable,
-                            id_role = m.id_role,
                             id_usuario = m.id_usuario,
                             miembro_activo = m.miembro_activo,
 
@@ -1716,7 +1713,6 @@ namespace CapaDatos
                         alumno_escuela_biblica = m.alumno_escuela_biblica,
                         curso_acabado = m.curso_acabado,
                         id_responsable = m.id_responsable,
-                        id_role = m.id_role,
                         id_usuario = m.id_usuario,
 
                         nombre_Provincia = p != null ? p.nombre_provincia : string.Empty,

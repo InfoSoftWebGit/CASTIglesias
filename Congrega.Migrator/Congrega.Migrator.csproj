@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Congrega.Migrator</RootNamespace>
+    <AssemblyName>Congrega.Migrator</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MySql.Data (Oracle) y no MySqlConnector: es la que trae MySqlScript, la
+         unica clase que entiende DELIMITER. Sin eso no se pueden ejecutar los
+         ~30 triggers con BEGIN ... END de la linea base. Ya se usa en CapaDatos. -->
+    <PackageReference Include="MySql.Data" Version="9.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Los scripts van junto al ejecutable para poder lanzar el migrador en el
+         VPS sin arrastrar el codigo fuente. -->
+    <None Include="Scripts\**\*.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

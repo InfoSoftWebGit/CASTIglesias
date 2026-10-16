@@ -123,9 +123,6 @@ namespace CapaEntidad
         [Column("ID_usuario")]
         public int? id_usuario { get; set; }
 
-        [Column("ID_role")]
-        public int? id_role { get; set; }
-
         [Column("Estado")]
         public string? estado { get; set; }
         
