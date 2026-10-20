@@ -18,13 +18,17 @@ namespace CapaNegocio
         public int ContadorMatrimonios(int sedeID)
             => _capaDatos.ContadorMatrimonios(sedeID);
 
+        // Mensaje único para las dos altas/ediciones: el matrimonio no tiene sentido
+        // si falta uno de los dos cónyuges.
+        private const string MensajeConyugesObligatorios = "Debes seleccionar al esposo y a la esposa.";
+
         public int RegistrarMatrimonio(Matrimonio obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;
             obj.ID_sede = sedeID;
-            if (string.IsNullOrWhiteSpace(obj.Nombres))
+            if (string.IsNullOrWhiteSpace(obj.Esposo) || string.IsNullOrWhiteSpace(obj.Esposa))
             {
-                mensaje = "El nombre del matrimonio no puede estar vacío.";
+                mensaje = MensajeConyugesObligatorios;
                 return 0;
             }
             if (obj.ID_pareja_seguidor == 0)
@@ -36,9 +40,9 @@ namespace CapaNegocio
         {
             mensaje = string.Empty;
             obj.ID_sede = sedeID;
-            if (string.IsNullOrWhiteSpace(obj.Nombres))
+            if (string.IsNullOrWhiteSpace(obj.Esposo) || string.IsNullOrWhiteSpace(obj.Esposa))
             {
-                mensaje = "El nombre del matrimonio no puede estar vacío.";
+                mensaje = MensajeConyugesObligatorios;
                 return false;
             }
             if (obj.ID_pareja_seguidor == 0)

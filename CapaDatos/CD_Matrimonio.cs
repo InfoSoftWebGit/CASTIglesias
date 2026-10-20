@@ -22,10 +22,12 @@ namespace CapaDatos
                             select new MatrimonioDTO
                             {
                                 ID_matrimonio = m.ID_matrimonio,
-                                Nombres = m.Nombres,
+                                Esposo = m.Esposo,
+                                Esposa = m.Esposa,
                                 Lideres = m.Lideres,
                                 ID_pareja_seguidor = m.ID_pareja_seguidor,
-                                Nombres_seguidor = s != null ? s.Nombres : null,
+                                Esposo_seguidor = s != null ? s.Esposo : null,
+                                Esposa_seguidor = s != null ? s.Esposa : null,
                                 ID_sede = m.ID_sede
                             };
                 return query.ToList();
@@ -86,7 +88,8 @@ namespace CapaDatos
                     return false;
                 }
 
-                existente.Nombres = obj.Nombres;
+                existente.Esposo = obj.Esposo;
+                existente.Esposa = obj.Esposa;
                 existente.Lideres = obj.Lideres;
                 existente.ID_pareja_seguidor = obj.ID_pareja_seguidor == 0 ? null : obj.ID_pareja_seguidor;
                 _context.SaveChanges();

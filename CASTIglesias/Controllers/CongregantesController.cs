@@ -457,14 +457,16 @@ namespace CASTIglesias.Controllers
 
         #endregion MIEMBROS CON ZONAS, GRUPOS Y MINISTERIOS
         #region OTROS MÉTODOS MIEMBROS
-        // Buscador compartido por casi todas las pantallas de congregantes y por las
-        // zonas de discipulado. Devuelve nombres de miembros, así que basta con tener
-        // permiso sobre alguno de los colectivos que lo consultan.
+        // Buscador compartido por casi todas las pantallas de congregantes, por las
+        // zonas de discipulado y por matrimonios (para elegir a cada cónyuge).
+        // Devuelve nombres de miembros, así que basta con tener permiso sobre alguno
+        // de los colectivos que lo consultan.
         [HttpGet]
         [RequierePermiso(nameof(Permisos.Miembros), nameof(Permisos.Proceso),
                          nameof(Permisos.Simpatizantes), nameof(Permisos.Visitantes),
                          nameof(Permisos.Jovenes), nameof(Permisos.Hombres),
-                         nameof(Permisos.Mujeres), nameof(Permisos.Ninos))]
+                         nameof(Permisos.Mujeres), nameof(Permisos.Ninos),
+                         nameof(Permisos.Matrimonios))]
         public JsonResult BuscarMiembros(string term)
         {
             try

@@ -1,5 +1,18 @@
-﻿@{
+﻿@* El entorno decide si la página se deja indexar. QA sirve exactamente la misma
+   landing que producción: sin esta distinción, Google acabaría listando
+   qa.congrega.es como una copia del sitio bueno y las dos competirían entre sí. *@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
+@{
     Layout = null;
+
+    // Dirección pública y definitiva de la landing. Se escribe fija, y no a
+    // partir de la petición, porque es la que debe ver el buscador: así una
+    // visita a congrega.es sin "www", por http, o con parámetros de campaña
+    // (?utm_source=...) sigue apuntando a una única dirección y no cuenta como
+    // varias páginas distintas con el mismo contenido.
+    const string urlCanonica = "https://www.congrega.es/";
+
+    bool indexable = Entorno.IsProduction();
 }
 <!DOCTYPE html>
 @* Esta vista no usa el layout, así que declara su propio lang. Sin esto, un
@@ -16,6 +29,44 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@L["Congrega CRM — Software de Gestión para Iglesias"]</title>
+
+    @* ── Metadatos para buscadores ──
+       La descripción es lo que Google enseña bajo el título en los resultados.
+       Se escribe pensando en lo que la gente teclea ("software de gestión para
+       iglesias", "CRM para iglesias", "app para iglesias") y se queda por debajo
+       de 160 caracteres, que es lo que el buscador muestra antes de cortar. *@
+    <meta name="description" content="@L["Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app. Pruébalo gratis."]" />
+    <meta name="author" content="Congrega CRM" />
+
+    @* En QA se pide explícitamente que no se indexe; en producción se pide lo
+       contrario de forma expresa, para que no quede a criterio del buscador. *@
+    @if (indexable)
+    {
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <link rel="canonical" href="@urlCanonica" />
+    }
+    else
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
+
+    @* ── Tarjeta al compartir el enlace (WhatsApp, Facebook, LinkedIn, X) ──
+       Sin esto, al pegar el enlace sale la dirección pelada; con esto sale
+       título, descripción e imagen. La imagen es el favicon porque hoy la
+       landing no tiene ninguna otra; lo suyo es sustituirla por una de
+       1200x630 px cuando exista. *@
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Congrega CRM" />
+    <meta property="og:title" content="@L["Congrega CRM — Software de Gestión para Iglesias"]" />
+    <meta property="og:description" content="@L["Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app. Pruébalo gratis."]" />
+    <meta property="og:url" content="@urlCanonica" />
+    <meta property="og:image" content="@(urlCanonica)favicon.png" />
+    <meta property="og:locale" content="@(IdiomasSoportados.Actual == "en" ? "en_US" : "es_ES")" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="@L["Congrega CRM — Software de Gestión para Iglesias"]" />
+    <meta name="twitter:description" content="@L["Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app. Pruébalo gratis."]" />
+    <meta name="twitter:image" content="@(urlCanonica)favicon.png" />
+
     <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
@@ -53,11 +104,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             color: white !important;
         }
         .navbar-brand span { color: var(--teal); }
+        /* ── Ancho de la barra ──
+           El resto de la página se alinea con .container (1140px como mucho),
+           pero en la barra ese límite deja los enlaces tan juntos que algunos
+           se parten en dos líneas. Aquí se amplía solo la barra: el contenido
+           respira y el logotipo y el botón de acceso quedan en los extremos. */
+        #mainNav .container {
+            max-width: 1560px;
+            padding-left: 26px;
+            padding-right: 26px;
+        }
         .nav-link {
             font-weight: 500;
             color: rgba(255,255,255,0.85) !important;
             transition: color 0.2s;
             padding: 6px 14px !important;
+            /* Ningún enlace debe partirse en dos líneas: "Cómo funciona" o
+               "Características" quedarían descolgados respecto a los demás. */
+            white-space: nowrap;
         }
         .nav-link:hover { color: var(--teal) !important; }
         .btn-nav-login {
@@ -67,9 +131,30 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             padding: 8px 22px;
             font-weight: 600;
             font-size: 0.92rem;
+            white-space: nowrap;
             transition: background 0.2s, transform 0.15s;
         }
         .btn-nav-login:hover { background: #009e89; transform: translateY(-1px); }
+
+        /* ── Contacto por WhatsApp en la barra ──
+           Va junto al botón de acceso pero con estilo de enlace y no de botón:
+           el objetivo principal de la barra sigue siendo iniciar sesión, y dos
+           botones sólidos uno al lado del otro competirían entre sí. El icono
+           de WhatsApp se pinta en su verde de marca para que se reconozca de un
+           vistazo sin tener que leer el número. */
+        .nav-contacto {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.88) !important;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+        .nav-contacto:hover { color: var(--teal) !important; }
+        .nav-contacto i { color: #25D366; font-size: 1.05rem; }
 
         /* ── Botón hamburguesa (móvil) ──
            La navbar es oscura pero no lleva la clase navbar-dark, así que Bootstrap
@@ -92,9 +177,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
         /* El menú desplegado en móvil hereda el fondo de la navbar, pero al abrirse
            sobre el hero conviene separarlo un poco del borde. */
-        @@media (max-width: 991.98px) {
+        @@media (max-width: 1199.98px) {
             #navbarMenu { padding-top: 10px; }
             #navbarMenu .lang-switch { margin-top: 10px; }
+            /* Al apilarse el menú, el contacto necesita su propia separación:
+               sin el margen lateral de ms-xl-3 quedaría pegado al selector. */
+            #navbarMenu .nav-contacto { margin-top: 12px; }
         }
 
         /* ── Selector de idioma ──
@@ -698,7 +786,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <!-- ═══════════════════ NAVBAR ═══════════════════ -->
-<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+@* expand-xl y no expand-lg: entre 992 y 1200px el menú completo (seis enlaces,
+   idioma, contacto y acceso) no cabe de una línea y Bootstrap lo encogería hasta
+   partir las etiquetas. A partir de ahí es preferible el botón de hamburguesa. *@
+<nav class="navbar navbar-expand-xl fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="#inicio">
             <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
@@ -708,7 +799,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarMenu">
-            <ul class="navbar-nav mx-auto gap-1">
+            <ul class="navbar-nav mx-auto gap-2">
                 <li class="nav-item"><a class="nav-link" href="#inicio">@L["Inicio"]</a></li>
                 <li class="nav-item"><a class="nav-link" href="#caracteristicas">@L["Características"]</a></li>
                 <li class="nav-item"><a class="nav-link" href="#como-funciona">@L["Cómo funciona"]</a></li>
@@ -726,7 +817,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             @* Selector de idioma. Los códigos no se traducen: quien no entiende
                la página necesita reconocer el suyo de un vistazo. El title sí,
                para los lectores de pantalla. *@
-            <div class="lang-switch ms-lg-3" role="group" aria-label="@L["Idioma"]">
+            <div class="lang-switch ms-xl-3" role="group" aria-label="@L["Idioma"]">
                 @foreach (var codigo in IdiomasSoportados.Codigos)
                 {
                     <a href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = "/" })"
@@ -735,7 +826,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                        hreflang="@codigo">@codigo.ToUpperInvariant()</a>
                 }
             </div>
-            <a href="/Login" class="btn btn-nav-login ms-lg-3">
+            @* Teléfono de contacto que abre WhatsApp. El enlace wa.me lleva el
+               número en formato internacional sin signos ni espacios, porque es
+               lo único que acepta; el texto visible sí los lleva por legibilidad.
+               En el móvil wa.me abre la app y en el escritorio WhatsApp Web. *@
+            <a href="https://wa.me/34623983007" class="nav-contacto ms-xl-3"
+               target="_blank" rel="noopener"
+               aria-label="@L["Contacto"] WhatsApp +34 623 98 30 07">
+                <i class="fab fa-whatsapp"></i>@L["Contacto"]: +34 623 98 30 07
+            </a>
+            <a href="/Login" class="btn btn-nav-login ms-xl-3">
                 <i class="fas fa-sign-in-alt me-2"></i>@L["Iniciar sesión"]
             </a>
         </div>
@@ -1488,6 +1588,55 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             var precioOferta = new Dictionary<string, int> { ["basico"] = 18, ["standard"] = 35, ["premium"] = 60, ["financiero"] = 50 };
             int Precio(string plan) => ofertaActiva ? precioOferta[plan] : precioNormal[plan];
         }
+
+        @* ── Datos estructurados (schema.org) ──
+           Le dicen a Google en su propio vocabulario qué es esto: una aplicación
+           de empresa, de quién, en qué idiomas y a qué precio. Es lo que permite
+           que el resultado salga con el rango de precios debajo en vez de una
+           línea de texto suelta.
+
+           Va aquí, pegado al bloque de arriba, para que los importes salgan de
+           Precio() y no haya dos sitios donde mantener el mismo número: si un
+           día los precios del anuncio y los de la página no coinciden, Google
+           retira el resultado enriquecido.
+
+           Las arrobas van dobladas (@@context, @@type) porque en una vista Razor
+           una arroba suelta abre una expresión de C#. *@
+        <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "SoftwareApplication",
+          "name": "Congrega CRM",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Church Management Software",
+          "operatingSystem": "Web",
+          "url": "@urlCanonica",
+          "description": "@L["Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app."]",
+          "inLanguage": ["es", "en"],
+          "offers": {
+            "@@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": "@Precio("basico")",
+            "highPrice": "@Precio("premium")",
+            "offerCount": 3,
+            "availability": "https://schema.org/InStock"
+          },
+          "publisher": {
+            "@@type": "Organization",
+            "name": "Congrega CRM",
+            "url": "@urlCanonica",
+            "logo": "@(urlCanonica)favicon.png",
+            "email": "soporte@@congrega.es",
+            "areaServed": "ES",
+            "contactPoint": {
+              "@@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "soporte@@congrega.es",
+              "availableLanguage": ["Spanish", "English"]
+            }
+          }
+        }
+        </script>
 
         @if (ofertaActiva)
         {

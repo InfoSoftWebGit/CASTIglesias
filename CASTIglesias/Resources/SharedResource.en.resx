@@ -785,7 +785,8 @@
   <data name="Ej: Factura de luz de noviembre…" xml:space="preserve"><value>E.g. November electricity bill…</value></data>
   <data name="Ej: Guitarrista" xml:space="preserve"><value>E.g. Guitarist</value></data>
   <data name="Ej: Retiro de Jóvenes, Culto de Navidad…" xml:space="preserve"><value>E.g. Youth Retreat, Christmas Service…</value></data>
-  <data name="Ej: Rubén y Sady" xml:space="preserve"><value>E.g. Rubén and Sady</value></data>
+  <data name="Ej: Rubén" xml:space="preserve"><value>E.g. Rubén</value></data>
+  <data name="Ej: Sady" xml:space="preserve"><value>E.g. Sady</value></data>
   <data name="Ej: Sala 1, Templo, Aula…" xml:space="preserve"><value>E.g. Room 1, Sanctuary, Classroom…</value></data>
   <!-- ══ Selectores ═══════════════════════════════════════════════════════ -->
   <data name="-- Selecciona un rol --" xml:space="preserve"><value>-- Select a role --</value></data>
@@ -799,6 +800,8 @@
   <data name="— Sin seguidor —" xml:space="preserve"><value>— No follow-up couple —</value></data>
   <data name="— Sin zona configurada —" xml:space="preserve"><value>— No zone configured —</value></data>
   <!-- ══ Campos y cabeceras ═══════════════════════════════════════════════ -->
+  <data name="Esposo" xml:space="preserve"><value>Husband</value></data>
+  <data name="Esposa" xml:space="preserve"><value>Wife</value></data>
   <data name="Descripción" xml:space="preserve"><value>Description</value></data>
   <data name="Descripción del grupo" xml:space="preserve"><value>Group description</value></data>
   <data name="Estado" xml:space="preserve"><value>Status</value></data>
@@ -1098,6 +1101,8 @@
   <data name="Configuración de la aplicación → Servicios" xml:space="preserve"><value>Application Settings → Services</value></data>
   <data name="Configuración del calendario" xml:space="preserve"><value>Calendar Settings</value></data>
   <data name="Congrega CRM — Panel de administración" xml:space="preserve"><value>Congrega CRM — Admin panel</value></data>
+  <data name="Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app." xml:space="preserve"><value>Congrega CRM is the church management software: members, groups, ministries, attendance, finances and donations in a single app.</value></data>
+  <data name="Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app. Pruébalo gratis." xml:space="preserve"><value>Congrega CRM is the church management software: members, groups, ministries, attendance, finances and donations in a single app. Try it free.</value></data>
   <data name="Congrega CRM — Software de Gestión para Iglesias" xml:space="preserve"><value>Congrega CRM — Church Management Software</value></data>
   <data name="Congrega es el CRM pensado para comunidades de fe. Controla congregantes, grupos, finanzas, asistencia y mucho más desde una sola plataforma." xml:space="preserve"><value>Congrega is the CRM built for faith communities. Manage congregants, groups, finances, attendance and much more from a single platform.</value></data>
   <data name="Congregantes — Listado" xml:space="preserve"><value>Congregants — List</value></data>
@@ -1142,7 +1147,7 @@
   <data name="Enviar" xml:space="preserve"><value>Send</value></data>
   <data name="Enviar mensaje" xml:space="preserve"><value>Send message</value></data>
   <data name="Escribe al menos 2 letras para buscar. Pulsa sobre el nombre para añadirlo." xml:space="preserve"><value>Type at least 2 letters to search. Click a name to add it.</value></data>
-  <data name="Escribe el nombre de ambos cónyuges." xml:space="preserve"><value>Type both spouses' names.</value></data>
+  <data name="Escribe al menos 2 letras y elige al miembro de la lista." xml:space="preserve"><value>Type at least 2 letters and pick the member from the list.</value></data>
   <data name="España" xml:space="preserve"><value>Spain</value></data>
   <data name="Especial para Pastores" xml:space="preserve"><value>Special for Pastors</value></data>
   <data name="Estados: miembro, simpatizante, visitante, en proceso" xml:space="preserve"><value>Statuses: member, regular attendee, visitor, in process</value></data>
@@ -1561,6 +1566,9 @@
   </data>
   <data name="El campo Nombres es obligatorio." xml:space="preserve">
     <value>The first name field is required.</value>
+  </data>
+  <data name="Debes seleccionar al esposo y a la esposa." xml:space="preserve">
+    <value>You must select both the husband and the wife.</value>
   </data>
   <data name="La fecha es obligatoria." xml:space="preserve">
     <value>The date is required.</value>

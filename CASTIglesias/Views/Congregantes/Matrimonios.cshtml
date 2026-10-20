@@ -23,7 +23,8 @@
         <table id="tablaMatrimonios" class="table table-bordered table-striped border-top" style="width: 100%">
             <thead>
                 <tr>
-                    <th>@L["Nombres"]</th>
+                    <th>@L["Esposo"]</th>
+                    <th>@L["Esposa"]</th>
                     <th>@L["Líderes"]</th>
                     <th>@L["Seguidor"]</th>
                     <th>@L["Acciones"]</th>
@@ -46,10 +47,16 @@
                 <input id="txtIdMatrimonio" type="hidden" value="0" />
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">@L["Nombres"] <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="txtNombresMatrimonio"
-                               placeholder="@L["Ej: Rubén y Sady"]" autocomplete="off" />
-                        <div class="form-text">@L["Escribe el nombre de ambos cónyuges."]</div>
+                        <label class="form-label">@L["Esposo"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtEsposoMatrimonio"
+                               placeholder="@L["Ej: Rubén"]" autocomplete="off" />
+                        <div class="form-text">@L["Escribe al menos 2 letras y elige al miembro de la lista."]</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">@L["Esposa"] <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtEsposaMatrimonio"
+                               placeholder="@L["Ej: Sady"]" autocomplete="off" />
+                        <div class="form-text">@L["Escribe al menos 2 letras y elige al miembro de la lista."]</div>
                     </div>
                     <div class="col-sm-6">
                         <label class="form-label">@L["Líderes"]</label>
@@ -85,6 +92,7 @@
     <script src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js"></script>
 
     <script>
         // Textos traducidos que consume el JavaScript de esta vista.
@@ -99,14 +107,43 @@
             estasSeguro: @Json.Serialize(L["¿Estás seguro?"].Value),
             guardado:    @Json.Serialize(L["Guardado"].Value),
             no:          @Json.Serialize(L["No"].Value),
-            si:          @Json.Serialize(L["Sí"].Value)
+            si:          @Json.Serialize(L["Sí"].Value),
+            conyugesObligatorios: @Json.Serialize(L["Debes seleccionar al esposo y a la esposa."].Value),
+            sinSeguidor: @Json.Serialize(L["— Sin seguidor —"].Value)
         });
 
         let tablaMatrimonios;
         let filaSeleccionada;
         let listaMatrimonios = [];
 
+        // Nombre con el que se identifica una pareja en los listados, en el selector
+        // de seguidor y en los avisos. Se compone al mostrar y no se guarda en la
+        // base de datos, para que no haya dos versiones del mismo texto.
+        function nombrePareja(esposo, esposa) {
+            return [esposo, esposa].filter(n => n).join(" y ");
+        }
+
+        // Alta del buscador de miembros sobre un input del modal. Guarda el nombre
+        // completo tal cual, que es lo que viaja a las columnas Esposo y Esposa.
+        function activarBuscadorMiembro(selectorInput) {
+            $(selectorInput).autocomplete({
+                appendTo: "#FormModalMatrimonios .modal-body",
+                source: function (req, resp) {
+                    $.get('@Url.Action("BuscarMiembros", "Congregantes")', { term: req.term }, function (res) {
+                        resp((res.data || []).map(function (m) {
+                            const nombre = ((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim();
+                            return { label: nombre, value: nombre };
+                        }));
+                    });
+                },
+                minLength: 2
+            });
+        }
+
         $(document).ready(function () {
+            activarBuscadorMiembro("#txtEsposoMatrimonio");
+            activarBuscadorMiembro("#txtEsposaMatrimonio");
+
             tablaMatrimonios = $("#tablaMatrimonios").DataTable({
                 responsive: true,
                 ordering: false,
@@ -120,7 +157,8 @@
                     }
                 },
                 columns: [
-                    { data: "nombres", defaultContent: "" },
+                    { data: "esposo", defaultContent: "" },
+                    { data: "esposa", defaultContent: "" },
                     {
                         data: "lideres",
                         render: function (data) {
@@ -130,8 +168,11 @@
                         }
                     },
                     {
-                        data: "nombres_seguidor",
-                        defaultContent: '<span class="text-muted">—</span>'
+                        data: null,
+                        render: function (data, type, row) {
+                            const nombre = nombrePareja(row.esposo_seguidor, row.esposa_seguidor);
+                            return nombre || '<span class="text-muted">—</span>';
+                        }
                     },
                     {
                         defaultContent: `
@@ -170,7 +211,7 @@
 
                 Swal.fire({
                     title: T.estasSeguro,
-                    text: fmt(T.eliminarMatrimonio, data.nombres),
+                    text: fmt(T.eliminarMatrimonio, nombrePareja(data.esposo, data.esposa)),
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonText: T.si,
@@ -200,10 +241,10 @@
 
         function poblarSelectSeguidor(idExcluir) {
             const select = $("#cboSeguidor");
-            select.empty().append('<option value="">— Sin seguidor —</option>');
+            select.empty().append($("<option>").val("").text(T.sinSeguidor));
             listaMatrimonios.forEach(function (m) {
                 if (m.iD_matrimonio !== idExcluir) {
-                    select.append($("<option>").val(m.iD_matrimonio).text(m.nombres));
+                    select.append($("<option>").val(m.iD_matrimonio).text(nombrePareja(m.esposo, m.esposa)));
                 }
             });
         }
@@ -213,14 +254,16 @@
 
             if (json) {
                 $("#txtIdMatrimonio").val(json.iD_matrimonio);
-                $("#txtNombresMatrimonio").val(json.nombres || "");
+                $("#txtEsposoMatrimonio").val(json.esposo || "");
+                $("#txtEsposaMatrimonio").val(json.esposa || "");
                 $("#cboLideres").val(json.lideres || "No");
                 poblarSelectSeguidor(json.iD_matrimonio);
                 $("#cboSeguidor").val(json.iD_pareja_seguidor || "");
-                $("#tituloModalMatrimonios").text("Editar matrimonio: " + (json.nombres || ""));
+                $("#tituloModalMatrimonios").text("Editar matrimonio: " + nombrePareja(json.esposo, json.esposa));
             } else {
                 $("#txtIdMatrimonio").val(0);
-                $("#txtNombresMatrimonio").val("");
+                $("#txtEsposoMatrimonio").val("");
+                $("#txtEsposaMatrimonio").val("");
                 $("#cboLideres").val("No");
                 poblarSelectSeguidor(0);
                 $("#cboSeguidor").val("");
@@ -234,13 +277,14 @@
         function guardarMatrimonio() {
             const obj = {
                 iD_matrimonio: parseInt($("#txtIdMatrimonio").val()) || 0,
-                nombres: $("#txtNombresMatrimonio").val().trim(),
+                esposo: $("#txtEsposoMatrimonio").val().trim(),
+                esposa: $("#txtEsposaMatrimonio").val().trim(),
                 lideres: $("#cboLideres").val(),
                 iD_pareja_seguidor: parseInt($("#cboSeguidor").val()) || null
             };
 
-            if (!obj.nombres) {
-                $("#mensajeErrorMatrimonio").removeClass("d-none").text(T.mCampoNombresObligatorio);
+            if (!obj.esposo || !obj.esposa) {
+                $("#mensajeErrorMatrimonio").removeClass("d-none").text(T.conyugesObligatorios);
                 return;
             }
 

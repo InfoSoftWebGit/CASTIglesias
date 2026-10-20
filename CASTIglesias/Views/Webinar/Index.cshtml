@@ -1,6 +1,15 @@
 @using CapaNegocio
+@* Mismo criterio que la landing: QA no debe indexarse. *@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
 @{
     Layout = null;
+
+    // Dirección pública de esta página, fija por el mismo motivo que en la
+    // landing: los enlaces de campaña llevan parámetros detrás y sin canónica
+    // cada variante contaría como una página distinta.
+    const string urlCanonicaWebinar = "https://www.congrega.es/Webinar";
+
+    bool indexable = Entorno.IsProduction();
 
     // Etiquetas de cada sesión. Se escriben como texto traducible en lugar de
     // formatear la fecha con la cultura activa porque "viernes 23 de octubre"
@@ -98,6 +107,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@L["Webinar gratuito — Congrega CRM"]</title>
     <meta name="description" content="@L["Sesión en directo de 2 horas para conocer Congrega CRM: demostración de la aplicación y turno de preguntas."]" />
+
+    @if (indexable)
+    {
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <link rel="canonical" href="@urlCanonicaWebinar" />
+    }
+    else
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
+
+    @* Tarjeta al compartir el enlace del webinar por WhatsApp o redes, que es
+       por donde se difunde una convocatoria. *@
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Congrega CRM" />
+    <meta property="og:title" content="@L["Webinar gratuito — Congrega CRM"]" />
+    <meta property="og:description" content="@L["Sesión en directo de 2 horas para conocer Congrega CRM: demostración de la aplicación y turno de preguntas."]" />
+    <meta property="og:url" content="@urlCanonicaWebinar" />
+    <meta property="og:image" content="https://www.congrega.es/favicon.png" />
+    <meta property="og:locale" content="@(IdiomasSoportados.Actual == "en" ? "en_US" : "es_ES")" />
+    <meta name="twitter:card" content="summary" />
+
     <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
@@ -427,7 +458,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     @L["Conoce"] <span>Congrega CRM</span> @L["en directo"]
                 </h1>
                 <p class="hero-subtitle mx-auto" style="max-width:640px;">
-                    @L["Dos horas como máximo para ver la aplicación funcionando, entender cómo se gestiona una iglesia con ella y preguntar todo lo que necesites."]
+                    @L["45 minutos para conocer el funcionamiento de la aplicación, entender cómo puede ayudar a gestionar tu iglesia y preguntarnos todo lo que necesites saber."]
                 </p>
                 <a href="#inscripcion" class="btn btn-nav-login" style="padding:13px 32px;">
                     <i class="fas fa-user-plus me-2"></i>@L["Reservar mi plaza"]
@@ -452,7 +483,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <div class="dato-webinar">
                     <div class="dato-icono"><i class="far fa-clock"></i></div>
                     <div>
-                        <div class="dato-titulo">@L["Duración máxima de 2 horas"]</div>
+                        <div class="dato-titulo">@L["Duración de 45 minutos"]</div>
                         <div class="dato-texto">@L["Demostración de la aplicación y, al final, turno de preguntas y respuestas."]</div>
                     </div>
                 </div>
@@ -477,7 +508,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="section-badge">@L["El webinar"]</div>
             <h2 class="section-title mt-2">@L["Qué veremos en la sesión"]</h2>
             <p class="section-subtitle mx-auto mt-3">
-                @L["La sesión dura dos horas como máximo y se divide en una parte de demostración y otra de preguntas."]
+                @L["La sesión dura 45 minutos y se divide en una parte de demostración y otra de preguntas."]
             </p>
         </div>
         <div class="row g-4">

@@ -30,6 +30,8 @@ appsettings*.json
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+web.config
+*.xml
 # Mono auto generated files
 mono_crash.*
 
@@ -148,7 +150,7 @@ ipch/
 *.vsp
 *.vspx
 *.sap
-
+.claude/settings.json
 # Visual Studio Trace Files
 *.e2e
 
