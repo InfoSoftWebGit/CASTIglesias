@@ -36,8 +36,8 @@ namespace CapaNegocio
         /// </remarks>
         public static readonly DateTime[] Sesiones =
         {
-            new DateTime(2026, 10, 23, 19, 0, 0),
-            new DateTime(2026, 10, 24, 19, 0, 0)
+            new DateTime(2026, 11, 25, 19, 0, 0),
+            new DateTime(2026, 11, 27, 19, 0, 0)
         };
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace CapaNegocio
                 <p>Hola {E(obj.nombre)},</p>
                 <p>Tu plaza para el webinar de <strong>Congrega CRM</strong> está reservada.</p>
                 <p><strong>Fecha:</strong> {E(TextoSesion(obj.fecha_sesion))}<br/>
-                   <strong>Duración:</strong> máximo 2 horas</p>
+                   <strong>Duración:</strong> 45 Minutos</p>
                 <p>Veremos la aplicación en funcionamiento, explicaremos cómo se usa cada
                    módulo y dejaremos un espacio final para preguntas y respuestas.</p>
                 <p><strong>Unos días antes del webinar te enviaremos a este mismo correo
