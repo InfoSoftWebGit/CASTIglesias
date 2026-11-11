@@ -4,6 +4,12 @@
 
     var loggedInSedeID = ViewBag.sedeID ?? 0;
     var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
+
+    // Pastores y admins: todo, con filtros. Resto: solo su alcance (Configuración → Seguimientos).
+    bool esPastor = ViewBag.EsPastorSeguimiento == true;
+    bool tieneAlcance = ViewBag.TieneAlcanceSeguimiento == true;
+    bool liderVinculado = ViewBag.LiderVinculado == true;
+    bool tieneAsignados = ViewBag.TieneAsignados == true;
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -37,20 +43,101 @@
     <li class="breadcrumb-item active">@L["Seguimiento de congregantes"]</li>
 </ol>
 
+@if (!esPastor && !tieneAlcance)
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-1"></i>
+        @if (!liderVinculado)
+        {
+            @L["Tu usuario no está vinculado a ningún líder. Pide a tu pastor que te configure en Configuración → Seguimientos."]
+        }
+        else
+        {
+            @L["Todavía no tienes zonas ni personas asignadas para hacer seguimiento. Pide a tu pastor que te las asigne."]
+        }
+    </div>
+}
+
+@if (!esPastor && tieneAsignados)
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fas fa-list-check me-1"></i> @L["Mi lista de seguimiento"]
+        </div>
+        <div class="table-responsive p-3">
+            <table id="tablaMisAsignados" class="table table-sm table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>@L["Persona"]</th>
+                        <th>@L["Motivo / campaña"]</th>
+                        <th>@L["Último seguimiento"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+}
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-clipboard-list me-1"></i> @L["Seguimiento de congregantes"]
     </div>
 
     <div class="table-responsive p-3">
-        <div class="row mb-2">
-            <div class="col-12">
-                <button data-permiso="MiembrosCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(null)">
+        <div class="row mb-2 g-2 align-items-center">
+            <div class="col-auto">
+                <button data-permiso="SeguimientoCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(null)">
                     <i class="fas fa-plus me-1"></i> @L["Nuevo seguimiento"]
                 </button>
             </div>
+            @if (esPastor)
+            {
+                <div class="col-auto ms-auto">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                        <select id="cboFiltroZona" class="form-select" title="@L["Filtrar por zona"]">
+                            <option value="">@L["Filtrar por zona"]</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button id="btnSinSeguimiento" type="button" class="btn btn-outline-warning">
+                        <i class="fas fa-user-clock me-1"></i> @L["Sin seguimiento"]
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <button id="btnBorrarFiltros" type="button" class="btn btn-outline-secondary">
+                        <i class="fas fa-eraser me-1"></i> @L["Borrar filtros"]
+                    </button>
+                </div>
+            }
         </div>
         <hr />
+
+        @if (esPastor)
+        {
+            <div id="panelSinSeguimiento" style="display:none;">
+                <div class="alert alert-warning py-2 small mb-2">
+                    <i class="fas fa-user-clock me-1"></i>
+                    @L["Miembros activos a los que todavía no se les ha registrado ningún seguimiento."]
+                </div>
+                <table id="tablaSinSeguimiento" class="table table-bordered table-striped border-top" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>@L["Miembro"]</th>
+                            <th>@L["Estado"]</th>
+                            <th>@L["Zonas"]</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        }
+
+        <div id="panelSeguimientos">
         <table id="tablaSeguimiento" class="table table-bordered table-striped border-top" style="width:100%">
             <thead>
                 <tr>
@@ -64,6 +151,7 @@
             </thead>
             <tbody></tbody>
         </table>
+        </div>
     </div>
 </div>
 
@@ -147,12 +235,118 @@
 
 <script>
     var tablaSeguimiento;
+    var tablaSinSeguimiento = null;
+    var tablaMisAsignados = null;
+    var esPastor = @Json.Serialize(esPastor);
+    var modoSinSeguimiento = false;
+
+    window.T = Object.assign(window.T || {}, {
+        segNunca:          @Json.Serialize(L["Nunca"].Value),
+        segRegistrar:      @Json.Serialize(L["Registrar seguimiento"].Value),
+        segSinSeguimiento: @Json.Serialize(L["Sin seguimiento"].Value)
+    });
+
+    function zonaFiltro() { return esPastor ? ($('#cboFiltroZona').val() || '') : ''; }
+
+    // Abre el modal de alta con el miembro ya elegido (lista asignada / sin seguimiento)
+    function nuevoSeguimientoPara(m) {
+        abrirModal(null);
+        $('#hiddenIdMiembro').val(m.id_miembro);
+        $('#txtNombreMiembro').val(m.nombre_miembro || '');
+        $('#txtApellidosMiembro').val(m.apellidos_miembro || '');
+    }
+
+    function recargarTodo() {
+        tablaSeguimiento.ajax.reload();
+        if (tablaSinSeguimiento && modoSinSeguimiento) tablaSinSeguimiento.ajax.reload();
+        if (tablaMisAsignados) tablaMisAsignados.ajax.reload();
+    }
+
+    function botonRegistrar(m) {
+        return $('<button type="button" data-permiso="SeguimientoCrearEditar" class="btn btn-sm btn-success">')
+            .attr('title', T.segRegistrar)
+            .html('<i class="fas fa-plus"></i>')
+            .on('click', function () { nuevoSeguimientoPara(m); });
+    }
 
     $(document).ready(function () {
+        if (esPastor) {
+            // ── Filtros (solo pastores) ───────────────────────────
+            $.get('@Url.Action("ListarZonasSeguimiento", "Congregantes")', function (res) {
+                (res.data || []).forEach(function (z) {
+                    $('#cboFiltroZona').append($('<option>').val(z.id).text(tDato(z.nombre)));
+                });
+            });
+
+            tablaSinSeguimiento = $('#tablaSinSeguimiento').DataTable({
+                deferLoading: 0,
+                ajax: {
+                    url: '@Url.Action("ListarSinSeguimiento", "Congregantes")',
+                    type: 'GET',
+                    data: function (d) { var z = zonaFiltro(); if (z) d.idZona = z; },
+                    dataSrc: 'data'
+                },
+                columns: [
+                    { data: null, render: function (m) { return $('<div>').text(((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim()).html(); } },
+                    { data: 'estado', defaultContent: '', render: function (v) { return $('<div>').text(tDato(v || '')).html(); } },
+                    { data: 'zonas', render: function (z) { return $('<div>').text((z || []).map(tDato).join(', ') || '—').html(); } },
+                    { data: null, orderable: false, defaultContent: '' }
+                ],
+                createdRow: function (row, m) { $('td:eq(3)', row).empty().append(botonRegistrar(m)); },
+                language: window.dtLang ? { url: window.dtLang } : {},
+                responsive: true
+            });
+
+            $('#cboFiltroZona').on('change', function () {
+                if (modoSinSeguimiento) tablaSinSeguimiento.ajax.reload();
+                else tablaSeguimiento.ajax.reload();
+            });
+
+            $('#btnSinSeguimiento').on('click', function () {
+                modoSinSeguimiento = !modoSinSeguimiento;
+                $(this).toggleClass('btn-outline-warning', !modoSinSeguimiento).toggleClass('btn-warning', modoSinSeguimiento);
+                $('#panelSinSeguimiento').toggle(modoSinSeguimiento);
+                $('#panelSeguimientos').toggle(!modoSinSeguimiento);
+                if (modoSinSeguimiento) tablaSinSeguimiento.ajax.reload();
+                else tablaSeguimiento.ajax.reload();
+            });
+
+            $('#btnBorrarFiltros').on('click', function () {
+                $('#cboFiltroZona').val('');
+                modoSinSeguimiento = false;
+                $('#btnSinSeguimiento').addClass('btn-outline-warning').removeClass('btn-warning');
+                $('#panelSinSeguimiento').hide();
+                $('#panelSeguimientos').show();
+                tablaSeguimiento.ajax.reload();
+            });
+        }
+
+        if ($('#tablaMisAsignados').length) {
+            tablaMisAsignados = $('#tablaMisAsignados').DataTable({
+                ajax: { url: '@Url.Action("ListarMisAsignados", "Congregantes")', type: 'GET', dataSrc: 'data' },
+                columns: [
+                    { data: null, render: function (m) { return $('<div>').text(((m.nombre_miembro || '') + ' ' + (m.apellidos_miembro || '')).trim()).html(); } },
+                    { data: 'motivo', render: function (v) { return $('<div>').text(v || '—').html(); } },
+                    {
+                        data: 'ultimo_seguimiento',
+                        render: function (v) {
+                            return v ? v.substring(0, 10) : '<span class="badge bg-warning text-dark">' + $('<div>').text(T.segNunca).html() + '</span>';
+                        }
+                    },
+                    { data: null, orderable: false, defaultContent: '' }
+                ],
+                createdRow: function (row, m) { $('td:eq(3)', row).empty().append(botonRegistrar(m)); },
+                language: window.dtLang ? { url: window.dtLang } : {},
+                paging: false, searching: false, info: false,
+                responsive: true
+            });
+        }
+
         tablaSeguimiento = $('#tablaSeguimiento').DataTable({
             ajax: {
                 url: '@Url.Action("ListarSeguimientos", "Congregantes")',
                 type: 'GET',
+                data: function (d) { var z = zonaFiltro(); if (z) d.idZona = z; },
                 dataSrc: 'data'
             },
             columns: [
@@ -190,9 +384,9 @@
                     data: null,
                     orderable: false,
                     render: function (data) {
-                        return '<button data-permiso="MiembrosCrearEditar" class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
+                        return '<button data-permiso="SeguimientoCrearEditar" class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
-                               '<button data-permiso="MiembrosEliminar" class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
+                               '<button data-permiso="SeguimientoEliminar" class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
                                '<i class="fas fa-trash"></i></button>';
                     }
                 }
@@ -298,7 +492,7 @@
                     if (res.resultado && res.resultado !== 0 && res.resultado !== false) {
                         Swal.fire(T.mExito, res.mensaje, 'success');
                         $('#modalSeguimiento').modal('hide');
-                        tablaSeguimiento.ajax.reload();
+                        recargarTodo();
                     } else {
                         Swal.fire('Error', res.mensaje || T.mNoGuardar, 'error');
                     }
@@ -329,7 +523,7 @@
                 success: function (res) {
                     if (res.resultado) {
                         Swal.fire('Eliminado', res.mensaje, 'success');
-                        tablaSeguimiento.ajax.reload();
+                        recargarTodo();
                     } else {
                         Swal.fire('Error', res.mensaje, 'error');
                     }
@@ -351,7 +545,7 @@
         if (term.length < 2) { $('#dropdownNombreMiembro').hide().empty(); return; }
         timerMiembro = setTimeout(function () {
             $.ajax({
-                url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                url: '@Url.Action("BuscarMiembrosSeguimiento", "Congregantes")',
                 type: 'GET',
                 data: { term: term },
                 success: function (res) {

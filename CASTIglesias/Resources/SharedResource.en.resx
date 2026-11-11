@@ -2631,4 +2631,97 @@
   <data name="Te hemos enviado un correo de confirmación. Unos días antes del webinar recibirás el enlace de Teams en esa misma dirección." xml:space="preserve"><value>We have sent you a confirmation email. A few days before the webinar you will receive the Teams link at that same address.</value></data>
   <data name="No se pudo completar la inscripción." xml:space="preserve"><value>The registration could not be completed.</value></data>
   <data name="No se pudo enviar. Inténtalo de nuevo." xml:space="preserve"><value>It could not be sent. Please try again.</value></data>
+  <data name="Configuración de seguimientos" xml:space="preserve"><value>Follow-up settings</value></data>
+  <data name="Seguimientos" xml:space="preserve"><value>Follow-ups</value></data>
+  <data name="Buscar líder" xml:space="preserve"><value>Search leader</value></data>
+  <data name="Líderes con seguimiento configurado" xml:space="preserve"><value>Leaders with follow-up configured</value></data>
+  <data name="Asignados" xml:space="preserve"><value>Assigned</value></data>
+  <data name="Todavía no hay líderes configurados." xml:space="preserve"><value>No leaders configured yet.</value></data>
+  <data name="Busca o selecciona un líder para configurar su seguimiento." xml:space="preserve"><value>Search or select a leader to configure their follow-up.</value></data>
+  <data name="Usuario con el que entra" xml:space="preserve"><value>User account they sign in with</value></data>
+  <data name="Vincular" xml:space="preserve"><value>Link</value></data>
+  <data name="Zonas de las que puede hacer seguimiento" xml:space="preserve"><value>Zones they can follow up</value></data>
+  <data name="Guardar zonas" xml:space="preserve"><value>Save zones</value></data>
+  <data name="Lista de personas asignadas" xml:space="preserve"><value>Assigned people list</value></data>
+  <data name="Persona" xml:space="preserve"><value>Person</value></data>
+  <data name="Motivo / campaña" xml:space="preserve"><value>Reason / campaign</value></data>
+  <data name="Sin personas asignadas." xml:space="preserve"><value>No people assigned.</value></data>
+  <data name="Vinculado a" xml:space="preserve"><value>Linked to</value></data>
+  <data name="Reconocido por correo (sin vincular)" xml:space="preserve"><value>Recognised by email (not linked)</value></data>
+  <data name="Sin usuario vinculado" xml:space="preserve"><value>No linked user</value></data>
+  <data name="-- Sin usuario --" xml:space="preserve"><value>-- No user --</value></data>
+  <data name="Selecciona una persona de la lista." xml:space="preserve"><value>Select a person from the list.</value></data>
+  <data name="¿Quitar a esta persona de la lista del líder?" xml:space="preserve"><value>Remove this person from the leader's list?</value></data>
+  <data name="No se pudo completar la operación." xml:space="preserve"><value>The operation could not be completed.</value></data>
+  <data name="Mi lista de seguimiento" xml:space="preserve"><value>My follow-up list</value></data>
+  <data name="Último seguimiento" xml:space="preserve"><value>Last follow-up</value></data>
+  <data name="Filtrar por zona" xml:space="preserve"><value>Filter by zone</value></data>
+  <data name="Sin seguimiento" xml:space="preserve"><value>No follow-up</value></data>
+  <data name="Borrar filtros" xml:space="preserve"><value>Clear filters</value></data>
+  <data name="Miembros activos a los que todavía no se les ha registrado ningún seguimiento." xml:space="preserve"><value>Active members who have not had any follow-up recorded yet.</value></data>
+  <data name="Nunca" xml:space="preserve"><value>Never</value></data>
+  <data name="Registrar seguimiento" xml:space="preserve"><value>Record follow-up</value></data>
+  <data name="Tu usuario no está vinculado a ningún líder. Pide a tu pastor que te configure en Configuración → Seguimientos." xml:space="preserve"><value>Your user is not linked to any leader. Ask your pastor to set you up in Settings → Follow-ups.</value></data>
+  <data name="Todavía no tienes zonas ni personas asignadas para hacer seguimiento. Pide a tu pastor que te las asigne." xml:space="preserve"><value>You don't have any zones or people assigned for follow-up yet. Ask your pastor to assign them.</value></data>
+  <data name="Solo los líderes pueden hacer seguimiento. Elige un líder e indica de qué zonas (de las que pertenece) puede hacer seguimiento y qué personas concretas tiene asignadas. Los pastores siguen viendo todos los seguimientos." xml:space="preserve"><value>Only leaders can do follow-up. Choose a leader and set which of their zones they can follow up and which specific people are assigned to them. Pastors still see all follow-ups.</value></data>
+  <data name="Sin un usuario vinculado el líder no podrá ver ningún seguimiento. Si su usuario tiene el mismo correo que su ficha de miembro se reconoce automáticamente." xml:space="preserve"><value>Without a linked user the leader won't see any follow-up. If their user has the same email as their member record, it is recognised automatically.</value></data>
+  <data name="Este líder no pertenece a ninguna zona. Asígnale zonas desde su ficha de miembro o usa la lista de personas." xml:space="preserve"><value>This leader doesn't belong to any zone. Assign zones from their member record or use the people list.</value></data>
+  <data name="Personas concretas a las que este líder debe hacer seguimiento (por ejemplo, de una campaña), aunque no sean de sus zonas." xml:space="preserve"><value>Specific people this leader must follow up (for example, from a campaign), even if they are not in their zones.</value></data>
+  <data name="Tu privacidad" xml:space="preserve"><value>Your privacy</value></data>
+  <data name="Usamos cookies propias necesarias para que la web funcione y, solo si nos das permiso, cookies de Google para medir las visitas y saber si nuestros anuncios funcionan. Puedes aceptarlas, rechazarlas o elegir cuáles." xml:space="preserve"><value>We use our own cookies that the website needs to work and, only if you allow it, Google cookies to measure visits and see whether our ads work. You can accept them, reject them or choose which ones.</value></data>
+  <data name="Política de cookies" xml:space="preserve"><value>Cookie policy</value></data>
+  <data name="Necesarias" xml:space="preserve"><value>Necessary</value></data>
+  <data name="Siempre activas" xml:space="preserve"><value>Always active</value></data>
+  <data name="Hacen funcionar la web: sesión, seguridad de los formularios e idioma." xml:space="preserve"><value>They make the website work: session, form security and language.</value></data>
+  <data name="Analítica" xml:space="preserve"><value>Analytics</value></data>
+  <data name="Google Analytics: cuántas personas nos visitan y qué páginas ven, para mejorar la web." xml:space="preserve"><value>Google Analytics: how many people visit us and which pages they see, so we can improve the website.</value></data>
+  <data name="Publicidad" xml:space="preserve"><value>Advertising</value></data>
+  <data name="Google Ads: saber si nuestros anuncios funcionan y mostrarte anuncios relevantes." xml:space="preserve"><value>Google Ads: to know whether our ads work and to show you relevant ads.</value></data>
+  <data name="Rechazar" xml:space="preserve"><value>Reject</value></data>
+  <data name="Configurar" xml:space="preserve"><value>Customise</value></data>
+  <data name="Guardar selección" xml:space="preserve"><value>Save selection</value></data>
+  <data name="Aceptar" xml:space="preserve"><value>Accept</value></data>
+  <data name="Configurar cookies" xml:space="preserve"><value>Cookie settings</value></data>
+  <data name="Aviso legal" xml:space="preserve"><value>Legal notice</value></data>
+  <data name="Última actualización" xml:space="preserve"><value>Last updated</value></data>
+  <data name="Usamos cookies técnicas necesarias para que la web funcione y, solo si nos das permiso, cookies analíticas de Google para saber cuántas personas nos visitan. No usamos cookies publicitarias. Puedes aceptarlas o rechazarlas." xml:space="preserve"><value>We use technical cookies the website needs to work and, only if you allow it, Google analytics cookies to know how many people visit us. We do not use advertising cookies. You can accept or reject them.</value></data>
+  <data name="He leído y acepto la" xml:space="preserve"><value>I have read and accept the</value></data>
+  <data name="Debes aceptar la política de privacidad para continuar." xml:space="preserve"><value>You must accept the privacy policy to continue.</value></data>
+  <data name="Responsable: {0}. Finalidad: responder a tu consulta y enviarte la información que pidas. Legitimación: tu solicitud. No cedemos tus datos a terceros salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación, supresión y otros escribiendo a {1}." xml:space="preserve"><value>Controller: {0}. Purpose: to answer your enquiry and send you the information you ask for. Legal basis: your request. We do not share your data with third parties unless required by law. You can exercise your rights of access, rectification, erasure and others by writing to {1}.</value></data>
+  <data name="Responsable: {0}. Finalidad: gestionar tu inscripción y enviarte el enlace de la sesión. Legitimación: tu solicitud. No cedemos tus datos a terceros salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación, supresión y otros escribiendo a {1}." xml:space="preserve"><value>Controller: {0}. Purpose: to manage your sign-up and send you the session link. Legal basis: your request. We do not share your data with third parties unless required by law. You can exercise your rights of access, rectification, erasure and others by writing to {1}.</value></data>
+  <data name="Características — Congrega CRM" xml:space="preserve"><value>Features — Congrega CRM</value></data>
+  <data name="Cómo funciona — Congrega CRM" xml:space="preserve"><value>How it works — Congrega CRM</value></data>
+  <data name="Precios — Congrega CRM" xml:space="preserve"><value>Pricing — Congrega CRM</value></data>
+  <data name="Contacto — Congrega CRM" xml:space="preserve"><value>Contact — Congrega CRM</value></data>
+  <data name="Ruta de navegación" xml:space="preserve"><value>Breadcrumb</value></data>
+  <data name="Todas las funciones de Congrega CRM para gestionar tu iglesia: miembros, grupos, ministerios, asistencia, seguimiento pastoral y finanzas." xml:space="preserve"><value>Every Congrega CRM feature to run your church: members, groups, ministries, attendance, pastoral follow-up and finances.</value></data>
+  <data name="Así se pone en marcha Congrega CRM en tu iglesia: sin instalaciones, en pocos pasos y con tu equipo trabajando desde el primer día." xml:space="preserve"><value>How Congrega CRM gets up and running in your church: nothing to install, just a few steps, and your team working from day one.</value></data>
+  <data name="Planes y precios de Congrega CRM, el software de gestión para iglesias. Sin permanencia: elige el plan que mejor se adapta a tu comunidad." xml:space="preserve"><value>Congrega CRM plans and pricing, the church management software. No lock-in: choose the plan that best fits your community.</value></data>
+  <data name="Escríbenos y te ayudamos a elegir el plan de Congrega CRM para tu iglesia. Respondemos en menos de 24 horas." xml:space="preserve"><value>Write to us and we will help you choose the right Congrega CRM plan for your church. We reply within 24 hours.</value></data>
+  <data name="Blog" xml:space="preserve"><value>Blog</value></data>
+  <data name="Blog — Congrega CRM" xml:space="preserve"><value>Blog — Congrega CRM</value></data>
+  <data name="Blog de Congrega" xml:space="preserve"><value>Congrega blog</value></data>
+  <data name="Ideas, guías y novedades para organizar mejor tu iglesia: gestión de miembros, seguimiento pastoral, finanzas y mucho más." xml:space="preserve"><value>Ideas, guides and news to help you run your church better: member management, pastoral follow-up, finances and much more.</value></data>
+  <data name="Muy pronto publicaremos aquí los primeros artículos." xml:space="preserve"><value>Our first articles are coming soon.</value></data>
+  <data name="{0} min de lectura" xml:space="preserve"><value>{0} min read</value></data>
+  <data name="Leer artículo" xml:space="preserve"><value>Read article</value></data>
+  <data name="¿Quieres ver Congrega CRM en tu iglesia?" xml:space="preserve"><value>Would you like to see Congrega CRM in your church?</value></data>
+  <data name="Te enseñamos la aplicación y te ayudamos a elegir el plan que mejor se adapta a tu comunidad." xml:space="preserve"><value>We will show you the application and help you choose the plan that best fits your community.</value></data>
+  <data name="Volver al blog" xml:space="preserve"><value>Back to the blog</value></data>
+  <data name="Página no encontrada — Congrega CRM" xml:space="preserve"><value>Page not found — Congrega CRM</value></data>
+  <data name="La página que buscas no existe o se ha movido." xml:space="preserve"><value>The page you are looking for does not exist or has been moved.</value></data>
+  <data name="No se ha encontrado la página" xml:space="preserve"><value>Page not found</value></data>
+  <data name="Puede que la dirección esté mal escrita o que la página se haya movido. Estos enlaces te pueden ayudar:" xml:space="preserve"><value>The address may be mistyped or the page may have moved. These links may help:</value></data>
+  <data name="Volver al inicio" xml:space="preserve"><value>Back to home</value></data>
+  <data name="Audiovisuales — Congrega CRM" xml:space="preserve"><value>Videos — Congrega CRM</value></data>
+  <data name="Mira Congrega CRM en acción" xml:space="preserve"><value>See Congrega CRM in action</value></data>
+  <data name="Vídeos para conocer la aplicación y ver cómo puede ayudar a tu iglesia." xml:space="preserve"><value>Videos to get to know the application and see how it can help your church.</value></data>
+  <data name="Muy pronto publicaremos aquí nuestros vídeos." xml:space="preserve"><value>Our videos are coming soon.</value></data>
+  <data name="Reproducir vídeo" xml:space="preserve"><value>Play video</value></data>
+  <data name="Al reproducir un vídeo te conectas con YouTube (Google), que puede usar cookies." xml:space="preserve"><value>Playing a video connects you to YouTube (Google), which may use cookies.</value></data>
+  <data name="Más información" xml:space="preserve"><value>More information</value></data>
+  <data name="Colaboradores" xml:space="preserve"><value>Partners</value></data>
+  <data name="Trabajan con Congrega" xml:space="preserve"><value>Working with Congrega</value></data>
+  <data name="Digitaliza tu iglesia con Congrega CRM" xml:space="preserve"><value>Digitise your church with Congrega CRM</value></data>
+  <data name="Vídeo editado por Ethereal Project." xml:space="preserve"><value>Video edited by Ethereal Project.</value></data>
 </root>

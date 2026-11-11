@@ -33,7 +33,7 @@ namespace CASTIglesias.Controllers
             ViewBag.Denominaciones = CN_Arqueos.Denominaciones;
             ViewBag.Usuarios = _negocioUsuarios.ListarUsuarios(ObtenerIdSedeUsuario());
             ViewBag.IdUsuario = SesionClaims.ObtenerIdUsuario(User);
-            return View();
+            return View("~/Views/Finanzas/FinanzasArqueos.cshtml");
         }
 
         [HttpGet]

@@ -32,7 +32,7 @@ namespace CASTIglesias.Controllers
             // cajas y fondos) y la vista enseña el aviso de que falta crearlo.
             var ejercicio = _negocioEjercicios.Listar().FirstOrDefault(e => e.status == "open");
 
-            return View(_negocioPanel.Armar(ejercicio, ObtenerIdSedeUsuario()));
+            return View("~/Views/Finanzas/DashboardFinanciero.cshtml", _negocioPanel.Armar(ejercicio, ObtenerIdSedeUsuario()));
         }
     }
 }

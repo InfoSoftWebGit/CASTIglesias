@@ -36,7 +36,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Index()
         {
             ViewBag.Cajas = _negocioTesoreria.ListarActivas();
-            return View();
+            return View("~/Views/Finanzas/FinanzasPagos.cshtml");
         }
 
         [HttpGet]

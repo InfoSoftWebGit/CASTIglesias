@@ -1,0 +1,55 @@
+@model List<CapaEntidad.BlogArticulo>
+@* Listado público del blog (/blog). Mismo layout, barra y pie que las páginas
+   de sección. Los artículos se escriben desde /BlogAdmin. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "blog";
+    ViewData["RutaCanonica"] = "blog";
+    ViewData["Title"] = L["Blog — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Blog"].Value;
+    ViewData["Descripcion"] = L["Ideas, guías y novedades para organizar mejor tu iglesia: gestión de miembros, seguimiento pastoral, finanzas y mucho más."].Value;
+}
+<partial name="~/Views/Landing/_CabeceraPagina.cshtml" />
+
+<section class="py-5" style="background:var(--bg-light);">
+    <div class="container py-3">
+        @if (Model.Count == 0)
+        {
+            <div class="blog-vacio">
+                <div><i class="far fa-newspaper"></i></div>
+                <p class="mb-0">@L["Muy pronto publicaremos aquí los primeros artículos."]</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var articulo in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <a class="blog-tarjeta" href="/blog/@articulo.slug" lang="@articulo.idioma">
+                            <div class="blog-tarjeta-imagen">
+                                @if (!string.IsNullOrEmpty(articulo.imagen_portada))
+                                {
+                                    <img src="@articulo.imagen_portada" alt="" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="sin-imagen"><i class="fas fa-church"></i></div>
+                                }
+                            </div>
+                            <div class="blog-tarjeta-cuerpo">
+                                <div class="blog-meta">
+                                    <time datetime="@articulo.fecha_publicacion?.ToString("yyyy-MM-dd")">@articulo.fecha_publicacion?.ToString("dd/MM/yyyy")</time>
+                                    · @L["{0} min de lectura", CapaNegocio.CN_Blog.MinutosLectura(articulo.contenido)]
+                                </div>
+                                <h2>@articulo.titulo</h2>
+                                <p>@articulo.resumen</p>
+                                <span class="blog-leer">@L["Leer artículo"] <i class="fas fa-arrow-right ms-1"></i></span>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

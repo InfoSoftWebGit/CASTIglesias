@@ -42,6 +42,8 @@ namespace CapaDatos
         public DbSet<Seguimiento> Seguimientos { get; set; }
         public DbSet<DetalleSeguimiento> DetallesSeguimiento { get; set; }
         public DbSet<Lider> Lideres { get; set; }
+        public DbSet<SeguimientoZonaLider> SeguimientoZonasLider { get; set; }
+        public DbSet<SeguimientoAsignacion> SeguimientoAsignaciones { get; set; }
         public DbSet<Matrimonio> Matrimonios { get; set; }
         public DbSet<ConfigJovenes> ConfigJovenes { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
@@ -64,6 +66,10 @@ namespace CapaDatos
         // bloque por iglesia porque las rellena gente de fuera, desde la página
         // pública, cuando todavía no hay ninguna iglesia asociada.
         public DbSet<WebinarInscripcion> WebinarInscripciones { get; set; }
+
+        // Artículos del blog público. Globales por el mismo motivo: son de
+        // Congrega y se leen desde la página pública, sin sesión.
+        public DbSet<BlogArticulo> BlogArticulos { get; set; }
 
         // ── Módulo financiero ────────────────────────────────────────────────
         // Las 48 tablas del área financiera. Las 46 que tienen organization_id

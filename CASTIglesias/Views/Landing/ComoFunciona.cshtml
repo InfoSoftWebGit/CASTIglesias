@@ -1,0 +1,15 @@
+@* Página independiente /como-funciona. Mismo contenido que la sección de la
+   landing, más los testimonios. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "como-funciona";
+    ViewData["RutaCanonica"] = "como-funciona";
+    ViewData["Title"] = L["Cómo funciona — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Cómo funciona"].Value;
+    ViewData["Descripcion"] = L["Así se pone en marcha Congrega CRM en tu iglesia: sin instalaciones, en pocos pasos y con tu equipo trabajando desde el primer día."].Value;
+}
+<partial name="_CabeceraPagina" />
+
+<partial name="_SeccionComoFunciona" />
+
+<partial name="_SeccionTestimonios" />

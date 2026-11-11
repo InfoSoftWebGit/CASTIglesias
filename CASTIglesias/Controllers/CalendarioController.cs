@@ -24,11 +24,11 @@ namespace CASTIglesias.Controllers
             _cnCulto = cnCulto;
         }
 
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public IActionResult Calendarios() => View();
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public JsonResult ObtenerCultos()
         {
             try
@@ -47,7 +47,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public JsonResult GenerarCalendario([FromBody] CalendarioRequest req)
         {
             try
@@ -71,7 +71,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        [RequierePermiso(nameof(Permisos.CalendarioCrearEditar))]
         public JsonResult Guardar([FromBody] CalendarioRequest req)
         {
             try
@@ -87,7 +87,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public JsonResult ListarGuardados()
         {
             try
@@ -114,7 +114,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public JsonResult ObtenerGuardado(int id)
         {
             try
@@ -131,7 +131,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public JsonResult ObtenerCandidatos(int idAsignacion)
         {
             try
@@ -149,7 +149,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        [RequierePermiso(nameof(Permisos.CalendarioCrearEditar))]
         public JsonResult CambiarServidor([FromBody] CambioServidorRequest req)
         {
             try
@@ -168,7 +168,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
+        [RequierePermiso(nameof(Permisos.CalendarioEliminar))]
         public JsonResult EliminarGuardado(int id)
         {
             try
@@ -184,7 +184,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public IActionResult ExportarExcelAgrupado([FromBody] CalendarioAgrupadoRequest req)
         {
             try
@@ -217,7 +217,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Calendario))]
         public IActionResult ExportarExcel([FromBody] CalendarioRequest req)
         {
             try

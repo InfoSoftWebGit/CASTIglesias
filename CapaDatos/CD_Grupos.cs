@@ -207,7 +207,7 @@ namespace CapaDatos
             if (!string.IsNullOrWhiteSpace(nombre))
                 consulta = consulta.Where(g => g.Descripcion.ToLower().Contains(nombre.ToLower()));
 
-            return consulta.ToList();
+            return consulta.OrderBy(g => g.Descripcion).ToList();
         }
 
 

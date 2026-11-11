@@ -32,7 +32,7 @@ namespace CASTIglesias.Controllers
             _negocioPlantillas = negocioPlantillas;
         }
 
-        public IActionResult Index() => View();
+        public IActionResult Index() => View("~/Views/Finanzas/FinanzasPlantillas.cshtml");
 
         [HttpGet]
         public JsonResult Listar() => Json(new { data = _negocioPlantillas.Listar() });
@@ -85,7 +85,7 @@ namespace CASTIglesias.Controllers
 
             ViewBag.Plantilla = plantilla;
             ViewBag.Avisos = _negocioPlantillas.Revisar(id);
-            return View(_negocioPlantillas.CuentasDe(id));
+            return View("~/Views/Finanzas/Cuentas.cshtml", _negocioPlantillas.CuentasDe(id));
         }
 
         [HttpPost]

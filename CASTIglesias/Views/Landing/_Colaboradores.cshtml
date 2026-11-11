@@ -1,0 +1,71 @@
+﻿@* Logos de las marcas que colaboran con Congrega.
+   Se usa en dos sitios con el mismo listado:
+     - Franja bajo la portada de la landing  (model "franja")
+     - Pie de todas las páginas públicas      (model "pie")
+   Con menos de 5 marcas la fila está quieta; con 5 o más se convierte sola en
+   un carrusel que se desplaza (y se para al pasar el ratón). *@
+@model string
+@{
+    // ════════════════════════════════════════════════════════════════════════
+    //  MARCAS COLABORADORAS
+    //  Para añadir una: guarda su logo (PNG con fondo transparente o SVG) en
+    //  wwwroot/img/colaboradores/ y copia una línea.
+    //  Patrocinado = true si hay pago o contraprestación: el enlace lleva
+    //  rel="sponsored", que es lo que pide Google en esos casos.
+    //  Usar el logo requiere permiso de la marca (vale un correo).
+    // ════════════════════════════════════════════════════════════════════════
+    var marcas = new List<(string Nombre, string Logo, string Web, bool Patrocinado)>
+    {
+        ("Ethereal Project", "/img/colaboradores/ethereal-project.png", "https://www.youtube.com/@EtherealProjectOficial", false),
+    };
+
+    bool enPie = Model == "pie";
+    bool carrusel = marcas.Count >= 5;
+
+    // Pinta todos los logos. En modo carrusel se llama dos veces para que el
+    // bucle no tenga salto; la copia va oculta a lectores de pantalla y al tabulador.
+    void Logos(bool copia)
+    {
+        foreach (var m in marcas)
+        {
+            <a class="colab-logo" href="@m.Web" target="_blank"
+               rel="@(m.Patrocinado ? "noopener sponsored" : "noopener")"
+               aria-hidden="@(copia ? "true" : null)" tabindex="@(copia ? "-1" : null)">
+                <img src="@m.Logo" alt="@m.Nombre" loading="lazy" />
+            </a>
+        }
+    }
+}
+@if (marcas.Count > 0)
+{
+    if (enPie)
+    {
+        <div class="colab-pie">
+            <div class="colab-pie-titulo">@L["Colaboradores"]</div>
+            @if (carrusel)
+            {
+                <div class="colab-carrusel"><div class="colab-cinta">@{ Logos(false); Logos(true); }</div></div>
+            }
+            else
+            {
+                <div class="colab-fila colab-fila-izq">@{ Logos(false); }</div>
+            }
+        </div>
+    }
+    else
+    {
+        <section class="colab-franja" aria-label="@L["Trabajan con Congrega"]">
+            <div class="container">
+                <div class="colab-franja-titulo">@L["Trabajan con Congrega"]</div>
+                @if (carrusel)
+                {
+                    <div class="colab-carrusel"><div class="colab-cinta">@{ Logos(false); Logos(true); }</div></div>
+                }
+                else
+                {
+                    <div class="colab-fila">@{ Logos(false); }</div>
+                }
+            </div>
+        </section>
+    }
+}

@@ -1,0 +1,195 @@
+﻿@* Estilos de la barra superior y del pie de las páginas públicas (landing,
+   páginas de sección y webinar). Salen de la landing original. *@
+<style>
+        /* ── NAVBAR ── */
+        #mainNav {
+            background: rgba(13, 27, 61, 0.96);
+            backdrop-filter: blur(12px);
+            transition: padding 0.3s ease, box-shadow 0.3s ease;
+            padding: 14px 0;
+        }
+        #mainNav.scrolled {
+            padding: 8px 0;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+        }
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.35rem;
+            letter-spacing: -0.5px;
+            color: white !important;
+        }
+        .navbar-brand span { color: var(--teal); }
+        /* ── Ancho de la barra ──
+           El resto de la página se alinea con .container (1140px como mucho),
+           pero en la barra ese límite deja los enlaces tan juntos que algunos
+           se parten en dos líneas. Aquí se amplía solo la barra: el contenido
+           respira y el logotipo y el botón de acceso quedan en los extremos. */
+        #mainNav .container {
+            max-width: 1560px;
+            padding-left: 26px;
+            padding-right: 26px;
+        }
+        .nav-link {
+            font-weight: 500;
+            color: rgba(255,255,255,0.85) !important;
+            transition: color 0.2s;
+            padding: 6px 14px !important;
+            /* Ningún enlace debe partirse en dos líneas: "Cómo funciona" o
+               "Características" quedarían descolgados respecto a los demás. */
+            white-space: nowrap;
+        }
+        .nav-link:hover { color: var(--teal) !important; }
+        .btn-nav-login {
+            background: var(--teal);
+            color: white !important;
+            border-radius: 8px;
+            padding: 8px 22px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            white-space: nowrap;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .btn-nav-login:hover { background: #009e89; transform: translateY(-1px); }
+
+        /* ── Contacto por WhatsApp en la barra ──
+           Va junto al botón de acceso pero con estilo de enlace y no de botón:
+           el objetivo principal de la barra sigue siendo iniciar sesión, y dos
+           botones sólidos uno al lado del otro competirían entre sí. El icono
+           de WhatsApp se pinta en su verde de marca para que se reconozca de un
+           vistazo sin tener que leer el número. */
+        .nav-contacto {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.88) !important;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+        .nav-contacto:hover { color: var(--teal) !important; }
+        .nav-contacto i { color: #25D366; font-size: 1.05rem; }
+
+        /* ── Botón hamburguesa (móvil) ──
+           La navbar es oscura pero no lleva la clase navbar-dark, así que Bootstrap
+           pinta el icono de tres rayas en negro translúcido y resulta invisible.
+           Se sustituye el SVG por uno blanco y se le da un borde tenue para que se
+           distinga como botón sobre el azul profundo de la barra. */
+        .navbar-toggler {
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,0.25) !important;
+            border-radius: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .navbar-toggler:hover { background: rgba(255,255,255,0.10); }
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.45);
+            outline: none;
+        }
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.95%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        /* El menú desplegado en móvil hereda el fondo de la navbar, pero al abrirse
+           sobre el hero conviene separarlo un poco del borde. */
+        @@media (max-width: 1399.98px) {
+            #navbarMenu { padding-top: 10px; }
+            #navbarMenu .lang-switch { margin-top: 10px; }
+            /* Al apilarse el menú, el contacto necesita su propia separación:
+               sin el margen lateral de ms-xxl-3 quedaría pegado al selector. */
+            #navbarMenu .nav-contacto { margin-top: 12px; }
+        }
+        /* Entre 1400 y 1600px el menú en línea va justo: el contacto se queda en
+           el icono de WhatsApp (el número sale al pasar el ratón) y los enlaces se
+           acercan un poco. Así no se corta el botón de acceso de la landing. */
+        @@media (min-width: 1400px) and (max-width: 1599.98px) {
+            .nav-contacto-texto { display: none; }
+            .nav-contacto i { font-size: 1.35rem; }
+            #mainNav .nav-link { padding: 6px 10px !important; }
+        }
+
+        /* ── Selector de idioma ──
+           Conmutador de dos posiciones en vez de desplegable: con solo dos
+           idiomas, un desplegable esconde la mitad de las opciones y obliga a
+           dos clics. Así ambas están a la vista y se cambia de una. */
+        .lang-switch {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
+        }
+        .lang-switch a {
+            display: block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: rgba(255,255,255,0.72);
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        .lang-switch a:hover { color: white; background: rgba(255,255,255,0.10); }
+        .lang-switch a.activo {
+            background: var(--teal);
+            color: white;
+        }
+
+        /* ── FOOTER ── */
+        .site-footer {
+            background: var(--primary-dark);
+            color: rgba(255,255,255,0.65); padding: 50px 0 22px;
+        }
+        .footer-brand-text { color: white; font-weight: 800; font-size: 1.2rem; }
+        .footer-brand-text span { color: var(--teal); }
+        .site-footer a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+        .site-footer a:hover { color: var(--teal); }
+        .footer-divider { border-color: rgba(255,255,255,0.1); margin: 28px 0 18px; }
+        /* ── Logo de Congrega en la barra y el pie ──
+           Va en una pastilla blanca: la "C" azul oscuro del logo no se vería
+           sobre el azul de la barra y del pie. */
+        .marca-logo {
+            width: 38px; height: 38px; border-radius: 9px; background: #fff;
+            margin-right: 10px; vertical-align: middle; object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+        .footer-brand-text .marca-logo { width: 34px; height: 34px; border-radius: 8px; }
+        .navbar-brand, .footer-brand-text { display: inline-flex; align-items: center; }
+        .navbar-brand span, .footer-brand-text span { margin-left: 0.28em; }
+
+        /* ── Colaboradores (franja bajo la portada y pie) ── */
+        .colab-fila { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 28px 56px; }
+        .colab-fila-izq { justify-content: flex-start; }
+        .colab-logo { display: inline-flex; align-items: center; }
+        .colab-logo img { height: 46px; width: auto; max-width: 220px; display: block; }
+        .colab-franja { background: #fff; padding: 28px 0 30px; border-bottom: 1px solid #EDF0F6; }
+        .colab-franja-titulo, .colab-pie-titulo {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+        }
+        .colab-franja-titulo { text-align: center; color: #6B7280; margin-bottom: 16px; }
+        /* En gris para no competir con la marca de Congrega; a color al pasar el ratón. */
+        .colab-franja .colab-logo img { filter: grayscale(1); opacity: 0.7; transition: filter 0.25s, opacity 0.25s; }
+        .colab-franja .colab-logo:hover img, .colab-franja .colab-logo:focus-visible img { filter: none; opacity: 1; }
+        /* En el pie oscuro, logos en blanco. */
+        .colab-pie { padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .colab-pie-titulo { color: rgba(255,255,255,0.55); margin-bottom: 12px; }
+        .colab-pie .colab-logo img { height: 36px; filter: brightness(0) invert(1); opacity: 0.7; transition: opacity 0.2s; }
+        .colab-pie .colab-logo:hover img { opacity: 1; }
+        /* Carrusel (a partir de 5 marcas). La cinta lleva los logos dos veces. */
+        .colab-carrusel { overflow: hidden;
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+                    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+        .colab-cinta { display: flex; align-items: center; gap: 56px; width: max-content; animation: colab-desliza 30s linear infinite; }
+        .colab-carrusel:hover .colab-cinta { animation-play-state: paused; }
+        @@keyframes colab-desliza { to { transform: translateX(calc(-50% - 28px)); } }
+        @@media (prefers-reduced-motion: reduce) {
+            .colab-cinta { animation: none; flex-wrap: wrap; width: auto; justify-content: center; }
+            .colab-cinta > [aria-hidden="true"] { display: none; }
+        }
+
+        /* Enlace de la página en la que se está (páginas de sección y webinar). */
+        .nav-link.activo { color: var(--teal) !important; font-weight: 600; }
+    </style>

@@ -1,0 +1,317 @@
+@model CapaEntidad.BlogArticulo
+@* Editor de un artículo del blog. El texto se escribe en Markdown, con una
+   barra de botones para no tener que recordar la sintaxis y una vista previa
+   que usa exactamente la misma conversión que la web pública. *@
+@{
+    bool esNuevo = Model.ID_articulo == 0;
+    ViewData["Title"] = esNuevo ? L["Nuevo artículo"].Value : L["Editar artículo"].Value;
+}
+
+<style>
+    .editor-barra .btn { min-width: 38px; }
+    #txtContenido { font-family: Consolas, "Courier New", monospace; font-size: 0.92rem; line-height: 1.6; min-height: 460px; }
+    #vistaPrevia { min-height: 460px; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 18px 22px; background: #fff; overflow: auto; line-height: 1.75; }
+    #vistaPrevia img { max-width: 100%; height: auto; border-radius: 8px; }
+    #vistaPrevia blockquote { border-left: 4px solid #00BFA5; background: #F0F4FF; padding: 10px 16px; color: #6B7280; }
+    #vistaPrevia table { width: 100%; border-collapse: collapse; }
+    #vistaPrevia th, #vistaPrevia td { border: 1px solid #dee2e6; padding: 6px 10px; }
+    .portada-previa { max-height: 160px; border-radius: 8px; }
+    .ayuda-markdown code { white-space: nowrap; }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+        <h1 class="mb-0">@ViewData["Title"]</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>@L["Volver al listado"]</a>
+    </div>
+
+    @if (TempData["BlogOk"] is string ok)
+    {
+        <div class="alert alert-success mt-3">
+            @ok
+            @if (Model.publicado)
+            {
+                <a href="/blog/@Model.slug" target="_blank" rel="noopener" class="alert-link ms-2">@L["Ver en la web"]</a>
+            }
+        </div>
+    }
+    @if (ViewBag.Error is string error)
+    {
+        <div class="alert alert-danger mt-3">@error</div>
+    }
+
+    <form asp-action="Editar" method="post" class="mt-3 mb-5" id="frmArticulo">
+        <input type="hidden" asp-for="ID_articulo" />
+
+        <div class="row g-4">
+            @* ── Columna principal: título y contenido ── *@
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="titulo" class="form-label fw-semibold">@L["Título"] *</label>
+                            <input asp-for="titulo" class="form-control form-control-lg" maxlength="200" required
+                                   placeholder="@L["Ej: 5 claves para organizar los grupos de tu iglesia"]" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="resumen" class="form-label fw-semibold">@L["Resumen"] *</label>
+                            <textarea asp-for="resumen" class="form-control" rows="2" maxlength="300" required
+                                      placeholder="@L["Una o dos frases. Se muestra en el listado y es lo que Google enseña bajo el título."]"></textarea>
+                            <div class="form-text"><span id="lblResumen">0</span> / 160 @L["caracteres recomendados para Google"]</div>
+                        </div>
+
+                        <label class="form-label fw-semibold">@L["Contenido"] *</label>
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item"><button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabEscribir">@L["Escribir"]</button></li>
+                            <li class="nav-item"><button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#tabPrevia" id="btnTabPrevia">@L["Vista previa"]</button></li>
+                        </ul>
+                        <div class="tab-content pt-2">
+                            <div class="tab-pane fade show active" id="tabEscribir">
+                                <div class="editor-barra btn-toolbar gap-1 mb-2" role="toolbar">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-md="h2" title="@L["Título de sección"]">H2</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-md="h3" title="@L["Subtítulo"]">H3</button>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-md="negrita" title="@L["Negrita"]"><i class="fas fa-bold"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary" data-md="cursiva" title="@L["Cursiva"]"><i class="fas fa-italic"></i></button>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-md="lista" title="@L["Lista"]"><i class="fas fa-list-ul"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary" data-md="numerada" title="@L["Lista numerada"]"><i class="fas fa-list-ol"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary" data-md="cita" title="@L["Cita"]"><i class="fas fa-quote-right"></i></button>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-secondary" data-md="enlace" title="@L["Enlace"]"><i class="fas fa-link"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary" id="btnImagenTexto" title="@L["Insertar imagen"]"><i class="fas fa-image"></i></button>
+                                    </div>
+                                </div>
+                                <textarea asp-for="contenido" id="txtContenido" class="form-control" required
+                                          placeholder="@L["Escribe aquí el artículo…"]"></textarea>
+                                <div class="form-text ayuda-markdown mt-2">
+                                    <code>## Título</code> · <code>**negrita**</code> · <code>*cursiva*</code> ·
+                                    <code>- elemento</code> · <code>[texto](https://...)</code> · <code>> cita</code> ·
+                                    @L["Deja una línea en blanco entre párrafos."]
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="tabPrevia">
+                                <div id="vistaPrevia" class="text-muted">@L["Cargando…"]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @* ── Columna lateral: publicación y datos ── *@
+            <div class="col-xl-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input asp-for="publicado" class="form-check-input" type="checkbox" role="switch" />
+                            <label asp-for="publicado" class="form-check-label fw-semibold">@L["Publicado en la web"]</label>
+                            <div class="form-text">@L["Desactivado se guarda como borrador y no lo ve nadie."]</div>
+                        </div>
+                        @if (Model.fecha_publicacion.HasValue)
+                        {
+                            <p class="small text-muted mb-3">@L["Publicado por primera vez el {0}.", Model.fecha_publicacion.Value.ToString("dd/MM/yyyy HH:mm")]</p>
+                        }
+                        <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save me-1"></i>@L["Guardar"]</button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="slug" class="form-label fw-semibold">@L["Dirección"]</label>
+                            <div class="input-group">
+                                <span class="input-group-text small">/blog/</span>
+                                <input asp-for="slug" class="form-control" maxlength="120" id="txtSlug"
+                                       placeholder="@L["se-genera-del-titulo"]" />
+                            </div>
+                            <div class="form-text">@L["Si la dejas vacía se genera a partir del título. Evita cambiarla una vez publicado: los enlaces antiguos dejarían de funcionar."]</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="idioma" class="form-label fw-semibold">@L["Idioma del artículo"]</label>
+                            <select asp-for="idioma" class="form-select">
+                                <option value="es">Español</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label asp-for="autor" class="form-label fw-semibold">@L["Autor"]</label>
+                            <input asp-for="autor" class="form-control" maxlength="100" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <label class="form-label fw-semibold">@L["Imagen de portada"]</label>
+                        <input type="hidden" asp-for="imagen_portada" id="txtPortada" />
+                        <div id="contPortada" class="mb-2 @(string.IsNullOrEmpty(Model.imagen_portada) ? "d-none" : "")">
+                            <img id="imgPortada" src="@Model.imagen_portada" alt="" class="portada-previa img-fluid" />
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="btnPortada">
+                                <i class="fas fa-upload me-1"></i>@L["Subir imagen"]
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm @(string.IsNullOrEmpty(Model.imagen_portada) ? "d-none" : "")" id="btnQuitarPortada">
+                                @L["Quitar"]
+                            </button>
+                        </div>
+                        <div class="form-text">@L["JPG, PNG, GIF o WEBP de hasta 5 MB. Ideal: 1200 × 630 px, que es lo que usan WhatsApp y las redes al compartir."]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @* Selector de fichero oculto, compartido por la portada y las imágenes del texto. *@
+    <input type="file" id="fileImagen" accept="image/jpeg,image/png,image/gif,image/webp" class="d-none" />
+</div>
+
+@section scripts {
+<script>
+    (function () {
+        const txt = document.getElementById("txtContenido");
+        const titulo = document.getElementById("titulo");
+        const slug = document.getElementById("txtSlug");
+        const resumen = document.getElementById("resumen");
+        const token = document.querySelector('#frmArticulo input[name="__RequestVerificationToken"]').value;
+        const textos = {
+            textoEnlace: @Json.Serialize(L["texto del enlace"].Value),
+            textoNegrita: @Json.Serialize(L["texto en negrita"].Value),
+            textoCursiva: @Json.Serialize(L["texto en cursiva"].Value),
+            subiendo: @Json.Serialize(L["Subiendo imagen…"].Value),
+            errorSubir: @Json.Serialize(L["No se pudo subir la imagen."].Value),
+            errorPrevia: @Json.Serialize(L["No se pudo generar la vista previa."].Value),
+            vacio: @Json.Serialize(L["Todavía no hay contenido."].Value)
+        };
+
+        // ── Contador del resumen ──
+        function contarResumen() {
+            const n = resumen.value.length;
+            const lbl = document.getElementById("lblResumen");
+            lbl.textContent = n;
+            lbl.className = n > 160 ? "text-danger fw-semibold" : "";
+        }
+        resumen.addEventListener("input", contarResumen);
+        contarResumen();
+
+        // ── Dirección a partir del título ──
+        // Se rellena sola mientras no se haya tocado a mano (ni exista ya).
+        let slugManual = slug.value.trim() !== "";
+        slug.addEventListener("input", function () { slugManual = slug.value.trim() !== ""; });
+        titulo.addEventListener("input", function () {
+            if (slugManual) return;
+            slug.value = titulo.value.normalize("NFD").replace(/[̀-ͯ]/g, "")
+                .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").substring(0, 120);
+        });
+
+        // ── Barra de formato ──
+        // Envuelve la selección o, si no hay, inserta un texto de ejemplo seleccionado.
+        function envolver(antes, despues, ejemplo) {
+            const ini = txt.selectionStart, fin = txt.selectionEnd;
+            const sel = txt.value.substring(ini, fin) || ejemplo;
+            txt.setRangeText(antes + sel + despues, ini, fin, "end");
+            txt.setSelectionRange(ini + antes.length, ini + antes.length + sel.length);
+            txt.focus();
+        }
+        // Añade un prefijo al principio de cada línea seleccionada.
+        function prefijarLineas(prefijo) {
+            const ini = txt.value.lastIndexOf("\n", txt.selectionStart - 1) + 1;
+            const fin = txt.selectionEnd;
+            const lineas = txt.value.substring(ini, fin).split("\n");
+            const nuevas = lineas.map(function (l, i) {
+                return (typeof prefijo === "function" ? prefijo(i) : prefijo) + l;
+            }).join("\n");
+            txt.setRangeText(nuevas, ini, fin, "end");
+            txt.focus();
+        }
+        function insertar(texto) {
+            txt.setRangeText(texto, txt.selectionStart, txt.selectionEnd, "end");
+            txt.focus();
+        }
+
+        document.querySelectorAll("[data-md]").forEach(function (boton) {
+            boton.addEventListener("click", function () {
+                switch (boton.dataset.md) {
+                    case "h2": prefijarLineas("## "); break;
+                    case "h3": prefijarLineas("### "); break;
+                    case "negrita": envolver("**", "**", textos.textoNegrita); break;
+                    case "cursiva": envolver("*", "*", textos.textoCursiva); break;
+                    case "lista": prefijarLineas("- "); break;
+                    case "numerada": prefijarLineas(function (i) { return (i + 1) + ". "; }); break;
+                    case "cita": prefijarLineas("> "); break;
+                    case "enlace": envolver("[", "](https://)", textos.textoEnlace); break;
+                }
+            });
+        });
+
+        // ── Vista previa: la genera el servidor con la misma conversión que la web ──
+        document.getElementById("btnTabPrevia").addEventListener("shown.bs.tab", function () {
+            const previa = document.getElementById("vistaPrevia");
+            if (!txt.value.trim()) { previa.className = "text-muted"; previa.textContent = textos.vacio; return; }
+
+            const datos = new URLSearchParams();
+            datos.append("contenido", txt.value);
+            fetch('@Url.Action("VistaPrevia", "BlogAdmin")', {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded", "RequestVerificationToken": token },
+                body: datos
+            })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+            .then(function (res) { previa.className = ""; previa.innerHTML = res.html; })
+            .catch(function () { previa.className = "text-danger"; previa.textContent = textos.errorPrevia; });
+        });
+
+        // ── Subida de imágenes ──
+        // El mismo selector sirve para la portada y para las imágenes del texto;
+        // "destino" recuerda cuál se pidió.
+        const fichero = document.getElementById("fileImagen");
+        let destino = null;
+
+        document.getElementById("btnPortada").addEventListener("click", function () { destino = "portada"; fichero.click(); });
+        document.getElementById("btnImagenTexto").addEventListener("click", function () { destino = "texto"; fichero.click(); });
+
+        document.getElementById("btnQuitarPortada").addEventListener("click", function () {
+            document.getElementById("txtPortada").value = "";
+            document.getElementById("contPortada").classList.add("d-none");
+            this.classList.add("d-none");
+        });
+
+        fichero.addEventListener("change", function () {
+            if (!fichero.files.length) return;
+            const datos = new FormData();
+            datos.append("fichero", fichero.files[0]);
+            fichero.value = "";
+
+            Swal.fire({ title: textos.subiendo, allowOutsideClick: false, didOpen: function () { Swal.showLoading(); } });
+
+            fetch('@Url.Action("SubirImagen", "BlogAdmin")', {
+                method: "POST",
+                headers: { "RequestVerificationToken": token },
+                body: datos
+            })
+            .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+            .then(function (res) {
+                Swal.close();
+                if (!res.ok) { Swal.fire({ icon: "error", text: res.mensaje }); return; }
+
+                if (destino === "portada") {
+                    document.getElementById("txtPortada").value = res.url;
+                    document.getElementById("imgPortada").src = res.url;
+                    document.getElementById("contPortada").classList.remove("d-none");
+                    document.getElementById("btnQuitarPortada").classList.remove("d-none");
+                } else {
+                    insertar("\n\n![](" + res.url + ")\n\n");
+                }
+            })
+            .catch(function () { Swal.fire({ icon: "error", text: textos.errorSubir }); });
+        });
+    })();
+</script>
+}

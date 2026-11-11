@@ -1,0 +1,97 @@
+@* Layout de las páginas públicas de marketing: la landing (/) y sus páginas
+   de sección (/caracteristicas, /como-funciona, /precios, /contacto).
+
+   Cada vista fija en ViewData:
+     Title         -> título de la pestaña y de la tarjeta al compartir.
+     Descripcion   -> texto bajo el título en Google.
+     RutaCanonica  -> ruta sin barra inicial ("" para la landing, "precios"...).
+     EsLanding     -> true solo en la landing: enlaces con ancla y botón de acceso.
+     PaginaActual  -> sección marcada en la barra en las páginas de sección.
+     NoIndexar     -> true en páginas que Google no debe guardar (404).
+     Imagen        -> imagen para la tarjeta al compartir (artículos del blog).
+     TipoOg        -> "article" en los artículos; "website" por defecto.
+
+   El entorno decide si la página se deja indexar. QA sirve exactamente las
+   mismas páginas que producción: sin esta distinción, Google acabaría listando
+   qa.congrega.es como una copia del sitio bueno y las dos competirían entre sí. *@
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
+@{
+    // Dirección pública y definitiva del sitio. Se escribe fija, y no a partir
+    // de la petición, porque es la que debe ver el buscador: así una visita sin
+    // "www", por http, o con parámetros de campaña (?utm_source=...) sigue
+    // apuntando a una única dirección y no cuenta como varias páginas distintas.
+    const string urlSitio = "https://www.congrega.es/";
+    string urlCanonica = urlSitio + (ViewData["RutaCanonica"] as string ?? "");
+
+    bool indexable = Entorno.IsProduction() && ViewData["NoIndexar"] as bool? != true;
+    string titulo = ViewData["Title"] as string ?? "Congrega CRM";
+    string descripcion = ViewData["Descripcion"] as string ?? "";
+
+    // Imagen de la tarjeta: la del artículo si la hay (convertida a dirección
+    // completa, que es lo que exigen WhatsApp y las redes); si no, el favicon.
+    string imagen = ViewData["Imagen"] as string ?? "";
+    imagen = string.IsNullOrEmpty(imagen) ? urlSitio + "img/og-congrega.png"
+           : imagen.StartsWith("/") ? urlSitio + imagen.TrimStart('/') : imagen;
+}
+<!DOCTYPE html>
+@* Estas páginas no usan _Layout, así que declaran su propio lang. Sin esto, un
+   navegador o un buscador leería la página en inglés como si fuese española. *@
+<html lang="@IdiomasSoportados.Actual">
+<head>
+    @* Google Tag Manager: solo se carga si el visitante acepta las cookies. *@
+    <partial name="_GoogleTagManager" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@titulo</title>
+
+    @* La descripción es lo que Google enseña bajo el título en los resultados;
+       conviene que se quede por debajo de 160 caracteres. *@
+    <meta name="description" content="@descripcion" />
+    <meta name="author" content="Congrega CRM" />
+
+    @* En QA se pide explícitamente que no se indexe; en producción se pide lo
+       contrario de forma expresa, para que no quede a criterio del buscador. *@
+    @if (indexable)
+    {
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+        <link rel="canonical" href="@urlCanonica" />
+    }
+    else
+    {
+        <meta name="robots" content="noindex, nofollow" />
+    }
+
+    @* Tarjeta al compartir el enlace (WhatsApp, Facebook, LinkedIn, X). La
+       imagen por defecto es el logo sobre blanco a 1200x630 px, el tamaño que
+       piden las redes (img/og-congrega.png). *@
+    <meta property="og:type" content="@(ViewData["TipoOg"] as string ?? "website")" />
+    <meta property="og:site_name" content="Congrega CRM" />
+    <meta property="og:title" content="@titulo" />
+    <meta property="og:description" content="@descripcion" />
+    <meta property="og:url" content="@urlCanonica" />
+    <meta property="og:image" content="@imagen" />
+    <meta property="og:locale" content="@(IdiomasSoportados.Actual == "en" ? "en_US" : "es_ES")" />
+    <meta name="twitter:card" content="@(ViewData["Imagen"] is string ? "summary_large_image" : "summary")" />
+    <meta name="twitter:title" content="@titulo" />
+    <meta name="twitter:description" content="@descripcion" />
+    <meta name="twitter:image" content="@imagen" />
+
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <partial name="~/Views/Landing/_EstilosLanding.cshtml" />
+    <partial name="~/Views/Landing/_EstilosNavPublica.cshtml" />
+</head>
+<body>
+<partial name="~/Views/Landing/_NavPublica.cshtml" />
+
+@RenderBody()
+
+<partial name="~/Views/Landing/_FooterPublico.cshtml" />
+
+<partial name="~/Views/Landing/_ScriptsLanding.cshtml" />
+<partial name="_BannerCookies" />
+</body>
+</html>

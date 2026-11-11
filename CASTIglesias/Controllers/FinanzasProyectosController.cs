@@ -33,7 +33,7 @@ namespace CASTIglesias.Controllers
         {
             ViewBag.Sedes = _negocioSedes.ListarSedes() ?? new List<CapaEntidad.Sedes>();
             ViewBag.Usuarios = _negocioUsuarios.ListarUsuarios(ObtenerIdSedeUsuario());
-            return View();
+            return View("~/Views/Finanzas/FinanzasProyectos.cshtml");
         }
 
         [HttpGet]

@@ -160,7 +160,10 @@
 
     <!-- NAV SUPERIOR -->
     <nav class="sb-topnav navbar navbar-expand">
-        <a class="navbar-brand ps-3" href="@Url.Action("Index", "Home")" style="font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px;">
+        <a class="navbar-brand ps-3 d-inline-flex align-items-center" href="@Url.Action("Index", "Home")" style="font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px;">
+            @* Logo en pastilla blanca: la "C" azul oscuro no se vería sobre la barra. *@
+            <img src="/img/logo-congrega-blanco.png" alt="" width="32" height="32"
+                 style="width:32px;height:32px;border-radius:8px;background:#fff;margin-right:9px;object-fit:contain;" />
             <span style="color: #00BFA5;">Congrega</span><span style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 400; margin-left: 4px;">CRM</span>
         </a>
 
@@ -250,6 +253,10 @@
                     {
                         <a class="small text-warning text-decoration-none" href="@Url.Action("Index", "Plataforma")">
                             <i class="fas fa-exchange-alt fa-fw me-1"></i>@L["Cambiar de iglesia"]
+                        </a>
+                        @* El blog público de congrega.es lo gestiona el equipo de Congrega. *@
+                        <a class="small text-warning text-decoration-none d-block mt-1" href="@Url.Action("Index", "BlogAdmin")">
+                            <i class="fas fa-newspaper fa-fw me-1"></i>@L["Blog de Congrega"]
                         </a>
                     }
 
@@ -572,7 +579,10 @@
             const n = parseFloat(valor);
             return isNaN(n)
                 ? '0,00'
-                : n.toLocaleString('@System.Globalization.CultureInfo.CurrentCulture.Name',
+                // CurrentUICulture y no CurrentCulture: esta última es la
+                // invariante (Program.cs), cuyo nombre es "" y hace que
+                // toLocaleString lance RangeError.
+                : n.toLocaleString('@System.Globalization.CultureInfo.CurrentUICulture.Name',
                                    { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
         window.importeEuro = function (valor) {

@@ -28,7 +28,7 @@ namespace CASTIglesias.Controllers
             _negocioEjercicios = negocioEjercicios;
         }
 
-        public IActionResult Index() => View();
+        public IActionResult Index() => View("~/Views/Finanzas/FinanzasEjercicios.cshtml");
 
         [HttpGet]
         public JsonResult Listar()

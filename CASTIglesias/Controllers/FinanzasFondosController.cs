@@ -31,7 +31,7 @@ namespace CASTIglesias.Controllers
                 .Where(s => s.ID != CapaEntidad.Sedes.TodasLasSedes)
                 .ToList();
 
-            return View();
+            return View("~/Views/Finanzas/FinanzasFondos.cshtml");
         }
 
         [HttpGet]

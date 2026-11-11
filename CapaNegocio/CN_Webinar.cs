@@ -64,7 +64,9 @@ namespace CapaNegocio
             // con espacios ni impiden detectar un correo repetido por mayúsculas.
             obj.nombre         = Limpiar(obj.nombre);
             obj.apellido       = Limpiar(obj.apellido);
-            obj.telefono       = Limpiar(obj.telefono);
+            // Teléfono opcional (minimización de datos, art. 5.1.c RGPD): el enlace se
+            // manda por correo. Vacío y no null por si la columna es NOT NULL.
+            obj.telefono       = Limpiar(obj.telefono) ?? string.Empty;
             obj.correo         = Limpiar(obj.correo)?.ToLowerInvariant();
             obj.nombre_iglesia = Limpiar(obj.nombre_iglesia);
             obj.denominacion   = Limpiar(obj.denominacion);
@@ -85,12 +87,6 @@ namespace CapaNegocio
             if (string.IsNullOrEmpty(obj.correo) || !CorreoValido(obj.correo))
             {
                 mensaje = "El correo electrónico no es válido.";
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(obj.telefono))
-            {
-                mensaje = "El teléfono es obligatorio.";
                 return false;
             }
 
@@ -204,7 +200,7 @@ namespace CapaNegocio
                 <p><strong>Sesión:</strong> {E(TextoSesion(obj.fecha_sesion))}</p>
                 <p><strong>Nombre:</strong> {E(obj.nombre)} {E(obj.apellido)}</p>
                 <p><strong>Correo:</strong> {E(obj.correo)}</p>
-                <p><strong>Teléfono:</strong> {E(obj.telefono)}</p>
+                <p><strong>Teléfono:</strong> {E(string.IsNullOrEmpty(obj.telefono) ? "—" : obj.telefono)}</p>
                 <p><strong>Iglesia:</strong> {E(obj.nombre_iglesia)}</p>
                 <p><strong>Denominación:</strong> {E(obj.denominacion ?? "—")}</p>
                 <p><strong>Idioma del formulario:</strong> {E(obj.idioma ?? "—")}</p>

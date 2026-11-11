@@ -19,6 +19,7 @@ namespace CASTIglesias.Controllers
         CN_ConfigDiezmo cnConfigDiezmo,
         CN_Seguimiento cnSeguimiento,
         CN_DetalleSeguimiento cnDetalleSeguimiento,
+        CN_SeguimientoConfig cnSeguimientoConfig,
         CN_Lideres cnLideres,
         CN_Matrimonio cnMatrimonio,
         CN_Jovenes cnJovenes,
@@ -38,6 +39,7 @@ namespace CASTIglesias.Controllers
         private readonly CN_ConfigDiezmo _cnConfigDiezmo = cnConfigDiezmo;
         private readonly CN_Seguimiento _cnSeguimiento = cnSeguimiento;
         private readonly CN_DetalleSeguimiento _cnDetalleSeguimiento = cnDetalleSeguimiento;
+        private readonly CN_SeguimientoConfig _cnSeguimientoConfig = cnSeguimientoConfig;
         private readonly CN_Lideres _cnLideres = cnLideres;
         private readonly CN_Matrimonio _cnMatrimonio = cnMatrimonio;
         private readonly CN_Jovenes _cnJovenes = cnJovenes;
@@ -387,7 +389,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Miembros))]
+        [RequierePermiso(nameof(Permisos.Miembros), nameof(Permisos.Lideres))]
         public JsonResult ContadorLideresActivos()
         {
             try { return Json(new { resultado = _cnLideres.ContadorLideresActivos(ObtenerIdSedeUsuario()) }); }
@@ -466,7 +468,8 @@ namespace CASTIglesias.Controllers
                          nameof(Permisos.Simpatizantes), nameof(Permisos.Visitantes),
                          nameof(Permisos.Jovenes), nameof(Permisos.Hombres),
                          nameof(Permisos.Mujeres), nameof(Permisos.Ninos),
-                         nameof(Permisos.Matrimonios))]
+                         nameof(Permisos.Matrimonios), nameof(Permisos.Lideres),
+                         nameof(Permisos.Seguimiento), nameof(Permisos.DetalleSeguimiento))]
         public JsonResult BuscarMiembros(string term)
         {
             try
@@ -940,7 +943,18 @@ namespace CASTIglesias.Controllers
         }
 
         #region Seguimiento
-        [RequierePermiso(nameof(Permisos.Miembros))]
+
+        // Pastores, AdminGlobal y admin de plataforma ven todo y tienen los filtros;
+        // el resto, solo las zonas y la lista que les asigna el pastor en
+        // Configuración → Seguimientos (ver AlcanceSeguimiento).
+        private bool EsPastorOAdmin => CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User);
+
+        private AlcanceSeguimiento? _alcanceSeguimiento;
+        private AlcanceSeguimiento AlcanceSeguimientoActual =>
+            _alcanceSeguimiento ??= _cnSeguimientoConfig.ObtenerAlcance(
+                CASTIglesias.Models.SesionClaims.ObtenerIdUsuario(User), EsPastorOAdmin);
+
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
         public IActionResult Seguimiento()
         {
             try
@@ -948,6 +962,12 @@ namespace CASTIglesias.Controllers
                 int sedeID = ObtenerIdSedeUsuario();
                 ViewBag.sedeID = sedeID;
                 ViewBag.nombre_sede = _cnSedes.ObtenerNombreSede(sedeID);
+
+                var alcance = AlcanceSeguimientoActual;
+                ViewBag.EsPastorSeguimiento = alcance.Total;
+                ViewBag.TieneAlcanceSeguimiento = alcance.TieneAlgo;
+                ViewBag.LiderVinculado = alcance.Total || alcance.IdMiembroLider != null;
+                ViewBag.TieneAsignados = alcance.MiembrosAsignados.Count > 0;
             }
             catch (Exception)
             {
@@ -955,14 +975,95 @@ namespace CASTIglesias.Controllers
             return View();
         }
 
+        /// <param name="idZona">Solo pastores: filtra por los miembros de esa zona.</param>
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Miembros))]
-        public JsonResult ListarSeguimientos()
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
+        public JsonResult ListarSeguimientos(int? idZona)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                var lista = _cnSeguimiento.ListarSeguimientos(sedeID);
+                var alcance = AlcanceSeguimientoActual;
+
+                ICollection<int>? ids = _cnSeguimientoConfig.IdsMiembrosEnAlcance(alcance);
+                if (alcance.Total && idZona is int zona && zona > 0)
+                    ids = _cnSeguimientoConfig.IdsMiembrosDeZona(zona);
+
+                var lista = _cnSeguimiento.ListarSeguimientos(sedeID, ids);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        /// <summary>Miembros activos sin ningún seguimiento (solo pastores).</summary>
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
+        public JsonResult ListarSinSeguimiento(int? idZona)
+        {
+            try
+            {
+                if (!EsPastorOAdmin) return SinPermiso();
+                int sedeID = ObtenerIdSedeUsuario();
+                return Json(new { data = _cnSeguimientoConfig.ListarSinSeguimiento(sedeID, idZona) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        /// <summary>Zonas para el filtro de la pantalla de Seguimiento (solo pastores).</summary>
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
+        public JsonResult ListarZonasSeguimiento()
+        {
+            try
+            {
+                if (!EsPastorOAdmin) return SinPermiso();
+                int sedeID = ObtenerIdSedeUsuario();
+                return Json(new { data = _cnSeguimientoConfig.ListarZonas(sedeID) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        /// <summary>Lista de personas que el pastor ha asignado al líder de la sesión.</summary>
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
+        public JsonResult ListarMisAsignados()
+        {
+            try
+            {
+                var alcance = AlcanceSeguimientoActual;
+                if (alcance.IdMiembroLider is not int idLider)
+                    return Json(new { data = new object[0] });
+
+                int sedeID = ObtenerIdSedeUsuario();
+                return Json(new { data = _cnSeguimientoConfig.ListarAsignadosConUltimoSeguimiento(idLider, sedeID) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        /// <summary>
+        /// Buscador de miembros de Seguimiento y Detalle de seguimiento: solo devuelve
+        /// personas dentro del alcance del usuario.
+        /// </summary>
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Seguimiento), nameof(Permisos.DetalleSeguimiento))]
+        public JsonResult BuscarMiembrosSeguimiento(string term)
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnSeguimientoConfig.BuscarMiembrosEnAlcance(sedeID, AlcanceSeguimientoActual, term);
                 return Json(new { data = lista });
             }
             catch (Exception ex)
@@ -973,7 +1074,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
+        [RequierePermiso(nameof(Permisos.SeguimientoCrearEditar))]
         public JsonResult RegistrarSeguimiento([FromBody] CapaEntidad.Seguimiento data)
         {
             try
@@ -981,6 +1082,18 @@ namespace CASTIglesias.Controllers
                 int sedeID = ObtenerIdSedeUsuario();
                 if (data == null)
                     return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
+
+                // Un líder solo puede registrar seguimientos de su alcance y, al editar,
+                // tampoco puede tocar uno ajeno cambiándole el miembro.
+                var alcance = AlcanceSeguimientoActual;
+                if (!_cnSeguimientoConfig.MiembroEnAlcance(alcance, data.ID_miembro))
+                    return SinPermiso();
+                if (data.ID != 0 && !alcance.Total)
+                {
+                    var idMiembroActual = _cnSeguimiento.ObtenerIdMiembro(data.ID);
+                    if (idMiembroActual == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembroActual.Value))
+                        return SinPermiso();
+                }
 
                 string mensaje;
                 object resultado;
@@ -1000,12 +1113,20 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
+        [RequierePermiso(nameof(Permisos.SeguimientoEliminar))]
         public JsonResult EliminarSeguimiento(int id)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
+                var alcance = AlcanceSeguimientoActual;
+                if (!alcance.Total)
+                {
+                    var idMiembro = _cnSeguimiento.ObtenerIdMiembro(id);
+                    if (idMiembro == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembro.Value))
+                        return SinPermiso();
+                }
+
                 string mensaje;
                 bool resultado = _cnSeguimiento.EliminarSeguimiento(id, sedeID, out mensaje);
                 return Json(new { resultado, mensaje });
@@ -1016,9 +1137,9 @@ namespace CASTIglesias.Controllers
             }
         }
 
-        // Solo lo usa la pantalla de Seguimiento, que pide el permiso de Miembros.
+        // Solo lo usa la pantalla de Seguimiento.
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Miembros))]
+        [RequierePermiso(nameof(Permisos.Seguimiento))]
         public JsonResult BuscarLideres(string term)
         {
             try
@@ -1035,24 +1156,32 @@ namespace CASTIglesias.Controllers
         #endregion Seguimiento
 
         #region DetallesSeguimiento
-        [RequierePermiso(nameof(Permisos.Miembros))]
+        [RequierePermiso(nameof(Permisos.DetalleSeguimiento))]
         public IActionResult DetallesSeguimiento()
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
                 ViewBag.sedeID = sedeID;
+
+                var alcance = AlcanceSeguimientoActual;
+                ViewBag.EsPastorSeguimiento = alcance.Total;
+                ViewBag.TieneAlcanceSeguimiento = alcance.TieneAlgo;
+                ViewBag.LiderVinculado = alcance.Total || alcance.IdMiembroLider != null;
             }
             catch (Exception) { }
             return View();
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Miembros))]
+        [RequierePermiso(nameof(Permisos.DetalleSeguimiento))]
         public JsonResult ListarDetallesSeguimiento(int idMiembro, string? tipo, string? fechaDesde, string? fechaHasta)
         {
             try
             {
+                if (!_cnSeguimientoConfig.MiembroEnAlcance(AlcanceSeguimientoActual, idMiembro))
+                    return SinPermiso();
+
                 int sedeID = ObtenerIdSedeUsuario();
                 DateTime? desde = string.IsNullOrEmpty(fechaDesde) ? null : DateTime.Parse(fechaDesde);
                 DateTime? hasta = string.IsNullOrEmpty(fechaHasta) ? null : DateTime.Parse(fechaHasta);
@@ -1067,7 +1196,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
+        [RequierePermiso(nameof(Permisos.DetalleSeguimientoCrearEditar))]
         public JsonResult RegistrarDetalleSeguimiento([FromBody] CapaEntidad.DetalleSeguimiento data)
         {
             try
@@ -1075,6 +1204,16 @@ namespace CASTIglesias.Controllers
                 int sedeID = ObtenerIdSedeUsuario();
                 if (data == null)
                     return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
+
+                var alcance = AlcanceSeguimientoActual;
+                if (!_cnSeguimientoConfig.MiembroEnAlcance(alcance, data.ID_miembro))
+                    return SinPermiso();
+                if (data.ID != 0 && !alcance.Total)
+                {
+                    var idMiembroActual = _cnDetalleSeguimiento.ObtenerIdMiembro(data.ID);
+                    if (idMiembroActual == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembroActual.Value))
+                        return SinPermiso();
+                }
 
                 string mensaje;
                 object resultado;
@@ -1094,12 +1233,20 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
+        [RequierePermiso(nameof(Permisos.DetalleSeguimientoEliminar))]
         public JsonResult EliminarDetalleSeguimiento(int id)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
+                var alcance = AlcanceSeguimientoActual;
+                if (!alcance.Total)
+                {
+                    var idMiembro = _cnDetalleSeguimiento.ObtenerIdMiembro(id);
+                    if (idMiembro == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembro.Value))
+                        return SinPermiso();
+                }
+
                 string mensaje;
                 bool resultado = _cnDetalleSeguimiento.EliminarDetalle(id, sedeID, out mensaje);
                 return Json(new { resultado, mensaje });
@@ -1112,7 +1259,7 @@ namespace CASTIglesias.Controllers
         #endregion DetallesSeguimiento
 
         #region Lideres
-        [RequierePermiso(nameof(Permisos.Miembros))]
+        [RequierePermiso(nameof(Permisos.Lideres))]
         public IActionResult Lideres()
         {
             try
@@ -1128,7 +1275,7 @@ namespace CASTIglesias.Controllers
         // Listado compartido: lo usan Líderes, Miembros, Proceso, Simpatizantes y
         // Visitantes para rellenar el desplegable de líder asignado.
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Miembros), nameof(Permisos.Proceso),
+        [RequierePermiso(nameof(Permisos.Lideres), nameof(Permisos.Miembros), nameof(Permisos.Proceso),
                          nameof(Permisos.Simpatizantes), nameof(Permisos.Visitantes))]
         public JsonResult ListarLideres()
         {
@@ -1146,7 +1293,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosCrearEditar))]
+        [RequierePermiso(nameof(Permisos.LideresCrearEditar))]
         public JsonResult RegistrarLider([FromBody] CapaEntidad.Lider data)
         {
             try
@@ -1173,7 +1320,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.MiembrosEliminar))]
+        [RequierePermiso(nameof(Permisos.LideresEliminar))]
         public JsonResult EliminarLider(int id)
         {
             try

@@ -1,0 +1,13 @@
+@* Página independiente /contacto. Mismo formulario que la landing; envía a
+   /Landing/EnviarContacto igual que allí. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "contacto";
+    ViewData["RutaCanonica"] = "contacto";
+    ViewData["Title"] = L["Contacto — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Contacto"].Value;
+    ViewData["Descripcion"] = L["Escríbenos y te ayudamos a elegir el plan de Congrega CRM para tu iglesia. Respondemos en menos de 24 horas."].Value;
+}
+<partial name="_CabeceraPagina" />
+
+<partial name="_SeccionContacto" />

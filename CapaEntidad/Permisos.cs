@@ -102,6 +102,39 @@ namespace CapaEntidad
         public bool AjustesCrearEditar { get; set; }
         public bool AjustesEliminar { get; set; }
 
+        // Pantallas que antes colgaban del permiso de otro módulo (Líderes y los
+        // seguimientos de Miembros; cultos, calendarios y salas de Ajustes) y que por
+        // eso no se podían conceder por separado. El script
+        // Queries/PermisosPorVista.sql copia el valor del módulo del que dependían,
+        // para que nadie pierda ni gane acceso al desplegarlo.
+        public bool Lideres { get; set; }
+        public bool LideresCrearEditar { get; set; }
+        public bool LideresEliminar { get; set; }
+
+        public bool Seguimiento { get; set; }
+        public bool SeguimientoCrearEditar { get; set; }
+        public bool SeguimientoEliminar { get; set; }
+
+        public bool DetalleSeguimiento { get; set; }
+        public bool DetalleSeguimientoCrearEditar { get; set; }
+        public bool DetalleSeguimientoEliminar { get; set; }
+
+        public bool Cultos { get; set; }
+        public bool CultosCrearEditar { get; set; }
+        public bool CultosEliminar { get; set; }
+
+        public bool Calendario { get; set; }
+        public bool CalendarioCrearEditar { get; set; }
+        public bool CalendarioEliminar { get; set; }
+
+        public bool CalendarioAnual { get; set; }
+        public bool CalendarioAnualCrearEditar { get; set; }
+        public bool CalendarioAnualEliminar { get; set; }
+
+        public bool Salas { get; set; }
+        public bool SalasCrearEditar { get; set; }
+        public bool SalasEliminar { get; set; }
+
         // ── Área financiera ──────────────────────────────────────────────────
         // No siguen el patrón Ver/CrearEditar/Eliminar de los módulos de arriba, y es
         // a propósito: aquí lo que hay que separar no son esas tres cosas, sino quién
@@ -148,5 +181,49 @@ namespace CapaEntidad
         /// los miembros, no un dato contable más.
         /// </remarks>
         public bool FinanzasDonantes { get; set; }
+
+        // ── Área financiera: pantallas ───────────────────────────────────────
+        // Qué pantallas del área puede abrir el usuario. Solo abren la pantalla: lo
+        // que se puede HACER dentro lo siguen decidiendo los permisos de arriba
+        // (contabilizar, aprobar, configurar...). FinanzasVer sigue siendo la puerta
+        // del área y da el panel financiero.
+        //
+        // La relación pantalla → permiso está en AreaFinancieraController
+        // (PermisoPorPantalla) y la usa también el menú financiero.
+
+        // Operaciones
+        public bool FinanzasVerIngresos { get; set; }
+        public bool FinanzasVerGastos { get; set; }
+        public bool FinanzasVerTransferencias { get; set; }
+        public bool FinanzasVerPagos { get; set; }
+        public bool FinanzasVerArqueos { get; set; }
+
+        // Contabilidad
+        public bool FinanzasVerDiario { get; set; }
+        public bool FinanzasVerMayor { get; set; }
+        public bool FinanzasVerSumasYSaldos { get; set; }
+        public bool FinanzasVerBalance { get; set; }
+        public bool FinanzasVerResultados { get; set; }
+        public bool FinanzasVerCierre { get; set; }
+
+        // Gestión
+        public bool FinanzasVerPresupuestos { get; set; }
+        public bool FinanzasVerCertificados { get; set; }
+        public bool FinanzasVerAprobaciones { get; set; }
+        public bool FinanzasVerConciliacion { get; set; }
+        public bool FinanzasVerAuditoria { get; set; }
+
+        // Configuración
+        public bool FinanzasVerConceptos { get; set; }
+        public bool FinanzasVerTesoreria { get; set; }
+        public bool FinanzasVerFondos { get; set; }
+        public bool FinanzasVerPlanCuentas { get; set; }
+        public bool FinanzasVerPlantillas { get; set; }
+        public bool FinanzasVerEjercicios { get; set; }
+        public bool FinanzasVerTerceros { get; set; }
+        public bool FinanzasVerProyectos { get; set; }
+        public bool FinanzasVerReglas { get; set; }
+        public bool FinanzasVerNumeraciones { get; set; }
+        public bool FinanzasVerApertura { get; set; }
     }
 }

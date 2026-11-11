@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CapaEntidad
 {
-    [Table("Lideres")]
+    // En minúsculas: el MySQL de producción distingue mayúsculas en nombres de tabla.
+    [Table("lideres")]
     public class Lider : ITieneIglesia
     {
         // Iglesia dueña del registro. La rellena AppDbContext al guardar y alimenta

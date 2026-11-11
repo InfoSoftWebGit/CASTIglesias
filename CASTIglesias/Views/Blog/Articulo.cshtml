@@ -1,0 +1,90 @@
+@model CapaEntidad.BlogArticulo
+@using CapaNegocio
+@* Artículo del blog (/blog/{slug}). El texto se guarda en Markdown y
+   CN_Blog.RenderizarHtml lo convierte en HTML sin etiquetas ni enlaces
+   peligrosos, por eso se puede pintar con Html.Raw. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "blog";
+    ViewData["RutaCanonica"] = "blog/" + Model.slug;
+    ViewData["Title"] = Model.titulo + " — Congrega CRM";
+    ViewData["Descripcion"] = Model.resumen;
+    ViewData["TipoOg"] = "article";
+    if (!string.IsNullOrEmpty(Model.imagen_portada)) { ViewData["Imagen"] = Model.imagen_portada; }
+
+    string urlArticulo = "https://www.congrega.es/blog/" + Model.slug;
+    string? imagenCompleta = string.IsNullOrEmpty(Model.imagen_portada) ? null
+        : Model.imagen_portada.StartsWith("/") ? "https://www.congrega.es" + Model.imagen_portada : Model.imagen_portada;
+}
+
+<header class="pagina-cabecera">
+    <div class="container">
+        <nav class="pagina-migas" aria-label="@L["Ruta de navegación"]">
+            <a href="/">@L["Inicio"]</a> <span class="mx-1">/</span>
+            <a href="/blog">@L["Blog"]</a>
+        </nav>
+        <h1 lang="@Model.idioma">@Model.titulo</h1>
+        <p class="mb-2" lang="@Model.idioma">@Model.resumen</p>
+        <div class="pagina-migas mt-3">
+            <i class="far fa-calendar-alt me-1"></i>
+            <time datetime="@Model.fecha_publicacion?.ToString("yyyy-MM-dd")">@Model.fecha_publicacion?.ToString("dd/MM/yyyy")</time>
+            @if (!string.IsNullOrEmpty(Model.autor))
+            {
+                <span class="mx-2">·</span><i class="far fa-user me-1"></i>@Model.autor
+            }
+            <span class="mx-2">·</span><i class="far fa-clock me-1"></i>@L["{0} min de lectura", CN_Blog.MinutosLectura(Model.contenido)]
+        </div>
+    </div>
+</header>
+
+<section class="py-5" style="background:#fff;">
+    <div class="container">
+        <article class="articulo" lang="@Model.idioma">
+            @if (!string.IsNullOrEmpty(Model.imagen_portada))
+            {
+                <div class="articulo-portada"><img src="@Model.imagen_portada" alt="@Model.titulo" /></div>
+            }
+
+            <div class="articulo-contenido">
+                @Html.Raw(CN_Blog.RenderizarHtml(Model.contenido))
+            </div>
+
+            <div class="articulo-cta">
+                <h2 class="h4 fw-bold mb-2">@L["¿Quieres ver Congrega CRM en tu iglesia?"]</h2>
+                <p>@L["Te enseñamos la aplicación y te ayudamos a elegir el plan que mejor se adapta a tu comunidad."]</p>
+                <a class="btn" href="/contacto">@L["Contáctanos"]</a>
+            </div>
+
+            <p class="mt-4 mb-0">
+                <a href="/blog" style="color:var(--primary);text-decoration:none;font-weight:600;">
+                    <i class="fas fa-arrow-left me-1"></i>@L["Volver al blog"]
+                </a>
+            </p>
+        </article>
+    </div>
+</section>
+
+@* Datos estructurados: le dicen a Google que es un artículo, de quién y cuándo
+   se publicó. Se serializan con JsonSerializer para que comillas, acentos o un
+   "</script>" en el título no rompan el bloque (escapa < y > por defecto). *@
+<script type="application/ld+json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>
+{
+    ["@context"] = "https://schema.org",
+    ["@type"] = "BlogPosting",
+    ["headline"] = Model.titulo,
+    ["description"] = Model.resumen,
+    ["inLanguage"] = Model.idioma,
+    ["datePublished"] = Model.fecha_publicacion?.ToString("yyyy-MM-ddTHH:mm:ss"),
+    ["dateModified"] = (Model.fecha_modificacion ?? Model.fecha_publicacion)?.ToString("yyyy-MM-ddTHH:mm:ss"),
+    ["mainEntityOfPage"] = urlArticulo,
+    ["image"] = imagenCompleta,
+    ["author"] = new Dictionary<string, object?> { ["@type"] = "Organization", ["name"] = Model.autor ?? "Congrega CRM" },
+    ["publisher"] = new Dictionary<string, object?>
+    {
+        ["@type"] = "Organization",
+        ["name"] = "Congrega CRM",
+        ["logo"] = new Dictionary<string, object?> { ["@type"] = "ImageObject", ["url"] = "https://www.congrega.es/img/logo-congrega-blanco.png" }
+    }
+}))
+</script>

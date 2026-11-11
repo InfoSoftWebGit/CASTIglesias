@@ -1,0 +1,92 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', function () {
+        document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Close mobile navbar on anchor link click
+    document.querySelectorAll('#navbarMenu a[href^="#"]').forEach(function (link) {
+        link.addEventListener('click', function () {
+            var collapse = document.getElementById('navbarMenu');
+            if (collapse.classList.contains('show')) {
+                bootstrap.Collapse.getOrCreateInstance(collapse).hide();
+            }
+        });
+    });
+
+    // Textos traducidos del formulario de contacto. Esta vista no usa _Layout
+    // (Layout = null), así que window.T no existe aquí: sin este bloque,
+    // T.mMensajeEnviado lanzaba un ReferenceError al recibir la respuesta y
+    // ni se mostraba la confirmación ni se vaciaba el formulario.
+    window.T = Object.assign(window.T || {}, {
+        mCompletaObligatorios: @Json.Serialize(L["Por favor, completa todos los campos obligatorios."].Value),
+        mMensajeEnviado:       @Json.Serialize(L["¡Mensaje enviado!"].Value),
+        mContactoEn24h:        @Json.Serialize(L["Nos pondremos en contacto contigo en menos de 24 horas."].Value),
+        mNoEnviar:             @Json.Serialize(L["No se pudo enviar."].Value),
+        mErrorConexion:        @Json.Serialize(L["Error de conexión"].Value),
+        mNoEnviarMensaje:      @Json.Serialize(L["No se pudo enviar el mensaje. Inténtalo de nuevo."].Value),
+        mPrivacidadTitulo:     @Json.Serialize(L["Política de privacidad"].Value),
+        mAceptaPrivacidad:     @Json.Serialize(L["Debes aceptar la política de privacidad para continuar."].Value)
+    });
+
+    // Contact form
+    function enviarContacto(e) {
+        e.preventDefault();
+
+        var campos = ['cNombre','cApellidos','cEmail','cIglesia','cMensaje'];
+        for (var i = 0; i < campos.length; i++) {
+            if (!document.getElementById(campos[i]).value.trim()) {
+                Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: T.mCompletaObligatorios, confirmButtonColor: '#1E3A8A' });
+                return;
+            }
+        }
+
+        if (!document.getElementById('cPrivacidad').checked) {
+            Swal.fire({ icon: 'warning', title: T.mPrivacidadTitulo, text: T.mAceptaPrivacidad, confirmButtonColor: '#1E3A8A' });
+            return;
+        }
+
+        var payload = {
+            nombre:    document.getElementById('cNombre').value.trim(),
+            apellidos: document.getElementById('cApellidos').value.trim(),
+            telefono:  document.getElementById('cTelefono').value.trim(),
+            email:     document.getElementById('cEmail').value.trim(),
+            pais:      document.getElementById('cPais').value.trim(),
+            ciudad:    document.getElementById('cCiudad').value.trim(),
+            iglesia:   document.getElementById('cIglesia').value.trim(),
+            mensaje:   document.getElementById('cMensaje').value.trim(),
+            aceptaPrivacidad: true
+        };
+
+        $.ajax({
+            url: '/Landing/EnviarContacto',
+            type: 'POST',
+            contentType: 'application/json',
+            // Sin layout no hay $.ajaxPrefilter, así que el token va explícito
+            headers: {
+                'RequestVerificationToken':
+                    document.querySelector('#frmContacto input[name="__RequestVerificationToken"]').value
+            },
+            data: JSON.stringify(payload),
+            success: function (res) {
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: T.mMensajeEnviado,
+                        text: T.mContactoEn24h,
+                        confirmButtonColor: '#1E3A8A'
+                    });
+                    document.getElementById('frmContacto').reset();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: res.mensaje || T.mNoEnviar, confirmButtonColor: '#1E3A8A' });
+                }
+            },
+            error: function () {
+                Swal.fire({ icon: 'error', title: T.mErrorConexion, text: T.mNoEnviarMensaje, confirmButtonColor: '#1E3A8A' });
+            }
+        });
+    }
+</script>

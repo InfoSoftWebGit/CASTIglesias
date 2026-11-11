@@ -50,7 +50,7 @@ namespace CASTIglesias.Controllers
             ViewBag.Ejercicio = ejercicio;
             ViewBag.FechaSugerida = ejercicio?.start_date ?? DateTime.Today;
 
-            return View();
+            return View("~/Views/Finanzas/FinanzasApertura.cshtml");
         }
 
         /// <summary>Saldo inicial tal y como llega del formulario.</summary>

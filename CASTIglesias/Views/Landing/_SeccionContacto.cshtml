@@ -1,0 +1,100 @@
+﻿<!-- ═══════════════════ CONTACTO ═══════════════════ -->
+<section id="contacto" class="py-5" style="background:#fff;">
+    <div class="container py-4">
+        <div class="row g-5 align-items-start">
+
+            <div class="col-lg-4">
+                <div class="section-badge">@L["Contacto"]</div>
+                <h2 class="section-title mt-2">@L["¿Hablamos?"]</h2>
+                <p style="color:var(--text-light);line-height:1.7;margin-top:1rem;font-size:0.96rem;">
+                    @L["Completa el formulario y nos pondremos en contacto contigo en menos de 24 horas para ayudarte a encontrar el plan que mejor se adapte a tu iglesia."]
+                </p>
+                <div class="mt-4 d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="contact-info-icon">
+                            <i class="fas fa-envelope" style="color:var(--primary);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">@L["Soporte"]</div>
+                            <div style="font-weight:600;color:var(--text);font-size:0.95rem;">soporte@congrega.es</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="contact-info-icon">
+                            <i class="fas fa-clock" style="color:var(--primary);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size:0.79rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">@L["Horario"]</div>
+                            <div style="font-weight:600;color:var(--text);font-size:0.95rem;">@L["Lun – Vie, 9:00 – 18:00"]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="contact-card">
+                    <form id="frmContacto" onsubmit="enviarContacto(event)" novalidate>
+                        @* Token antifalsificación. Esta página no usa el layout común, así
+                           que no hereda ni el token ni el $.ajaxPrefilter que lo envía: hay
+                           que ponerlo aquí y mandarlo a mano en la llamada de más abajo. *@
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["Nombre"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cNombre" placeholder="@L["Tu nombre"]" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["Apellidos"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cApellidos" placeholder="@L["Tus apellidos"]" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["Teléfono"]</label>
+                                <input type="tel" class="form-control" id="cTelefono" placeholder="+34 600 000 000" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["Correo electrónico"] <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="cEmail" placeholder="correo@ejemplo.com" required />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["País"]</label>
+                                <input type="text" class="form-control" id="cPais" placeholder="@L["España"]" />
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label">@L["Ciudad"]</label>
+                                <input type="text" class="form-control" id="cCiudad" placeholder="@L["Madrid"]" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@L["Nombre de la iglesia"] <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cIglesia" placeholder="@L["Iglesia..."]" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@L["Mensaje"] <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="cMensaje" rows="4"
+                                          placeholder="@L["Cuéntanos sobre tu iglesia y qué módulos te interesan..."]" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                @* Primera capa de información (art. 13 RGPD) y casilla SIN marcar:
+                                   la AEPD no admite casillas premarcadas. El servidor también
+                                   comprueba AceptaPrivacidad por si alguien la salta. *@
+                                <p class="nota-privacidad mb-2">
+                                    @L["Responsable: {0}. Finalidad: responder a tu consulta y enviarte la información que pidas. Legitimación: tu solicitud. No cedemos tus datos a terceros salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación, supresión y otros escribiendo a {1}.", DatosLegales.Titular, DatosLegales.Email]
+                                </p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="cPrivacidad" required />
+                                    <label class="form-check-label" for="cPrivacidad">
+                                        @L["He leído y acepto la"] <a href="/privacidad" target="_blank" rel="noopener">@L["Política de privacidad"]</a>. <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-contact">
+                                    <i class="fas fa-paper-plane me-2"></i>@L["Enviar mensaje"]
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

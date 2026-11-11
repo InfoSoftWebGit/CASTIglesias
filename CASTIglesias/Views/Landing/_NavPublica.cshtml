@@ -1,0 +1,82 @@
+@* Barra superior de las páginas públicas.
+
+   - En la landing (ViewData["EsLanding"] = true) los enlaces son anclas de la
+     misma página y aparece el botón "Iniciar sesión".
+   - En las páginas de sección y en el webinar los enlaces llevan a cada página
+     independiente (/precios, /contacto...), el logotipo vuelve a la landing y
+     NO hay botón de acceso: el acceso solo se ofrece desde la landing o desde
+     /Login directamente. *@
+@{
+    bool esLanding = ViewData["EsLanding"] as bool? == true;
+    string actual = ViewData["PaginaActual"] as string ?? "";
+
+    // Destino de cada enlace según la página en la que se está.
+    string Destino(string seccion) => esLanding ? "#" + seccion : "/" + seccion;
+    string Activo(string seccion) => !esLanding && actual == seccion ? "activo" : "";
+
+    // Tras cambiar de idioma se vuelve a la misma página. En la página 404 la
+    // petición llega reescrita a /estado/404, así que se usa la dirección original.
+    var reejecucion = Context.Features.Get<Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature>();
+    string volverA = esLanding ? "/" : reejecucion?.OriginalPath ?? Context.Request.Path.Value ?? "/";
+}
+@* expand-xl y no expand-lg: entre 992 y 1200px el menú completo (siete enlaces,
+   idioma, contacto y acceso) no cabe de una línea y Bootstrap lo encogería hasta
+   partir las etiquetas. A partir de ahí es preferible el botón de hamburguesa. *@
+<nav class="navbar navbar-expand-xxl fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="@(esLanding ? "#inicio" : "/")">
+            <img src="/img/logo-congrega-blanco.png" alt="" class="marca-logo" width="38" height="38" />Congrega <span>CRM</span>
+        </a>
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav mx-auto gap-2">
+                <li class="nav-item"><a class="nav-link" href="@(esLanding ? "#inicio" : "/")">@L["Inicio"]</a></li>
+                <li class="nav-item"><a class="nav-link @Activo("caracteristicas")" href="@Destino("caracteristicas")">@L["Características"]</a></li>
+                <li class="nav-item"><a class="nav-link @Activo("como-funciona")" href="@Destino("como-funciona")">@L["Cómo funciona"]</a></li>
+                <li class="nav-item"><a class="nav-link @Activo("precios")" href="@Destino("precios")">@L["Precios"]</a></li>
+                @* El blog es siempre una página aparte, también desde la landing. *@
+                <li class="nav-item"><a class="nav-link @Activo("blog")" href="/blog">@L["Blog"]</a></li>
+                @* Enlace al webinar. Va en teal y no en blanco como el resto
+                   porque es una convocatoria con fecha de caducidad: tiene que
+                   verse antes de que pasen las sesiones. *@
+                <li class="nav-item">
+                    <a class="nav-link @Activo("Webinar")" href="/Webinar" style="color:var(--teal) !important;">
+                        <i class="fas fa-video me-1"></i>@L["Webinar"]
+                    </a>
+                </li>
+                <li class="nav-item"><a class="nav-link @Activo("contacto")" href="@Destino("contacto")">@L["Contacto"]</a></li>
+            </ul>
+            @* Selector de idioma. Los códigos no se traducen: quien no entiende
+               la página necesita reconocer el suyo de un vistazo. El title sí,
+               para los lectores de pantalla. *@
+            <div class="lang-switch ms-xxl-3" role="group" aria-label="@L["Idioma"]">
+                @foreach (var codigo in IdiomasSoportados.Codigos)
+                {
+                    <a href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = volverA })"
+                       class="@(codigo == IdiomasSoportados.Actual ? "activo" : "")"
+                       title="@IdiomasSoportados.Nombres[codigo]"
+                       hreflang="@codigo">@codigo.ToUpperInvariant()</a>
+                }
+            </div>
+            @* Teléfono de contacto que abre WhatsApp. El enlace wa.me lleva el
+               número en formato internacional sin signos ni espacios, porque es
+               lo único que acepta; el texto visible sí los lleva por legibilidad.
+               En el móvil wa.me abre la app y en el escritorio WhatsApp Web. *@
+            <a href="https://wa.me/34623983007" class="nav-contacto ms-xxl-3"
+               target="_blank" rel="noopener"
+               aria-label="@L["Contacto"] WhatsApp +34 623 98 30 07"
+               title="WhatsApp +34 623 98 30 07">
+                <i class="fab fa-whatsapp"></i><span class="nav-contacto-texto">@L["Contacto"]: +34 623 98 30 07</span>
+            </a>
+            @if (esLanding)
+            {
+                <a href="/Login" class="btn btn-nav-login ms-xxl-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>@L["Iniciar sesión"]
+                </a>
+            }
+        </div>
+    </div>
+</nav>

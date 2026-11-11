@@ -1,0 +1,11 @@
+@* Franja superior de las páginas de sección: migas para volver a la landing,
+   título principal (h1) y una frase. Lee ViewData["Titulo1"] y ["Descripcion"]. *@
+<header class="pagina-cabecera">
+    <div class="container">
+        <nav class="pagina-migas" aria-label="@L["Ruta de navegación"]">
+            <a href="/">@L["Inicio"]</a> <span class="mx-1">/</span> <span>@ViewData["Titulo1"]</span>
+        </nav>
+        <h1>@ViewData["Titulo1"]</h1>
+        <p>@ViewData["Descripcion"]</p>
+    </div>
+</header>

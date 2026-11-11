@@ -3,6 +3,9 @@
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Entorno
 @{
     Layout = null;
+    // Barra y pie compartidos con la landing: marcan el webinar como página
+    // actual y no muestran el botón de acceso.
+    ViewData["PaginaActual"] = "Webinar";
 
     // Dirección pública de esta página, fija por el mismo motivo que en la
     // landing: los enlaces de campaña llevan parámetros detrás y sin canónica
@@ -96,13 +99,8 @@
    propio lang y repite los estilos compartidos. *@
 <html lang="@IdiomasSoportados.Actual">
 <head>
-    <!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-T3W99HQS');</script>
-<!-- End Google Tag Manager -->
+    @* Google Tag Manager: solo se carga si el visitante acepta las cookies. *@
+    <partial name="_GoogleTagManager" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@L["Webinar gratuito — Congrega CRM"]</title>
@@ -125,7 +123,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <meta property="og:title" content="@L["Webinar gratuito — Congrega CRM"]" />
     <meta property="og:description" content="@L["Sesión en directo de 2 horas para conocer Congrega CRM: demostración de la aplicación y turno de preguntas."]" />
     <meta property="og:url" content="@urlCanonicaWebinar" />
-    <meta property="og:image" content="https://www.congrega.es/favicon.png" />
+    <meta property="og:image" content="https://www.congrega.es/img/og-congrega.png" />
     <meta property="og:locale" content="@(IdiomasSoportados.Actual == "en" ? "en_US" : "es_ES")" />
     <meta name="twitter:card" content="summary" />
 
@@ -393,48 +391,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             .section-title { font-size: 1.65rem; }
         }
     </style>
+    <partial name="~/Views/Landing/_EstilosNavPublica.cshtml" />
 </head>
 <body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-T3W99HQS"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 
-<!-- ═══════════════════ NAVBAR ═══════════════════ -->
-<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
-    <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
-        </a>
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarMenu">
-            @* Los enlaces de sección apuntan a la landing con ancla: desde aquí
-               no existen esos destinos en la página. *@
-            <ul class="navbar-nav mx-auto gap-1">
-                <li class="nav-item"><a class="nav-link" href="/#inicio">@L["Inicio"]</a></li>
-                <li class="nav-item"><a class="nav-link" href="/#caracteristicas">@L["Características"]</a></li>
-                <li class="nav-item"><a class="nav-link" href="/#precios">@L["Precios"]</a></li>
-                <li class="nav-item"><a class="nav-link activo" href="/Webinar">@L["Webinar"]</a></li>
-                <li class="nav-item"><a class="nav-link" href="/#contacto">@L["Contacto"]</a></li>
-            </ul>
-            <div class="lang-switch ms-lg-3" role="group" aria-label="@L["Idioma"]">
-                @foreach (var codigo in IdiomasSoportados.Codigos)
-                {
-                    <a href="@Url.Action("CambiarIdioma", "Acceso", new { lang = codigo, returnUrl = "/Webinar" })"
-                       class="@(codigo == IdiomasSoportados.Actual ? "activo" : "")"
-                       title="@IdiomasSoportados.Nombres[codigo]"
-                       hreflang="@codigo">@codigo.ToUpperInvariant()</a>
-                }
-            </div>
-            <a href="/Login" class="btn btn-nav-login ms-lg-3">
-                <i class="fas fa-sign-in-alt me-2"></i>@L["Iniciar sesión"]
-            </a>
-        </div>
-    </div>
-</nav>
+<partial name="~/Views/Landing/_NavPublica.cshtml" />
 
 <!-- ═══════════════════ HERO ═══════════════════ -->
 <section class="hero-webinar">
@@ -585,8 +546,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <input type="text" class="form-control" id="wApellido" placeholder="@L["Tu apellido"]" autocomplete="family-name" required />
                             </div>
                             <div class="col-sm-6">
-                                <label class="form-label" for="wTelefono">@L["Teléfono"] <span class="text-danger">*</span></label>
-                                <input type="tel" class="form-control" id="wTelefono" placeholder="+34 600 000 000" autocomplete="tel" required />
+                                <label class="form-label" for="wTelefono">@L["Teléfono"]</label>
+                                <input type="tel" class="form-control" id="wTelefono" placeholder="+34 600 000 000" autocomplete="tel" />
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label" for="wEmail">@L["Correo electrónico"] <span class="text-danger">*</span></label>
@@ -656,10 +617,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 </div>
                             </div>
 
-                            <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-2">
-                                <p class="nota-datos mb-0" style="max-width:420px;">
-                                    @L["Usaremos tus datos únicamente para gestionar tu asistencia al webinar y enviarte el enlace de la reunión."]
+                            <div class="col-12 mt-2">
+                                @* Primera capa de información (art. 13 RGPD) y casilla SIN marcar:
+                                   la AEPD no admite casillas premarcadas. El servidor también
+                                   comprueba AceptaPrivacidad por si alguien la salta. *@
+                                <p class="nota-datos mb-2">
+                                    @L["Responsable: {0}. Finalidad: gestionar tu inscripción y enviarte el enlace de la sesión. Legitimación: tu solicitud. No cedemos tus datos a terceros salvo obligación legal. Puedes ejercer tus derechos de acceso, rectificación, supresión y otros escribiendo a {1}.", DatosLegales.Titular, DatosLegales.Email]
                                 </p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="wPrivacidad" required />
+                                    <label class="form-check-label" for="wPrivacidad">
+                                        @L["He leído y acepto la"] <a href="/privacidad" target="_blank" rel="noopener">@L["Política de privacidad"]</a>. <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 d-flex justify-content-end mt-2">
                                 <button type="submit" class="btn btn-contact" id="btnInscribir">
                                     <i class="fas fa-paper-plane me-2"></i>@L["Confirmar inscripción"]
                                 </button>
@@ -672,41 +645,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 </section>
 
-<!-- ═══════════════════ FOOTER ═══════════════════ -->
-<footer class="site-footer">
-    <div class="container">
-        <div class="row g-4">
-            <div class="col-md-5">
-                <div class="footer-brand-text mb-2">
-                    <i class="fas fa-church me-2"></i>Congrega <span>CRM</span>
-                </div>
-                <p style="font-size:0.87rem;line-height:1.65;max-width:290px;">
-                    @L["Software de gestión integral diseñado para iglesias y comunidades de fe."]
-                </p>
-            </div>
-            <div class="col-md-4">
-                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Producto"]</div>
-                <div class="d-flex flex-column gap-2">
-                    <a href="/#caracteristicas">@L["Características"]</a>
-                    <a href="/#precios">@L["Precios"]</a>
-                    <a href="/#contacto">@L["Contacto"]</a>
-                    <a href="/Login">@L["Iniciar sesión"]</a>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Soporte"]</div>
-                <div style="font-size:0.87rem;">soporte@congrega.es</div>
-                <div style="font-size:0.87rem;margin-top:5px;">@L["Lun – Vie · 9:00 – 18:00"]</div>
-            </div>
-        </div>
-        <hr class="footer-divider" />
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
-             style="font-size:0.84rem;">
-            <span>@L["© 2025 Congrega CRM. Todos los derechos reservados."]</span>
-            <span>@L["Desarrollado con"] <i class="fas fa-heart" style="color:#ef4444;"></i> @L["para la iglesia"]</span>
-        </div>
-    </div>
-</footer>
+<partial name="~/Views/Landing/_FooterPublico.cshtml" />
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -739,13 +678,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         mRevisaCorreo:      @Json.Serialize(L["Te hemos enviado un correo de confirmación. Unos días antes del webinar recibirás el enlace de Teams en esa misma dirección."].Value),
         mNoInscribir:       @Json.Serialize(L["No se pudo completar la inscripción."].Value),
         mErrorConexion:     @Json.Serialize(L["Error de conexión"].Value),
-        mReintentar:        @Json.Serialize(L["No se pudo enviar. Inténtalo de nuevo."].Value)
+        mReintentar:        @Json.Serialize(L["No se pudo enviar. Inténtalo de nuevo."].Value),
+        mAceptaPrivacidad:  @Json.Serialize(L["Debes aceptar la política de privacidad para continuar."].Value)
     });
 
     function inscribirWebinar(e) {
         e.preventDefault();
 
-        var campos = ['wNombre','wApellido','wTelefono','wEmail','wIglesia'];
+        var campos = ['wNombre','wApellido','wEmail','wIglesia'];
         for (var i = 0; i < campos.length; i++) {
             if (!document.getElementById(campos[i]).value.trim()) {
                 Swal.fire({ icon: 'warning', title: T.mCamposRequeridos, text: T.mCompletaObligatorios, confirmButtonColor: '#1E3A8A' });
@@ -759,6 +699,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             return;
         }
 
+        if (!document.getElementById('wPrivacidad').checked) {
+            Swal.fire({ icon: 'warning', title: T.mCamposRequeridos, text: T.mAceptaPrivacidad, confirmButtonColor: '#1E3A8A' });
+            return;
+        }
+
         var payload = {
             nombre:       document.getElementById('wNombre').value.trim(),
             apellido:     document.getElementById('wApellido').value.trim(),
@@ -768,6 +713,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             denominacion: document.getElementById('wDenominacion').value,
             sesion:       parseInt(sesion.value, 10),
             pregunta:     document.getElementById('wPregunta').value.trim(),
+            aceptaPrivacidad: true,
             web:          document.getElementById('wWeb').value
         };
 
@@ -807,5 +753,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
     }
 </script>
+<partial name="_BannerCookies" />
 </body>
 </html>

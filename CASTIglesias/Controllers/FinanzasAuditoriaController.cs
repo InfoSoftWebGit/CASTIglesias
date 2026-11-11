@@ -34,7 +34,7 @@ namespace CASTIglesias.Controllers
             ViewBag.TiposEvento = _negocioAuditoria.TiposDeEvento();
             ViewBag.TiposEntidad = _negocioAuditoria.TiposDeEntidad();
             ViewBag.Tope = CN_Auditoria.TopeFilas;
-            return View();
+            return View("~/Views/Finanzas/FinanzasAuditoria.cshtml");
         }
 
         [HttpGet]

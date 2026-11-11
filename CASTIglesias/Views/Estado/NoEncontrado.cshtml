@@ -1,0 +1,25 @@
+@* Página "No se ha encontrado" (404). La sirve EstadoController para cualquier
+   dirección que no existe. Mismo aspecto que las páginas públicas, sin botón
+   de acceso, y marcada para que Google no la guarde. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["NoIndexar"] = true;
+    ViewData["Title"] = L["Página no encontrada — Congrega CRM"].Value;
+    ViewData["Descripcion"] = L["La página que buscas no existe o se ha movido."].Value;
+}
+<section class="pagina-404">
+    <div class="container">
+        <div class="codigo">404</div>
+        <h1>@L["No se ha encontrado la página"]</h1>
+        <p>@L["Puede que la dirección esté mal escrita o que la página se haya movido. Estos enlaces te pueden ayudar:"]</p>
+        <a href="/" class="btn btn-nav-login" style="padding:12px 30px;">
+            <i class="fas fa-home me-2"></i>@L["Volver al inicio"]
+        </a>
+        <div class="atajos mt-4">
+            <a href="/caracteristicas">@L["Características"]</a>
+            <a href="/precios">@L["Precios"]</a>
+            <a href="/blog">@L["Blog"]</a>
+            <a href="/contacto">@L["Contacto"]</a>
+        </div>
+    </div>
+</section>

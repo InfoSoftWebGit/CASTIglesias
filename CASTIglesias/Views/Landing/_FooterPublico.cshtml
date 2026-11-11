@@ -1,0 +1,60 @@
+@* Pie de las páginas públicas. Misma información que el de la landing; fuera
+   de ella los enlaces van a cada página independiente y no se ofrece el
+   acceso (solo desde la landing o desde /Login directamente). *@
+@{
+    bool esLanding = ViewData["EsLanding"] as bool? == true;
+    string Destino(string seccion) => esLanding ? "#" + seccion : "/" + seccion;
+}
+<footer class="site-footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="@(esLanding ? "col-md-4" : "col-md-5")">
+                <div class="footer-brand-text mb-2">
+                    <img src="/img/logo-congrega-blanco.png" alt="" class="marca-logo" width="34" height="34" />Congrega <span>CRM</span>
+                </div>
+                <p style="font-size:0.87rem;line-height:1.65;max-width:290px;">
+                    @L["Software de gestión integral diseñado para iglesias y comunidades de fe."]
+                </p>
+            </div>
+            <div class="@(esLanding ? "col-md-2" : "col-md-4")">
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Producto"]</div>
+                <div class="d-flex flex-column gap-2">
+                    <a href="@Destino("caracteristicas")">@L["Características"]</a>
+                    <a href="@Destino("como-funciona")">@L["Cómo funciona"]</a>
+                    <a href="@Destino("precios")">@L["Precios"]</a>
+                    <a href="/audiovisuales">@L["Audiovisuales"]</a>
+                    <a href="/blog">@L["Blog"]</a>
+                    <a href="/Webinar">@L["Webinar"]</a>
+                    <a href="@Destino("contacto")">@L["Contacto"]</a>
+                </div>
+            </div>
+            @if (esLanding)
+            {
+                <div class="col-md-3">
+                    <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Acceso"]</div>
+                    <div class="d-flex flex-column gap-2">
+                        <a href="/Login">@L["Iniciar sesión"]</a>
+                    </div>
+                </div>
+            }
+            <div class="col-md-3">
+                <div style="color:white;font-weight:700;margin-bottom:12px;font-size:0.9rem;">@L["Soporte"]</div>
+                <div style="font-size:0.87rem;">soporte@congrega.es</div>
+                <div style="font-size:0.87rem;margin-top:5px;">@L["Lun – Vie · 9:00 – 18:00"]</div>
+            </div>
+        </div>
+        <hr class="footer-divider" />
+        <partial name="~/Views/Landing/_Colaboradores.cshtml" model="@("pie")" />
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
+             style="font-size:0.84rem;">
+            <span>@L["© 2025 Congrega CRM. Todos los derechos reservados."]</span>
+            <span class="d-flex flex-wrap gap-3">
+                <a href="/aviso-legal">@L["Aviso legal"]</a>
+                <a href="/privacidad">@L["Política de privacidad"]</a>
+                <a href="/cookies">@L["Política de cookies"]</a>
+                <a href="#configurar-cookies" data-abrir-cookies>@L["Configurar cookies"]</a>
+            </span>
+            <span>@L["Desarrollado con"] <i class="fas fa-heart" style="color:#ef4444;"></i> @L["para la iglesia"]</span>
+        </div>
+    </div>
+</footer>

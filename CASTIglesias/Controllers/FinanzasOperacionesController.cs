@@ -85,7 +85,7 @@ namespace CASTIglesias.Controllers
             ViewBag.HayEjercicioAbierto = _negocioEjercicios.Listar()
                 .Any(e => e.status == "open");
 
-            return View("Operaciones");
+            return View("~/Views/Finanzas/Operaciones.cshtml");
         }
 
         [HttpGet]

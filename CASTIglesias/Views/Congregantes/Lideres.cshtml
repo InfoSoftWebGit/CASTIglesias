@@ -368,129 +368,67 @@
         }, 300);
     });
 
-    // ─── AUTOCOMPLETE: ZONA ───────────────────────────────────────
-    var timerZona;
-    $('#txtZona').on('input', function () {
-        var term = $(this).val().trim();
-        $('#hiddenIdZona').val(0);
-        clearTimeout(timerZona);
-        if (term.length < 2) { $('#dropdownZona').hide().empty(); return; }
-        timerZona = setTimeout(function () {
+    // ─── LISTAS: ZONA / GRUPO / MINISTERIO ────────────────────────
+    // Al entrar en el campo se despliega la lista completa; al escribir se va
+    // filtrando. Si el texto no coincide con ninguna opción elegida, el ID queda
+    // a 0 (el campo vacío significa "sin zona/grupo/ministerio").
+    function listaSeleccionable(inputSel, ddSel, hiddenSel, url) {
+        var timer;
+        function cargar(term) {
             $.ajax({
-                url: '@Url.Action("ListarZonasPorNombre", "Congregantes")',
+                url: url,
                 type: 'GET',
-                data: { nombre: term },
+                data: { nombre: term || '' },
                 success: function (res) {
-                    var dd = $('#dropdownZona');
+                    var dd = $(ddSel);
                     dd.empty();
                     var lista = Array.isArray(res) ? res : (res.data || []);
-                    if (lista.length > 0) {
-                        lista.forEach(function (z) {
-                            $('<button type="button">')
-                                .addClass('list-group-item list-group-item-action')
-                                .text(z.nombre || '')
-                                .on('click', function () {
-                                    $('#hiddenIdZona').val(z.id);
-                                    $('#txtZona').val(z.nombre || '');
-                                    dd.hide().empty();
-                                })
-                                .appendTo(dd);
-                        });
-                        dd.show();
-                    } else {
-                        dd.hide();
-                    }
+                    if (lista.length === 0) { dd.hide(); return; }
+                    lista.forEach(function (x) {
+                        var texto = typeof tDato === 'function' ? tDato(x.nombre || '') : (x.nombre || '');
+                        $('<button type="button">')
+                            .addClass('list-group-item list-group-item-action')
+                            .toggleClass('active', String(x.id) === String($(hiddenSel).val()))
+                            .text(texto)
+                            // mousedown: se elige antes de que el input pierda el foco
+                            .on('mousedown', function (e) {
+                                e.preventDefault();
+                                $(hiddenSel).val(x.id);
+                                $(inputSel).val(texto);
+                                dd.hide().empty();
+                            })
+                            .appendTo(dd);
+                    });
+                    dd.show();
                 }
             });
-        }, 300);
-    });
+        }
 
-    // Borrar zona al limpiar campo
-    $('#txtZona').on('change', function () {
-        if ($(this).val().trim() === '') $('#hiddenIdZona').val(0);
-    });
-
-    // ─── AUTOCOMPLETE: GRUPO ──────────────────────────────────────
-    var timerGrupo;
-    $('#txtGrupo').on('input', function () {
-        var term = $(this).val().trim();
-        $('#hiddenIdGrupo').val(0);
-        clearTimeout(timerGrupo);
-        if (term.length < 2) { $('#dropdownGrupo').hide().empty(); return; }
-        timerGrupo = setTimeout(function () {
-            $.ajax({
-                url: '@Url.Action("ListarGruposPorNombre", "Congregantes")',
-                type: 'GET',
-                data: { nombre: term },
-                success: function (res) {
-                    var dd = $('#dropdownGrupo');
-                    dd.empty();
-                    var lista = Array.isArray(res) ? res : (res.data || []);
-                    if (lista.length > 0) {
-                        lista.forEach(function (g) {
-                            $('<button type="button">')
-                                .addClass('list-group-item list-group-item-action')
-                                .text(g.nombre || '')
-                                .on('click', function () {
-                                    $('#hiddenIdGrupo').val(g.id);
-                                    $('#txtGrupo').val(g.nombre || '');
-                                    dd.hide().empty();
-                                })
-                                .appendTo(dd);
-                        });
-                        dd.show();
-                    } else {
-                        dd.hide();
-                    }
-                }
+        $(inputSel)
+            .on('focus click', function () {
+                // Con algo ya elegido se muestra toda la lista para poder cambiarlo
+                cargar(parseInt($(hiddenSel).val()) > 0 ? '' : $(this).val().trim());
+            })
+            .on('input', function () {
+                var term = $(this).val().trim();
+                $(hiddenSel).val(0);
+                clearTimeout(timer);
+                timer = setTimeout(function () { cargar(term); }, 250);
+            })
+            .on('keydown', function (e) {
+                if (e.key === 'Escape') $(ddSel).hide().empty();
+            })
+            .on('blur', function () {
+                setTimeout(function () { $(ddSel).hide().empty(); }, 150);
             });
-        }, 300);
-    });
+    }
 
-    $('#txtGrupo').on('change', function () {
-        if ($(this).val().trim() === '') $('#hiddenIdGrupo').val(0);
-    });
-
-    // ─── AUTOCOMPLETE: MINISTERIO ─────────────────────────────────
-    var timerMinisterio;
-    $('#txtMinisterio').on('input', function () {
-        var term = $(this).val().trim();
-        $('#hiddenIdMinisterio').val(0);
-        clearTimeout(timerMinisterio);
-        if (term.length < 2) { $('#dropdownMinisterio').hide().empty(); return; }
-        timerMinisterio = setTimeout(function () {
-            $.ajax({
-                url: '@Url.Action("ListarMinisteriosPorNombre", "Congregantes")',
-                type: 'GET',
-                data: { nombre: term },
-                success: function (res) {
-                    var dd = $('#dropdownMinisterio');
-                    dd.empty();
-                    var lista = Array.isArray(res) ? res : (res.data || []);
-                    if (lista.length > 0) {
-                        lista.forEach(function (m) {
-                            $('<button type="button">')
-                                .addClass('list-group-item list-group-item-action')
-                                .text(m.nombre || '')
-                                .on('click', function () {
-                                    $('#hiddenIdMinisterio').val(m.id);
-                                    $('#txtMinisterio').val(m.nombre || '');
-                                    dd.hide().empty();
-                                })
-                                .appendTo(dd);
-                        });
-                        dd.show();
-                    } else {
-                        dd.hide();
-                    }
-                }
-            });
-        }, 300);
-    });
-
-    $('#txtMinisterio').on('change', function () {
-        if ($(this).val().trim() === '') $('#hiddenIdMinisterio').val(0);
-    });
+    listaSeleccionable('#txtZona', '#dropdownZona', '#hiddenIdZona',
+        '@Url.Action("ListarZonasPorNombre", "Congregantes")');
+    listaSeleccionable('#txtGrupo', '#dropdownGrupo', '#hiddenIdGrupo',
+        '@Url.Action("ListarGruposPorNombre", "Congregantes")');
+    listaSeleccionable('#txtMinisterio', '#dropdownMinisterio', '#hiddenIdMinisterio',
+        '@Url.Action("ListarMinisteriosPorNombre", "Congregantes")');
 
     // Cerrar dropdowns al hacer clic fuera
     $(document).on('click', function (e) {

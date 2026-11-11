@@ -1,6 +1,12 @@
 ﻿@{
     ViewBag.Title = L["Detalle de seguimiento"].Value;
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Solo los pastores ven a todos; el resto, lo que le asigna el pastor en
+    // Configuración → Seguimientos (el buscador ya viene limitado a eso).
+    bool esPastor = ViewBag.EsPastorSeguimiento == true;
+    bool tieneAlcance = ViewBag.TieneAlcanceSeguimiento == true;
+    bool liderVinculado = ViewBag.LiderVinculado == true;
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -26,6 +32,21 @@
     <li class="breadcrumb-item"><a href="#">@L["Resumen"]</a></li>
     <li class="breadcrumb-item active">@L["Detalle de seguimiento"]</li>
 </ol>
+
+@if (!esPastor && !tieneAlcance)
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-1"></i>
+        @if (!liderVinculado)
+        {
+            @L["Tu usuario no está vinculado a ningún líder. Pide a tu pastor que te configure en Configuración → Seguimientos."]
+        }
+        else
+        {
+            @L["Todavía no tienes zonas ni personas asignadas para hacer seguimiento. Pide a tu pastor que te las asigne."]
+        }
+    </div>
+}
 
 <!-- PANEL FILTROS -->
 <div class="card mb-3">
@@ -179,7 +200,7 @@
         if (term.length < 2) { $('#dropdownBuscarMiembro').hide().empty(); return; }
         timerFiltro = setTimeout(function () {
             $.ajax({
-                url: '@Url.Action("BuscarMiembros", "Congregantes")',
+                url: '@Url.Action("BuscarMiembrosSeguimiento", "Congregantes")',
                 type: 'GET',
                 data: { term: term },
                 success: function (res) {
@@ -245,6 +266,7 @@
             type: 'GET',
             data: params,
             success: function (res) {
+                if (res && res.sinPermiso) Swal.fire(T.mAtencion, res.mensaje, 'warning');
                 tablaDetalles.clear().rows.add(res.data || []).draw();
             },
             error: function () {

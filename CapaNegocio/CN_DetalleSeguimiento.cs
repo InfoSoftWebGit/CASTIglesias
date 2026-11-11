@@ -19,6 +19,8 @@ namespace CapaNegocio
             return _capaDatos.ListarDetalles(idMiembro, tipo, fechaDesde, fechaHasta, sedeID);
         }
 
+        public int? ObtenerIdMiembro(int idDetalle) => _capaDatos.ObtenerIdMiembro(idDetalle);
+
         public int RegistrarDetalle(DetalleSeguimiento obj, int sedeID, out string mensaje)
         {
             mensaje = string.Empty;

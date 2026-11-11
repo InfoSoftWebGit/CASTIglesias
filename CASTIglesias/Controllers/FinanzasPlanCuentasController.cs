@@ -23,7 +23,7 @@ namespace CASTIglesias.Controllers
             _negocioPlanCuentas = negocioPlanCuentas;
         }
 
-        public IActionResult Index() => View();
+        public IActionResult Index() => View("~/Views/Finanzas/FinanzasPlanCuentas.cshtml");
 
         [HttpGet]
         public JsonResult Listar()
