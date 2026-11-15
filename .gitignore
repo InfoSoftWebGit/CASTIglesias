@@ -28,6 +28,8 @@ appsettings*.json
 *.env
 dotnet-tools.json
 
+ModificacionMasiva.js
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

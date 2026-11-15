@@ -1,0 +1,8 @@
+@* Iconos de la pestaña y del móvil, comunes a todas las páginas.
+   asp-append-version añade a la dirección una huella del fichero (?v=...).
+   Los navegadores guardan el icono de la pestaña en una caché propia que no
+   caduca aunque el fichero cambie; con la huella, al cambiar la imagen cambia
+   la dirección y el navegador la vuelve a descargar sin hacer nada más. *@
+<link rel="icon" type="image/png" sizes="512x512" href="~/favicon.png" asp-append-version="true" />
+<link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="~/favicon.ico" asp-append-version="true" />
+<link rel="apple-touch-icon" href="~/apple-touch-icon.png" asp-append-version="true" />
