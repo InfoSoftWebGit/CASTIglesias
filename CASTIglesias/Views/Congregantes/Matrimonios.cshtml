@@ -15,8 +15,13 @@
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
-            <div class="col-12">
+            <div class="col-12 d-flex justify-content-between">
                 <button data-permiso="MatrimoniosCrearEditar" type="button" class="btn btn-success" onclick="abrirModalMatrimonios()">@L["Añadir matrimonio"]</button>
+                @* Descarga del listado con las columnas que elija el usuario: la
+                   página que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+                <button type="button" class="btn btn-outline-success" id="btnExportarMatrimonios">
+                    <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+                </button>
             </div>
         </div>
 
@@ -197,6 +202,25 @@
                         'text-align': 'center'
                     });
                 }
+            });
+
+            // Descarga a Excel con columnas a elegir. Se añade la pareja completa
+            // como una sola columna, que es como se nombra a un matrimonio en el
+            // resto de la aplicación y lo que se suele querer en una lista.
+            ExportarTabla.configurar({
+                boton: '#btnExportarMatrimonios',
+                tabla: function () { return tablaMatrimonios; },
+                titulo: @Json.Serialize(L["Matrimonios"].Value),
+                columnas: [
+                    { etiqueta: @Json.Serialize(L["Matrimonio"].Value), porDefecto: false,
+                      valor: function (f) { return nombrePareja(f.esposo, f.esposa); } },
+                    { etiqueta: @Json.Serialize(L["Esposo"].Value), clave: 'esposo' },
+                    { etiqueta: @Json.Serialize(L["Esposa"].Value), clave: 'esposa' },
+                    { etiqueta: @Json.Serialize(L["Líderes"].Value),
+                      valor: function (f) { return ExportarTabla.siNo(f.lideres); } },
+                    { etiqueta: @Json.Serialize(L["Seguidor"].Value),
+                      valor: function (f) { return nombrePareja(f.esposo_seguidor, f.esposa_seguidor); } }
+                ]
             });
 
             $("#tablaMatrimonios tbody").on("click", ".btn-editarMatrimonio", function () {

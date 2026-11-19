@@ -43,10 +43,22 @@
 
     <div class="table-responsive p-3">
         <div class="row mb-2">
-            <div class="col-12">
+            <div class="col-12 d-flex justify-content-between flex-wrap gap-2">
                 <button data-permiso="MiembrosCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(null)">
                     <i class="fas fa-plus me-1"></i> @L["Nuevo líder"]
                 </button>
+                <div>
+                    @* El reparto completo (todos los encargados con sus personas),
+                       sin paginar: es lo que se comparte con cada encargado. *@
+                    <button type="button" class="btn btn-outline-primary me-2" id="btnVerEncargados">
+                        <i class="fas fa-user-shield me-1"></i> @L["Encargados y personas a cargo"]
+                    </button>
+                    @* Descarga del listado con las columnas que elija el usuario: la
+                       página que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+                    <button type="button" class="btn btn-outline-success" id="btnExportarLideres">
+                        <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+                    </button>
+                </div>
             </div>
         </div>
         <hr />
@@ -159,6 +171,9 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+@* Informe de encargados y personas a cargo (modal, Excel e impresión) *@
+@await Html.PartialAsync("_Encargados")
+
 <script>
     var tablaLideres;
 
@@ -200,6 +215,35 @@
             ],
             language: window.dtLang ? { url: window.dtLang } : {},
             responsive: true
+        });
+
+        // Descarga a Excel con columnas a elegir. Para ver a quién atiende cada
+        // líder está el informe de encargados, que es otro botón de esta pantalla.
+        ExportarTabla.configurar({
+            boton: '#btnExportarLideres',
+            tabla: function () { return tablaLideres; },
+            titulo: @Json.Serialize(L["Líderes"].Value),
+            subtitulo: @Json.Serialize(ViewBag.nombre_sede?.ToString() ?? string.Empty),
+            columnas: [
+                { etiqueta: @Json.Serialize(L["Miembro"].Value),
+                  valor: function (f) {
+                      return ((f.nombre_miembro || '') + ' ' + (f.apellidos_miembro || '')).trim();
+                  } },
+                { etiqueta: @Json.Serialize(L["Nombre"].Value),    clave: 'nombre_miembro', porDefecto: false },
+                { etiqueta: @Json.Serialize(L["Apellidos"].Value), clave: 'apellidos_miembro', porDefecto: false },
+                // Las zonas que crea la aplicación se traducen con tDato; las que
+                // escribe cada iglesia se quedan tal cual.
+                { etiqueta: @Json.Serialize(L["Zona"].Value),
+                  valor: function (f) { return window.tDato(f.nombre_zona); } },
+                { etiqueta: @Json.Serialize(L["Grupo"].Value),      clave: 'descripcion_grupo' },
+                { etiqueta: @Json.Serialize(L["Ministerio"].Value), clave: 'descripcion_ministerio' },
+                { etiqueta: @Json.Serialize(L["Acceso app"].Value),
+                  valor: function (f) {
+                      return f.tiene_usuario
+                          ? @Json.Serialize(L["Con acceso"].Value)
+                          : @Json.Serialize(L["Sin acceso"].Value);
+                  } }
+            ]
         });
     });
 

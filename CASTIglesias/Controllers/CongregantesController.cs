@@ -1,6 +1,7 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
 using CASTIglesias.Filters;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -504,6 +505,44 @@ namespace CASTIglesias.Controllers
             catch (Exception ex)
             {
                 return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+        // Listado de fechas conmemorativas (cumpleaños, bautismo, boda y llegada a la
+        // iglesia) que comparten las cuatro pantallas de congregantes. El estado llega
+        // como parámetro porque la acción es la misma para todas: el permiso se exige
+        // sobre el estado PEDIDO, no sobre la pantalla que llama, para que quien solo
+        // ve visitantes no pueda leer los cumpleaños de los miembros cambiando el
+        // parámetro. TienePermisoSobreEstado con sufijo vacío pide el permiso de
+        // lectura del módulo ("Visitantes", "Miembros"...).
+        [HttpGet]
+        public JsonResult ListarFechasConmemorativas(string estado, int dias = 3)
+        {
+            try
+            {
+                if (!TienePermisoSobreEstado(estado, string.Empty))
+                    return SinPermiso();
+
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnMiembros.ListarFechasConmemorativas(sedeID, estado, dias);
+
+                var sedesMap = _cnSedes.ListarSedes().ToDictionary(s => s.ID, s => s.nombre_sede);
+                const string SedeDesconocida = "Sede Desconocida";
+
+                var data = lista.Select(f =>
+                {
+                    f.nombre_sede = sedesMap.GetValueOrDefault(f.id_sede, SedeDesconocida);
+                    return f;
+                });
+
+                return Json(new { data });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = "Error interno al listar las fechas conmemorativas: " + ErrorHelper.Mensaje(ex) });
             }
         }
         #endregion OTROS MÉTODOS MIEMBROS
@@ -1190,6 +1229,180 @@ namespace CASTIglesias.Controllers
         }
         #endregion Lideres
 
+        #region Encargados y personas a cargo
+        // El reparto del seguimiento: cada encargado con los congregantes que
+        // atiende. Lo consultan la pantalla de Líderes y la de Detalle de
+        // seguimiento, para que quien revisa y quien hace el seguimiento vean lo
+        // mismo. A diferencia de los listados, este NO se recorta: su utilidad es
+        // tener el reparto completo para compartirlo.
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
+        public JsonResult ListarEncargados()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var lista = _cnLideres.ListarEncargadosAgrupados(sedeID);
+                RellenarNombresDeSede(lista);
+                return Json(new { data = lista });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { data = new object[0], error = true, mensaje = ErrorHelper.Mensaje(ex) });
+            }
+        }
+
+        [HttpGet]
+        [RequierePermiso(nameof(Permisos.Miembros))]
+        public IActionResult ExportarEncargadosExcel()
+        {
+            try
+            {
+                int sedeID = ObtenerIdSedeUsuario();
+                var encargados = _cnLideres.ListarEncargadosAgrupados(sedeID);
+                RellenarNombresDeSede(encargados);
+
+                string nombreSede = _cnSedes.ObtenerNombreSede(sedeID);
+                return GenerarExcelEncargados(encargados, nombreSede);
+            }
+            catch (Exception ex)
+            {
+                // La descarga se abre en una pestaña nueva, así que no hay JavaScript
+                // que pueda mostrar un mensaje: se devuelve el texto del error.
+                return BadRequest($"No se pudo generar el fichero: {ErrorHelper.Mensaje(ex)}");
+            }
+        }
+
+        /// <summary>
+        /// Pone el nombre de la sede en los encargados y en sus personas a cargo.
+        /// </summary>
+        /// <remarks>
+        /// Igual que en ListarMiembros: la consulta devuelve el ID y el nombre se
+        /// resuelve aquí, porque con sede 1000 el listado mezcla varias sedes y hay
+        /// que poder distinguirlas en el fichero.
+        /// </remarks>
+        private void RellenarNombresDeSede(List<EncargadoDTO> encargados)
+        {
+            const string SedeDesconocida = "Sede Desconocida";
+            var sedes = _cnSedes.ListarSedes().ToDictionary(s => s.ID, s => s.nombre_sede);
+
+            string NombreDe(int id) =>
+                sedes.TryGetValue(id, out var nombre) ? (nombre ?? SedeDesconocida) : SedeDesconocida;
+
+            foreach (var encargado in encargados)
+            {
+                encargado.nombre_sede = NombreDe(encargado.id_sede);
+                foreach (var persona in encargado.personas)
+                    persona.nombre_sede = NombreDe(persona.id_sede);
+            }
+        }
+
+        /// <summary>
+        /// Hoja de cálculo del reparto: una fila por entrada a cargo.
+        /// </summary>
+        /// <remarks>
+        /// Se repite el nombre del encargado en cada una de sus filas en lugar de
+        /// combinar celdas: así el fichero se puede filtrar y ordenar en Excel, que
+        /// es lo que hace quien revisa el seguimiento. Los encargados sin nadie
+        /// asignado también salen, con la fila marcada, porque el hueco es parte de
+        /// lo que se revisa.
+        /// </remarks>
+        private IActionResult GenerarExcelEncargados(List<EncargadoDTO> encargados, string nombreSede)
+        {
+            using var libro = new XLWorkbook();
+            var hoja = libro.Worksheets.Add("Encargados");
+
+            string[] cabeceras =
+            [
+                "Encargado", "Zona", "Grupo", "Ministerio",
+                "Persona(s) a cargo", "Estado", "Teléfono", "Correo electrónico", "Sede"
+            ];
+
+            hoja.Cell(1, 1).Value = "Encargados y personas a cargo";
+            hoja.Range(1, 1, 1, cabeceras.Length).Merge();
+            hoja.Cell(1, 1).Style.Font.SetBold(true).Font.SetFontSize(14)
+                .Font.SetFontColor(XLColor.FromHtml("#1E3A8A"));
+
+            int totalPersonas = encargados.Sum(e => e.total_personas);
+            hoja.Cell(2, 1).Value = $"{nombreSede} — {encargados.Count} encargado(s), {totalPersonas} persona(s) a cargo";
+            hoja.Range(2, 1, 2, cabeceras.Length).Merge();
+            hoja.Cell(2, 1).Style.Font.SetItalic(true).Font.SetFontSize(10)
+                .Font.SetFontColor(XLColor.FromHtml("#64748b"));
+
+            const int filaCabecera = 4;
+            for (int c = 0; c < cabeceras.Length; c++)
+                hoja.Cell(filaCabecera, c + 1).Value = cabeceras[c];
+
+            hoja.Range(filaCabecera, 1, filaCabecera, cabeceras.Length).Style
+                .Font.SetBold(true).Font.SetFontColor(XLColor.White)
+                .Fill.SetBackgroundColor(XLColor.FromHtml("#1E3A8A"))
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+            int fila = filaCabecera + 1;
+            foreach (var encargado in encargados)
+            {
+                if (encargado.personas.Count == 0)
+                {
+                    EscribirFilaEncargado(hoja, fila, encargado, null);
+                    hoja.Range(fila, 1, fila, cabeceras.Length).Style
+                        .Fill.SetBackgroundColor(XLColor.FromHtml("#fff7ed"));
+                    fila++;
+                    continue;
+                }
+
+                foreach (var persona in encargado.personas)
+                {
+                    EscribirFilaEncargado(hoja, fila, encargado, persona);
+                    fila++;
+                }
+            }
+
+            int ultimaFila = fila - 1;
+            if (ultimaFila >= filaCabecera + 1)
+            {
+                hoja.Range(filaCabecera, 1, ultimaFila, cabeceras.Length).Style
+                    .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
+                    .Border.SetInsideBorder(XLBorderStyleValues.Hair)
+                    .Border.SetInsideBorderColor(XLColor.FromHtml("#cbd5e1"));
+                hoja.Range(filaCabecera, 1, ultimaFila, cabeceras.Length).SetAutoFilter();
+            }
+
+            hoja.Cell(ultimaFila + 2, 1).Value = $"Generado con Congrega CRM — {DateTime.Now:dd/MM/yyyy HH:mm}";
+            hoja.Range(ultimaFila + 2, 1, ultimaFila + 2, cabeceras.Length).Merge();
+            hoja.Cell(ultimaFila + 2, 1).Style
+                .Font.SetItalic(true).Font.SetFontSize(9)
+                .Font.SetFontColor(XLColor.FromHtml("#94a3b8"))
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+            hoja.SheetView.FreezeRows(filaCabecera);
+            hoja.Columns().AdjustToContents(8.0, 45.0);
+
+            using var memoria = new MemoryStream();
+            libro.SaveAs(memoria);
+            return File(memoria.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Encargados_y_personas_a_cargo_{DateTime.Now:yyyyMMdd_HHmm}.xlsx");
+        }
+
+        private static void EscribirFilaEncargado(IXLWorksheet hoja, int fila, EncargadoDTO encargado, PersonaACargoDTO? persona)
+        {
+            hoja.Cell(fila, 1).SetValue(encargado.titulo);
+            hoja.Cell(fila, 2).SetValue(encargado.nombre_zona ?? "—");
+            hoja.Cell(fila, 3).SetValue(encargado.descripcion_grupo ?? "—");
+            hoja.Cell(fila, 4).SetValue(encargado.descripcion_ministerio ?? "—");
+            hoja.Cell(fila, 5).SetValue(persona?.titulo ?? "Sin personas a cargo");
+            hoja.Cell(fila, 6).SetValue(persona?.estado ?? "");
+            // Teléfonos y correos como texto: los teléfonos pueden traer prefijos y
+            // espacios, y un cero inicial se perdería al guardarlos como número.
+            hoja.Cell(fila, 7).SetValue(persona?.telefono_movil ?? "");
+            hoja.Cell(fila, 8).SetValue(persona?.correo_electronico ?? "");
+            hoja.Cell(fila, 9).SetValue(persona?.nombre_sede ?? encargado.nombre_sede);
+
+            if (persona == null)
+                hoja.Cell(fila, 5).Style.Font.SetItalic(true).Font.SetFontColor(XLColor.FromHtml("#b45309"));
+        }
+        #endregion Encargados y personas a cargo
+
         #region Familias
         [RequierePermiso(nameof(Permisos.Familias))]
         public IActionResult Familias()
@@ -1340,6 +1553,8 @@ namespace CASTIglesias.Controllers
 
                 ViewBag.ConfigJovenes = config;
                 ViewBag.GruposJovenes = grupos;
+                // Lo usa el subtítulo del Excel que se descarga desde esta pantalla
+                ViewBag.nombre_sede = _cnSedes.ObtenerNombreSede(sedeID);
             }
             catch (Exception)
             {
@@ -1486,6 +1701,8 @@ namespace CASTIglesias.Controllers
             {
                 int sedeID = ObtenerIdSedeUsuario();
                 ViewBag.EsSedeGlobal = sedeID == 1000;
+                // Lo usa el subtítulo del Excel que se descarga desde esta pantalla
+                ViewBag.nombre_sede = _cnSedes.ObtenerNombreSede(sedeID);
 
                 // Crea la zona por defecto de la sede si aún no existe (null en la vista global).
                 var zona = _cnZonaDiscipulado.ObtenerZona(sedeID, tipo);

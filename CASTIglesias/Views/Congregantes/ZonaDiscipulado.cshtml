@@ -52,12 +52,19 @@
                 <span>&nbsp;<span class="badge bg-secondary">@L["Líder"]: @zona.nombre_lider</span></span>
             }
         </span>
-        @if (zona != null)
-        {
-            <button type="button" class="btn btn-success btn-sm" data-permiso="@permisoCrearEditar" onclick="abrirModalMiembroZona()">
-                <i class="fas fa-plus me-1"></i> @L["Añadir miembro"]
+        <span>
+            @* Descarga del listado con las columnas que elija el usuario: la página
+               que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+            <button type="button" class="btn btn-outline-success btn-sm me-2" id="btnExportarZona">
+                <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
             </button>
-        }
+            @if (zona != null)
+            {
+                <button type="button" class="btn btn-success btn-sm" data-permiso="@permisoCrearEditar" onclick="abrirModalMiembroZona()">
+                    <i class="fas fa-plus me-1"></i> @L["Añadir miembro"]
+                </button>
+            }
+        </span>
     </div>
     <div class="table-responsive">
         <table id="tablaMiembrosZona" class="table table-bordered table-striped border-top" style="width:100%">
@@ -227,6 +234,29 @@
                         searchable: false,
                         width: "100px"
                     }
+                ]
+            });
+
+            // Descarga a Excel con columnas a elegir. El listado de una zona de
+            // discipulado trae menos campos que la ficha completa: lo que hay en la
+            // consulta (ver CD_ZonaDiscipulado.ListarMiembrosZona) es lo que se
+            // puede exportar. El título lleva el nombre de la zona ya traducido,
+            // porque esta misma vista sirve para Hombres, Mujeres y Niños.
+            ExportarTabla.configurar({
+                boton: '#btnExportarZona',
+                tabla: function () { return tablaMiembrosZona; },
+                titulo: @Json.Serialize(tituloTraducido),
+                subtitulo: @Json.Serialize(ViewBag.nombre_sede?.ToString() ?? string.Empty),
+                columnas: [
+                    { etiqueta: @Json.Serialize(L["Nombre"].Value),    clave: 'nombre_miembro' },
+                    { etiqueta: @Json.Serialize(L["Apellidos"].Value), clave: 'apellidos_miembro' },
+                    { etiqueta: @Json.Serialize(L["Teléfono"].Value),  clave: 'telefono_movil' },
+                    { etiqueta: @Json.Serialize(L["Edad"].Value),      clave: 'edad' },
+                    { etiqueta: @Json.Serialize(L["Grupo"].Value),     clave: 'nombre_grupo' },
+                    // El estado se guarda en español ("Visitante", "Proceso"...) y
+                    // tDato solo lo traduce al pintarlo.
+                    { etiqueta: @Json.Serialize(L["Estado"].Value), porDefecto: false,
+                      valor: function (f) { return window.tDato(f.estado); } }
                 ]
             });
 

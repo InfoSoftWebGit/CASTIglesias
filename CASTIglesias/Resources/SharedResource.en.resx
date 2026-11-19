@@ -2631,4 +2631,55 @@
   <data name="Te hemos enviado un correo de confirmación. Unos días antes del webinar recibirás el enlace de Teams en esa misma dirección." xml:space="preserve"><value>We have sent you a confirmation email. A few days before the webinar you will receive the Teams link at that same address.</value></data>
   <data name="No se pudo completar la inscripción." xml:space="preserve"><value>The registration could not be completed.</value></data>
   <data name="No se pudo enviar. Inténtalo de nuevo." xml:space="preserve"><value>It could not be sent. Please try again.</value></data>
+  <data name="Nuestras redes sociales" xml:space="preserve"><value>Follow us on social media</value></data>
+  <data name="Síguenos en" xml:space="preserve"><value>Follow us on</value></data>
+  <!-- Listado de fechas conmemorativas de los congregantes (_FechasConmemorativas.cshtml) -->
+  <data name="Fechas conmemorativas" xml:space="preserve"><value>Special dates</value></data>
+  <data name="Próximamente" xml:space="preserve"><value>Coming up</value></data>
+  <data name="Mostrar" xml:space="preserve"><value>Show</value></data>
+  <data name="Solo hoy" xml:space="preserve"><value>Today only</value></data>
+  <data name="Próximos 7 días" xml:space="preserve"><value>Next 7 days</value></data>
+  <data name="Próximos 30 días" xml:space="preserve"><value>Next 30 days</value></data>
+  <data name="Todo el año" xml:space="preserve"><value>Whole year</value></data>
+  <data name="Cuándo" xml:space="preserve"><value>When</value></data>
+  <data name="Motivo" xml:space="preserve"><value>Occasion</value></data>
+  <data name="Congregante" xml:space="preserve"><value>Congregant</value></data>
+  <data name="Años" xml:space="preserve"><value>Years</value></data>
+  <data name="Cumpleaños" xml:space="preserve"><value>Birthday</value></data>
+  <data name="Aniversario de bautismo" xml:space="preserve"><value>Baptism anniversary</value></data>
+  <data name="Aniversario de boda" xml:space="preserve"><value>Wedding anniversary</value></data>
+  <data name="Aniversario en la iglesia" xml:space="preserve"><value>Church anniversary</value></data>
+  <data name="Es hoy" xml:space="preserve"><value>Today</value></data>
+  <data name="Es mañana" xml:space="preserve"><value>Tomorrow</value><comment>Fecha conmemorativa del día siguiente. La clave "Mañana" ya está usada para el turno de mañana.</comment></data>
+  <data name="En {0} días" xml:space="preserve"><value>In {0} days</value></data>
+  <data name="Hoy no hay ninguna fecha conmemorativa." xml:space="preserve"><value>There are no special dates today.</value></data>
+  <data name="No hay fechas conmemorativas en el periodo elegido." xml:space="preserve"><value>There are no special dates in the selected period.</value></data>
+  <data name="{0} fecha(s) en el periodo elegido" xml:space="preserve"><value>{0} date(s) in the selected period</value></data>
+  <data name="Hay {0} fecha(s) conmemorativa(s) en los próximos días." xml:space="preserve"><value>There are {0} special date(s) in the next few days.</value></data>
+  <data name="No se pudieron cargar las fechas conmemorativas." xml:space="preserve"><value>The special dates could not be loaded.</value></data>
+  <!-- Exportación de listados a Excel y a PDF (ver wwwroot/js/exportar-tabla.js) -->
+  <data name="Exportar" xml:space="preserve"><value>Export</value></data>
+  <data name="Exportar a Excel" xml:space="preserve"><value>Export to Excel</value></data>
+  <data name="Descargar Excel" xml:space="preserve"><value>Download Excel</value></data>
+  <data name="Marcar todas" xml:space="preserve"><value>Select all</value></data>
+  <data name="Desmarcar todas" xml:space="preserve"><value>Clear all</value></data>
+  <data name="Se descargan como máximo {0} filas: las de la página que estás viendo, con el orden y la búsqueda que tengas aplicados." xml:space="preserve"><value>Up to {0} rows are downloaded: the ones on the page you are viewing, with the sorting and search you have applied.</value></data>
+  <data name="Marca al menos una columna." xml:space="preserve"><value>Select at least one column.</value></data>
+  <data name="No hay filas que exportar en esta página." xml:space="preserve"><value>There are no rows to export on this page.</value></data>
+  <data name="No se pudo generar el fichero." xml:space="preserve"><value>The file could not be generated.</value></data>
+  <data name="El navegador ha bloqueado la ventana de impresión. Permítela y vuelve a intentarlo." xml:space="preserve"><value>Your browser blocked the print window. Allow it and try again.</value></data>
+  <data name="Generado con Congrega CRM" xml:space="preserve"><value>Generated with Congrega CRM</value></data>
+  <!-- Informe de encargados y personas a cargo -->
+  <data name="Encargados y personas a cargo" xml:space="preserve"><value>People in charge and their assignments</value></data>
+  <data name="Personas a cargo" xml:space="preserve"><value>Assigned congregants</value></data>
+  <data name="Sin personas a cargo" xml:space="preserve"><value>No one assigned</value></data>
+  <data name="Todavía no hay encargados asignados. Asigna un responsable en la ficha de cada congregante." xml:space="preserve"><value>No one is in charge yet. Set a person in charge on each congregant's record.</value></data>
+  <data name="{0} persona(s) a cargo" xml:space="preserve"><value>{0} congregant(s) assigned</value></data>
+  <data name="No se pudo cargar el listado de encargados." xml:space="preserve"><value>The list of people in charge could not be loaded.</value></data>
+  <data name="Consulta el reparto del seguimiento para revisarlo o compartirlo con cada encargado." xml:space="preserve"><value>Check how follow-up is shared out, to review it or pass it on to each person in charge.</value></data>
+  <!-- Columnas de los listados que se pueden exportar -->
+  <data name="Con acceso" xml:space="preserve"><value>With access</value></data>
+  <data name="Sin acceso" xml:space="preserve"><value>No access</value></data>
+  <data name="Matrimonio" xml:space="preserve"><value>Couple</value><comment>La pareja como una sola columna; "Matrimonios" es el título del listado.</comment></data>
+  <data name="Integrantes" xml:space="preserve"><value>Household members</value><comment>Número de personas de una familia; no confundir con "Miembros" (Members).</comment></data>
 </root>

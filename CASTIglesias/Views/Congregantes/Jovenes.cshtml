@@ -26,12 +26,19 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-user-friends me-1"></i> @L["Lista de Jóvenes &nbsp;"]<span class="badge bg-secondary">Rango: @config.edad_minima – @config.edad_maxima años</span>
         </span>
-        @if (!zonaSinConfigurar)
-        {
-            <button data-permiso="JovenesCrearEditar" type="button" class="btn btn-success btn-sm" onclick="abrirModalJoven()">
-                <i class="fas fa-plus me-1"></i> @L["Añadir joven"]
+        <span>
+            @* Descarga del listado con las columnas que elija el usuario: la página
+               que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+            <button type="button" class="btn btn-outline-success btn-sm me-2" id="btnExportarJovenes">
+                <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
             </button>
-        }
+            @if (!zonaSinConfigurar)
+            {
+                <button data-permiso="JovenesCrearEditar" type="button" class="btn btn-success btn-sm" onclick="abrirModalJoven()">
+                    <i class="fas fa-plus me-1"></i> @L["Añadir joven"]
+                </button>
+            }
+        </span>
     </div>
     <div class="table-responsive">
         <table id="tablaJovenes" class="table table-bordered table-striped border-top" style="width:100%">
@@ -56,6 +63,11 @@
         <i class="fas fa-hourglass-end me-1"></i>
         @L["Próximos a salir del rango"]
         <span class="badge bg-warning text-dark ms-2">Edad entre @(config.edad_maxima - 1) y @config.edad_maxima años</span>
+        @* Esta lista es la que se suele pasar al líder de jóvenes, así que también
+           se puede descargar. *@
+        <button type="button" class="btn btn-outline-light btn-sm float-end" id="btnExportarProximos">
+            <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+        </button>
     </div>
     <div class="table-responsive">
         <table id="tablaProximos" class="table table-bordered table-striped border-top" style="width:100%">
@@ -254,6 +266,33 @@
                     dataSrc: "data"
                 },
                 columns: columnas
+            });
+
+            // Descarga a Excel con columnas a elegir. Las dos tablas de la pantalla
+            // comparten columnas porque comparten consulta (ver CD_Jovenes), así
+            // que la lista se define una vez y se usa en los dos botones.
+            var columnasExportables = [
+                { etiqueta: @Json.Serialize(L["Nombre"].Value),    clave: 'nombre_miembro' },
+                { etiqueta: @Json.Serialize(L["Apellidos"].Value), clave: 'apellidos_miembro' },
+                { etiqueta: @Json.Serialize(L["Teléfono"].Value),  clave: 'telefono_movil' },
+                { etiqueta: @Json.Serialize(L["Edad"].Value),      clave: 'edad' },
+                { etiqueta: @Json.Serialize(L["Grupo"].Value),     clave: 'nombre_grupo' }
+            ];
+
+            ExportarTabla.configurar({
+                boton: '#btnExportarJovenes',
+                tabla: function () { return tablaJovenes; },
+                titulo: @Json.Serialize(L["Jóvenes"].Value),
+                subtitulo: @Json.Serialize(ViewBag.nombre_sede?.ToString() ?? string.Empty),
+                columnas: columnasExportables
+            });
+
+            ExportarTabla.configurar({
+                boton: '#btnExportarProximos',
+                tabla: function () { return tablaProximos; },
+                titulo: @Json.Serialize(L["Próximos a salir del rango"].Value),
+                subtitulo: @Json.Serialize(ViewBag.nombre_sede?.ToString() ?? string.Empty),
+                columnas: columnasExportables
             });
 
             $("#tablaJovenes tbody").on("click", ".btn-editarGrupo", function () {

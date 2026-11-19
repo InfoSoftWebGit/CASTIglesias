@@ -1,0 +1,64 @@
+@* Iconos enlazados a las redes sociales. El texto y la caja los pone quien la incluya. *@
+@{
+    // La landing incluye la parcial dos veces (hero y pie): los estilos solo se pintan en la primera.
+    var estilosPintados = Context.Items.ContainsKey("rsEstilos");
+    Context.Items["rsEstilos"] = true;
+
+    var redes = new[]
+    {
+        new { Nombre = "YouTube",   Icono = "fab fa-youtube",   Color = "#FF0000", Url = "https://www.youtube.com/@CongregaCRM" },
+        new { Nombre = "Instagram", Icono = "fab fa-instagram", Color = "#E1306C", Url = "https://www.instagram.com/congregacrm/" },
+        new { Nombre = "TikTok",    Icono = "fab fa-tiktok",    Color = "#00F2EA", Url = "https://www.tiktok.com/@congregacrm" },
+        new { Nombre = "LinkedIn",  Icono = "fab fa-linkedin",  Color = "#0A66C2", Url = "https://www.linkedin.com/in/congrega-crm-93095644a/" },
+        new { Nombre = "X",         Icono = "fab fa-x-twitter", Color = "#FFFFFF", Url = "https://x.com/CongregaCRM" },
+        new { Nombre = "Facebook",  Icono = "fab fa-facebook",  Color = "#1877F2", Url = "https://www.facebook.com/profile.php?id=61596041057994" }
+    };
+}
+
+<span class="rs-iconos">
+    @foreach (var red in redes)
+    {
+        <a href="@red.Url"
+           class="rs-enlace"
+           data-red="@red.Nombre"
+           style="--rs-hover: @red.Color;"
+           target="_blank"
+           rel="noopener"
+           title="@red.Nombre"
+           aria-label="@L["Síguenos en"] @red.Nombre">
+            <i class="@red.Icono" aria-hidden="true"></i>
+        </a>
+    }
+</span>
+
+@if (!estilosPintados)
+{
+    <style>
+        .rs-iconos {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--rs-gap, 14px);
+        }
+
+        /* El color y el tamaño base los fija el contenedor con --rs-color y --rs-size. */
+        .rs-enlace {
+            color: var(--rs-color, rgba(255,255,255,0.72));
+            font-size: var(--rs-size, 1.05rem);
+            line-height: 1;
+            text-decoration: none;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+
+        .rs-enlace:hover,
+        .rs-enlace:focus-visible {
+            color: var(--rs-hover);
+            transform: translateY(-2px);
+        }
+
+        .rs-enlace:focus-visible {
+            outline: 2px solid var(--rs-hover);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+    </style>
+}

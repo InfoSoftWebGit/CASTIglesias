@@ -1735,5 +1735,130 @@ namespace CapaDatos
 
 
         #endregion CambiarEstados
+
+        #region Fechas conmemorativas
+
+        /// <summary>
+        /// Fechas conmemorativas de los congregantes de un estado (Visitante,
+        /// Simpatizante, Proceso o Miembro), ordenadas por lo que toca antes.
+        /// </summary>
+        /// <param name="sedeID">Sede del usuario (1000 = todas).</param>
+        /// <param name="estado">Estado exacto tal como está en la columna Estado.</param>
+        /// <remarks>
+        /// La proyección se trae a memoria y el reparto en filas se hace en C#: el
+        /// cálculo del próximo aniversario necesita construir fechas con el año en
+        /// curso y eso no se traduce a SQL de forma portable entre versiones de MySQL.
+        /// El volumen es el de una sede, no el de un histórico, así que cabe de sobra.
+        /// </remarks>
+        public List<FechaConmemorativaDTO> ListarFechasConmemorativas(int sedeID, string estado)
+        {
+            try
+            {
+                var consulta = _context.Miembros
+                    .AsQueryable()
+                    .Where(m => m.estado == estado)
+                    // A una baja o a un fallecido no se le felicita
+                    .Where(m => m.miembro_activo != "No")
+                    .Where(m => m.fallecido != true);
+
+                if (sedeID != 1000)
+                {
+                    consulta = consulta.Where(m => m.id_sede == sedeID);
+                }
+
+                var congregantes = consulta
+                    .Select(m => new
+                    {
+                        m.id_miembro,
+                        m.nombre_miembro,
+                        m.apellidos_miembro,
+                        m.telefono_movil,
+                        m.correo_electronico,
+                        m.id_sede,
+                        m.fecha_cumpleanios,
+                        m.fecha_bautismo,
+                        m.fecha_boda,
+                        m.fecha_llegada_iglesia
+                    })
+                    .ToList();
+
+                // Se fija "hoy" una sola vez: si se leyera dentro del bucle, un listado
+                // pedido a medianoche podría mezclar dos días distintos.
+                var hoy = DateTime.Today;
+                var filas = new List<FechaConmemorativaDTO>();
+
+                foreach (var c in congregantes)
+                {
+                    var origen = new[]
+                    {
+                        (FechaConmemorativaDTO.TipoCumpleanios, c.fecha_cumpleanios),
+                        (FechaConmemorativaDTO.TipoBautismo, c.fecha_bautismo),
+                        (FechaConmemorativaDTO.TipoBoda, c.fecha_boda),
+                        (FechaConmemorativaDTO.TipoLlegada, c.fecha_llegada_iglesia)
+                    };
+
+                    foreach (var (tipo, fecha) in origen)
+                    {
+                        if (fecha == null) continue;
+
+                        var proxima = ProximaCelebracion(fecha.Value, hoy);
+
+                        filas.Add(new FechaConmemorativaDTO
+                        {
+                            id_miembro = c.id_miembro,
+                            nombre_miembro = c.nombre_miembro,
+                            apellidos_miembro = c.apellidos_miembro,
+                            tipo = tipo,
+                            fecha = fecha.Value,
+                            proxima_celebracion = proxima,
+                            dias_restantes = (proxima - hoy).Days,
+                            // Las fichas importadas de hojas de cálculo traen a veces un
+                            // año de relleno: sin año fiable no se dice cuántos cumple.
+                            aniversario = fecha.Value.Year > 1900
+                                ? proxima.Year - fecha.Value.Year
+                                : null,
+                            telefono_movil = c.telefono_movil,
+                            correo_electronico = c.correo_electronico,
+                            id_sede = c.id_sede,
+                            // Lo rellena el controlador, igual que en el resto de listados
+                            nombre_sede = string.Empty
+                        });
+                    }
+                }
+
+                return filas
+                    .OrderBy(f => f.dias_restantes)
+                    .ThenBy(f => f.apellidos_miembro)
+                    .ThenBy(f => f.nombre_miembro)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error ListarFechasConmemorativas EF Core: {ErrorHelper.Mensaje(ex)}");
+                return new List<FechaConmemorativaDTO>();
+            }
+        }
+
+        /// <summary>
+        /// Día y mes de la fecha aplicados al año en curso; si ya pasó, al que viene.
+        /// </summary>
+        /// <remarks>
+        /// El 29 de febrero se celebra el 28 en los años no bisiestos: pasarlo al 1 de
+        /// marzo lo sacaría del listado del mes de febrero, que es donde lo busca quien
+        /// prepara las felicitaciones.
+        /// </remarks>
+        private static DateTime ProximaCelebracion(DateTime fecha, DateTime hoy)
+        {
+            DateTime EnElAnio(int anio)
+            {
+                int dia = Math.Min(fecha.Day, DateTime.DaysInMonth(anio, fecha.Month));
+                return new DateTime(anio, fecha.Month, dia);
+            }
+
+            var esteAnio = EnElAnio(hoy.Year);
+            return esteAnio >= hoy ? esteAnio : EnElAnio(hoy.Year + 1);
+        }
+
+        #endregion Fechas conmemorativas
     }
 }

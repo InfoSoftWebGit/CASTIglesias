@@ -20,7 +20,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Congrega</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
+    @* ?v=2 fuerza a los navegadores a descartar el favicon antiguo que tengan en caché. *@
+    <link rel="icon" type="image/png" href="/favicon.png?v=2">
+    <link rel="apple-touch-icon" href="/favicon.png?v=2">
 
     <!-- ✅ Se elimina integrity para evitar error de verificación -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -33,6 +35,44 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
+        /* ── Redes sociales en la barra superior ───────────────────────────────── */
+        .redes-topnav {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            align-items: center;
+            gap: 12px;
+            /* Variables que lee la parcial _RedesSociales */
+            --rs-color: rgba(255,255,255,0.72);
+            --rs-size: 1.1rem;
+            --rs-gap: 13px;
+        }
+
+        .redes-topnav-texto {
+            color: rgba(255,255,255,0.55);
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        /* Ventana de redes para pantallas pequeñas: fondo claro, así que los
+           iconos van en gris oscuro y el de X, que es blanco, en negro. */
+        .redes-modal {
+            --rs-color: #334155;
+            --rs-size: 1.9rem;
+            --rs-gap: 20px;
+        }
+
+        .redes-modal .rs-iconos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            row-gap: 18px;
+        }
+
+        .redes-modal .rs-enlace[data-red="X"] {
+            --rs-hover: #000000;
+        }
+
         /* ── Responsive global (móvil / tablet) ────────────────────────────────── */
         @@media (max-width: 767.98px) {
             /* Tablas: scroll suave con toque en iOS/Android */
@@ -168,7 +208,25 @@
             <i class="fas fa-bars"></i>
         </button>
 
+        @* Redes sociales centradas en la barra. Se posicionan respecto a la nav
+           para que queden en el centro real y no en el hueco que dejen el logo y
+           los iconos de usuario. Se ocultan por debajo de lg: ahí no hay sitio. *@
+        <div class="redes-topnav d-none d-lg-flex">
+            <span class="redes-topnav-texto">@L["Nuestras redes sociales"]:</span>
+            <partial name="_RedesSociales" />
+        </div>
+
         <ul class="navbar-nav ms-auto me-0 me-md-3 my-2 my-md-0">
+            @* Por debajo de lg no caben los iconos en la barra: se sustituyen por
+               este botón, que abre el mismo listado en una ventana. *@
+            <li class="nav-item d-lg-none">
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalRedes"
+                   title="@L["Nuestras redes sociales"]" aria-label="@L["Nuestras redes sociales"]"
+                   style="color: rgba(255,255,255,0.7);">
+                    <i class="fas fa-circle-nodes fa-fw"></i>
+                </a>
+            </li>
+
             @* Salir a la web pública: cierra sesión igual que la opción del
                desplegable, pero aterriza en la landing en vez de en el login. *@
             <li class="nav-item">
@@ -308,6 +366,23 @@
                     </div>
                 </div>
             </footer>
+        </div>
+    </div>
+
+    @* Redes sociales para pantallas pequeñas. Lo abre el botón de la barra. *@
+    <div class="modal fade" id="modalRedes" tabindex="-1" aria-labelledby="tituloModalRedes" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title" id="tituloModalRedes">
+                        <i class="fas fa-circle-nodes me-2 text-muted"></i>@L["Nuestras redes sociales"]
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+                </div>
+                <div class="modal-body redes-modal">
+                    <partial name="_RedesSociales" />
+                </div>
+            </div>
         </div>
     </div>
 
@@ -503,7 +578,32 @@
             mTipoSeguimientoObligatorio:  @Json.Serialize(L["El tipo de seguimiento es obligatorio."].Value),
             mTotalMiembrosBaja:           @Json.Serialize(L["Total de Miembros de Baja"].Value),
             mTurnoFechaObligatorios:      @Json.Serialize(L["El turno y la fecha son obligatorios."].Value),
-            mZonaEliminada:               @Json.Serialize(L["La Zona fue eliminada correctamente."].Value)
+            mZonaEliminada:               @Json.Serialize(L["La Zona fue eliminada correctamente."].Value),
+
+            // ── Exportación de listados (ver wwwroot/js/exportar-tabla.js) ───
+            // Van aquí y no en cada vista porque el modal de columnas es el mismo
+            // para los once listados que lo usan, y lo construye ese fichero JS.
+            xExportar:                    @Json.Serialize(L["Exportar"].Value),
+            xExportarExcel:               @Json.Serialize(L["Exportar a Excel"].Value),
+            xMarcarTodas:                 @Json.Serialize(L["Marcar todas"].Value),
+            xDesmarcarTodas:              @Json.Serialize(L["Desmarcar todas"].Value),
+            xDescargarExcel:              @Json.Serialize(L["Descargar Excel"].Value),
+            xImprimirPdf:                 @Json.Serialize(L["Imprimir o guardar en PDF"].Value),
+            xAyudaExportar:               @Json.Serialize(L["Se descargan como máximo {0} filas: las de la página que estás viendo, con el orden y la búsqueda que tengas aplicados."].Value),
+            xSinColumnas:                 @Json.Serialize(L["Marca al menos una columna."].Value),
+            xSinFilas:                    @Json.Serialize(L["No hay filas que exportar en esta página."].Value),
+            xErrorDescarga:               @Json.Serialize(L["No se pudo generar el fichero."].Value),
+            xBloqueoVentana:              @Json.Serialize(L["El navegador ha bloqueado la ventana de impresión. Permítela y vuelve a intentarlo."].Value),
+            xGeneradoCon:                 @Json.Serialize(L["Generado con Congrega CRM"].Value),
+
+            // ── Informe de encargados y personas a cargo ─────────────────────
+            // Lo usan las pantallas de Líderes y de Detalle de seguimiento.
+            xEncargados:                  @Json.Serialize(L["Encargados y personas a cargo"].Value),
+            xPersonasACargo:              @Json.Serialize(L["Personas a cargo"].Value),
+            xSinPersonasACargo:           @Json.Serialize(L["Sin personas a cargo"].Value),
+            xSinEncargados:               @Json.Serialize(L["Todavía no hay encargados asignados. Asigna un responsable en la ficha de cada congregante."].Value),
+            xTotalACargo:                 @Json.Serialize(L["{0} persona(s) a cargo"].Value),
+            xNoCargarEncargados:          @Json.Serialize(L["No se pudo cargar el listado de encargados."].Value)
         });
 
         // Días de la semana. Estaban repetidos como literales en tres vistas, así
@@ -531,6 +631,16 @@
             "Mujeres":        @Json.Serialize(L["Mujeres"].Value),
             "Niños":          @Json.Serialize(L["Niños"].Value),
             "Jóvenes":        @Json.Serialize(L["Jóvenes"].Value),
+            // Valores de la columna sexo. Son un conjunto cerrado que escribe la
+            // aplicación (el select de la ficha), así que se pueden traducir al
+            // pintarlos; el valor guardado sigue siendo el español.
+            "Hombre":         @Json.Serialize(L["Hombre"].Value),
+            "Mujer":          @Json.Serialize(L["Mujer"].Value),
+            // Estados del congregante (columna estado). También los escribe la
+            // aplicación al avanzar o retroceder de estado, nunca la iglesia.
+            "Visitante":      @Json.Serialize(L["Visitante"].Value),
+            "Simpatizante":   @Json.Serialize(L["Simpatizante"].Value),
+            "Proceso":        @Json.Serialize(L["Proceso"].Value),
             // Roles de usuario (columna Rol)
             "AdminGlobal":    @Json.Serialize(L["Administrador Global"].Value),
             "PastorGeneral":  @Json.Serialize(L["Pastor General"].Value),
@@ -564,15 +674,28 @@
                 plantilla);
         };
 
+        // Idioma con el que el navegador da formato a los números.
+        //
+        // Se toma de UICulture y NO de CurrentCulture: Program.cs fuerza
+        // CurrentCulture a InvariantCulture para que el enlace de formularios lea
+        // siempre los decimales con punto, y el Name de la cultura invariante es
+        // cadena vacía. toLocaleString('') no devuelve un valor por defecto: lanza
+        // RangeError, y al ocurrir dentro del render de una columna aborta el
+        // pintado entero de la tabla (se queda en "Cargando...").
+        //
+        // El "|| undefined" cubre el caso de que UICulture tampoco traiga código:
+        // con undefined, toLocaleString usa el idioma del navegador en vez de fallar.
+        window.LOCALE = @Json.Serialize(System.Globalization.CultureInfo.CurrentUICulture.Name) || undefined;
+
         // Importes: SIEMPRE con dos decimales y con el separador del idioma
         // activo. Sin esto, 30,10 € se pinta como "30.1" (el valor que llega
         // del servidor en JSON) y parece que se han perdido los céntimos.
         // Uso: importe(30.1) -> "30,10"   importeEuro(30.1) -> "30,10 €"
         window.importe = function (valor) {
             const n = parseFloat(valor);
-            return isNaN(n)
-                ? '0,00'
-                : n.toLocaleString('@System.Globalization.CultureInfo.CurrentCulture.Name',
+            // El cero del caso inválido también pasa por toLocaleString: escrito a
+            // mano como '0,00' quedaría con coma incluso en inglés.
+            return (isNaN(n) ? 0 : n).toLocaleString(window.LOCALE,
                                    { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };
         window.importeEuro = function (valor) {
@@ -664,6 +787,13 @@
                 });
             }
 
+            // La red se abre en otra pestaña: al volver, la ventana no debe seguir abierta.
+            document.querySelectorAll('#modalRedes .rs-enlace').forEach(function (enlace) {
+                enlace.addEventListener('click', function () {
+                    bootstrap.Modal.getInstance(document.getElementById('modalRedes'))?.hide();
+                });
+            });
+
             // Dropdown sede estable
             const sedeBtn = document.getElementById('dropdownSede');
             if (sedeBtn) {
@@ -692,6 +822,13 @@
             });
         }
     </script>
+
+    @* Exportación de listados a Excel y a PDF. Se carga en el layout, y no en
+       cada vista, porque lo usan todas las pantallas de congregantes; el fichero
+       no hace nada por sí solo hasta que una vista llama a ExportarTabla.configurar.
+       Va ANTES de la sección Scripts para que las vistas puedan usarlo en su
+       propio $(document).ready. *@
+    <script src="~/js/exportar-tabla.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)
 </body>

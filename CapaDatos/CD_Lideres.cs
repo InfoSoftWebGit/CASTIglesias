@@ -52,6 +52,134 @@ namespace CapaDatos
         }
 
         /// <summary>
+        /// Devuelve los encargados (líderes) con los congregantes que tienen asignados.
+        /// </summary>
+        /// <remarks>
+        /// El vínculo es miembros.ID_responsable -> lideres.ID, no el nombre: un
+        /// cambio de apellido o dos líderes homónimos no deben alterar el reparto.
+        ///
+        /// Decisiones de este listado:
+        /// - Se devuelven TODOS los líderes de la sede, incluidos los que no tienen
+        ///   a nadie asignado. Un encargado sin personas es precisamente lo que
+        ///   busca quien revisa que el seguimiento se esté repartiendo.
+        /// - De las personas a cargo se excluyen las bajas (miembro_activo == "No"):
+        ///   el listado es operativo, y a quien ya no asiste no se le hace
+        ///   seguimiento. Las fichas de baja siguen estando en su propia pantalla.
+        /// - Un mismo miembro puede estar registrado como líder en varias filas de
+        ///   lideres (una por zona, grupo o ministerio). Cada fila es un encargado
+        ///   distinto porque ID_responsable apunta a una fila concreta.
+        /// </remarks>
+        /// <param name="sedeID">Sede del usuario (1000 para todas las de su iglesia).</param>
+        public List<EncargadoDTO> ListarEncargadosConPersonasACargo(int sedeID)
+        {
+            try
+            {
+                var consultaLideres = _context.Lideres.AsQueryable();
+                if (sedeID != 1000)
+                    consultaLideres = consultaLideres.Where(l => l.ID_sede == sedeID);
+
+                var lideres = consultaLideres.ToList();
+                if (lideres.Count == 0) return new List<EncargadoDTO>();
+
+                var zonas = _context.Zona.ToDictionary(z => z.ID_zona, z => z.nombre_zona ?? "");
+                var grupos = _context.Grupos.ToDictionary(g => g.ID_grupo, g => g.Descripcion ?? "");
+                var ministerios = _context.Ministerios.ToDictionary(m => m.ID, m => m.Descripcion ?? "");
+
+                // Se piden de una vez los congregantes de todos los líderes y se
+                // reparten en memoria: una consulta por líder dejaría el listado a
+                // merced del número de líderes de la iglesia.
+                var idsLideres = lideres.Select(l => l.ID).ToList();
+
+                var asignados = _context.Miembros
+                    .Where(m => m.id_responsable != null
+                                && idsLideres.Contains(m.id_responsable.Value)
+                                && m.miembro_activo != "No")
+                    .Select(m => new
+                    {
+                        m.id_responsable,
+                        persona = new PersonaACargoDTO
+                        {
+                            id_miembro = m.id_miembro,
+                            nombre_miembro = m.nombre_miembro,
+                            apellidos_miembro = m.apellidos_miembro,
+                            estado = m.estado,
+                            telefono_movil = m.telefono_movil,
+                            correo_electronico = m.correo_electronico,
+                            id_sede = m.id_sede
+                        }
+                    })
+                    .ToList();
+
+                var personasPorLider = asignados
+                    .GroupBy(a => a.id_responsable!.Value)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(a => a.persona)
+                              .OrderBy(p => p.apellidos_miembro)
+                              .ThenBy(p => p.nombre_miembro)
+                              .ToList());
+
+                return lideres
+                    .Select(l => new EncargadoDTO
+                    {
+                        id_lider = l.ID,
+                        id_miembro = l.ID_miembro,
+                        nombre_encargado = l.Nombre_miembro,
+                        apellidos_encargado = l.Apellidos_miembro,
+                        nombre_zona = l.ID_zona > 0 && zonas.ContainsKey(l.ID_zona) ? zonas[l.ID_zona] : null,
+                        descripcion_grupo = l.ID_grupo > 0 && grupos.ContainsKey(l.ID_grupo) ? grupos[l.ID_grupo] : null,
+                        descripcion_ministerio = l.ID_ministerio > 0 && ministerios.ContainsKey(l.ID_ministerio) ? ministerios[l.ID_ministerio] : null,
+                        id_sede = l.ID_sede,
+                        personas = personasPorLider.TryGetValue(l.ID, out var lista) ? lista : new List<PersonaACargoDTO>()
+                    })
+                    // Primero quien más gente lleva: es el orden en el que se revisa
+                    // el reparto, y deja al final a los líderes sin asignaciones.
+                    .OrderByDescending(e => e.personas.Count)
+                    .ThenBy(e => e.apellidos_encargado)
+                    .ThenBy(e => e.nombre_encargado)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ListarEncargadosConPersonasACargo: {ErrorHelper.Mensaje(ex)}");
+                return new List<EncargadoDTO>();
+            }
+        }
+
+        /// <summary>
+        /// Matrimonios registrados en la sede, para poder unir en un mismo bloque a
+        /// los encargados (y a las personas a cargo) que son pareja.
+        /// </summary>
+        /// <remarks>
+        /// Devuelve los nombres tal cual están guardados; quien compara es la capa
+        /// de negocio, porque la coincidencia por nombre es una regla (ver
+        /// CN_Lideres.ListarEncargadosAgrupados) y no una consulta.
+        /// </remarks>
+        public List<ParejaDTO> ListarParejasSede(int sedeID)
+        {
+            try
+            {
+                var consulta = _context.Matrimonios.AsQueryable();
+                if (sedeID != 1000)
+                    consulta = consulta.Where(m => m.ID_sede == sedeID);
+
+                return consulta
+                    .Select(m => new ParejaDTO
+                    {
+                        id_matrimonio = m.ID_matrimonio,
+                        esposo = m.Esposo,
+                        esposa = m.Esposa
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error ListarParejasSede: {ErrorHelper.Mensaje(ex)}");
+                return new List<ParejaDTO>();
+            }
+        }
+
+        /// <summary>
         /// Cuenta los líderes cuyo miembro asociado está activo. Si sedeID es 1000 (Admin Global), cuenta todos.
         /// </summary>
         public int ContadorLideresActivos(int sedeID)

@@ -27,6 +27,21 @@
     <div class="table-responsive">
         <div class="row">
             <div class="col-12 mb-2 text-end">
+                @* Abre el listado de fechas conmemorativas (ver _FechasConmemorativas).
+                   El contador del badge lo rellena ese parcial con las fechas de los
+                   próximos días. *@
+                <button type="button" class="btn btn-outline-primary me-2" id="btnFechasConmemorativas">
+                    <i class="fas fa-calendar-day"></i> @L["Fechas conmemorativas"]
+                    @* Contador dentro del flujo del botón y no en posición absoluta:
+                       .table-responsive recorta lo que sobresale de su caja. *@
+                    <span class="badge rounded-pill bg-danger ms-1" id="badgeFechasProximas" style="display:none;">0</span>
+                </button>
+                @* Descarga del listado con las columnas que elija el usuario.
+                   Lo que se descarga es la página que se está viendo (ver
+                   wwwroot/js/exportar-tabla.js). *@
+                <button type="button" class="btn btn-outline-success me-2" id="btnExportarMiembros">
+                    <i class="fas fa-file-excel"></i> @L["Exportar a Excel"]
+                </button>
                 <button type="button" class="btn btn-outline-danger" id="btnToggleBajas">
                     <i class="fas fa-user-slash"></i> @L["Ver bajas"]
                 </button>
@@ -428,11 +443,18 @@
     </div>
 </div>
 
+@* Modal de fechas conmemorativas. Va aquí, fuera de .table-responsive, porque ese
+   contenedor tiene overflow y recortaría el modal. *@
+@await Html.PartialAsync("_FechasConmemorativas", "Miembro")
+
 @section scripts {
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    @* Columnas que se pueden descargar (comunes a los cuatro listados) *@
+    @await Html.PartialAsync("_ColumnasExportacion")
 
     <script>
         // Textos traducidos que consume el JavaScript de esta vista.
@@ -576,6 +598,44 @@
                    idioma en español y queda vacío en inglés, porque DataTables ya
                    incluye sus textos en ese idioma. *@
                 language: window.dtLang ? { url: window.dtLang } : {}
+            });
+
+            // Descarga a Excel con columnas a elegir.
+            //
+            // A las columnas comunes (_ColumnasExportacion) se les añade lo que solo
+            // existe en la ficha de miembro: el número, los diezmos y la escuela
+            // bíblica. El número va delante porque es la primera columna de la tabla.
+            ExportarTabla.configurar({
+                boton: '#btnExportarMiembros',
+                tabla: function () { return tabladata; },
+                titulo: @Json.Serialize(L["Miembros"].Value),
+                // El subtítulo deja constancia de qué se descargó: la sede y si el
+                // listado era el de activos o el de bajas.
+                subtitulo: function () {
+                    return loggedInSedeNombre + ' — ' + $('#badgeEstadoListado').text();
+                },
+                columnas: [
+                    {
+                        etiqueta: @Json.Serialize(L["Número Miembro"].Value),
+                        valor: function (f) { return formatearNumeroMiembro(f.numero_miembro); }
+                    }
+                ].concat(window.COLUMNAS_CONGREGANTE, [
+                    { etiqueta: @Json.Serialize(L["Grupo familiar"].Value),   clave: 'grupo_familiar', porDefecto: false },
+                    { etiqueta: @Json.Serialize(L["Diezmo individual"].Value), clave: 'diezmo_individual', porDefecto: false },
+                    { etiqueta: @Json.Serialize(L["Diezmo familiar"].Value),  clave: 'diezmo_familiar', porDefecto: false },
+                    {
+                        etiqueta: @Json.Serialize(L["Alumno Escuela Bíblica"].Value), porDefecto: false,
+                        valor: function (f) { return ExportarTabla.siNo(f.alumno_escuela_biblica); }
+                    },
+                    {
+                        etiqueta: @Json.Serialize(L["Curso acabado"].Value), porDefecto: false,
+                        valor: function (f) { return ExportarTabla.siNo(f.curso_acabado); }
+                    },
+                    {
+                        etiqueta: @Json.Serialize(L["Excluir directorio"].Value), porDefecto: false,
+                        valor: function (f) { return ExportarTabla.siNo(f.excluir_directorio); }
+                    }
+                ])
             });
 
             // Alternar entre el listado de activos (por defecto) y el de bajas

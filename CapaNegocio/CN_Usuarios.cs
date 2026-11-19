@@ -1,6 +1,7 @@
 ﻿using CapaDatos;
 using CapaEntidad;
 using System.Collections.Generic;
+using System.Net;
 
 namespace CapaNegocio
 {
@@ -125,8 +126,9 @@ namespace CapaNegocio
 
             if (idUsuario > 0)
             {
-                bool correoEnviado = CN_Recursos.EnviarCorreo(objDTO.correo_electronico, "Nuevo usuario",
-          $"<p>Su contraseña: {clave}</p>");
+                bool correoEnviado = CN_Recursos.EnviarCorreo(objDTO.correo_electronico,
+                    "Tu acceso a Congrega CRM",
+                    CuerpoCorreoClaveTemporal(objDTO.correo_electronico, clave, esAlta: true));
                 // La comprobación de arriba descarta casi todos los fallos, pero el envío
                 // aún puede fallar (destinatario rechazado, corte de red). Se deshace el
                 // alta para no dejar un usuario al que nadie puede entrar.
@@ -183,8 +185,63 @@ namespace CapaNegocio
 
             if (!exito) return false;
 
-            return CN_Recursos.EnviarCorreo(correo, "Contraseña reestablecida",
-                $"<p>Su nueva contraseña es: {nuevaClave}</p>");
+            return CN_Recursos.EnviarCorreo(correo,
+                "Contraseña temporal de Congrega CRM",
+                CuerpoCorreoClaveTemporal(correo, nuevaClave, esAlta: false));
+        }
+
+        /// <summary>
+        /// Cuerpo del correo que lleva una contraseña temporal, tanto en el alta de un
+        /// usuario como al recuperar el acceso.
+        /// </summary>
+        /// <param name="esAlta">true si es un usuario nuevo; false si ha pedido recuperar
+        /// la contraseña. Solo cambia la frase de entrada: los pasos son los mismos.</param>
+        /// <remarks>
+        /// Los pasos se explican uno a uno porque la aplicación pide la contraseña
+        /// temporal DOS veces (al iniciar sesión y luego en "Contraseña actual"), y sin
+        /// explicarlo la gente cree que el correo trae una contraseña equivocada.
+        /// </remarks>
+        private static string CuerpoCorreoClaveTemporal(string correo, string clave, bool esAlta)
+        {
+            string entradilla = esAlta
+                ? "Se ha creado tu usuario en <strong>Congrega CRM</strong>, la aplicación de gestión de tu iglesia."
+                : "Has pedido recuperar el acceso a <strong>Congrega CRM</strong>. Tu contraseña anterior ya no es válida.";
+
+            // El enlace solo se pone si el entorno tiene configurada su URL pública.
+            string urlLogin = CN_Recursos.UrlLogin();
+            string paso2 = string.IsNullOrEmpty(urlLogin)
+                ? "Entra en la aplicación e <strong>inicia sesión</strong> con tu correo y esa contraseña temporal."
+                : $@"Entra en <a href=""{urlLogin}"" style=""color:#1E3A8A"">{urlLogin}</a> e
+                     <strong>inicia sesión</strong> con tu correo y esa contraseña temporal.";
+
+            string contenido = $@"
+                <p>{entradilla}</p>
+                <p>Estos son tus datos de acceso:</p>
+                <p style=""background:#f3f4f6;border-left:4px solid #00BFA5;padding:12px 16px"">
+                   <strong>Usuario:</strong> {WebUtility.HtmlEncode(correo)}<br/>
+                   <strong>Contraseña temporal:</strong>
+                   <span style=""font-family:Consolas,monospace;font-size:17px;letter-spacing:1px"">{WebUtility.HtmlEncode(clave)}</span>
+                </p>
+                <p><strong>Cómo entrar por primera vez:</strong></p>
+                <ol>
+                  <li style=""margin-bottom:8px"">Copia la contraseña temporal de arriba.</li>
+                  <li style=""margin-bottom:8px"">{paso2}</li>
+                  <li style=""margin-bottom:8px"">La aplicación te llevará directamente a la pantalla
+                      <em>Cambiar contraseña</em>. Ahí escribe <strong>otra vez la contraseña temporal</strong>
+                      en el campo <em>Contraseña actual</em>, y en los dos campos siguientes
+                      (<em>Nueva contraseña</em> y <em>Confirmar nueva contraseña</em>) la contraseña que
+                      quieras usar a partir de ahora, de al menos {LongitudMinimaClave} caracteres.</li>
+                </ol>
+                <p>Al guardarla volverás a la pantalla de inicio de sesión: entra de nuevo, ya con tu
+                   contraseña nueva.</p>
+                <p style=""color:#6B7280;font-size:13px"">
+                   La contraseña temporal solo sirve para ese primer acceso y no la conoce nadie más
+                   que tú: no la compartas y no hace falta que guardes este correo cuando hayas
+                   terminado.</p>";
+
+            return CN_Recursos.ComponerCorreo(
+                esAlta ? "Bienvenido a Congrega CRM" : "Contraseña temporal",
+                contenido);
         }
     }
 }

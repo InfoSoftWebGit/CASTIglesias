@@ -1,5 +1,6 @@
 ﻿using CapaDatos;
 using CapaEntidad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -379,5 +380,43 @@ namespace CapaNegocio
         }
 
         #endregion CambiarEstados
+
+        #region Fechas conmemorativas
+
+        // Estados con pantalla propia de congregantes. El estado llega del navegador
+        // y acaba en un WHERE: se admite solo uno de estos cuatro para que no se pueda
+        // pedir un listado de un estado que no existe (o de una columna inventada).
+        private static readonly Dictionary<string, string> EstadosConListado = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Visitante"] = "Visitante",
+            ["Simpatizante"] = "Simpatizante",
+            ["Proceso"] = "Proceso",
+            ["Miembro"] = "Miembro"
+        };
+
+        /// <summary>
+        /// Fechas conmemorativas de los congregantes de un estado, ordenadas por
+        /// proximidad. Si el estado no es uno de los cuatro válidos devuelve vacío.
+        /// </summary>
+        /// <param name="dias">
+        /// Antelación máxima en días. La pantalla pide solo los días que va a mostrar
+        /// (normalmente tres) para no mandar al navegador cuatro fechas por congregante
+        /// de todo el año cada vez que se entra en el listado.
+        /// </param>
+        public List<FechaConmemorativaDTO> ListarFechasConmemorativas(int sedeID, string? estado, int dias)
+        {
+            if (estado == null || !EstadosConListado.TryGetValue(estado.Trim(), out var estadoValido))
+                return new List<FechaConmemorativaDTO>();
+
+            // El parámetro llega del navegador: se acota al año, que es el ciclo
+            // completo de cualquier fecha conmemorativa.
+            int limite = Math.Clamp(dias, 0, 366);
+
+            return _capaDatos.ListarFechasConmemorativas(sedeID, estadoValido)
+                .Where(f => f.dias_restantes <= limite)
+                .ToList();
+        }
+
+        #endregion Fechas conmemorativas
     }
 }

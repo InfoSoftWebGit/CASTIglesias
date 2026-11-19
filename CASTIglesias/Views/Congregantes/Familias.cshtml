@@ -16,8 +16,13 @@
     </div>
     <div class="table-responsive">
         <div class="row mb-3">
-            <div class="col-12">
+            <div class="col-12 d-flex justify-content-between">
                 <button data-permiso="FamiliasCrearEditar" type="button" class="btn btn-success" onclick="abrirModalFamilias()">@L["Añadir nueva familia"]</button>
+                @* Descarga del listado con las columnas que elija el usuario: la
+                   página que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+                <button type="button" class="btn btn-outline-success" id="btnExportarFamilias">
+                    <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+                </button>
             </div>
         </div>
 
@@ -266,6 +271,25 @@
                         'text-align': 'center'
                     });
                 }
+            });
+
+            // Descarga a Excel con columnas a elegir. Son los campos de la ficha de
+            // familia (ver la entidad Familia); el CP llega como "cP" porque el
+            // serializador pasa la primera letra a minúscula y el resto lo deja.
+            ExportarTabla.configurar({
+                boton: '#btnExportarFamilias',
+                tabla: function () { return tabladata; },
+                titulo: @Json.Serialize(L["Familias"].Value),
+                columnas: [
+                    { etiqueta: @Json.Serialize(L["Nombre Familia"].Value), clave: 'nombre_familia' },
+                    { etiqueta: @Json.Serialize(L["Teléfono"].Value),       clave: 'telefono_familia' },
+                    { etiqueta: @Json.Serialize(L["Dirección"].Value),      clave: 'direccion' },
+                    { etiqueta: @Json.Serialize(L["Municipio"].Value),      clave: 'municipio' },
+                    { etiqueta: @Json.Serialize(L["Provincia"].Value),      clave: 'provincia', porDefecto: false },
+                    { etiqueta: @Json.Serialize(L["CP"].Value), porDefecto: false,
+                      valor: function (f) { return f.cP != null ? f.cP : f.cp; } },
+                    { etiqueta: @Json.Serialize(L["Integrantes"].Value),    clave: 'integrantes', porDefecto: false }
+                ]
             });
 
             // Botón editar

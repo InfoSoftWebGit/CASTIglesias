@@ -1,0 +1,321 @@
+@using System.Text.Json
+@model string
+@{
+    // Estado del congregante de la pantalla que incluye este parcial: "Visitante",
+    // "Simpatizante", "Proceso" o "Miembro". Viaja al servidor en cada consulta
+    // porque la acción ListarFechasConmemorativas es la misma para las cuatro.
+    var estadoCongregante = Model;
+
+    // Traducción de los tipos de fecha. El servidor manda la clave en español (los
+    // Tipo* de FechaConmemorativaDTO) y aquí se convierte al idioma activo, igual
+    // que haría @L[...] en el HTML.
+    var tiposTraducidos = new Dictionary<string, string>
+    {
+        [CapaEntidad.FechaConmemorativaDTO.TipoCumpleanios] = L[CapaEntidad.FechaConmemorativaDTO.TipoCumpleanios].Value,
+        [CapaEntidad.FechaConmemorativaDTO.TipoBautismo] = L[CapaEntidad.FechaConmemorativaDTO.TipoBautismo].Value,
+        [CapaEntidad.FechaConmemorativaDTO.TipoBoda] = L[CapaEntidad.FechaConmemorativaDTO.TipoBoda].Value,
+        [CapaEntidad.FechaConmemorativaDTO.TipoLlegada] = L[CapaEntidad.FechaConmemorativaDTO.TipoLlegada].Value
+    };
+}
+
+@*
+    Listado de fechas conmemorativas de los congregantes (cumpleaños, aniversario de
+    bautismo, de boda y de llegada a la iglesia).
+
+    Es un parcial y no cuatro copias porque Visitantes, Simpatizantes, En proceso y
+    Miembros necesitan exactamente lo mismo cambiando solo el estado.
+
+    Se incluye al final de la vista, FUERA de .table-responsive: ese contenedor tiene
+    overflow y recortaría el modal. El botón que lo abre se pone en la cabecera de
+    cada pantalla con id="btnFechasConmemorativas".
+*@
+<div class="modal fade" id="ModalFechasConmemorativas" tabindex="-1" aria-labelledby="tituloFechasConmemorativas" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #1E3A8A;">
+                <h1 class="modal-title fs-5" id="tituloFechasConmemorativas">
+                    <i class="fas fa-calendar-day me-1"></i> @L["Fechas conmemorativas"]
+                </h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="@L["Cerrar"]"></button>
+            </div>
+
+            <div class="modal-body">
+                @* Aviso de lo que viene en los próximos días. Oculto si no hay nada. *@
+                <div class="alert alert-warning d-none" id="avisoFechasProximas" role="alert">
+                    <strong><i class="fas fa-bell me-1"></i> @L["Próximamente"]:</strong>
+                    <span id="listaFechasProximas"></span>
+                </div>
+
+                <div class="row align-items-end mb-3">
+                    <div class="col-sm-5">
+                        <label for="cboRangoFechas" class="form-label">@L["Mostrar"]</label>
+                        <select id="cboRangoFechas" class="form-select">
+                            @* El modal abre en "hoy": es lo que se celebra el día en que se consulta *@
+                            <option value="0" selected>@L["Solo hoy"]</option>
+                            <option value="7">@L["Próximos 7 días"]</option>
+                            <option value="30">@L["Próximos 30 días"]</option>
+                            <option value="365">@L["Todo el año"]</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-7 text-sm-end mt-3 mt-sm-0">
+                        <span class="text-muted small" id="resumenFechasConmemorativas"></span>
+                    </div>
+                </div>
+
+                <table id="tablaFechasConmemorativas" class="table table-bordered table-striped border-top" style="width: 100%">
+                    <thead>
+                        <tr>
+                            <th>@L["Cuándo"]</th>
+                            <th>@L["Motivo"]</th>
+                            <th>@L["Congregante"]</th>
+                            <th>@L["Años"]</th>
+                            <th>@L["Teléfono"]</th>
+                            <th>@L["Correo electrónico"]</th>
+                            <th>@L["Sede"]</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@L["Cerrar"]</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Todo va dentro de DOMContentLoaded porque este parcial se pinta en el cuerpo de
+    // la vista, antes de que el layout cargue jQuery, Bootstrap y SweetAlert al final
+    // del <body>. Para entonces ya están disponibles.
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Textos traducidos del parcial. Se amplía window.T con la misma fórmula que
+        // el layout y las vistas (nunca "const T", ver el comentario del layout).
+        window.T = Object.assign(window.T || {}, {
+            fcTipos:            @Json.Serialize(tiposTraducidos),
+            @* "Es hoy"/"Es mañana" y no "Hoy"/"Mañana": la clave "Mañana" ya existe
+               en el .resx con el sentido de turno de mañana ("Morning"). *@
+            fcHoy:              @Json.Serialize(L["Es hoy"].Value),
+            fcManiana:          @Json.Serialize(L["Es mañana"].Value),
+            fcEnDias:           @Json.Serialize(L["En {0} días"].Value),
+            fcSinHoy:           @Json.Serialize(L["Hoy no hay ninguna fecha conmemorativa."].Value),
+            fcSinNada:          @Json.Serialize(L["No hay fechas conmemorativas en el periodo elegido."].Value),
+            fcTotal:            @Json.Serialize(L["{0} fecha(s) en el periodo elegido"].Value),
+            fcAvisoTitulo:      @Json.Serialize(L["Fechas conmemorativas"].Value),
+            fcAvisoCuerpo:      @Json.Serialize(L["Hay {0} fecha(s) conmemorativa(s) en los próximos días."].Value),
+            fcErrorCargar:      @Json.Serialize(L["No se pudieron cargar las fechas conmemorativas."].Value)
+        });
+
+        // Días de antelación con los que se avisa. El aviso incluye lo de hoy.
+        const DIAS_AVISO = 3;
+
+        const estadoCongregante = @Json.Serialize(estadoCongregante);
+        const urlFechas = '@Url.Action("ListarFechasConmemorativas", "Congregantes")';
+
+        let tablaFechas = null;      // DataTable, se crea al abrir el modal por primera vez
+        let fechasCargadas = [];     // Respuesta completa del servidor, se filtra en cliente
+
+        // dd/mm a partir de la fecha ISO del servidor. Se parte la cadena en lugar de
+        // usar new Date() para que el huso horario del navegador no desplace el día.
+        function diaMes(iso) {
+            const partes = (iso || '').substring(0, 10).split('-');
+            return partes.length === 3 ? partes[2] + '/' + partes[1] : '';
+        }
+
+        function textoCuando(dias) {
+            if (dias <= 0) return T.fcHoy;
+            if (dias === 1) return T.fcManiana;
+            return T.fcEnDias.replace('{0}', dias);
+        }
+
+        // Rojo lo de hoy, naranja lo que entra en el plazo de aviso, gris el resto.
+        // Son los colores de la aplicación para urgente/atención (ver el módulo
+        // financiero): se evita el verde/rojo como única señal.
+        function colorCuando(dias) {
+            if (dias <= 0) return 'bg-danger';
+            if (dias <= DIAS_AVISO) return 'bg-warning text-dark';
+            return 'bg-secondary';
+        }
+
+        function escapar(texto) {
+            return $('<div>').text(texto === null || texto === undefined ? '' : texto).html();
+        }
+
+        function nombreCompleto(f) {
+            return ((f.nombre_miembro || '') + ' ' + (f.apellidos_miembro || '')).trim();
+        }
+
+        function tipoTraducido(tipo) {
+            return (T.fcTipos && T.fcTipos[tipo]) ? T.fcTipos[tipo] : (tipo || '');
+        }
+
+        // Pinta la tabla con las filas que caen dentro del rango elegido
+        function pintarFechas() {
+            if (!tablaFechas) return;
+
+            const limite = parseInt($('#cboRangoFechas').val() || '0', 10);
+            const filas = fechasCargadas.filter(f => f.dias_restantes <= limite);
+
+            // Mensaje de tabla vacía: distinto si se está mirando solo el día de hoy.
+            // Se cambia ANTES del draw, que es cuando DataTables lo lee.
+            tablaFechas.settings()[0].oLanguage.sZeroRecords = limite === 0 ? T.fcSinHoy : T.fcSinNada;
+
+            tablaFechas.clear();
+            tablaFechas.rows.add(filas).draw();
+
+            $('#resumenFechasConmemorativas').text(T.fcTotal.replace('{0}', filas.length));
+        }
+
+        // Aviso de los próximos días: panel dentro del modal, contador en el botón y
+        // notificación flotante al entrar en la pantalla.
+        function pintarAviso() {
+            const proximas = fechasCargadas.filter(f => f.dias_restantes <= DIAS_AVISO);
+
+            // Contador en el botón que abre el modal
+            const badge = $('#badgeFechasProximas');
+            if (proximas.length > 0) {
+                badge.text(proximas.length).show();
+            } else {
+                badge.hide();
+            }
+
+            const aviso = $('#avisoFechasProximas');
+            if (proximas.length === 0) {
+                aviso.addClass('d-none');
+                $('#listaFechasProximas').empty();
+                return;
+            }
+
+            // Se listan como máximo cinco para que el panel no crezca sin control;
+            // el resto se ve en la tabla cambiando el rango a "Próximos 7 días".
+            const resumen = proximas.slice(0, 5).map(f =>
+                escapar(nombreCompleto(f)) + ' — ' + escapar(tipoTraducido(f.tipo)) +
+                ' (' + escapar(textoCuando(f.dias_restantes)) + ')'
+            ).join('; ');
+
+            $('#listaFechasProximas').html(resumen + (proximas.length > 5 ? '…' : ''));
+            aviso.removeClass('d-none');
+
+            notificarUnaVez(proximas.length);
+        }
+
+        // Notificación flotante al cargar la pantalla. Se muestra una sola vez por
+        // sesión y día: si saltara en cada recarga acabaría siendo ruido que se ignora.
+        function notificarUnaVez(cuantas) {
+            const clave = 'fcAvisado:' + estadoCongregante + ':' + new Date().toDateString();
+            try {
+                if (sessionStorage.getItem(clave)) return;
+                sessionStorage.setItem(clave, '1');
+            } catch (e) {
+                // Navegador con el almacenamiento bloqueado: se avisa igualmente
+            }
+
+            if (typeof Swal === 'undefined') return;
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'info',
+                title: T.fcAvisoTitulo,
+                text: T.fcAvisoCuerpo.replace('{0}', cuantas),
+                showConfirmButton: false,
+                timer: 6000,
+                timerProgressBar: true
+            });
+        }
+
+        // Consulta al servidor. Alimenta a la vez el aviso de los próximos días y la
+        // tabla del modal, así que se piden siempre al menos los días del aviso: con
+        // el rango en "solo hoy" el panel de "Próximamente" seguiría necesitándolos.
+        function cargarFechas(dias, alTerminar) {
+            $.ajax({
+                url: urlFechas,
+                type: 'GET',
+                data: { estado: estadoCongregante, dias: Math.max(dias || 0, DIAS_AVISO) },
+                success: function (res) {
+                    if (res.error) {
+                        console.error(res.mensaje);
+                        return;
+                    }
+                    fechasCargadas = res.data || [];
+                    pintarAviso();
+                    if (typeof alTerminar === 'function') alTerminar();
+                },
+                error: function () {
+                    console.error(T.fcErrorCargar);
+                }
+            });
+        }
+
+        function crearTabla() {
+            if (tablaFechas) return;
+
+            tablaFechas = $('#tablaFechasConmemorativas').DataTable({
+                responsive: true,
+                // El servidor ya devuelve las filas ordenadas por proximidad
+                ordering: false,
+                data: [],
+                columns: [
+                    {
+                        data: null,
+                        render: function (fila) {
+                            return '<span class="badge ' + colorCuando(fila.dias_restantes) + '">' +
+                                   escapar(textoCuando(fila.dias_restantes)) + '</span> ' +
+                                   '<span class="text-muted small">' + diaMes(fila.proxima_celebracion) + '</span>';
+                        }
+                    },
+                    {
+                        data: 'tipo',
+                        render: function (valor) { return escapar(tipoTraducido(valor)); }
+                    },
+                    {
+                        data: null,
+                        render: function (fila) { return escapar(nombreCompleto(fila)); }
+                    },
+                    {
+                        data: 'aniversario',
+                        className: 'text-center',
+                        render: function (valor) { return valor === null || valor === undefined ? '—' : valor; }
+                    },
+                    {
+                        data: 'telefono_movil',
+                        render: function (valor) { return escapar(valor) || '—'; }
+                    },
+                    {
+                        data: 'correo_electronico',
+                        render: function (valor) { return escapar(valor) || '—'; }
+                    },
+                    {
+                        data: 'nombre_sede',
+                        render: function (valor) { return escapar(valor); }
+                    }
+                ],
+                language: window.dtLang ? { url: window.dtLang } : {}
+            });
+        }
+
+        // Cambiar el rango obliga a volver al servidor: lo que hay en memoria solo
+        // llega hasta el rango que se pidió la última vez.
+        $('#cboRangoFechas').on('change', function () {
+            cargarFechas(parseInt($(this).val() || '0', 10), pintarFechas);
+        });
+
+        $('#btnFechasConmemorativas').on('click', function () {
+            crearTabla();
+
+            // Se vuelve a consultar al abrir para que el listado no se quede obsoleto
+            // si la pestaña lleva horas abierta y ha cambiado el día.
+            $('#cboRangoFechas').val('0');
+            cargarFechas(0, pintarFechas);
+
+            // getOrCreateInstance y no "new": abrir y cerrar varias veces no debe
+            // dejar una instancia de Bootstrap por cada clic.
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('ModalFechasConmemorativas')).show();
+        });
+
+        // Al entrar en la pantalla solo se calcula el aviso; la tabla se crea al abrir
+        cargarFechas(0);
+    });
+</script>

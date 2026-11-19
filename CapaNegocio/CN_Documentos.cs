@@ -79,7 +79,7 @@ namespace CapaNegocio
         /// para calcular su huella y mirar su firma. Con el tope de 10 MB eso no es un
         /// problema de memoria, y evita escribir en disco algo que luego se rechaza.
         /// </remarks>
-        public ResultadoSubidaDTO Comprobar(byte[] contenido, string nombreOriginal)
+        public ResultadoSubidaDTO Comprobar(byte[] contenido, string nombreOriginal, int idIglesia)
         {
             var r = new ResultadoSubidaDTO();
 
@@ -117,7 +117,18 @@ namespace CapaNegocio
 
             // El nombre en disco lo pone el programa. La extensión se conserva para
             // que el navegador sepa qué hacer al descargarlo.
-            r.clave_almacen = $"{DateTime.UtcNow:yyyyMM}/{Guid.NewGuid():N}{extension}";
+            //
+            // La primera carpeta es la iglesia y no un detalle de orden: es lo que
+            // permite llevarse, copiar o borrar los justificantes de UN cliente sin
+            // tocar los de los demás. Hace falta para el backup por iglesia, para
+            // entregarle sus datos si los pide y para borrarlos si se va. Con todos
+            // los ficheros mezclados en una sola carpeta eso solo se podría hacer
+            // consultando la base de datos fichero a fichero.
+            //
+            // Dentro va el año-mes para que ninguna carpeta llegue a tener decenas de
+            // miles de ficheros, que es donde el explorador de Windows y las copias de
+            // seguridad empiezan a ir mal.
+            r.clave_almacen = $"{idIglesia}/{DateTime.UtcNow:yyyyMM}/{Guid.NewGuid():N}{extension}";
             r.correcto = true;
             r.mensaje = huella;   // el controlador lo necesita para guardarlo
             return r;

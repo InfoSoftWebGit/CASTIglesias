@@ -1,0 +1,58 @@
+@*
+    Columnas exportables comunes a las cuatro pantallas de congregantes
+    (Visitantes, Simpatizantes, En proceso y Miembros).
+
+    Está en un parcial y no repetido en cada vista porque las cuatro listan el
+    mismo MiembroDetalleDTO: así una columna nueva en la ficha se añade en un solo
+    sitio y aparece en los cuatro listados.
+
+    Se incluye DENTRO de @@section scripts, nunca en el cuerpo de la vista: el
+    layout carga jQuery y exportar-tabla.js al final de la página, y aquí se usa
+    ExportarTabla.
+
+    Cada vista parte de esta lista y le añade lo suyo (el número de miembro, los
+    diezmos...), porque no todos los listados traen los mismos campos.
+    Ver wwwroot/js/exportar-tabla.js para el formato de cada entrada.
+*@
+<script>
+    // "porDefecto: false" = la columna se ofrece pero llega desmarcada. Se usa con
+    // todo lo que está en la ficha pero no en la tabla: así la descarga de un clic
+    // se parece a lo que el usuario tiene delante, y quien necesite más lo marca.
+    window.COLUMNAS_CONGREGANTE = [
+        { etiqueta: @Json.Serialize(L["Nombre"].Value),              clave: 'nombre_miembro' },
+        { etiqueta: @Json.Serialize(L["Apellidos"].Value),           clave: 'apellidos_miembro' },
+        { etiqueta: @Json.Serialize(L["Correo electrónico"].Value),  clave: 'correo_electronico' },
+        { etiqueta: @Json.Serialize(L["Teléfono móvil"].Value),      clave: 'telefono_movil' },
+        { etiqueta: @Json.Serialize(L["Teléfono fijo"].Value),       clave: 'telefono_fijo', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Edad"].Value),                clave: 'edad' },
+        // El valor guardado sigue siendo "Hombre"/"Mujer"; tDato solo lo traduce.
+        { etiqueta: @Json.Serialize(L["Sexo"].Value),                valor: function (f) { return window.tDato(f.sexo); } },
+        { etiqueta: @Json.Serialize(L["Sede"].Value),                clave: 'nombre_sede' },
+        { etiqueta: @Json.Serialize(L["Estado civil"].Value),        clave: 'estado_Civil', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["País de nacimiento"].Value),  clave: 'pais_nacimiento', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Dirección"].Value),           clave: 'direccion', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Municipio"].Value),           clave: 'nombre_Municipio', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Provincia"].Value),           clave: 'nombre_Provincia', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Código Postal"].Value),       clave: 'codigo_Postal', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Fecha de Llegada a la Iglesia"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.fecha(f.fecha_llegada_iglesia); } },
+        { etiqueta: @Json.Serialize(L["Fecha de Cumpleaños"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.fecha(f.fecha_cumpleanios); } },
+        { etiqueta: @Json.Serialize(L["Fecha de Boda"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.fecha(f.fecha_boda); } },
+        { etiqueta: @Json.Serialize(L["Bautizado"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.siNo(f.bautizado); } },
+        { etiqueta: @Json.Serialize(L["Fecha de Bautismo"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.fecha(f.fecha_bautismo); } },
+        { etiqueta: @Json.Serialize(L["Lugar de bautismo"].Value),   clave: 'lugar_bautismo', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Número de hijos"].Value),     clave: 'numero_hijos', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Observaciones"].Value),       clave: 'observaciones', porDefecto: false },
+        { etiqueta: @Json.Serialize(L["Acepta la Ley Orgánica de Protección de Datos (LOPD)"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.siNo(f.acepta_LOPD); } },
+        // miembro_activo se guarda como "Si"/"No", no como booleano
+        { etiqueta: @Json.Serialize(L["Activo"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.siNo(f.miembro_activo); } },
+        { etiqueta: @Json.Serialize(L["Fecha de Baja (Retiro)"].Value), porDefecto: false,
+          valor: function (f) { return ExportarTabla.fecha(f.fecha_baja); } }
+    ];
+</script>

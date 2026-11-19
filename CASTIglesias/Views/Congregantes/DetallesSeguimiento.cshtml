@@ -83,13 +83,31 @@
                 </button>
             </div>
         </div>
+
+        @* El reparto completo del seguimiento: todos los encargados con sus
+           personas a cargo, sin paginar. No depende del miembro que se busque
+           arriba, porque sirve para revisar y repartir el seguimiento entero. *@
+        <hr />
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span class="text-muted small">
+                @L["Consulta el reparto del seguimiento para revisarlo o compartirlo con cada encargado."]
+            </span>
+            <button type="button" class="btn btn-outline-primary" id="btnVerEncargados">
+                <i class="fas fa-user-shield me-1"></i> @L["Encargados y personas a cargo"]
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- TABLA DE DETALLES -->
 <div class="card">
-    <div class="card-header" style="background-color: #1E3A8A; color:white;">
-        <i class="fas fa-user me-1"></i> <span id="lblMiembroSeleccionado">@L["Ningún miembro seleccionado"]</span>
+    <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #1E3A8A; color:white;">
+        <span><i class="fas fa-user me-1"></i> <span id="lblMiembroSeleccionado">@L["Ningún miembro seleccionado"]</span></span>
+        @* Descarga del historial del miembro con las columnas que elija el usuario
+           (ver wwwroot/js/exportar-tabla.js). *@
+        <button type="button" class="btn btn-outline-light btn-sm" id="btnExportarDetalles" style="display:none;">
+            <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+        </button>
     </div>
     <div class="table-responsive p-3">
         <div id="mensajeSinMiembro" class="text-center text-muted py-4">
@@ -113,6 +131,9 @@
 @section Scripts {
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+@* Informe de encargados y personas a cargo (modal, Excel e impresión) *@
+@await Html.PartialAsync("_Encargados")
 
 <script>
     var tablaDetalles;
@@ -158,6 +179,38 @@
             },
             responsive: true,
             order: [[1, 'desc']]
+        });
+
+        // Descarga a Excel del historial del miembro con columnas a elegir. El
+        // subtítulo lleva el miembro y el periodo consultado para que el fichero no
+        // quede sin contexto una vez descargado.
+        ExportarTabla.configurar({
+            boton: '#btnExportarDetalles',
+            tabla: function () { return tablaDetalles; },
+            titulo: @Json.Serialize(L["Detalle de seguimiento"].Value),
+            // Aquí sí se ofrece imprimir: el historial de un miembro es corto y se
+            // suele querer en papel o en PDF para hablarlo con el encargado.
+            pdf: true,
+            subtitulo: function () {
+                var fechas = obtenerFechasFiltro();
+                var periodo = [fechas.desde, fechas.hasta].filter(function (f) { return f; })
+                    .map(function (f) { return ExportarTabla.fecha(f); }).join(' – ');
+                return [$('#lblMiembroSeleccionado').text(), periodo]
+                    .filter(function (t) { return t; }).join(' · ');
+            },
+            columnas: [
+                // El valor guardado es "Consejeria" sin tilde; se traduce al pintar
+                { etiqueta: @Json.Serialize(L["Tipo"].Value),
+                  valor: function (f) {
+                      return f.tipo_seguimiento === 'Consejeria'
+                          ? @Json.Serialize(L["Consejería"].Value)
+                          : f.tipo_seguimiento;
+                  } },
+                { etiqueta: @Json.Serialize(L["Fecha"].Value),
+                  valor: function (f) { return ExportarTabla.fecha(f.fecha); } },
+                { etiqueta: @Json.Serialize(L["Persona a cargo"].Value), clave: 'persona_cargo' },
+                { etiqueta: @Json.Serialize(L["Observaciones"].Value),   clave: 'observaciones' }
+            ]
         });
     });
 
@@ -239,6 +292,8 @@
         $('#lblMiembroSeleccionado').text(nombreCompleto || 'Miembro seleccionado');
         $('#mensajeSinMiembro').hide();
         $('#tablaDetalles').show();
+        // El botón de descarga solo tiene sentido con un miembro ya buscado
+        $('#btnExportarDetalles').show();
 
         $.ajax({
             url: '@Url.Action("ListarDetallesSeguimiento", "Congregantes")',

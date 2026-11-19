@@ -74,7 +74,11 @@ namespace CASTIglesias.Controllers
                 contenido = memoria.ToArray();
             }
 
-            var comprobacion = _negocioDocumentos.Comprobar(contenido, fichero.FileName);
+            // La iglesia se pasa porque decide en qué carpeta se escribe el fichero.
+            // Se toma de la sesión, nunca de la petición: si llegara desde el
+            // formulario, cualquiera podría escribir en la carpeta de otro cliente.
+            var comprobacion = _negocioDocumentos.Comprobar(contenido, fichero.FileName,
+                                                            SesionClaims.ObtenerIdIglesia(User));
             if (!comprobacion.correcto)
                 return Json(new { resultado = false, mensaje = comprobacion.mensaje });
 

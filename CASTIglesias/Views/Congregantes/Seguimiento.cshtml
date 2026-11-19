@@ -44,10 +44,22 @@
 
     <div class="table-responsive p-3">
         <div class="row mb-2">
-            <div class="col-12">
+            <div class="col-12 d-flex justify-content-between flex-wrap gap-2">
                 <button data-permiso="MiembrosCrearEditar" type="button" class="btn btn-success" onclick="abrirModal(null)">
                     <i class="fas fa-plus me-1"></i> @L["Nuevo seguimiento"]
                 </button>
+                <div>
+                    @* El reparto completo (todos los encargados con sus personas),
+                       sin paginar: es lo que se comparte con cada encargado. *@
+                    <button type="button" class="btn btn-outline-primary me-2" id="btnVerEncargados">
+                        <i class="fas fa-user-shield me-1"></i> @L["Encargados y personas a cargo"]
+                    </button>
+                    @* Descarga del listado con las columnas que elija el usuario: la
+                       página que se está viendo (ver wwwroot/js/exportar-tabla.js). *@
+                    <button type="button" class="btn btn-outline-success" id="btnExportarSeguimientos">
+                        <i class="fas fa-file-excel me-1"></i> @L["Exportar a Excel"]
+                    </button>
+                </div>
             </div>
         </div>
         <hr />
@@ -145,6 +157,9 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
+@* Informe de encargados y personas a cargo (modal, Excel e impresión) *@
+@await Html.PartialAsync("_Encargados")
+
 <script>
     var tablaSeguimiento;
 
@@ -199,6 +214,34 @@
             ],
             language: window.dtLang ? { url: window.dtLang } : {},
             responsive: true
+        });
+
+        // Descarga a Excel con columnas a elegir. El nombre del miembro se ofrece
+        // junto y por separado: junto para leerlo, separado para poder ordenar por
+        // apellidos en la hoja de cálculo.
+        ExportarTabla.configurar({
+            boton: '#btnExportarSeguimientos',
+            tabla: function () { return tablaSeguimiento; },
+            titulo: @Json.Serialize(L["Seguimiento de congregantes"].Value),
+            columnas: [
+                { etiqueta: @Json.Serialize(L["Miembro"].Value),
+                  valor: function (f) {
+                      return ((f.nombre_miembro || '') + ' ' + (f.apellidos_miembro || '')).trim();
+                  } },
+                { etiqueta: @Json.Serialize(L["Nombre"].Value),    clave: 'nombre_miembro', porDefecto: false },
+                { etiqueta: @Json.Serialize(L["Apellidos"].Value), clave: 'apellidos_miembro', porDefecto: false },
+                // El valor guardado es "Consejeria" sin tilde; se traduce al pintar
+                { etiqueta: @Json.Serialize(L["Tipo"].Value),
+                  valor: function (f) {
+                      return f.tipo_seguimiento === 'Consejeria'
+                          ? @Json.Serialize(L["Consejería"].Value)
+                          : f.tipo_seguimiento;
+                  } },
+                { etiqueta: @Json.Serialize(L["Fecha"].Value),
+                  valor: function (f) { return ExportarTabla.fecha(f.fecha_seguimiento); } },
+                { etiqueta: @Json.Serialize(L["Persona a cargo"].Value), clave: 'persona_cargo' },
+                { etiqueta: @Json.Serialize(L["Observaciones"].Value),   clave: 'observaciones' }
+            ]
         });
     });
 
