@@ -1,3 +1,4 @@
+@using CASTIglesias.Controllers
 @*
     Menú lateral del área financiera.
 
@@ -9,168 +10,101 @@
     apuntando a #sidenavAccordion, que es lo que hace que al abrir un grupo
     se cierre el anterior.
 
-    Las entradas marcadas como "Pronto" se irán activando conforme lleguen los
-    bloques siguientes (maestros, asistente, operaciones). Se dejan a la vista,
-    y deshabilitadas, para que se entienda qué trae el área; una entrada que
-    lleva a una página en blanco parece un fallo.
+    Cada enlace solo se pinta si el usuario tiene el permiso de esa pantalla
+    (AreaFinancieraController.PermisoPorPantalla, el mismo mapa con el que el
+    servidor corta el paso). Un grupo sin ninguna pantalla visible no se pinta.
+    Los roles con acceso total reciben todos los permisos a true en la sesión,
+    así que a ellos les aparece todo.
 *@
+@{
+    var permisosFin = ViewBag.PermisosMiembro as CapaEntidad.Permisos ?? new CapaEntidad.Permisos();
+
+    bool PuedeVer(string controlador, string accion)
+    {
+        var permiso = AreaFinancieraController.ObtenerPermisoDePantalla(controlador, accion);
+        return permiso == null || CASTIglesias.Filters.RequierePermisoAttribute.TieneAlguno(permisosFin, permiso);
+    }
+
+    // (texto, icono, acción, controlador)
+    var grupos = new[]
+    {
+        new {
+            Id = "collapseFinOperaciones", Titulo = "Operaciones", Icono = "fa-right-left",
+            Enlaces = new[] {
+                (Texto: "Ingresos y aportaciones",   Icono: "fa-hand-holding-heart", Accion: "Ingresos", Controlador: "FinanzasOperaciones"),
+                (Texto: "Gastos",                    Icono: "fa-receipt",            Accion: "Gastos",   Controlador: "FinanzasOperaciones"),
+                (Texto: "Transferencias entre sedes",Icono: "fa-right-left",         Accion: "Index",    Controlador: "FinanzasTransferencias"),
+                (Texto: "Facturas y pagos",          Icono: "fa-file-invoice",       Accion: "Index",    Controlador: "FinanzasPagos"),
+                (Texto: "Arqueos de caja",           Icono: "fa-calculator",         Accion: "Index",    Controlador: "FinanzasArqueos"),
+            }
+        },
+        new {
+            Id = "collapseFinContabilidad", Titulo = "Contabilidad", Icono = "fa-book",
+            Enlaces = new[] {
+                (Texto: "Libro Diario",          Icono: "fa-book-open",       Accion: "Index",        Controlador: "FinanzasDiario"),
+                (Texto: "Libro Mayor",           Icono: "fa-list-ol",         Accion: "Mayor",        Controlador: "FinanzasInformes"),
+                (Texto: "Sumas y saldos",        Icono: "fa-scale-balanced",  Accion: "SumasYSaldos", Controlador: "FinanzasInformes"),
+                (Texto: "Balance de Situación",  Icono: "fa-building-columns",Accion: "Balance",      Controlador: "FinanzasInformes"),
+                (Texto: "Cuenta de Resultados",  Icono: "fa-chart-line",      Accion: "Resultados",   Controlador: "FinanzasInformes"),
+                (Texto: "Cierre del ejercicio",  Icono: "fa-flag-checkered",  Accion: "Cierre",       Controlador: "FinanzasInformes"),
+            }
+        },
+        new {
+            Id = "collapseFinGestion", Titulo = "Gestión", Icono = "fa-chart-pie",
+            Enlaces = new[] {
+                (Texto: "Presupuestos",                 Icono: "fa-chart-pie",     Accion: "Index", Controlador: "FinanzasPresupuestos"),
+                (Texto: "Certificados de aportaciones", Icono: "fa-file-lines",    Accion: "Index", Controlador: "FinanzasCertificados"),
+                (Texto: "Aprobaciones",                 Icono: "fa-user-check",    Accion: "Index", Controlador: "FinanzasAprobaciones"),
+                (Texto: "Conciliación bancaria",        Icono: "fa-code-compare",  Accion: "Index", Controlador: "FinanzasConciliacion"),
+                (Texto: "Auditoría",                    Icono: "fa-clipboard-list",Accion: "Index", Controlador: "FinanzasAuditoria"),
+            }
+        },
+        new {
+            Id = "collapseFinConfiguracion", Titulo = "Configuración", Icono = "fa-sliders",
+            Enlaces = new[] {
+                (Texto: "Conceptos",                    Icono: "fa-tags",            Accion: "Index", Controlador: "FinanzasConceptos"),
+                (Texto: "Cajas y bancos",               Icono: "fa-cash-register",   Accion: "Index", Controlador: "FinanzasTesoreria"),
+                (Texto: "Fondos",                       Icono: "fa-piggy-bank",      Accion: "Index", Controlador: "FinanzasFondos"),
+                (Texto: "Plan de cuentas",              Icono: "fa-sitemap",         Accion: "Index", Controlador: "FinanzasPlanCuentas"),
+                (Texto: "Plantillas del plan contable", Icono: "fa-layer-group",     Accion: "Index", Controlador: "FinanzasPlantillas"),
+                (Texto: "Ejercicios y periodos",        Icono: "fa-calendar-check",  Accion: "Index", Controlador: "FinanzasEjercicios"),
+                (Texto: "Terceros",                     Icono: "fa-address-book",    Accion: "Index", Controlador: "FinanzasTerceros"),
+                (Texto: "Proyectos y actividades",      Icono: "fa-diagram-project", Accion: "Index", Controlador: "FinanzasProyectos"),
+                (Texto: "Reglas de contabilización",    Icono: "fa-code-branch",     Accion: "Index", Controlador: "FinanzasReglas"),
+                (Texto: "Numeración de documentos",     Icono: "fa-hashtag",         Accion: "Index", Controlador: "FinanzasNumeraciones"),
+                (Texto: "Puesta en marcha",             Icono: "fa-flag-checkered",  Accion: "Index", Controlador: "FinanzasApertura"),
+            }
+        },
+    };
+}
 
                         <a class="nav-link" href="@Url.Action("Index", "Finanzas")">
                             <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
                             @L["Panel financiero"]
                         </a>
 
-                        <!-- BLOQUE OPERACIONES -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinOperaciones" aria-expanded="false">
-                            <div class="sb-nav-link-icon"><i class="fas fa-right-left"></i></div>
-                            @L["Operaciones"]
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseFinOperaciones" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Ingresos", "FinanzasOperaciones")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                                    @L["Ingresos y aportaciones"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Gastos", "FinanzasOperaciones")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-receipt"></i></div>
-                                    @L["Gastos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTransferencias")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-right-left"></i></div>
-                                    @L["Transferencias entre sedes"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPagos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-file-invoice"></i></div>
-                                    @L["Facturas y pagos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasArqueos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-calculator"></i></div>
-                                    @L["Arqueos de caja"]
-                                </a>
-                            </nav>
-                        </div>
+                        @foreach (var grupo in grupos)
+                        {
+                            var visibles = grupo.Enlaces.Where(e => PuedeVer(e.Controlador, e.Accion)).ToList();
+                            if (visibles.Count == 0) { continue; }
 
-                        <!-- BLOQUE CONTABILIDAD -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinContabilidad" aria-expanded="false">
-                            <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
-                            @L["Contabilidad"]
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseFinContabilidad" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasDiario")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                                    @L["Libro Diario"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Mayor", "FinanzasInformes")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-list-ol"></i></div>
-                                    @L["Libro Mayor"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("SumasYSaldos", "FinanzasInformes")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-scale-balanced"></i></div>
-                                    @L["Sumas y saldos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Balance", "FinanzasInformes")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-building-columns"></i></div>
-                                    @L["Balance de Situación"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Resultados", "FinanzasInformes")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-line"></i></div>
-                                    @L["Cuenta de Resultados"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Cierre", "FinanzasInformes")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-flag-checkered"></i></div>
-                                    @L["Cierre del ejercicio"]
-                                </a>
-                            </nav>
-                        </div>
-
-                        <!-- BLOQUE GESTIÓN -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinGestion" aria-expanded="false">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
-                            @L["Gestión"]
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseFinGestion" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPresupuestos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></div>
-                                    @L["Presupuestos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasCertificados")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-file-lines"></i></div>
-                                    @L["Certificados de aportaciones"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasAprobaciones")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
-                                    @L["Aprobaciones"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasConciliacion")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-code-compare"></i></div>
-                                    @L["Conciliación bancaria"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasAuditoria")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
-                                    @L["Auditoría"]
-                                </a>
-                            </nav>
-                        </div>
-
-                        <!-- BLOQUE CONFIGURACIÓN -->
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseFinConfiguracion" aria-expanded="false">
-                            <div class="sb-nav-link-icon"><i class="fas fa-sliders"></i></div>
-                            @L["Configuración"]
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseFinConfiguracion" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasConceptos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-tags"></i></div>
-                                    @L["Conceptos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTesoreria")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-cash-register"></i></div>
-                                    @L["Cajas y bancos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasFondos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-piggy-bank"></i></div>
-                                    @L["Fondos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPlanCuentas")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-sitemap"></i></div>
-                                    @L["Plan de cuentas"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasPlantillas")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></div>
-                                    @L["Plantillas del plan contable"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasEjercicios")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
-                                    @L["Ejercicios y periodos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasTerceros")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-address-book"></i></div>
-                                    @L["Terceros"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasProyectos")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-diagram-project"></i></div>
-                                    @L["Proyectos y actividades"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasReglas")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-code-branch"></i></div>
-                                    @L["Reglas de contabilización"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasNumeraciones")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-hashtag"></i></div>
-                                    @L["Numeración de documentos"]
-                                </a>
-                                <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "FinanzasApertura")">
-                                    <div class="sb-nav-link-icon"><i class="fas fa-flag-checkered"></i></div>
-                                    @L["Puesta en marcha"]
-                                </a>
-                            </nav>
-                        </div>
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#@grupo.Id" aria-expanded="false">
+                                <div class="sb-nav-link-icon"><i class="fas @grupo.Icono"></i></div>
+                                @L[grupo.Titulo]
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down nav-link-collapse-icon"></i></div>
+                            </a>
+                            <div class="collapse" id="@grupo.Id" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    @foreach (var enlace in visibles)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action(enlace.Accion, enlace.Controlador)">
+                                            <div class="sb-nav-link-icon"><i class="fas @enlace.Icono"></i></div>
+                                            @L[enlace.Texto]
+                                        </a>
+                                    }
+                                </nav>
+                            </div>
+                        }
 
                         @* Salida del área. Va al final y separada, para que no se
                            confunda con una pantalla más del menú. *@

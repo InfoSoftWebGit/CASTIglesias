@@ -52,11 +52,11 @@ namespace CASTIglesias.Controllers
             {
                 ViewBag.ConjuntoID = conjunto.id;
                 ViewBag.TieneAsientos = _negocioReglas.TieneAsientos(conjunto.id);
-                return View(_negocioReglas.ListarReglas(conjunto.id));
+                return View("~/Views/Finanzas/FinanzasReglas.cshtml", _negocioReglas.ListarReglas(conjunto.id));
             }
 
             ViewBag.TieneAsientos = false;
-            return View(new List<CapaDatos.CD_ReglasContabilizacion.ReglaDTO>());
+            return View("~/Views/Finanzas/FinanzasReglas.cshtml", new List<CapaDatos.CD_ReglasContabilizacion.ReglaDTO>());
         }
 
         /// <summary>

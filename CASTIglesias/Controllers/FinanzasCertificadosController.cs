@@ -73,7 +73,7 @@ namespace CASTIglesias.Controllers
             ViewBag.Anios = anios;
             ViewBag.Anio = elegido;
 
-            return View(_negocioCertificados.ResumenDelAnio(elegido, FiltroSede()));
+            return View("~/Views/Finanzas/FinanzasCertificados.cshtml", _negocioCertificados.ResumenDelAnio(elegido, FiltroSede()));
         }
 
         /// <summary>El certificado de una persona, listo para imprimir.</summary>
@@ -82,7 +82,7 @@ namespace CASTIglesias.Controllers
             var certificado = _negocioCertificados.Certificado(idTercero, anio, FiltroSede());
             if (certificado == null) return RedirectToAction("Index", new { anio });
 
-            return View(certificado);
+            return View("~/Views/Finanzas/Certificado.cshtml", certificado);
         }
     }
 }

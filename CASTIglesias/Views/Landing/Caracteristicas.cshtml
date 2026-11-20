@@ -1,0 +1,16 @@
+@* Página independiente /caracteristicas. Mismo contenido que la sección de la
+   landing (vista general + módulos en detalle), con dirección propia para que
+   el buscador la indexe y se pueda escribir a mano. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "caracteristicas";
+    ViewData["RutaCanonica"] = "caracteristicas";
+    ViewData["Title"] = L["Características — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Características"].Value;
+    ViewData["Descripcion"] = L["Todas las funciones de Congrega CRM para gestionar tu iglesia: miembros, grupos, ministerios, asistencia, seguimiento pastoral y finanzas."].Value;
+}
+<partial name="_CabeceraPagina" />
+
+<partial name="_SeccionCaracteristicas" />
+
+<partial name="_SeccionModulos" />

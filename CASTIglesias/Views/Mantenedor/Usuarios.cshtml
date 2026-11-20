@@ -213,6 +213,24 @@
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkNinosEliminar" disabled></td>
                                         </tr>
                                         <tr>
+                                            <td>@L["Líderes"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkLideres" data-modulo="Lideres"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkLideresCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkLideresEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Seguimiento"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkSeguimiento" data-modulo="Seguimiento"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkSeguimientoCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkSeguimientoEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Detalle de seguimiento"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkDetalleSeguimiento" data-modulo="DetalleSeguimiento"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkDetalleSeguimientoCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkDetalleSeguimientoEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
                                             <td>@L["Grupos"]</td>
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkGrupos" data-modulo="Grupos"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkGruposCrearEditar" disabled></td>
@@ -253,6 +271,30 @@
                                             <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkAsistencia" data-modulo="Asistencia"></td>
                                             <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkAsistenciaCrearEditar" disabled></td>
                                             <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkAsistenciaEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Cultos y Servicios"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkCultos" data-modulo="Cultos"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkCultosCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkCultosEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Calendario de Servicios"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkCalendario" data-modulo="Calendario"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkCalendarioCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkCalendarioEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Calendario Anual"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkCalendarioAnual" data-modulo="CalendarioAnual"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkCalendarioAnualCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkCalendarioAnualEliminar" disabled></td>
+                                        </tr>
+                                        <tr>
+                                            <td>@L["Salas"]</td>
+                                            <td class="text-center"><input class="form-check-input check-ver" type="checkbox" id="chkSalas" data-modulo="Salas"></td>
+                                            <td class="text-center"><input class="form-check-input check-crear" type="checkbox" id="chkSalasCrearEditar" disabled></td>
+                                            <td class="text-center"><input class="form-check-input check-eliminar" type="checkbox" id="chkSalasEliminar" disabled></td>
                                         </tr>
                                         <tr>
                                             <td>@L["Configuración de la aplicación"]</td>
@@ -344,6 +386,74 @@
                                                        id="chkFinanzasDonantes" data-permiso="FinanzasDonantes">
                                             </td>
                                         </tr>
+                                    </tbody>
+                                </table>
+
+                                @* Pantallas del área financiera que puede abrir. Solo abren la
+                                   pantalla: lo que se puede hacer dentro lo deciden las casillas
+                                   de arriba. Necesitan además "Entrar al área financiera". El
+                                   servidor las comprueba en AreaFinancieraController. *@
+                                @{
+                                    var pantallasFinanzas = new[]
+                                    {
+                                        (Grupo: "Operaciones", Pantallas: new[] {
+                                            ("FinanzasVerIngresos", "Ingresos y aportaciones"),
+                                            ("FinanzasVerGastos", "Gastos"),
+                                            ("FinanzasVerTransferencias", "Transferencias entre sedes"),
+                                            ("FinanzasVerPagos", "Facturas y pagos"),
+                                            ("FinanzasVerArqueos", "Arqueos de caja") }),
+                                        (Grupo: "Contabilidad", Pantallas: new[] {
+                                            ("FinanzasVerDiario", "Libro Diario"),
+                                            ("FinanzasVerMayor", "Libro Mayor"),
+                                            ("FinanzasVerSumasYSaldos", "Sumas y saldos"),
+                                            ("FinanzasVerBalance", "Balance de Situación"),
+                                            ("FinanzasVerResultados", "Cuenta de Resultados"),
+                                            ("FinanzasVerCierre", "Cierre del ejercicio") }),
+                                        (Grupo: "Gestión", Pantallas: new[] {
+                                            ("FinanzasVerPresupuestos", "Presupuestos"),
+                                            ("FinanzasVerCertificados", "Certificados de aportaciones"),
+                                            ("FinanzasVerAprobaciones", "Aprobaciones"),
+                                            ("FinanzasVerConciliacion", "Conciliación bancaria"),
+                                            ("FinanzasVerAuditoria", "Auditoría") }),
+                                        (Grupo: "Configuración", Pantallas: new[] {
+                                            ("FinanzasVerConceptos", "Conceptos"),
+                                            ("FinanzasVerTesoreria", "Cajas y bancos"),
+                                            ("FinanzasVerFondos", "Fondos"),
+                                            ("FinanzasVerPlanCuentas", "Plan de cuentas"),
+                                            ("FinanzasVerPlantillas", "Plantillas del plan contable"),
+                                            ("FinanzasVerEjercicios", "Ejercicios y periodos"),
+                                            ("FinanzasVerTerceros", "Terceros"),
+                                            ("FinanzasVerProyectos", "Proyectos y actividades"),
+                                            ("FinanzasVerReglas", "Reglas de contabilización"),
+                                            ("FinanzasVerNumeraciones", "Numeración de documentos"),
+                                            ("FinanzasVerApertura", "Puesta en marcha") }),
+                                    };
+                                }
+                                <h6 class="mb-2 mt-3">@L["Pantallas del área financiera"]</h6>
+                                <table class="table table-sm table-bordered align-middle mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>@L["Pantalla"]</th>
+                                            <th class="text-center" style="width:60px">@L["Ver"]</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var grupo in pantallasFinanzas)
+                                        {
+                                            <tr class="table-light">
+                                                <td colspan="2"><strong>@L[grupo.Grupo]</strong></td>
+                                            </tr>
+                                            @foreach (var (permiso, texto) in grupo.Pantallas)
+                                            {
+                                                <tr>
+                                                    <td class="ps-4">@L[texto]</td>
+                                                    <td class="text-center">
+                                                        <input class="form-check-input check-finanzas" type="checkbox"
+                                                               id="chk@(permiso)" data-permiso="@permiso">
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
                                     </tbody>
                                 </table>
                             </div>
@@ -464,6 +574,9 @@
             ['Hombres',       'chkHombres',       'chkHombresCrearEditar',       'chkHombresEliminar'],
             ['Mujeres',       'chkMujeres',       'chkMujeresCrearEditar',       'chkMujeresEliminar'],
             ['Ninos',         'chkNinos',         'chkNinosCrearEditar',         'chkNinosEliminar'],
+            ['Lideres',       'chkLideres',       'chkLideresCrearEditar',       'chkLideresEliminar'],
+            ['Seguimiento',   'chkSeguimiento',   'chkSeguimientoCrearEditar',   'chkSeguimientoEliminar'],
+            ['DetalleSeguimiento', 'chkDetalleSeguimiento', 'chkDetalleSeguimientoCrearEditar', 'chkDetalleSeguimientoEliminar'],
             ['Grupos',        'chkGrupos',        'chkGruposCrearEditar',        'chkGruposEliminar'],
             ['Zonas',         'chkZonas',         'chkZonasCrearEditar',         'chkZonasEliminar'],
             ['Ministerio',    'chkMinisterio',    'chkMinisterioCrearEditar',    'chkMinisterioEliminar'],
@@ -473,6 +586,10 @@
             // El primer valor es el nombre de la propiedad en Permisos (Asistencia), no el
             // texto del menú ("Control"): con "Control" nunca se guardaba ni se cargaba.
             ['Asistencia',    'chkAsistencia',    'chkAsistenciaCrearEditar',    'chkAsistenciaEliminar'],
+            ['Cultos',        'chkCultos',        'chkCultosCrearEditar',        'chkCultosEliminar'],
+            ['Calendario',    'chkCalendario',    'chkCalendarioCrearEditar',    'chkCalendarioEliminar'],
+            ['CalendarioAnual', 'chkCalendarioAnual', 'chkCalendarioAnualCrearEditar', 'chkCalendarioAnualEliminar'],
+            ['Salas',         'chkSalas',         'chkSalasCrearEditar',         'chkSalasEliminar'],
             ['Ajustes',       'chkAjustes',       'chkAjustesCrearEditar',       'chkAjustesEliminar'],
         ];
 

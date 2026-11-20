@@ -1,0 +1,13 @@
+@* Página independiente /precios. Mismo contenido que la sección de la landing;
+   los botones de contratar llevan a /contacto. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "precios";
+    ViewData["RutaCanonica"] = "precios";
+    ViewData["Title"] = L["Precios — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Precios"].Value;
+    ViewData["Descripcion"] = L["Planes y precios de Congrega CRM, el software de gestión para iglesias. Sin permanencia: elige el plan que mejor se adapta a tu comunidad."].Value;
+}
+<partial name="_CabeceraPagina" />
+
+<partial name="_SeccionPrecios" />

@@ -36,7 +36,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Index()
         {
             ViewBag.PuedeVerDatosFiscales = PuedeVerDatosFiscales();
-            return View();
+            return View("~/Views/Finanzas/FinanzasTerceros.cshtml");
         }
 
         [HttpGet]

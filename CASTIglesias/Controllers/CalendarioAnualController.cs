@@ -25,7 +25,7 @@ namespace CASTIglesias.Controllers
             _cnSala   = cnSala;
         }
 
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.CalendarioAnual))]
         public IActionResult Index()
         {
             int sedeId = ObtenerIdSedeUsuario();
@@ -36,7 +36,7 @@ namespace CASTIglesias.Controllers
 
         // FullCalendar llama a este endpoint con ?start=...&end=...
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.CalendarioAnual))]
         public JsonResult ObtenerEventos(string start, string end)
         {
             try
@@ -53,7 +53,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        [RequierePermiso(nameof(Permisos.CalendarioAnualCrearEditar))]
         public JsonResult GuardarEvento([FromBody] EventoCalendarioDTO dto)
         {
             try
@@ -68,7 +68,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
+        [RequierePermiso(nameof(Permisos.CalendarioAnualEliminar))]
         public JsonResult EliminarEvento(int idEvento)
         {
             try

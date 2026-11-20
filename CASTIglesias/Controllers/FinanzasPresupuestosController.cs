@@ -40,7 +40,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Index()
         {
             ViewBag.Ejercicios = _negocioEjercicios.Listar();
-            return View();
+            return View("~/Views/Finanzas/FinanzasPresupuestos.cshtml");
         }
 
         [HttpGet]
@@ -91,7 +91,7 @@ namespace CASTIglesias.Controllers
             ViewBag.Sedes = _negocioSedes.ListarSedes();
             ViewBag.Ministerios = _negocioMinisterios.ListarMinisterios(ObtenerIdSedeUsuario());
 
-            return View(seguimiento);
+            return View("~/Views/Finanzas/Seguimiento.cshtml", seguimiento);
         }
 
         [HttpPost]

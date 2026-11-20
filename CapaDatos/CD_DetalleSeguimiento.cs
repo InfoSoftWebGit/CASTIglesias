@@ -55,6 +55,13 @@ namespace CapaDatos
             }
         }
 
+        /// <summary>Miembro al que pertenece un detalle (null si no existe).</summary>
+        public int? ObtenerIdMiembro(int idDetalle) =>
+            _context.DetallesSeguimiento
+                .Where(d => d.ID == idDetalle)
+                .Select(d => (int?)d.ID_miembro)
+                .FirstOrDefault();
+
         public int RegistrarDetalle(DetalleSeguimiento obj, out string mensaje)
         {
             mensaje = string.Empty;

@@ -62,7 +62,7 @@
                             </div>
                         }
                         <!-- BLOQUE DISCIPULADO -->
-                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Hombres || permisosMiembro.Mujeres || permisosMiembro.Ninos || permisosMiembro.Miembros)
+                        @if (tieneAccesoTotal || permisosMiembro.Familias || permisosMiembro.Matrimonios || permisosMiembro.Jovenes || permisosMiembro.Hombres || permisosMiembro.Mujeres || permisosMiembro.Ninos || permisosMiembro.Lideres || permisosMiembro.Seguimiento || permisosMiembro.DetalleSeguimiento)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseDiscipulado" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
@@ -113,16 +113,22 @@
                                             @L["Niños"]
                                         </a>
                                     }
-                                    @if (tieneAccesoTotal || permisosMiembro.Miembros)
+                                    @if (tieneAccesoTotal || permisosMiembro.Lideres)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Lideres", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-user-tie"></i></div>
                                             @L["Líderes"]
                                         </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Seguimiento)
+                                    {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Seguimiento", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
                                             @L["Seguimiento"]
                                         </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.DetalleSeguimiento)
+                                    {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("DetallesSeguimiento", "Congregantes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-search"></i></div>
                                             @L["Detalle de seguimiento"]
@@ -212,7 +218,7 @@
                         }
 
                         <!-- BLOQUE ASISTENCIA -->
-                        @if (tieneAccesoTotal || permisosMiembro.Asistencia)
+                        @if (tieneAccesoTotal || permisosMiembro.Asistencia || permisosMiembro.Cultos || permisosMiembro.Calendario || permisosMiembro.CalendarioAnual || permisosMiembro.Salas)
                         {
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseAsistencia" aria-expanded="false">
                                 <div class="sb-nav-link-icon"><i class="fas fa-check-square"></i></div>
@@ -228,20 +234,29 @@
                                             @L["Asistencia"]
                                         </a>
                                     }
-                                    @if (tieneAccesoTotal || permisosMiembro.Ajustes)
+                                    @if (tieneAccesoTotal || permisosMiembro.Cultos)
                                     {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Cultos", "Mantenedor")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
                                             @L["Cultos y Servicios"]
                                         </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Calendario)
+                                    {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Calendarios", "Calendario")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-calendar-alt"></i></div>
                                             @L["Calendario de Servicios"]
                                         </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.CalendarioAnual)
+                                    {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "CalendarioAnual")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-calendar"></i></div>
                                             @L["Calendario Anual"]
                                         </a>
+                                    }
+                                    @if (tieneAccesoTotal || permisosMiembro.Salas)
+                                    {
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Index", "Sala")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-door-open"></i></div>
                                             @L["Salas"]
@@ -279,6 +294,14 @@
                                         <a class="nav-link collapsed-sub-item" href="@Url.Action("Servicios", "Ajustes")">
                                             <div class="sb-nav-link-icon"><i class="fas fa-church"></i></div>
                                             @L["Servicios"]
+                                        </a>
+                                    }
+                                    @* Reparto del seguimiento entre líderes: solo pastores y admins *@
+                                    @if (tieneAccesoTotal)
+                                    {
+                                        <a class="nav-link collapsed-sub-item" href="@Url.Action("Seguimientos", "Ajustes")">
+                                            <div class="sb-nav-link-icon"><i class="fas fa-clipboard-check"></i></div>
+                                            @L["Seguimientos"]
                                         </a>
                                     }
                                 </nav>

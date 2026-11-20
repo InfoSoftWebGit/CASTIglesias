@@ -32,7 +32,7 @@ namespace CASTIglesias.Controllers
         {
             ViewBag.CuentasContables = _negocioPlanCuentas.ListarContabilizables();
             ViewBag.Fondos = _negocioFondos.ListarActivos();
-            return View();
+            return View("~/Views/Finanzas/FinanzasConceptos.cshtml");
         }
 
         [HttpGet]

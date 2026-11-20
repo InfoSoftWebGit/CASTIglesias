@@ -504,7 +504,7 @@ namespace CapaPresentaciónAdmin.Controllers
         ///////////////////////////// APARTADO DE CULTOS //////////////////////////////
         #region Cultos
 
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Cultos))]
         public IActionResult Cultos() => View();
 
         [HttpGet]
@@ -538,7 +538,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        [RequierePermiso(nameof(Permisos.CultosCrearEditar))]
         public JsonResult GuardarCulto([FromBody] CapaEntidad.CultoConBloquesDTO dto)
         {
             try
@@ -555,7 +555,7 @@ namespace CapaPresentaciónAdmin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
+        [RequierePermiso(nameof(Permisos.CultosEliminar))]
         public JsonResult EliminarCulto(int id)
         {
             try

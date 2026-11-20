@@ -1,0 +1,13 @@
+@* Página independiente /audiovisuales. Mismo contenido que la sección de la
+   landing; los vídeos se configuran en _SeccionAudiovisuales.cshtml. *@
+@{
+    Layout = "~/Views/Landing/_LayoutPublico.cshtml";
+    ViewData["PaginaActual"] = "audiovisuales";
+    ViewData["RutaCanonica"] = "audiovisuales";
+    ViewData["Title"] = L["Audiovisuales — Congrega CRM"].Value;
+    ViewData["Titulo1"] = L["Audiovisuales"].Value;
+    ViewData["Descripcion"] = L["Vídeos para conocer la aplicación y ver cómo puede ayudar a tu iglesia."].Value;
+}
+<partial name="_CabeceraPagina" />
+
+<partial name="_SeccionAudiovisuales" />

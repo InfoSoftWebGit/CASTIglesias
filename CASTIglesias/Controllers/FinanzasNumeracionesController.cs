@@ -24,7 +24,7 @@ namespace CASTIglesias.Controllers
             _negocioNumeraciones = negocioNumeraciones;
         }
 
-        public IActionResult Index() => View(_negocioNumeraciones.Listar());
+        public IActionResult Index() => View("~/Views/Finanzas/FinanzasNumeraciones.cshtml", _negocioNumeraciones.Listar());
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -36,6 +36,11 @@ namespace CASTIglesias.Controllers
             if (!string.IsNullOrWhiteSpace(model.Web))
                 return Json(new { ok = true });
 
+            // La casilla de privacidad se valida también aquí: el navegador se
+            // puede saltar, y sin aceptación no se puede tratar la inscripción.
+            if (!model.AceptaPrivacidad)
+                return Json(new { ok = false, mensaje = "Debes aceptar la política de privacidad para continuar." });
+
             // La fecha se resuelve en el servidor a partir del índice elegido.
             // Si el cliente manda un índice que no existe, no hay sesión que
             // asignar y la inscripción se rechaza.
@@ -82,5 +87,8 @@ namespace CASTIglesias.Controllers
 
         /// <summary>Campo trampa para robots; debe llegar vacío.</summary>
         public string? Web { get; set; }
+
+        /// <summary>Casilla "He leído y acepto la Política de privacidad".</summary>
+        public bool AceptaPrivacidad { get; set; }
     }
 }

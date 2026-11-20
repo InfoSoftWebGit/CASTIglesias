@@ -20,9 +20,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Congrega</title>
-    @* ?v=2 fuerza a los navegadores a descartar el favicon antiguo que tengan en caché. *@
-    <link rel="icon" type="image/png" href="/favicon.png?v=2">
-    <link rel="apple-touch-icon" href="/favicon.png?v=2">
+    @* Los iconos van en una parcial común; asp-append-version añade la huella del
+       fichero a la dirección, que es lo que obliga al navegador a descartar el
+       icono antiguo que tenga en caché. *@
+    <partial name="_Iconos" />
 
     <!-- ✅ Se elimina integrity para evitar error de verificación -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -200,7 +201,10 @@
 
     <!-- NAV SUPERIOR -->
     <nav class="sb-topnav navbar navbar-expand">
-        <a class="navbar-brand ps-3" href="@Url.Action("Index", "Home")" style="font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px;">
+        <a class="navbar-brand ps-3 d-inline-flex align-items-center" href="@Url.Action("Index", "Home")" style="font-weight: 700; font-size: 1.3rem; letter-spacing: 0.5px;">
+            @* Logo en pastilla blanca: la "C" azul oscuro no se vería sobre la barra. *@
+            <img src="/img/logo-congrega-blanco.png" alt="" width="32" height="32"
+                 style="width:32px;height:32px;border-radius:8px;background:#fff;margin-right:9px;object-fit:contain;" />
             <span style="color: #00BFA5;">Congrega</span><span style="color: rgba(255,255,255,0.5); font-size: 0.75rem; font-weight: 400; margin-left: 4px;">CRM</span>
         </a>
 
@@ -308,6 +312,10 @@
                     {
                         <a class="small text-warning text-decoration-none" href="@Url.Action("Index", "Plataforma")">
                             <i class="fas fa-exchange-alt fa-fw me-1"></i>@L["Cambiar de iglesia"]
+                        </a>
+                        @* El blog público de congrega.es lo gestiona el equipo de Congrega. *@
+                        <a class="small text-warning text-decoration-none d-block mt-1" href="@Url.Action("Index", "BlogAdmin")">
+                            <i class="fas fa-newspaper fa-fw me-1"></i>@L["Blog de Congrega"]
                         </a>
                     }
 
@@ -695,6 +703,8 @@
             const n = parseFloat(valor);
             // El cero del caso inválido también pasa por toLocaleString: escrito a
             // mano como '0,00' quedaría con coma incluso en inglés.
+            // Se usa window.LOCALE (definido arriba a partir de CurrentUICulture) y no
+            // CurrentCulture, que es la invariante y haría que toLocaleString lance RangeError.
             return (isNaN(n) ? 0 : n).toLocaleString(window.LOCALE,
                                    { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         };

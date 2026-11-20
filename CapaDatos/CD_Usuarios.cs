@@ -35,27 +35,9 @@ namespace CapaDatos
                 Asistencia = false
             };
 
-           
-            var permisosTotales = new Permisos
-            {
-                Usuarios = true, UsuariosCrearEditar = true, UsuariosEliminar = true,
-                Miembros = true, MiembrosCrearEditar = true, MiembrosEliminar = true,
-                Familias = true, FamiliasCrearEditar = true, FamiliasEliminar = true,
-                Grupos = true, GruposCrearEditar = true, GruposEliminar = true,
-                Zonas = true, ZonasCrearEditar = true, ZonasEliminar = true,
-                Diezmos = true, DiezmosCrearEditar = true, DiezmosEliminar = true,
-                Conceptos = true, ConceptosCrearEditar = true, ConceptosEliminar = true,
-                Asistencia = true, AsistenciaCrearEditar = true, AsistenciaEliminar = true,
-                Ministerio = true, MinisterioCrearEditar = true, MinisterioEliminar = true,
-                Visitantes = true, VisitantesCrearEditar = true, VisitantesEliminar = true,
-                Simpatizantes = true, SimpatizantesCrearEditar = true, SimpatizantesEliminar = true,
-                Proceso = true, ProcesoCrearEditar = true, ProcesoEliminar = true,
-                Hombres = true, HombresCrearEditar = true, HombresEliminar = true,
-                Mujeres = true, MujeresCrearEditar = true, MujeresEliminar = true,
-                Ninos = true, NinosCrearEditar = true, NinosEliminar = true,
-                Ajustes = true, AjustesCrearEditar = true, AjustesEliminar = true,
-                ID_usuario = ID_usuario
-            };
+            // Antes era una lista escrita a mano a la que le faltaban módulos
+            // (Matrimonios, Jóvenes, Gastos, el área financiera...).
+            var permisosTotales = ObtenerPermisosTotales(ID_usuario);
 
             var usuario = _context.Usuarios.FirstOrDefault(u => u.ID_usuario == ID_usuario);
 
@@ -165,92 +147,15 @@ namespace CapaDatos
                 }
                 else
                 {
-                    permisoExistente.Usuarios = objPermisosDTO.Usuarios;
-                    permisoExistente.UsuariosCrearEditar = objPermisosDTO.UsuariosCrearEditar;
-                    permisoExistente.UsuariosEliminar = objPermisosDTO.UsuariosEliminar;
-
-                    permisoExistente.Miembros = objPermisosDTO.Miembros;
-                    permisoExistente.MiembrosCrearEditar = objPermisosDTO.MiembrosCrearEditar;
-                    permisoExistente.MiembrosEliminar = objPermisosDTO.MiembrosEliminar;
-
-                    permisoExistente.Familias = objPermisosDTO.Familias;
-                    permisoExistente.FamiliasCrearEditar = objPermisosDTO.FamiliasCrearEditar;
-                    permisoExistente.FamiliasEliminar = objPermisosDTO.FamiliasEliminar;
-
-                    permisoExistente.Grupos = objPermisosDTO.Grupos;
-                    permisoExistente.GruposCrearEditar = objPermisosDTO.GruposCrearEditar;
-                    permisoExistente.GruposEliminar = objPermisosDTO.GruposEliminar;
-
-                    permisoExistente.Zonas = objPermisosDTO.Zonas;
-                    permisoExistente.ZonasCrearEditar = objPermisosDTO.ZonasCrearEditar;
-                    permisoExistente.ZonasEliminar = objPermisosDTO.ZonasEliminar;
-
-                    permisoExistente.Diezmos = objPermisosDTO.Diezmos;
-                    permisoExistente.DiezmosCrearEditar = objPermisosDTO.DiezmosCrearEditar;
-                    permisoExistente.DiezmosEliminar = objPermisosDTO.DiezmosEliminar;
-
-                    permisoExistente.Conceptos = objPermisosDTO.Conceptos;
-                    permisoExistente.ConceptosCrearEditar = objPermisosDTO.ConceptosCrearEditar;
-                    permisoExistente.ConceptosEliminar = objPermisosDTO.ConceptosEliminar;
-
-                    permisoExistente.Asistencia = objPermisosDTO.Asistencia;
-                    permisoExistente.AsistenciaCrearEditar = objPermisosDTO.AsistenciaCrearEditar;
-                    permisoExistente.AsistenciaEliminar = objPermisosDTO.AsistenciaEliminar;
-
-                    permisoExistente.Ministerio = objPermisosDTO.Ministerio;
-                    permisoExistente.MinisterioCrearEditar = objPermisosDTO.MinisterioCrearEditar;
-                    permisoExistente.MinisterioEliminar = objPermisosDTO.MinisterioEliminar;
-
-                    permisoExistente.Visitantes = objPermisosDTO.Visitantes;
-                    permisoExistente.VisitantesCrearEditar = objPermisosDTO.VisitantesCrearEditar;
-                    permisoExistente.VisitantesEliminar = objPermisosDTO.VisitantesEliminar;
-
-                    permisoExistente.Simpatizantes = objPermisosDTO.Simpatizantes;
-                    permisoExistente.SimpatizantesCrearEditar = objPermisosDTO.SimpatizantesCrearEditar;
-                    permisoExistente.SimpatizantesEliminar = objPermisosDTO.SimpatizantesEliminar;
-
-                    permisoExistente.Proceso = objPermisosDTO.Proceso;
-                    permisoExistente.ProcesoCrearEditar = objPermisosDTO.ProcesoCrearEditar;
-                    permisoExistente.ProcesoEliminar = objPermisosDTO.ProcesoEliminar;
-
-                    permisoExistente.Matrimonios = objPermisosDTO.Matrimonios;
-                    permisoExistente.MatrimoniosCrearEditar = objPermisosDTO.MatrimoniosCrearEditar;
-                    permisoExistente.MatrimoniosEliminar = objPermisosDTO.MatrimoniosEliminar;
-
-                    permisoExistente.Jovenes = objPermisosDTO.Jovenes;
-                    permisoExistente.JovenesCrearEditar = objPermisosDTO.JovenesCrearEditar;
-                    permisoExistente.JovenesEliminar = objPermisosDTO.JovenesEliminar;
-
-                    permisoExistente.Hombres = objPermisosDTO.Hombres;
-                    permisoExistente.HombresCrearEditar = objPermisosDTO.HombresCrearEditar;
-                    permisoExistente.HombresEliminar = objPermisosDTO.HombresEliminar;
-
-                    permisoExistente.Mujeres = objPermisosDTO.Mujeres;
-                    permisoExistente.MujeresCrearEditar = objPermisosDTO.MujeresCrearEditar;
-                    permisoExistente.MujeresEliminar = objPermisosDTO.MujeresEliminar;
-
-                    permisoExistente.Ninos = objPermisosDTO.Ninos;
-                    permisoExistente.NinosCrearEditar = objPermisosDTO.NinosCrearEditar;
-                    permisoExistente.NinosEliminar = objPermisosDTO.NinosEliminar;
-
-                    permisoExistente.Gastos = objPermisosDTO.Gastos;
-                    permisoExistente.GastosCrearEditar = objPermisosDTO.GastosCrearEditar;
-                    permisoExistente.GastosEliminar = objPermisosDTO.GastosEliminar;
-
-                    permisoExistente.Ajustes = objPermisosDTO.Ajustes;
-                    permisoExistente.AjustesCrearEditar = objPermisosDTO.AjustesCrearEditar;
-                    permisoExistente.AjustesEliminar = objPermisosDTO.AjustesEliminar;
-
-                    // Área financiera. No siguen el patrón Ver/CrearEditar/Eliminar:
-                    // ver el comentario de la clase Permisos.
-                    permisoExistente.FinanzasVer = objPermisosDTO.FinanzasVer;
-                    permisoExistente.FinanzasOperacionesCrearEditar = objPermisosDTO.FinanzasOperacionesCrearEditar;
-                    permisoExistente.FinanzasOperacionesEliminar = objPermisosDTO.FinanzasOperacionesEliminar;
-                    permisoExistente.FinanzasContabilizar = objPermisosDTO.FinanzasContabilizar;
-                    permisoExistente.FinanzasRevertir = objPermisosDTO.FinanzasRevertir;
-                    permisoExistente.FinanzasConfiguracion = objPermisosDTO.FinanzasConfiguracion;
-                    permisoExistente.FinanzasAprobar = objPermisosDTO.FinanzasAprobar;
-                    permisoExistente.FinanzasDonantes = objPermisosDTO.FinanzasDonantes;
+                    // Se copian TODOS los permisos (booleanos) por reflexión, igual que
+                    // ObtenerPermisosTotales: con la copia campo a campo, cada permiso
+                    // nuevo que no se añadía aquí se guardaba al crear el usuario pero
+                    // se perdía en silencio al editarlo.
+                    foreach (var prop in typeof(Permisos).GetProperties())
+                    {
+                        if (prop.PropertyType == typeof(bool) && prop.CanWrite)
+                            prop.SetValue(permisoExistente, prop.GetValue(objPermisosDTO));
+                    }
 
                     _context.Permisos.Update(permisoExistente);
                     _context.SaveChanges();

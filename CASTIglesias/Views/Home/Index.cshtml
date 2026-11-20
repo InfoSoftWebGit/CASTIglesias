@@ -36,7 +36,7 @@
         new { Ver = permisos.Ninos,       Accion = "Ninos",       Bajas = false, Texto = L["Total de Niños"].Value,       Id = "totalninos",          Color = "#D97706", Icono = "fas fa-child",       Contador = "ContadorNinos",          Orden = 4 },
         new { Ver = permisos.Matrimonios, Accion = "Matrimonios", Bajas = false, Texto = L["Total de Matrimonios"].Value, Id = "totalmatrimonios",    Color = "#BE185D", Icono = "fas fa-heart",       Contador = "ContadorMatrimonios",    Orden = 5 },
         new { Ver = permisos.Familias,    Accion = "Familias",    Bajas = false, Texto = L["Total de Familias"].Value,    Id = "totalfamilias",       Color = "#6D28D9", Icono = "fas fa-people-roof", Contador = "ContadorFamilias",       Orden = 6 },
-        new { Ver = permisos.Miembros,    Accion = "Lideres",     Bajas = false, Texto = L["Total de Líderes"].Value,     Id = "totallideresactivos", Color = "#047857", Icono = "fas fa-user-tie",    Contador = "ContadorLideresActivos", Orden = 7 }
+        new { Ver = permisos.Lideres,     Accion = "Lideres",     Bajas = false, Texto = L["Total de Líderes"].Value,     Id = "totallideresactivos", Color = "#047857", Icono = "fas fa-user-tie",    Contador = "ContadorLideresActivos", Orden = 7 }
     }.Where(t => t.Ver).ToList();
 }
 

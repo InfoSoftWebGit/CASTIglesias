@@ -152,12 +152,13 @@ namespace CapaDatos
         }
         public List<Ministerio> BuscarMinisteriosPorNombre(int sedeID, string nombre)
         {
-            nombre ??= string.Empty; // si es null, lo convertimos en vacío
+            nombre = (nombre ?? string.Empty).Trim().ToLower(); // vacío = todos
 
             return _context.Ministerios
-                .Where(m => m.ID_sede == sedeID &&
-                            !string.IsNullOrEmpty(m.Descripcion) &&
-                            m.Descripcion.ToLower().Contains(nombre.ToLower()))
+                .Where(m => sedeID == 1000 || m.ID_sede == sedeID)
+                .Where(m => !string.IsNullOrEmpty(m.Descripcion) &&
+                            m.Descripcion.ToLower().Contains(nombre))
+                .OrderBy(m => m.Descripcion)
                 .ToList();
         }
 

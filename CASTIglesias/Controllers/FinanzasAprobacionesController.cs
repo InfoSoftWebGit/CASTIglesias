@@ -61,7 +61,7 @@ namespace CASTIglesias.Controllers
             ViewBag.PuedeAprobar = PuedeAprobar();
             ViewBag.RolAprobador = _negocioAprobaciones.RolAprobador();
 
-            return View();
+            return View("~/Views/Finanzas/FinanzasAprobaciones.cshtml");
         }
 
         [HttpGet]

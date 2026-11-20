@@ -174,10 +174,14 @@ namespace CapaDatos
         }
         public List<Zona> BuscarZonasPorNombre(int sedeID, string nombre)
         {
-            return _context.Zona
-                .Where(z => z.ID_sede == sedeID &&
-                            z.nombre_zona.ToLower().Contains(nombre.ToLower()))
-                .ToList();
+            // Sin texto devuelve todas: los buscadores muestran la lista completa al
+            // entrar en el campo y la van filtrando mientras se escribe.
+            var consulta = _context.Zona.AsQueryable();
+            if (sedeID != 1000)
+                consulta = consulta.Where(z => z.ID_sede == sedeID);
+            if (!string.IsNullOrWhiteSpace(nombre))
+                consulta = consulta.Where(z => z.nombre_zona != null && z.nombre_zona.ToLower().Contains(nombre.Trim().ToLower()));
+            return consulta.OrderBy(z => z.nombre_zona).ToList();
         }
 
     }

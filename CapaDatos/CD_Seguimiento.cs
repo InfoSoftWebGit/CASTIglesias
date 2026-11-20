@@ -14,13 +14,23 @@ namespace CapaDatos
             _context = context;
         }
 
-        public List<Seguimiento> ListarSeguimientos(int sedeID)
+        /// <param name="idsMiembros">
+        /// Si no es null, solo se devuelven seguimientos de esos miembros (alcance del
+        /// líder o filtro por zona). Vacío = ninguno.
+        /// </param>
+        public List<Seguimiento> ListarSeguimientos(int sedeID, ICollection<int>? idsMiembros = null)
         {
             try
             {
                 var consulta = _context.Seguimientos.AsQueryable();
                 if (sedeID != 1000)
                     consulta = consulta.Where(s => s.ID_sede == sedeID);
+                if (idsMiembros != null)
+                {
+                    if (idsMiembros.Count == 0) return new List<Seguimiento>();
+                    var ids = idsMiembros.ToList();
+                    consulta = consulta.Where(s => ids.Contains(s.ID_miembro));
+                }
                 return consulta.OrderByDescending(s => s.ID).ToList();
             }
             catch (Exception ex)
@@ -29,6 +39,13 @@ namespace CapaDatos
                 return new List<Seguimiento>();
             }
         }
+
+        /// <summary>Miembro al que pertenece un seguimiento (null si no existe).</summary>
+        public int? ObtenerIdMiembro(int idSeguimiento) =>
+            _context.Seguimientos
+                .Where(s => s.ID == idSeguimiento)
+                .Select(s => (int?)s.ID_miembro)
+                .FirstOrDefault();
 
         public int RegistrarSeguimiento(Seguimiento obj, out string mensaje)
         {
@@ -122,7 +139,10 @@ namespace CapaDatos
                     (l.Nombre_miembro != null && l.Nombre_miembro.ToLower().Contains(term.ToLower())) ||
                     (l.Apellidos_miembro != null && l.Apellidos_miembro.ToLower().Contains(term.ToLower())));
 
-            return consulta.Take(10)
+            // Sin texto (lista desplegada al entrar en el campo) se enseñan más
+            return consulta
+                .OrderBy(l => l.Nombre_miembro).ThenBy(l => l.Apellidos_miembro)
+                .Take(string.IsNullOrWhiteSpace(term) ? 50 : 10)
                 .Select(l => (object)new
                 {
                     id = l.ID_miembro,

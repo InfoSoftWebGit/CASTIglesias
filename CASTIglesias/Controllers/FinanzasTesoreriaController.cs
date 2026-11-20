@@ -34,7 +34,7 @@ namespace CASTIglesias.Controllers
             // Solo las que admiten apuntes: las que agrupan no pueden recibir movimientos
             ViewBag.CuentasContables = _negocioPlanCuentas.ListarContabilizables();
 
-            return View();
+            return View("~/Views/Finanzas/FinanzasTesoreria.cshtml");
         }
 
         [HttpGet]

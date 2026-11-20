@@ -86,12 +86,12 @@ namespace CASTIglesias.Controllers
                 ViewBag.SaldoInicial = saldoInicial;
                 ViewBag.Cuenta = cuentas.FirstOrDefault(c => c.id == elegida.Value);
                 PrepararFiltros(fechaDesde, fechaHasta, fondoID);
-                return View(movimientos);
+                return View("~/Views/Finanzas/Mayor.cshtml", movimientos);
             }
 
             ViewBag.SaldoInicial = 0m;
             PrepararFiltros(fechaDesde, fechaHasta, fondoID);
-            return View(new List<CapaDatos.CD_Informes.MovimientoMayorDTO>());
+            return View("~/Views/Finanzas/Mayor.cshtml", new List<CapaDatos.CD_Informes.MovimientoMayorDTO>());
         }
 
         public IActionResult SumasYSaldos(string? desde, string? hasta, int? fondoID)
@@ -101,7 +101,7 @@ namespace CASTIglesias.Controllers
             DateTime fechaHasta = DateTime.TryParse(hasta, out var h) ? h : porDefectoHasta;
 
             PrepararFiltros(fechaDesde, fechaHasta, fondoID);
-            return View(_negocioInformes.SumasYSaldos(fechaDesde, fechaHasta, FiltroSede(), fondoID));
+            return View("~/Views/Finanzas/SumasYSaldos.cshtml", _negocioInformes.SumasYSaldos(fechaDesde, fechaHasta, FiltroSede(), fondoID));
         }
 
         public IActionResult Balance(string? hasta, int? fondoID)
@@ -110,7 +110,7 @@ namespace CASTIglesias.Controllers
             DateTime fechaHasta = DateTime.TryParse(hasta, out var h) ? h : finEjercicio;
 
             PrepararFiltros(inicioEjercicio, fechaHasta, fondoID);
-            return View(_negocioInformes.Balance(fechaHasta, FiltroSede(), fondoID, inicioEjercicio));
+            return View("~/Views/Finanzas/Balance.cshtml", _negocioInformes.Balance(fechaHasta, FiltroSede(), fondoID, inicioEjercicio));
         }
 
         /// <summary>
@@ -133,13 +133,13 @@ namespace CASTIglesias.Controllers
             if (ejercicio == null)
             {
                 ViewBag.SinEjercicios = true;
-                return View(new CN_Informes.PropuestaCierreDTO());
+                return View("~/Views/Finanzas/Cierre.cshtml", new CN_Informes.PropuestaCierreDTO());
             }
 
             ViewBag.EjercicioID = ejercicio.id;
             var periodos = _negocioEjercicios.ListarPeriodos(ejercicio.id);
 
-            return View(_negocioInformes.PropuestaCierre(ejercicio, periodos, FiltroSede()));
+            return View("~/Views/Finanzas/Cierre.cshtml", _negocioInformes.PropuestaCierre(ejercicio, periodos, FiltroSede()));
         }
 
         public IActionResult Resultados(string? desde, string? hasta, int? fondoID)
@@ -149,7 +149,7 @@ namespace CASTIglesias.Controllers
             DateTime fechaHasta = DateTime.TryParse(hasta, out var h) ? h : porDefectoHasta;
 
             PrepararFiltros(fechaDesde, fechaHasta, fondoID);
-            return View(_negocioInformes.Resultados(fechaDesde, fechaHasta, FiltroSede(), fondoID));
+            return View("~/Views/Finanzas/Resultados.cshtml", _negocioInformes.Resultados(fechaDesde, fechaHasta, FiltroSede(), fondoID));
         }
     }
 }

@@ -1,0 +1,394 @@
+@{
+    ViewData["Title"] = L["Configuración de seguimientos"].Value;
+}
+
+<style>
+    .autocomplete-wrapper { position: relative; }
+    /* fixed (colocado por JS junto al campo) y no absolute: las tarjetas del tema
+       recortan su contenido y la lista quedaba oculta dentro del recuadro. */
+    .autocomplete-dropdown {
+        position: fixed;
+        z-index: 1080;
+        max-height: 260px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0 0 .375rem .375rem;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    #tablaLideres tbody tr { cursor: pointer; }
+    #tablaLideres tbody tr.table-active td { font-weight: 600; }
+</style>
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@L["Configuración de seguimientos"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">@L["Inicio"]</a></li>
+        <li class="breadcrumb-item">@L["Ajustes"]</li>
+        <li class="breadcrumb-item active">@L["Seguimientos"]</li>
+    </ol>
+
+    <p class="text-muted small">
+        @L["Solo los líderes pueden hacer seguimiento. Elige un líder e indica de qué zonas (de las que pertenece) puede hacer seguimiento y qué personas concretas tiene asignadas. Los pastores siguen viendo todos los seguimientos."]
+    </p>
+
+    <div class="row">
+        <!-- ── Columna izquierda: buscar líder y líderes configurados ── -->
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-search me-1"></i> @L["Buscar líder"]
+                </div>
+                <div class="card-body">
+                    <div class="autocomplete-wrapper">
+                        <input type="text" class="form-control" id="txtBuscarLider"
+                               autocomplete="off" placeholder="@L["Buscar por nombre..."]">
+                        <div id="ddBuscarLider" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-user-check me-1"></i> @L["Líderes con seguimiento configurado"]
+                </div>
+                <div class="card-body p-0">
+                    <table id="tablaLideres" class="table table-sm table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>@L["Líder"]</th>
+                                <th>@L["Zonas"]</th>
+                                <th class="text-center">@L["Asignados"]</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="sinLideres" class="text-center text-muted small py-3" style="display:none;">
+                        @L["Todavía no hay líderes configurados."]
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Columna derecha: configuración del líder seleccionado ── -->
+        <div class="col-lg-7">
+            <div id="panelVacio" class="card mb-4">
+                <div class="card-body text-center text-muted py-5">
+                    <i class="fas fa-user-cog fa-2x mb-2 d-block"></i>
+                    @L["Busca o selecciona un líder para configurar su seguimiento."]
+                </div>
+            </div>
+
+            <div id="panelLider" style="display:none;">
+                <div class="card mb-3">
+                    <div class="card-header text-white" style="background-color:#1E3A8A;">
+                        <i class="fas fa-user me-1"></i> <span id="lblLider"></span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Usuario vinculado -->
+                        <h6 class="mb-2">@L["Usuario con el que entra"]</h6>
+                        <div id="infoUsuario" class="small mb-2"></div>
+                        <div class="input-group input-group-sm mb-1">
+                            <select id="cboUsuario" class="form-select"></select>
+                            <button id="btnVincular" class="btn btn-outline-primary" type="button">
+                                <i class="fas fa-link me-1"></i>@L["Vincular"]
+                            </button>
+                        </div>
+                        <div class="form-text mb-3">
+                            @L["Sin un usuario vinculado el líder no podrá ver ningún seguimiento. Si su usuario tiene el mismo correo que su ficha de miembro se reconoce automáticamente."]
+                        </div>
+
+                        <hr />
+
+                        <!-- Zonas -->
+                        <h6 class="mb-2">@L["Zonas de las que puede hacer seguimiento"]</h6>
+                        <div id="listaZonas" class="mb-2"></div>
+                        <div id="sinZonas" class="alert alert-warning small py-2" style="display:none;">
+                            @L["Este líder no pertenece a ninguna zona. Asígnale zonas desde su ficha de miembro o usa la lista de personas."]
+                        </div>
+                        <button id="btnGuardarZonas" class="btn btn-primary btn-sm">
+                            <i class="fas fa-save me-1"></i>@L["Guardar zonas"]
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-list-check me-1"></i> @L["Lista de personas asignadas"]
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-2">
+                            @L["Personas concretas a las que este líder debe hacer seguimiento (por ejemplo, de una campaña), aunque no sean de sus zonas."]
+                        </p>
+                        <div class="row g-2 align-items-end mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small mb-1">@L["Persona"]</label>
+                                <div class="autocomplete-wrapper">
+                                    <input type="text" class="form-control form-control-sm" id="txtBuscarMiembro"
+                                           autocomplete="off" placeholder="@L["Buscar por nombre..."]">
+                                    <div id="ddBuscarMiembro" class="autocomplete-dropdown list-group" style="display:none;"></div>
+                                </div>
+                                <input type="hidden" id="hiddenIdMiembro" value="0" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small mb-1">@L["Motivo / campaña"]</label>
+                                <input type="text" class="form-control form-control-sm" id="txtMotivo" maxlength="150"
+                                       placeholder="@L["Opcional"]">
+                            </div>
+                            <div class="col-md-2">
+                                <button id="btnAgregar" class="btn btn-success btn-sm w-100" type="button">
+                                    <i class="fas fa-plus me-1"></i>@L["Añadir"]
+                                </button>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th>@L["Persona"]</th>
+                                    <th>@L["Motivo / campaña"]</th>
+                                    <th>@L["Desde"]</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyAsignados"></tbody>
+                        </table>
+                        <div id="sinAsignados" class="text-center text-muted small py-2" style="display:none;">
+                            @L["Sin personas asignadas."]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    window.T = Object.assign(window.T || {}, {
+        segUsuarioVinculado:   @Json.Serialize(L["Vinculado a"].Value),
+        segUsuarioPorCorreo:   @Json.Serialize(L["Reconocido por correo (sin vincular)"].Value),
+        segSinUsuario:         @Json.Serialize(L["Sin usuario vinculado"].Value),
+        segElegirUsuario:      @Json.Serialize(L["-- Sin usuario --"].Value),
+        segSeleccionaPersona:  @Json.Serialize(L["Selecciona una persona de la lista."].Value),
+        segQuitarAsignado:     @Json.Serialize(L["¿Quitar a esta persona de la lista del líder?"].Value),
+        segError:              @Json.Serialize(L["No se pudo completar la operación."].Value)
+    });
+
+    const urls = {
+        lideres:     '@Url.Action("ListarLideresSeguimiento", "Ajustes")',
+        buscarLider: '@Url.Action("BuscarLideresSeguimiento", "Ajustes")',
+        buscarMiem:  '@Url.Action("BuscarMiembrosSeguimiento", "Ajustes")',
+        config:      '@Url.Action("ObtenerConfigSeguimientoLider", "Ajustes")',
+        zonas:       '@Url.Action("GuardarZonasSeguimiento", "Ajustes")',
+        agregar:     '@Url.Action("AgregarAsignacionSeguimiento", "Ajustes")',
+        eliminar:    '@Url.Action("EliminarAsignacionSeguimiento", "Ajustes")',
+        vincular:    '@Url.Action("VincularUsuarioSeguimiento", "Ajustes")'
+    };
+
+    let liderActual = null;
+
+    function toast(ok, texto) {
+        Swal.fire({
+            toast: true, position: 'top-end', icon: ok ? 'success' : 'error',
+            title: texto || (ok ? '' : T.segError),
+            showConfirmButton: false, timer: 3000, timerProgressBar: true
+        });
+    }
+
+    function esc(t) { return $('<div>').text(t == null ? '' : t).html(); }
+
+    // ─── Líderes configurados ────────────────────────────────────
+    function cargarLideres() {
+        $.get(urls.lideres, function (res) {
+            const tb = $('#tablaLideres tbody').empty();
+            const lista = (res && res.data) || [];
+            $('#sinLideres').toggle(lista.length === 0);
+            lista.forEach(function (l) {
+                const tr = $('<tr>')
+                    .toggleClass('table-active', liderActual === l.id_miembro)
+                    .append($('<td>').text((l.nombre_miembro + ' ' + l.apellidos_miembro).trim()))
+                    .append($('<td class="small">').text((l.zonas || []).map(tDato).join(', ') || '—'))
+                    .append($('<td class="text-center">').text(l.total_asignados))
+                    .on('click', function () { seleccionarLider(l.id_miembro); });
+                tb.append(tr);
+            });
+        });
+    }
+
+    // ─── Autocomplete genérico ───────────────────────────────────
+    // Coloca la lista justo debajo del campo (coordenadas de ventana, por ser fixed)
+    function posicionarLista(inputSel, dd) {
+        const r = $(inputSel)[0].getBoundingClientRect();
+        dd.css({ top: r.bottom + 'px', left: r.left + 'px', width: r.width + 'px' });
+    }
+
+    // Con fixed, al hacer scroll la lista se quedaría flotando: se cierra
+    // (captura: el scroll puede ser de un contenedor del layout y no de la ventana;
+    // el de la propia lista se ignora para poder recorrerla)
+    function cerrarListas(e) {
+        if (e && e.target && $(e.target).closest('.autocomplete-dropdown').length) return;
+        $('.autocomplete-dropdown').hide().empty();
+    }
+    document.addEventListener('scroll', cerrarListas, true);
+    $(window).on('resize', cerrarListas);
+
+    // Al entrar en el campo se despliega la lista; al escribir se va filtrando.
+    function autocompletar(inputSel, ddSel, url, alElegir) {
+        let timer;
+        function cargar(term) {
+            $.get(url, { term: term || '' }, function (res) {
+                const dd = $(ddSel).empty();
+                const lista = (res && res.data) || [];
+                if (lista.length === 0) { dd.hide(); return; }
+                lista.forEach(function (m) {
+                    const nombre = ((m.nombre || m.nombre_miembro || '') + ' ' + (m.apellidos || m.apellidos_miembro || '')).trim();
+                    $('<button type="button" class="list-group-item list-group-item-action">')
+                        .text(nombre)
+                        // mousedown: se elige antes de que el input pierda el foco
+                        .on('mousedown', function (e) { e.preventDefault(); dd.hide().empty(); alElegir(m, nombre); })
+                        .appendTo(dd);
+                });
+                posicionarLista(inputSel, dd);
+                dd.show();
+            });
+        }
+        $(inputSel)
+            .on('focus click', function () { if (!$(ddSel).is(':visible')) cargar($(this).val().trim()); })
+            .on('input', function () {
+                const term = $(this).val().trim();
+                clearTimeout(timer);
+                timer = setTimeout(function () { cargar(term); }, 250);
+            })
+            .on('keydown', function (e) { if (e.key === 'Escape') $(ddSel).hide().empty(); })
+            .on('blur', function () { setTimeout(function () { $(ddSel).hide().empty(); }, 150); });
+    }
+
+    autocompletar('#txtBuscarLider', '#ddBuscarLider', urls.buscarLider, function (m, nombre) {
+        $('#txtBuscarLider').val(nombre);
+        seleccionarLider(m.id);
+    });
+
+    autocompletar('#txtBuscarMiembro', '#ddBuscarMiembro', urls.buscarMiem, function (m, nombre) {
+        $('#txtBuscarMiembro').val(nombre);
+        $('#hiddenIdMiembro').val(m.id_miembro);
+    });
+    $('#txtBuscarMiembro').on('input', function () { $('#hiddenIdMiembro').val(0); });
+
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.autocomplete-wrapper').length) $('.autocomplete-dropdown').hide().empty();
+    });
+
+    // ─── Panel del líder ─────────────────────────────────────────
+    function seleccionarLider(idMiembro) {
+        $.get(urls.config, { idMiembro: idMiembro }, function (res) {
+            if (!res || !res.success) { toast(false, res && res.mensaje); return; }
+            liderActual = idMiembro;
+            pintarLider(res.data, res.usuarios || []);
+            $('#tablaLideres tbody tr').removeClass('table-active');
+            cargarLideres();
+        });
+    }
+
+    function pintarLider(d, usuarios) {
+        $('#panelVacio').hide();
+        $('#panelLider').show();
+        $('#lblLider').text((d.nombre_miembro + ' ' + d.apellidos_miembro).trim());
+
+        // Usuario
+        const u = d.usuario;
+        $('#infoUsuario').html(
+            u ? (u.vinculado
+                    ? '<span class="badge bg-success me-1"><i class="fas fa-link"></i></span>' + esc(T.segUsuarioVinculado) + ': <strong>' + esc(u.correo) + '</strong>'
+                    : '<span class="badge bg-info text-dark me-1"><i class="fas fa-envelope"></i></span>' + esc(T.segUsuarioPorCorreo) + ': <strong>' + esc(u.correo) + '</strong>')
+              : '<span class="badge bg-warning text-dark me-1"><i class="fas fa-exclamation-triangle"></i></span>' + esc(T.segSinUsuario));
+        const cbo = $('#cboUsuario').empty().append($('<option value="0">').text(T.segElegirUsuario));
+        usuarios.forEach(function (x) {
+            cbo.append($('<option>').val(x.id).text(x.nombre + ' — ' + x.correo + ' (' + tDato(x.rol) + ')'));
+        });
+        cbo.val(u ? u.id : 0);
+
+        // Zonas
+        const lz = $('#listaZonas').empty();
+        (d.zonas || []).forEach(function (z) {
+            const id = 'chkZona' + z.id;
+            lz.append(
+                $('<div class="form-check form-check-inline">')
+                    .append($('<input type="checkbox" class="form-check-input chk-zona">').attr('id', id).val(z.id).prop('checked', z.asignada))
+                    .append($('<label class="form-check-label">').attr('for', id).text(tDato(z.nombre)))
+            );
+        });
+        const hayZonas = (d.zonas || []).length > 0;
+        $('#sinZonas').toggle(!hayZonas);
+        $('#btnGuardarZonas').toggle(hayZonas);
+
+        // Asignados
+        pintarAsignados(d.asignados || []);
+    }
+
+    function pintarAsignados(lista) {
+        const tb = $('#tbodyAsignados').empty();
+        $('#sinAsignados').toggle(lista.length === 0);
+        lista.forEach(function (a) {
+            tb.append(
+                $('<tr>')
+                    .append($('<td>').text((a.nombre_miembro + ' ' + a.apellidos_miembro).trim()))
+                    .append($('<td>').text(a.motivo || '—'))
+                    .append($('<td class="small">').text(a.fecha_asignacion ? a.fecha_asignacion.substring(0, 10) : ''))
+                    .append($('<td class="text-center">').append(
+                        $('<button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>')
+                            .on('click', function () { quitarAsignado(a.id); })))
+            );
+        });
+    }
+
+    $('#btnGuardarZonas').on('click', function () {
+        if (!liderActual) return;
+        const zonas = $('.chk-zona:checked').map(function () { return parseInt(this.value); }).get();
+        $.ajax({
+            url: urls.zonas, type: 'POST', contentType: 'application/json',
+            data: JSON.stringify({ IdMiembro: liderActual, Zonas: zonas }),
+            success: function (res) { toast(res.success, res.mensaje); if (res.success) cargarLideres(); },
+            error: function () { toast(false); }
+        });
+    });
+
+    $('#btnVincular').on('click', function () {
+        if (!liderActual) return;
+        $.post(urls.vincular, { idLider: liderActual, idUsuario: parseInt($('#cboUsuario').val()) || 0 }, function (res) {
+            toast(res.success, res.mensaje);
+            if (res.success) seleccionarLider(liderActual);
+        }).fail(function () { toast(false); });
+    });
+
+    $('#btnAgregar').on('click', function () {
+        if (!liderActual) return;
+        const idMiembro = parseInt($('#hiddenIdMiembro').val()) || 0;
+        if (idMiembro <= 0) { toast(false, T.segSeleccionaPersona); return; }
+        $.post(urls.agregar, { idLider: liderActual, idMiembro: idMiembro, motivo: $('#txtMotivo').val().trim() }, function (res) {
+            toast(res.success, res.mensaje);
+            if (res.success) {
+                $('#txtBuscarMiembro, #txtMotivo').val('');
+                $('#hiddenIdMiembro').val(0);
+                seleccionarLider(liderActual);
+            }
+        }).fail(function () { toast(false); });
+    });
+
+    function quitarAsignado(id) {
+        Swal.fire({
+            title: T.mEstasSeguro, text: T.segQuitarAsignado, icon: 'warning',
+            showCancelButton: true, confirmButtonText: T.mSiEliminar, cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33'
+        }).then(function (r) {
+            if (!r.isConfirmed) return;
+            $.post(urls.eliminar, { id: id }, function (res) {
+                toast(res.success, res.mensaje);
+                if (res.success) seleccionarLider(liderActual);
+            }).fail(function () { toast(false); });
+        });
+    }
+
+    $(document).ready(cargarLideres);
+</script>
+}

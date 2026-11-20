@@ -29,7 +29,7 @@ namespace CASTIglesias.Controllers
         public IActionResult Index()
         {
             ViewBag.Cuentas = _negocioConciliacion.CuentasConciliables();
-            return View();
+            return View("~/Views/Finanzas/FinanzasConciliacion.cshtml");
         }
 
         [HttpGet]

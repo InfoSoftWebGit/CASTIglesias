@@ -49,6 +49,16 @@ namespace CASTIglesias.Models
             EsAdminPlataforma(usuario);
 
         /// <summary>
+        /// Pastores (de cualquier nivel), AdminGlobal y administrador de plataforma: los
+        /// que ven Seguimiento completo, con sus filtros, y lo configuran para los líderes.
+        /// </summary>
+        public static bool EsPastorOAdmin(ClaimsPrincipal usuario) =>
+            usuario.IsInRole("AdminGlobal") ||
+            usuario.IsInRole("PastorGeneral") ||
+            usuario.IsInRole("PastorSede") ||
+            EsAdminPlataforma(usuario);
+
+        /// <summary>
         /// Sustituye los claims indicados y vuelve a emitir la cookie de sesión.
         /// </summary>
         public static async Task ReemplazarAsync(HttpContext http, IDictionary<string, string> nuevos)

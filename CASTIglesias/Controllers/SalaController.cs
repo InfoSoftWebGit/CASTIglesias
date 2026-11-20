@@ -25,7 +25,7 @@ namespace CASTIglesias.Controllers
             _cnZonas  = cnZonas;
         }
 
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Salas))]
         public IActionResult Index()
         {
             int sedeId = ObtenerIdSedeUsuario();
@@ -34,7 +34,7 @@ namespace CASTIglesias.Controllers
         }
 
         [HttpGet]
-        [RequierePermiso(nameof(Permisos.Ajustes))]
+        [RequierePermiso(nameof(Permisos.Salas))]
         public JsonResult Listar()
         {
             try
@@ -61,7 +61,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesCrearEditar))]
+        [RequierePermiso(nameof(Permisos.SalasCrearEditar))]
         public JsonResult Guardar(int idSala, string nombreSala, string reservado,
                                    int? idZonaReserva, string? fechaReserva)
         {
@@ -93,7 +93,7 @@ namespace CASTIglesias.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [RequierePermiso(nameof(Permisos.AjustesEliminar))]
+        [RequierePermiso(nameof(Permisos.SalasEliminar))]
         public JsonResult Eliminar(int idSala)
         {
             try

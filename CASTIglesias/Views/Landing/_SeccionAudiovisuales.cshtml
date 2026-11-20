@@ -1,0 +1,102 @@
+@using System.Text.RegularExpressions
+@{
+    // ════════════════════════════════════════════════════════════════════════
+    //  VÍDEOS DE LA SECCIÓN "AUDIOVISUALES"
+    //  Para añadir uno, copia una línea y pega el enlace de YouTube tal cual lo
+    //  da el botón "Compartir" (vale youtu.be/..., youtube.com/watch?v=...,
+    //  /shorts/... o /embed/...). El primero de la lista sale el más grande.
+    //  Título y descripción van en español; la traducción al inglés se añade en
+    //  Resources/SharedResource.en.resx con el mismo texto como clave.
+    //  Portada (opcional): imagen propia en wwwroot, p. ej. "/img/video-demo.jpg".
+    //  Si la lista está vacía, la sección no aparece en la landing.
+    // ════════════════════════════════════════════════════════════════════════
+    var videos = new List<(string Enlace, string Titulo, string Descripcion, string? Portada)>
+    {
+        ("https://youtu.be/tmffPAZy4ZE", "Digitaliza tu iglesia con Congrega CRM", "Vídeo editado por Ethereal Project.", null),
+        // ("https://youtu.be/XXXXXXXXXXX", "Título del vídeo", "Descripción corta.", null),
+    };
+
+    bool esLanding = ViewData["EsLanding"] as bool? == true;
+
+    // Saca el identificador de 11 caracteres de cualquier formato de enlace de YouTube.
+    static string? IdYoutube(string enlace)
+    {
+        var m = Regex.Match(enlace ?? "", @"(?:youtu\.be/|v=|/embed/|/shorts/|/live/)([A-Za-z0-9_-]{11})");
+        return m.Success ? m.Groups[1].Value : null;
+    }
+
+    var validos = videos
+        .Select(v => (Id: IdYoutube(v.Enlace), v.Titulo, v.Descripcion, v.Portada))
+        .Where(v => v.Id != null)
+        .ToList();
+}
+@if (validos.Count > 0 || !esLanding)
+{
+<!-- ═══════════════════ AUDIOVISUALES ═══════════════════ -->
+<section id="audiovisuales" class="py-5 audiovisuales-section">
+    <div class="container py-4">
+        @if (esLanding)
+        {
+            <div class="text-center mb-5">
+                <div class="section-badge">@L["Audiovisuales"]</div>
+                <h2 class="section-title mt-2">@L["Mira Congrega CRM en acción"]</h2>
+                <p class="section-subtitle mt-3">@L["Vídeos para conocer la aplicación y ver cómo puede ayudar a tu iglesia."]</p>
+            </div>
+        }
+
+        @if (validos.Count == 0)
+        {
+            <div class="blog-vacio">
+                <div><i class="fas fa-film"></i></div>
+                <p class="mb-0">@L["Muy pronto publicaremos aquí nuestros vídeos."]</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4 justify-content-center">
+                @for (int i = 0; i < validos.Count; i++)
+                {
+                    var v = validos[i];
+                    @* El primero ocupa todo el ancho; el resto, de dos en dos. *@
+                    <div class="@(i == 0 ? "col-lg-10" : "col-md-6")">
+                        @* Fachada: hasta que se pulsa no se carga nada de YouTube (ni la
+                           miniatura), así no se envía ningún dato a Google sin que el
+                           visitante lo pida. Al pulsar se cambia por el reproductor de
+                           youtube-nocookie.com. Ver la Política de cookies. *@
+                        <div class="video-marco">
+                            <button type="button" class="video-fachada" data-video="@v.Id"
+                                    aria-label="@L["Reproducir vídeo"]: @L[v.Titulo]"
+                                    style="@(string.IsNullOrEmpty(v.Portada) ? null : $"background-image:url('{v.Portada}')")">
+                                <span class="video-play"><i class="fas fa-play"></i></span>
+                                <span class="video-titulo">@L[v.Titulo]</span>
+                            </button>
+                        </div>
+                        @if (!string.IsNullOrEmpty(v.Descripcion))
+                        {
+                            <p class="video-descripcion">@L[v.Descripcion]</p>
+                        }
+                    </div>
+                }
+            </div>
+            <p class="video-aviso text-center">
+                <i class="fab fa-youtube me-1"></i>@L["Al reproducir un vídeo te conectas con YouTube (Google), que puede usar cookies."]
+                <a href="/cookies">@L["Más información"]</a>
+            </p>
+        }
+    </div>
+</section>
+
+<script>
+    // Cambia la fachada por el reproductor solo cuando el visitante pulsa.
+    document.querySelectorAll(".video-fachada").forEach(function (boton) {
+        boton.addEventListener("click", function () {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://www.youtube-nocookie.com/embed/" + boton.dataset.video + "?autoplay=1&rel=0";
+            iframe.title = boton.getAttribute("aria-label");
+            iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+            iframe.allowFullscreen = true;
+            boton.replaceWith(iframe);
+        });
+    });
+</script>
+}

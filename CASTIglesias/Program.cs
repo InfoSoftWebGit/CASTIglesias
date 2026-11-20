@@ -31,6 +31,11 @@ builder.Services.AddScoped<CN_Usuarios>();
 builder.Services.AddScoped<CD_Webinar>();
 builder.Services.AddScoped<CN_Webinar>();
 
+// Blog público (/blog) y su panel para el administrador de plataforma (/BlogAdmin)
+builder.Services.AddScoped<CD_Blog>();
+builder.Services.AddScoped<CN_Blog>();
+builder.Services.AddSingleton<CASTIglesias.Services.AlmacenImagenesBlog>();
+
 builder.Services.AddScoped<CD_Miembros>();
 builder.Services.AddScoped<CN_Miembros>();
 builder.Services.AddScoped<CD_Zona>();
@@ -73,6 +78,8 @@ builder.Services.AddScoped<CN_ConfigDiezmo>();
 
 builder.Services.AddScoped<CD_Seguimiento>();
 builder.Services.AddScoped<CN_Seguimiento>();
+builder.Services.AddScoped<CD_SeguimientoConfig>();
+builder.Services.AddScoped<CN_SeguimientoConfig>();
 
 builder.Services.AddScoped<CD_DetalleSeguimiento>();
 builder.Services.AddScoped<CN_DetalleSeguimiento>();
@@ -259,6 +266,14 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Página "No se ha encontrado" (404). Cuando una petición termina en un código
+// de error sin cuerpo, se vuelve a ejecutar contra /estado/{código}. Solo el 404
+// tiene página propia (EstadoController); el resto sigue respondiendo vacío
+// como hasta ahora. Va antes de UseStaticFiles para cubrir también ficheros que
+// no existen.
+app.UseStatusCodePagesWithReExecute("/estado/{0}");
+
 app.UseStaticFiles();
 
 // ── Localización de las peticiones (multi-idioma ES/EN) ────────────────────

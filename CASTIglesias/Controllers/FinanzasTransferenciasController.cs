@@ -32,7 +32,7 @@ namespace CASTIglesias.Controllers
             ViewBag.Cajas = _negocioTesoreria.ListarActivas();
             ViewBag.Fondos = _negocioFondos.ListarActivos();
             ViewBag.Sedes = _negocioSedes.ListarSedes();
-            return View();
+            return View("~/Views/Finanzas/FinanzasTransferencias.cshtml");
         }
 
         [HttpGet]

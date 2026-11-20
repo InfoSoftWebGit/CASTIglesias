@@ -13,10 +13,12 @@ namespace CapaNegocio
             _capaDatos = capaDatos;
         }
 
-        public List<Seguimiento> ListarSeguimientos(int sedeID)
+        public List<Seguimiento> ListarSeguimientos(int sedeID, ICollection<int>? idsMiembros = null)
         {
-            return _capaDatos.ListarSeguimientos(sedeID);
+            return _capaDatos.ListarSeguimientos(sedeID, idsMiembros);
         }
+
+        public int? ObtenerIdMiembro(int idSeguimiento) => _capaDatos.ObtenerIdMiembro(idSeguimiento);
 
         public int RegistrarSeguimiento(Seguimiento obj, int sedeID, out string mensaje)
         {

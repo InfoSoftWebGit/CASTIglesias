@@ -1,0 +1,248 @@
+﻿@{
+    bool esLanding = ViewData["EsLanding"] as bool? == true;
+    // Dirección pública del sitio para los datos estructurados.
+    const string urlSitio = "https://www.congrega.es/";
+}
+<!-- ═══════════════════ PRECIOS ═══════════════════ -->
+<section id="precios" class="py-5 pricing-section">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <div class="section-badge">@L["Planes"]</div>
+            <h2 class="section-title mt-2">@L["Elige el plan que mejor se adapta"]</h2>
+            <p class="section-subtitle mt-3">
+                @L["Planes flexibles para iglesias de cualquier tamaño. Sin permanencia, cancela cuando quieras."]
+            </p>
+        </div>
+        @{
+            // Precios en un solo sitio. La oferta de lanzamiento se muestra hasta el
+            // 31/03/2027 inclusive; a partir del 1/4/2027 la página enseña sola el
+            // precio normal, sin tener que volver a publicar.
+            // Cuando exista la pasarela de pago, estos importes deberán coincidir con
+            // la tabla planes y con los precios creados en Stripe.
+            var finOferta = new DateTime(2027, 3, 31);
+            // Quien se da de alta con la oferta conserva el precio en los cobros hasta esta
+            // fecha inclusive; desde el día siguiente paga el precio normal. Debe coincidir
+            // con la fecha que use la pasarela para retirar el descuento.
+            var finPrecioOferta = new DateTime(2028, 3, 31);
+            bool ofertaActiva = DateTime.Today <= finOferta;
+            // "financiero" no es un plan: es el complemento que se contrata SOBRE un
+            // Standard o un Premium. Vive en el mismo diccionario para que la oferta de
+            // lanzamiento y la fecha de fin le apliquen igual que a los planes.
+            var precioNormal = new Dictionary<string, int> { ["basico"] = 25, ["standard"] = 60, ["premium"] = 90, ["financiero"] = 70 };
+            var precioOferta = new Dictionary<string, int> { ["basico"] = 18, ["standard"] = 35, ["premium"] = 60, ["financiero"] = 50 };
+            int Precio(string plan) => ofertaActiva ? precioOferta[plan] : precioNormal[plan];
+        }
+
+        @* ── Datos estructurados (schema.org) ──
+           Le dicen a Google en su propio vocabulario qué es esto: una aplicación
+           de empresa, de quién, en qué idiomas y a qué precio. Es lo que permite
+           que el resultado salga con el rango de precios debajo en vez de una
+           línea de texto suelta.
+
+           Va aquí, pegado al bloque de arriba, para que los importes salgan de
+           Precio() y no haya dos sitios donde mantener el mismo número: si un
+           día los precios del anuncio y los de la página no coinciden, Google
+           retira el resultado enriquecido.
+
+           Las arrobas van dobladas (@@context, @@type) porque en una vista Razor
+           una arroba suelta abre una expresión de C#. *@
+        <script type="application/ld+json">
+        {
+          "@@context": "https://schema.org",
+          "@@type": "SoftwareApplication",
+          "name": "Congrega CRM",
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "Church Management Software",
+          "operatingSystem": "Web",
+          "url": "@urlSitio",
+          "description": "@L["Congrega CRM es el software de gestión para iglesias: miembros, grupos, ministerios, asistencia, finanzas y donaciones en una sola app."]",
+          "inLanguage": ["es", "en"],
+          "offers": {
+            "@@type": "AggregateOffer",
+            "priceCurrency": "EUR",
+            "lowPrice": "@Precio("basico")",
+            "highPrice": "@Precio("premium")",
+            "offerCount": 3,
+            "availability": "https://schema.org/InStock"
+          },
+          "publisher": {
+            "@@type": "Organization",
+            "name": "Congrega CRM",
+            "url": "@urlSitio",
+            "logo": "@(urlSitio)img/logo-congrega-blanco.png",
+            "email": "soporte@@congrega.es",
+            "areaServed": "ES",
+            "contactPoint": {
+              "@@type": "ContactPoint",
+              "contactType": "customer support",
+              "email": "soporte@@congrega.es",
+              "availableLanguage": ["Spanish", "English"]
+            }
+          }
+        }
+        </script>
+
+        @if (ofertaActiva)
+        {
+            <div class="oferta-lanzamiento" role="note">
+                <div class="oferta-icono"><i class="fas fa-gift"></i></div>
+                <div>
+                    <div class="oferta-titulo">@L["OFERTA POR LANZAMIENTO"]</div>
+                    <div class="oferta-validez">
+                        <i class="far fa-calendar-alt me-1"></i>@L["Válido hasta {0}", finOferta.ToString("dd/MM/yyyy")]
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row g-4 align-items-center justify-content-center">
+
+            <!-- Básico -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card">
+                    <div class="plan-name">
+                        <i class="fas fa-leaf me-2" style="color:#10B981;"></i>@L["Básico"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("basico") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            @* Precio normal tachado: la etiqueta oculta aclara a los lectores de pantalla qué es *@
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["basico"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["Perfecto para comunidades pequeñas que dan sus primeros pasos en la digitalización."]
+                    </div>
+                    <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Acceso a"] <strong>@L["3 módulos"]</strong> a elegir</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <a href="@(esLanding ? "#contacto" : "/contacto")" class="btn btn-plan btn-plan-outline">@L["Contratar Básico"]</a>
+                </div>
+            </div>
+
+            <!-- Standard (popular) -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card popular">
+                    <div class="popular-badge"><i class="fas fa-fire me-1"></i> @L["Más popular"]</div>
+                    <div class="plan-name">
+                        <i class="fas fa-rocket me-2" style="color:#3B82F6;"></i>@L["Standard"]
+                    </div>
+                    <div class="plan-etiqueta">
+                        <i class="fas fa-cross"></i> @L["Ideal para pastores de sede"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("standard") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["standard"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["El plan ideal para empezar: todos los módulos para el pastor que dirige una sede."]
+                    </div>
+                    <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Incluye todo lo básico de la aplicación"]</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Hasta"] <strong>1 sede</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Dashboard con gráficas avanzadas"]</span></div>
+                    <a href="@(esLanding ? "#contacto" : "/contacto")" class="btn btn-plan btn-plan-primary">@L["Contratar Standard"]</a>
+                </div>
+            </div>
+
+            <!-- Premium -->
+            <div class="col-md-6 col-lg-4">
+                <div class="pricing-card">
+                    <div class="plan-name">
+                        <i class="fas fa-crown me-2" style="color:#F59E0B;"></i>@L["Premium"]
+                    </div>
+                    <div class="plan-etiqueta">
+                        <i class="fas fa-church"></i> @L["Para pastores con varias sedes"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("premium") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["premium"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["Para el pastor que dirige varias sedes y necesita verlas todas desde un mismo panel."]
+                    </div>
+                    <hr />
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Incluye todo lo básico de la aplicación"]</strong></span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Acceso completo"]</strong> @L["a todos los módulos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span><strong>@L["Multi-sede"]</strong>: @L["varias sedes en una misma cuenta"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Actualizaciones automáticas"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Soporte prioritario"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Personalización de módulos"]</span></div>
+                    <a href="@(esLanding ? "#contacto" : "/contacto")" class="btn btn-plan btn-plan-outline">@L["Contratar Premium"]</a>
+                </div>
+            </div>
+
+        </div>
+
+        @* ── Complemento: área financiera ───────────────────────────────────────
+           No es un cuarto plan. Se contrata SOBRE un Standard o un Premium, y no
+           está disponible con el Básico porque ese plan limita el número de vistas.
+           Por eso va fuera de la fila, con otro color y diciéndolo explícitamente:
+           si alguien contrata esperando llevarlo suelto, la reclamación es segura. *@
+        <div class="complemento-card">
+            <div class="complemento-badge">
+                <i class="fas fa-plus-circle"></i> @L["COMPLEMENTO"]
+            </div>
+            <div class="complemento-grid">
+                <div class="complemento-col">
+                    <div class="plan-name">
+                        <i class="fas fa-calculator me-2" style="color:#0D9488;"></i>@L["Área financiera"]
+                    </div>
+                    <div class="plan-precios">
+                        <div class="plan-price"><sup>€</sup>@Precio("financiero") <span class="period">@L["/mes"]</span></div>
+                        @if (ofertaActiva)
+                        {
+                            <del class="plan-price-old"><span class="visually-hidden">@L["Antes:"] </span>@precioNormal["financiero"] €</del>
+                        }
+                    </div>
+                    <div class="plan-iva">@L["IVA (21 %) incluido"]</div>
+                    <div class="plan-desc">
+                        @L["La contabilidad de la iglesia en la misma aplicación: ingresos, gastos, fondos y ejercicios contables, con la trazabilidad que hace falta para rendir cuentas."]
+                    </div>
+                    <div class="complemento-aviso">
+                        <i class="fas fa-info-circle me-1"></i>
+                        @L["Se suma a los planes Standard y Premium. No está disponible con el plan Básico."]
+                    </div>
+                </div>
+                <div class="complemento-col">
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Panel financiero con ingresos, gastos y reparto por concepto"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Ejercicios y periodos contables, con cierre"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Plan de cuentas, fondos, cajas y bancos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Numeración correlativa de documentos"]</span></div>
+                    <div class="plan-feature"><i class="fas fa-check-circle"></i><span>@L["Datos fiscales de los donantes cifrados"]</span></div>
+                    <a href="@(esLanding ? "#contacto" : "/contacto")" class="btn btn-plan btn-complemento">@L["Añadir área financiera"]</a>
+                </div>
+            </div>
+        </div>
+
+        @if (ofertaActiva)
+        {
+            @* Condiciones de la oferta a la vista antes de pagar: evita sorpresas y
+               reclamaciones cuando se pase al precio normal. *@
+            <p class="text-center mt-4 mb-0 fw-semibold" style="font-size:0.9rem;color:#B91C1C;">
+                <i class="fas fa-tag me-1"></i>
+                @L["Contrata antes del {0} y mantén el precio de oferta hasta el {1}. Después se aplica el precio normal.",
+                   finOferta.ToString("dd/MM/yyyy"), finPrecioOferta.ToString("dd/MM/yyyy")]
+            </p>
+        }
+        <p class="text-center text-muted mt-4" style="font-size:0.87rem;">
+            <i class="fas fa-info-circle me-1"></i>
+            @L["¿Necesitas una solución personalizada?"]
+            <a href="@(esLanding ? "#contacto" : "/contacto")" style="color:var(--primary);text-decoration:none;font-weight:600;">@L["Contáctanos"]</a>
+            @L["y te preparamos una oferta a medida."]
+        </p>
+    </div>
+</section>

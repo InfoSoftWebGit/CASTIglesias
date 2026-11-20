@@ -1,0 +1,111 @@
+@model List<CapaEntidad.BlogArticulo>
+@* Listado de artículos del blog para el administrador de plataforma. *@
+@{
+    ViewData["Title"] = L["Blog"].Value;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-4">
+        <h1 class="mb-0">@L["Blog"]</h1>
+        <div class="d-flex gap-2">
+            <a href="/blog" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+                <i class="fas fa-external-link-alt me-1"></i>@L["Ver el blog"]
+            </a>
+            <a asp-action="Editar" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>@L["Nuevo artículo"]
+            </a>
+        </div>
+    </div>
+    <p class="text-muted mt-2">
+        @L["Artículos de congrega.es/blog. Los borradores no se ven en la web hasta que se publican."]
+    </p>
+
+    @if (TempData["BlogOk"] is string ok)
+    {
+        <div class="alert alert-success">@ok</div>
+    }
+    @if (TempData["BlogError"] is string error)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>@L["Título"]</th>
+                        <th>@L["Dirección"]</th>
+                        <th>@L["Idioma"]</th>
+                        <th>@L["Estado"]</th>
+                        <th>@L["Publicado el"]</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-muted">@L["Todavía no hay artículos. Pulsa «Nuevo artículo» para escribir el primero."]</td></tr>
+                    }
+                    @foreach (var articulo in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@articulo.titulo</td>
+                            <td><code>/blog/@articulo.slug</code></td>
+                            <td>@articulo.idioma.ToUpperInvariant()</td>
+                            <td>
+                                @if (articulo.publicado)
+                                {
+                                    <span class="badge bg-success">@L["Publicado"]</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@L["Borrador"]</span>
+                                }
+                            </td>
+                            <td>@articulo.fecha_publicacion?.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end text-nowrap">
+                                @if (articulo.publicado)
+                                {
+                                    <a href="/blog/@articulo.slug" target="_blank" rel="noopener"
+                                       class="btn btn-sm btn-outline-secondary" title="@L["Ver en la web"]">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                }
+                                <a asp-action="Editar" asp-route-id="@articulo.ID_articulo"
+                                   class="btn btn-sm btn-outline-primary">@L["Editar"]</a>
+                                <form asp-action="Eliminar" method="post" class="d-inline frm-eliminar"
+                                      data-titulo="@articulo.titulo">
+                                    <input type="hidden" name="id" value="@articulo.ID_articulo" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="@L["Eliminar"]">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+<script>
+    // Confirmación antes de borrar: un artículo eliminado no se puede recuperar.
+    document.querySelectorAll(".frm-eliminar").forEach(function (formulario) {
+        formulario.addEventListener("submit", function (e) {
+            e.preventDefault();
+            Swal.fire({
+                icon: "warning",
+                title: @Json.Serialize(L["¿Eliminar este artículo?"].Value),
+                text: formulario.dataset.titulo,
+                showCancelButton: true,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: @Json.Serialize(L["Eliminar"].Value),
+                cancelButtonText: @Json.Serialize(L["Cancelar"].Value)
+            }).then(function (r) { if (r.isConfirmed) formulario.submit(); });
+        });
+    });
+</script>
+}

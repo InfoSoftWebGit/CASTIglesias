@@ -1,0 +1,78 @@
+@* ─────────────────────────────────────────────────────────────────────────────
+   Google Tag Manager condicionado al consentimiento de cookies.
+
+   Va lo primero dentro de <head> en las páginas públicas (landing, webinar).
+   El banner que recoge la decisión es _BannerCookies.cshtml, al final de <body>.
+
+   Por qué así:
+   - La ley española (LSSI art. 22.2) y la guía de cookies de la AEPD exigen
+     pedir permiso ANTES de instalar cookies que no sean técnicas. Antes GTM se
+     cargaba al abrir la página, sin preguntar.
+   - Se usa el "modo básico" de Consent Mode v2: mientras no haya permiso, el
+     script de Google ni siquiera se descarga, así que no salen cookies ni la IP
+     del visitante hacia Google. Si acepta, se carga GTM con el consentimiento
+     ya actualizado y las etiquetas de GA4 / Google Ads lo respetan.
+   - Las señales de consentimiento por defecto se envían igualmente a dataLayer
+     para que, cuando GTM llegue, arranque sabiendo qué está permitido.
+
+   La decisión se guarda en la cookie técnica "cg_consent" (no necesita permiso
+   porque solo sirve para recordar la elección). Formato: v1.a{0|1}.p{0|1}.{fecha}
+   Si algún día cambian las categorías, subir a "v2" hace que se vuelva a
+   preguntar a todo el mundo, como pide la AEPD.
+   ───────────────────────────────────────────────────────────────────────────── *@
+<script>
+(function (w, d) {
+    var GTM_ID = 'GTM-T3W99HQS';
+
+    w.dataLayer = w.dataLayer || [];
+    function gtag() { w.dataLayer.push(arguments); }
+    w.gtag = w.gtag || gtag;
+
+    // Todo denegado hasta que la persona decida. Las técnicas no necesitan permiso.
+    gtag('consent', 'default', {
+        analytics_storage:     'denied',
+        ad_storage:            'denied',
+        ad_user_data:          'denied',
+        ad_personalization:    'denied',
+        functionality_storage: 'granted',
+        security_storage:      'granted'
+    });
+
+    function leer() {
+        var m = d.cookie.match(/(?:^|;\s*)cg_consent=([^;]*)/);
+        if (!m) return null;
+        var p = decodeURIComponent(m[1]).split('.');
+        if (p[0] !== 'v1') return null;
+        return { analitica: p[1] === 'a1', publicidad: p[2] === 'p1' };
+    }
+
+    var gtmCargado = false;
+    function aplicar(c) {
+        gtag('consent', 'update', {
+            analytics_storage:  c.analitica  ? 'granted' : 'denied',
+            ad_storage:         c.publicidad ? 'granted' : 'denied',
+            ad_user_data:       c.publicidad ? 'granted' : 'denied',
+            ad_personalization: c.publicidad ? 'granted' : 'denied'
+        });
+
+        if (!gtmCargado && (c.analitica || c.publicidad)) {
+            gtmCargado = true;
+            w.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+            var s = d.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtm.js?id=' + GTM_ID;
+            var f = d.getElementsByTagName('script')[0];
+            f.parentNode.insertBefore(s, f);
+        }
+    }
+
+    w.CongregaConsent = {
+        leer: leer,
+        aplicar: aplicar,
+        gtmCargado: function () { return gtmCargado; }
+    };
+
+    var guardado = leer();
+    if (guardado) aplicar(guardado);
+})(window, document);
+</script>
