@@ -1,0 +1,45 @@
+@*
+    Informe mensual imprimible. El HTML lo compone FormateadorAnalitica, el mismo
+    que se envía por correo: así lo que se imprime y lo que llega es idéntico.
+*@
+@{
+    ViewBag.Title = L["Informe mensual"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int anio = ViewBag.Anio, mes = ViewBag.Mes;
+    var anterior = new DateTime(anio, mes, 1).AddMonths(-1);
+    var siguiente = new DateTime(anio, mes, 1).AddMonths(1);
+    bool haySiguiente = siguiente <= DateTime.Today;
+}
+<style>
+    @@media print {
+        body * { visibility: hidden; }
+        #informeMensual, #informeMensual * { visibility: visible; }
+        #informeMensual { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+</style>
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item active">@L["Informe mensual"]</li>
+</ol>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a class="btn btn-outline-secondary btn-sm" asp-action="InformeMensual" asp-route-anio="@anterior.Year" asp-route-mes="@anterior.Month">
+        <i class="fas fa-chevron-left me-1"></i> @L["Mes anterior"]
+    </a>
+    @if (haySiguiente)
+    {
+        <a class="btn btn-outline-secondary btn-sm" asp-action="InformeMensual" asp-route-anio="@siguiente.Year" asp-route-mes="@siguiente.Month">
+            @L["Mes siguiente"] <i class="fas fa-chevron-right ms-1"></i>
+        </a>
+    }
+    <button type="button" class="btn btn-primary btn-sm ms-auto" onclick="window.print()">
+        <i class="fas fa-file-pdf me-1"></i> @L["Imprimir / PDF"]
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body" id="informeMensual">
+        @Html.Raw(ViewBag.Html)
+    </div>
+</div>

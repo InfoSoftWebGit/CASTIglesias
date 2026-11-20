@@ -131,5 +131,11 @@ namespace CapaEntidad
 
         [Column("Tipo_relacion_familiar")]
         public string? tipo_relacion_familiar { get; set; }
+
+        // Congregante con el que está casado/a. Se guarda en las dos fichas (cada
+        // una apunta a la otra) y solo lo escribe CD_Miembros.VincularConyuge, que
+        // mantiene la pareja coherente: los métodos de guardar la ficha no lo tocan.
+        [Column("ID_conyuge")]
+        public int? id_conyuge { get; set; }
     }
 }

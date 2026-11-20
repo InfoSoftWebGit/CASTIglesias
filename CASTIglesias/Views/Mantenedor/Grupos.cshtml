@@ -15,6 +15,9 @@
     <li class="breadcrumb-item active">@L["Grupos"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("gr", "Pertenencia", L["Evolución de los grupos"].Value, "grupo"))
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-users me-1"></i> @L["Lista de Grupos"]

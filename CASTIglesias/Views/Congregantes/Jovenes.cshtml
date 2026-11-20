@@ -14,6 +14,9 @@
     <li class="breadcrumb-item active">@L["Jóvenes"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("jv", "Jovenes", L["Evolución de los jóvenes"].Value))
+
 @if (zonaSinConfigurar)
 {
     <div class="alert alert-warning d-flex align-items-center mb-4">

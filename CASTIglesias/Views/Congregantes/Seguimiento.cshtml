@@ -5,11 +5,13 @@
     var loggedInSedeID = ViewBag.sedeID ?? 0;
     var loggedInSedeNombre = ViewBag.nombre_sede?.ToString() ?? "Sede Desconocida";
 
-    // Pastores y admins: todo, con filtros. Resto: solo su alcance (Configuración → Seguimientos).
+    // Pastores y admins: todo, con filtros. Líder: sus personas a cargo y su lista.
+    // Supervisor de zona: además ve (sin poder tocar) los de sus zonas.
     bool esPastor = ViewBag.EsPastorSeguimiento == true;
     bool tieneAlcance = ViewBag.TieneAlcanceSeguimiento == true;
     bool liderVinculado = ViewBag.LiderVinculado == true;
     bool tieneAsignados = ViewBag.TieneAsignados == true;
+    bool esSupervisor = ViewBag.EsSupervisorSeguimiento == true;
 }
 <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -43,6 +45,9 @@
     <li class="breadcrumb-item active">@L["Seguimiento de congregantes"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("sg", "Seguimiento", L["Evolución del seguimiento"].Value))
+
 @if (!esPastor && !tieneAlcance)
 {
     <div class="alert alert-info">
@@ -53,8 +58,16 @@
         }
         else
         {
-            @L["Todavía no tienes zonas ni personas asignadas para hacer seguimiento. Pide a tu pastor que te las asigne."]
+            @L["Todavía no tienes personas a cargo ni asignadas para hacer seguimiento. Pide a tu pastor que te las asigne."]
         }
+    </div>
+}
+
+@if (!esPastor && esSupervisor)
+{
+    <div class="alert alert-secondary small">
+        <i class="fas fa-eye me-1"></i>
+        @L["Supervisas una o más zonas: ves todos sus seguimientos, pero solo puedes registrar, editar o borrar los de tus personas a cargo y tu lista."]
     </div>
 }
 
@@ -252,6 +265,9 @@
 
 <script>
     var tablaSeguimiento;
+    // IDs de seguimientos que el supervisor de zona solo puede ver (ListarSeguimientos)
+    var soloLectura = new Set();
+    var txtSoloLectura = @Json.Serialize(L["Solo lectura: esta persona no está a tu cargo"].Value);
     var tablaSinSeguimiento = null;
     var tablaMisAsignados = null;
     var esPastor = @Json.Serialize(esPastor);
@@ -364,13 +380,16 @@
                 url: '@Url.Action("ListarSeguimientos", "Congregantes")',
                 type: 'GET',
                 data: function (d) { var z = zonaFiltro(); if (z) d.idZona = z; },
-                dataSrc: 'data'
+                dataSrc: function (json) {
+                    soloLectura = new Set((json && json.soloLectura) || []);
+                    return (json && json.data) || [];
+                }
             },
             columns: [
                 {
                     data: null,
                     render: function (data) {
-                        return (data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || '');
+                        return $('<div>').text((data.nombre_miembro || '') + ' ' + (data.apellidos_miembro || '')).html();
                     }
                 },
                 {
@@ -401,6 +420,9 @@
                     data: null,
                     orderable: false,
                     render: function (data) {
+                        // Supervisor de zona: ve el seguimiento, pero la persona no es suya
+                        if (soloLectura.has(data.id))
+                            return '<span class="text-muted small" title="' + txtSoloLectura + '"><i class="fas fa-eye"></i></span>';
                         return '<button data-permiso="SeguimientoCrearEditar" class="btn btn-sm btn-warning me-1" onclick=\'abrirModal(' + JSON.stringify(data) + ')\'>' +
                                '<i class="fas fa-edit"></i></button>' +
                                '<button data-permiso="SeguimientoEliminar" class="btn btn-sm btn-danger" onclick="eliminarSeguimiento(' + data.id + ')">' +
@@ -592,7 +614,8 @@
             $.ajax({
                 url: '@Url.Action("BuscarMiembrosSeguimiento", "Congregantes")',
                 type: 'GET',
-                data: { term: term },
+                // Solo personas a las que puede registrar seguimiento (no las de la zona que supervisa)
+                data: { term: term, gestionar: true },
                 success: function (res) {
                     var dd = $('#dropdownNombreMiembro');
                     dd.empty();

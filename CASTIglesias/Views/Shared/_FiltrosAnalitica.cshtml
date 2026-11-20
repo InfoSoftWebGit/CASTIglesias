@@ -1,0 +1,62 @@
+@model string
+@*
+    Barra de filtros común de los paneles de informes (la engancha Analitica.panel
+    en wwwroot/js/analitica.js).
+
+    Model: prefijo de los id ("as" → asRango, asDesde, asHasta...), para que dos
+    paneles en la misma página no choquen.
+    ViewData["ConTurno"] = true añade el desplegable de turno (asistencia); sus
+    opciones las rellena el panel con los turnos que tengan datos.
+*@
+@{
+    var p = Model;
+    var conTurno = ViewData["ConTurno"] as bool? ?? false;
+}
+<div class="analitica-filtros analitica-no-imprimir">
+    <div>
+        <label class="form-label" for="@(p)Rango">@L["Periodo"]</label>
+        <select id="@(p)Rango" class="form-select form-select-sm">
+            <option value="mes">@L["Este mes"]</option>
+            <option value="mes_anterior">@L["Mes anterior"]</option>
+            <option value="trimestre">@L["Este trimestre"]</option>
+            <option value="anio">@L["Este año"]</option>
+            <option value="12m" selected>@L["Últimos 12 meses"]</option>
+            <option value="24m">@L["Últimos 24 meses"]</option>
+            <option value="anio_anterior">@L["Año anterior"]</option>
+            <option value="personalizado">@L["Personalizado"]</option>
+        </select>
+    </div>
+    <div>
+        <label class="form-label" for="@(p)Desde">@L["Desde"]</label>
+        <input type="date" id="@(p)Desde" class="form-control form-control-sm" />
+    </div>
+    <div>
+        <label class="form-label" for="@(p)Hasta">@L["Hasta"]</label>
+        <input type="date" id="@(p)Hasta" class="form-control form-control-sm" />
+    </div>
+    <div>
+        <label class="form-label" for="@(p)Agrupacion">@L["Agrupar por"]</label>
+        <select id="@(p)Agrupacion" class="form-select form-select-sm">
+            <option value="semana">@L["Semana"]</option>
+            <option value="mes" selected>@L["Mes"]</option>
+            <option value="trimestre">@L["Trimestre"]</option>
+        </select>
+    </div>
+    @if (conTurno)
+    {
+        <div>
+            <label class="form-label" for="@(p)Turno">@L["Turno"]</label>
+            <select id="@(p)Turno" class="form-select form-select-sm">
+                <option value="">@L["Todos"]</option>
+            </select>
+        </div>
+    }
+    <div class="ms-auto d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-outline-success" id="@(p)DescargarDatos">
+            <i class="fas fa-file-excel me-1"></i> @L["Descargar datos"]
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="@(p)Imprimir">
+            <i class="fas fa-file-pdf me-1"></i> @L["Imprimir / PDF"]
+        </button>
+    </div>
+</div>

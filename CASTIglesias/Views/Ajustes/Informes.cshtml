@@ -1,0 +1,255 @@
+@*
+    Ajustes > Informes (solo pastores y AdminGlobal):
+      1. Quién puede ver los gráficos e informes, además de los pastores.
+      2. Objetivos anuales que usa el panel de salud del inicio.
+      3. Informe mensual por correo a los pastores generales.
+*@
+@{
+    ViewBag.Title = L["Informes"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var indicadores = (string[])ViewBag.Indicadores;
+    var etiquetas = new Dictionary<string, string>
+    {
+        ["nuevos"] = L["Personas nuevas"].Value,
+        ["a_miembro"] = L["Pasaron a miembro"].Value,
+        ["bautismos"] = L["Bautismos"].Value,
+        ["crecimiento"] = L["Crecimiento neto"].Value,
+        ["asistencia_media"] = L["Asistencia media"].Value,
+        ["seguimientos"] = L["Seguimientos"].Value,
+        ["donantes"] = L["Personas que aportan"].Value
+    };
+    var ayudas = new Dictionary<string, string>
+    {
+        ["nuevos"] = L["Personas que llegan en el año"].Value,
+        ["a_miembro"] = L["Personas que pasan a miembro oficial en el año"].Value,
+        ["bautismos"] = L["Bautismos con fecha en el año"].Value,
+        ["crecimiento"] = L["Personas activas de más al acabar el año"].Value,
+        ["asistencia_media"] = L["Media de personas por culto"].Value,
+        ["seguimientos"] = L["Seguimientos registrados en el año"].Value,
+        ["donantes"] = L["Personas distintas que aportan en el año"].Value
+    };
+    int anioActual = DateTime.Today.Year;
+}
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+
+<ol class="breadcrumb mb-4 mt-4">
+    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">@L["Información"]</a></li>
+    <li class="breadcrumb-item">@L["Configuración de la aplicación"]</li>
+    <li class="breadcrumb-item active">@L["Informes"]</li>
+</ol>
+
+<ul class="nav nav-tabs mb-3" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabAcceso" type="button" role="tab">
+            <i class="fas fa-user-shield me-1"></i> @L["Quién ve los informes"]
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabObjetivos" type="button" role="tab">
+            <i class="fas fa-bullseye me-1"></i> @L["Objetivos anuales"]
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabCorreo" type="button" role="tab">
+            <i class="fas fa-envelope me-1"></i> @L["Informe mensual"]
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    @* ── 1. Quién ve los informes ── *@
+    <div class="tab-pane fade show active" id="tabAcceso" role="tabpanel">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-user-shield me-1"></i> @L["Quién ve los informes"]</div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    @L["Los gráficos e informes de todas las pantallas y el panel de salud del inicio solo los ven los pastores. Marca aquí a las demás personas que también deben verlos (por ejemplo, el equipo de liderazgo). Cada persona solo verá los informes de las pantallas a las que ya tiene acceso."]
+                </p>
+                <div class="table-responsive">
+                    <table id="tablaUsuariosInformes" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>@L["Nombre"]</th>
+                                <th>@L["Rol"]</th>
+                                <th>@L["Sede"]</th>
+                                <th class="text-center">@L["Ve los informes"]</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── 2. Objetivos anuales ── *@
+    <div class="tab-pane fade" id="tabObjetivos" role="tabpanel">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span><i class="fas fa-bullseye me-1"></i> @L["Objetivos anuales"] · <span id="lblSedeObjetivos"></span></span>
+                <select id="cboAnioObjetivos" class="form-select form-select-sm w-auto">
+                    @for (int a = anioActual + 1; a >= anioActual - 3; a--)
+                    {
+                        <option value="@a" selected="@(a == anioActual)">@a</option>
+                    }
+                </select>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    @L["El panel de salud del inicio compara cada indicador con su objetivo y con lo que debería llevarse a estas alturas del año. Deja vacío lo que no quieras fijar. Los objetivos son de la sede en la que estás trabajando; si una sede no tiene, se usan los de «Todas las sedes»."]
+                </p>
+                <div class="row g-3" id="formObjetivos">
+                    @foreach (var ind in indicadores)
+                    {
+                        <div class="col-sm-6 col-lg-4">
+                            <label class="form-label fw-semibold" for="obj_@ind">@etiquetas.GetValueOrDefault(ind, ind)</label>
+                            <input type="number" min="0" step="1" class="form-control" id="obj_@ind" data-indicador="@ind" placeholder="—" />
+                            <small class="text-muted">@ayudas.GetValueOrDefault(ind, "")</small>
+                        </div>
+                    }
+                </div>
+                <div class="mt-3 d-flex gap-2 align-items-center">
+                    <button type="button" class="btn btn-primary" id="btnGuardarObjetivos"><i class="fas fa-save me-1"></i> @L["Guardar objetivos"]</button>
+                    <span class="text-success small" id="lblObjetivosGuardados" style="display:none;"><i class="fas fa-check me-1"></i>@L["Guardado"]</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── 3. Informe mensual por correo ── *@
+    <div class="tab-pane fade" id="tabCorreo" role="tabpanel">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-envelope me-1"></i> @L["Informe mensual"]</div>
+            <div class="card-body d-grid gap-3">
+                <p class="text-muted mb-0">
+                    @L["El día 1 de cada mes se envía a los pastores generales un resumen del mes anterior: congregantes, asistencia, seguimiento y economía, con las mismas frases del resumen de cada panel. Todo se calcula en el servidor de Congrega; no se envían datos a servicios externos."]
+                </p>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="chkEnvioMensual">
+                    <label class="form-check-label fw-semibold" for="chkEnvioMensual">@L["Enviar el informe mensual por correo"]</label>
+                </div>
+                <div>
+                    <div class="small text-muted">@L["Destinatarios (pastores generales con correo):"]</div>
+                    <div id="lblDestinatarios" class="small"></div>
+                    <div class="small text-muted mt-1" id="lblUltimoEnvio"></div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-outline-primary" asp-controller="Analitica" asp-action="InformeMensual">
+                        <i class="fas fa-file-lines me-1"></i> @L["Ver el informe del mes pasado"]
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" id="btnEnviarPrueba">
+                        <i class="fas fa-paper-plane me-1"></i> @L["Enviarme una prueba"]
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.T = Object.assign(window.T || {}, {
+            informes: {
+                siempre:     @Json.Serialize(L["Siempre (pastor)"].Value),
+                error:       @Json.Serialize(L["No se pudo guardar."].Value),
+                ninguno:     @Json.Serialize(L["Ningún pastor general tiene correo: no se enviará a nadie."].Value),
+                ultimoEnvio: @Json.Serialize(L["Último informe enviado: {mes}"].Value),
+                nuncaEnviado: @Json.Serialize(L["Todavía no se ha enviado ningún informe."].Value),
+                pruebaOk:    @Json.Serialize(L["Te hemos enviado el informe del mes pasado a {correo}."].Value),
+                todas:       @Json.Serialize(L["Todas las sedes"].Value)
+            }
+        });
+
+        (function () {
+            'use strict';
+            const T = window.T.informes;
+            const url = {
+                usuarios: '@Url.Action("ListarUsuariosInformes", "Ajustes")',
+                guardarVer: '@Url.Action("GuardarVerInformes", "Ajustes")',
+                objetivos: '@Url.Action("ObtenerObjetivos", "Ajustes")',
+                guardarObjetivos: '@Url.Action("GuardarObjetivos", "Ajustes")',
+                config: '@Url.Action("ObtenerConfigInformes", "Ajustes")',
+                guardarEnvio: '@Url.Action("GuardarEnvioMensual", "Ajustes")',
+                prueba: '@Url.Action("EnviarInformePrueba", "Ajustes")'
+            };
+            const esc = s => $('<div>').text(s ?? '').html();
+            const error = m => Swal.fire({ icon: 'error', text: m || T.error });
+
+            // 1. Quién ve los informes
+            $('#tablaUsuariosInformes').DataTable({
+                ajax: { url: url.usuarios, dataSrc: j => j.success ? j.data : [] },
+                columns: [
+                    { data: 'nombre', render: d => esc(d) },
+                    { data: 'rol', render: d => esc(d) },
+                    { data: 'sede', render: d => esc(d) },
+                    {
+                        data: null, className: 'text-center', orderable: false,
+                        render: u => u.siempre
+                            ? `<span class="badge bg-secondary">${esc(T.siempre)}</span>`
+                            : `<div class="form-check form-switch d-inline-block"><input class="form-check-input chk-ver" type="checkbox" role="switch" data-id="${u.id_usuario}" ${u.ver_informes ? 'checked' : ''}></div>`
+                    }
+                ],
+                order: [],
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/' + (document.documentElement.lang === 'en' ? 'en-GB' : 'es-ES') + '.json' }
+            });
+            $('#tablaUsuariosInformes').on('change', '.chk-ver', function () {
+                const chk = this;
+                $.post(url.guardarVer, { idUsuario: chk.dataset.id, valor: chk.checked })
+                    .done(r => { if (!r.success) { chk.checked = !chk.checked; error(r.mensaje || r.message); } })
+                    .fail(() => { chk.checked = !chk.checked; error(); });
+            });
+
+            // 2. Objetivos anuales
+            function cargarObjetivos() {
+                $.get(url.objetivos, { anio: $('#cboAnioObjetivos').val() }).done(r => {
+                    if (!r.success) return error(r.mensaje || r.message);
+                    $('#lblSedeObjetivos').text(r.sede === 1000 ? T.todas : r.nombreSede);
+                    $('#formObjetivos input').each(function () {
+                        const v = r.data[this.dataset.indicador];
+                        this.value = v == null ? '' : v;
+                    });
+                });
+            }
+            $('#cboAnioObjetivos').on('change', cargarObjetivos);
+            $('#btnGuardarObjetivos').on('click', function () {
+                const valores = {};
+                $('#formObjetivos input').each(function () { valores[this.dataset.indicador] = this.value === '' ? null : Number(this.value); });
+                $.ajax({ url: url.guardarObjetivos, type: 'POST', contentType: 'application/json',
+                         data: JSON.stringify({ anio: Number($('#cboAnioObjetivos').val()), valores }) })
+                    .done(r => {
+                        if (!r.success) return error(r.mensaje || r.message);
+                        $('#lblObjetivosGuardados').stop(true).fadeIn(150).delay(1800).fadeOut(400);
+                    })
+                    .fail(() => error());
+            });
+            cargarObjetivos();
+
+            // 3. Informe mensual
+            function cargarConfig() {
+                $.get(url.config).done(r => {
+                    if (!r.success) return;
+                    $('#chkEnvioMensual').prop('checked', r.envio_mensual);
+                    $('#lblDestinatarios').html(r.destinatarios.length ? r.destinatarios.map(esc).join(', ') : `<span class="text-danger">${esc(T.ninguno)}</span>`);
+                    $('#lblUltimoEnvio').text(r.ultimo_envio ? T.ultimoEnvio.replace('{mes}', r.ultimo_envio) : T.nuncaEnviado);
+                });
+            }
+            $('#chkEnvioMensual').on('change', function () {
+                const chk = this;
+                $.post(url.guardarEnvio, { activo: chk.checked })
+                    .done(r => { if (!r.success) { chk.checked = !chk.checked; error(r.mensaje || r.message); } })
+                    .fail(() => { chk.checked = !chk.checked; error(); });
+            });
+            $('#btnEnviarPrueba').on('click', function () {
+                const btn = $(this).prop('disabled', true);
+                $.post(url.prueba)
+                    .done(r => r.success ? Swal.fire({ icon: 'success', text: T.pruebaOk.replace('{correo}', r.correo) }) : error(r.mensaje || r.message))
+                    .fail(() => error())
+                    .always(() => btn.prop('disabled', false));
+            });
+            cargarConfig();
+        })();
+    </script>
+}

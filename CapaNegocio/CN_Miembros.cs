@@ -65,6 +65,7 @@ namespace CapaNegocio
                 errores.Add("El nombre del miembro no puede ser vacío.");
             if (string.IsNullOrWhiteSpace(obj.apellidos_miembro))
                 errores.Add("El apellido del miembro no puede ser vacío.");
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -97,6 +98,7 @@ namespace CapaNegocio
                 errores.Add("El apellido del miembro no puede ser vacío.");
 
             // Si hay errores, enviarlos y no continuar
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -116,6 +118,27 @@ namespace CapaNegocio
         {
             mensaje = string.Empty;
             return _capaDatos.EliminarMiembro(id, sedeID, out mensaje);
+        }
+
+        //---------------------------------------------------------
+        // CÓNYUGE
+        //---------------------------------------------------------
+        /// <summary>
+        /// Se comprueba antes de guardar la ficha, en todas las pantallas, para no
+        /// dejar guardada una ficha cuyo vínculo luego no se puede hacer.
+        /// </summary>
+        private void AgregarErrorConyuge(MiembroDetalleDTO obj, int sedeID, List<string> errores)
+        {
+            var error = _capaDatos.ValidarConyuge(obj.id_miembro, obj.id_conyuge, sedeID);
+            if (error != null) errores.Add(error);
+        }
+
+        /// <summary>
+        /// Vincula (o desvincula) al cónyuge después de guardar la ficha. Ver CD_Miembros.VincularConyuge.
+        /// </summary>
+        public ResultadoConyuge VincularConyuge(int idMiembro, int? idConyuge, int sedeID, out string mensaje)
+        {
+            return _capaDatos.VincularConyuge(idMiembro, idConyuge, sedeID, out mensaje);
         }
         #endregion
                                              #region MÉTODOS DE CONTADORES
@@ -278,6 +301,7 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
 
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -297,6 +321,7 @@ namespace CapaNegocio
                 errores.Add("El nombre del miembro no puede ser vacío.");
 
             // Si hay errores, enviarlos y no continuar
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -324,6 +349,7 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
             // Si hay errores, enviarlos y no continuar
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);
@@ -349,6 +375,7 @@ namespace CapaNegocio
             if (string.IsNullOrWhiteSpace(obj.nombre_miembro))
                 errores.Add("El nombre del miembro no puede ser vacío.");
             // Si hay errores, enviarlos y no continuar
+            AgregarErrorConyuge(obj, sedeID, errores);
             if (errores.Any())
             {
                 mensaje = string.Join("\n", errores);

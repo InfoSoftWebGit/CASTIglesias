@@ -1,0 +1,168 @@
+@using CASTIglesias.Models
+@*
+    Panel "Informes y evolución" de la asistencia a los cultos.
+
+    La cifra principal es la media por culto (no el total), comparada con el
+    periodo anterior y con el mismo periodo del año pasado. Datos:
+    AnaliticaController.Asistencia. Gráficos: wwwroot/js/analitica.js.
+*@
+@* Solo para quien puede ver informes: pastores y a quien ellos asignen (Ajustes > Informes) *@
+@{ if ((ViewBag.PermisosMiembro as CapaEntidad.Permisos)?.VerInformes != true) { return; } }
+@await Html.PartialAsync("_RecursosAnalitica")
+
+<div class="card mb-4 analitica-panel" id="panelAnaliticaAsistencia">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-line me-1"></i> @L["Informes y evolución"]</span>
+        <button type="button" class="btn btn-sm btn-outline-light analitica-no-imprimir" id="btnAnaliticaAsistencia"
+                data-bs-toggle="collapse" data-bs-target="#cuerpoAnaliticaAsistencia" aria-expanded="false" aria-controls="cuerpoAnaliticaAsistencia">
+            <i class="fas fa-chart-area me-1"></i> <span>@L["Mostrar gráficos"]</span>
+        </button>
+    </div>
+
+    <div id="cuerpoAnaliticaAsistencia" class="collapse">
+        <div class="card-body d-grid gap-3">
+            @await Html.PartialAsync("_FiltrosAnalitica", "as", new ViewDataDictionary(ViewData) { ["ConTurno"] = true })
+
+            <div>
+                <h5 class="mb-0">@L["Evolución de la asistencia"]</h5>
+                <small class="text-muted" id="asRangoTexto"></small>
+            </div>
+
+            <div class="analitica-resumen">
+                <div class="fw-semibold mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i> @L["Resumen del periodo"]</div>
+                <ul id="asResumen"><li class="text-muted">@L["Cargando..."]</li></ul>
+            </div>
+
+            <div class="analitica-kpis" id="asKpis"></div>
+
+            <div class="analitica-rejilla">
+                @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("asGraficoMedia", L["Asistencia media por culto"].Value,
+                    L["Verde cuando sube respecto al periodo anterior, rojo cuando baja"].Value))
+                @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("asGraficoComposicion", L["Quién asiste"].Value,
+                    L["Total de asistentes en cada periodo, por grupo"].Value))
+                @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("asGraficoTurnos", L["Media por turno"].Value,
+                    L["Este periodo frente al anterior"].Value, Bajo: true))
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.T = Object.assign(window.T || {}, {
+        analiticaAsistencia: {
+            nombreInforme: @Json.Serialize(L["Evolución de la asistencia"].Value),
+            tituloMedia:   @Json.Serialize(L["Asistencia media por culto"].Value),
+            tituloComposicion: @Json.Serialize(L["Quién asiste"].Value),
+            tituloTurnos:  @Json.Serialize(L["Media por turno"].Value),
+            turno:         @Json.Serialize(L["Turno"].Value),
+            cultos:        @Json.Serialize(L["Cultos"].Value),
+            grupos: {
+                adultos:   @Json.Serialize(L["Adultos"].Value),
+                ninos:     @Json.Serialize(L["Niños"].Value),
+                nuevos:    @Json.Serialize(L["Nuevos"].Value),
+                invitados: @Json.Serialize(L["Invitados / visitas"].Value)
+            },
+            kpis: {
+                media:     @Json.Serialize(L["Media por culto"].Value),
+                total:     @Json.Serialize(L["Asistencia total"].Value),
+                nuevos:    @Json.Serialize(L["Nuevos"].Value),
+                invitados: @Json.Serialize(L["Invitados / visitas"].Value),
+                maximo:    @Json.Serialize(L["Máximo en un culto"].Value),
+                cultos:    @Json.Serialize(L["Cultos registrados"].Value)
+            }
+        }
+    });
+
+    (function () {
+        'use strict';
+        const A = window.Analitica, TC = window.T.analiticaComun, T = window.T.analiticaAsistencia, C = A.colores;
+        const GRUPOS = ['adultos', 'ninos', 'nuevos', 'invitados'];
+        const selTurno = document.getElementById('asTurno');
+
+        const panel = A.panel({
+            prefijo: 'as',
+            panelId: 'panelAnaliticaAsistencia',
+            cuerpoId: 'cuerpoAnaliticaAsistencia',
+            botonId: 'btnAnaliticaAsistencia',
+            url: '@Url.Action("Asistencia", "Analitica")',
+            claveLocal: 'analiticaAsistenciaAbierto',
+            textos: TC,
+            params: () => ({ turno: selTurno.value }),
+            pintar,
+            descargarTodo: d => A.descargarCSV(T.nombreInforme,
+                [TC.periodo, T.cultos, ...GRUPOS.map(g => T.grupos[g]), TC.total, T.kpis.media, TC.anioAnterior],
+                d.periodos.map((p, i) => [A.etiquetaPeriodo(p.etiqueta, TC), p.cultos, ...GRUPOS.map(g => p[g]), p.total,
+                                          p.media ?? '', d.media_anio_anterior[i] ?? '']))
+        });
+        selTurno.addEventListener('change', panel.cargar);
+
+        function pintar(d) {
+            // Turnos: se conservan los que ya había y se añaden los nuevos
+            const elegido = selTurno.value;
+            selTurno.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
+            d.turnos.forEach(t => selTurno.add(new Option(t, t, false, t === elegido)));
+
+            const etiquetas = d.periodos.map(p => A.etiquetaPeriodo(p.etiqueta, TC));
+
+            A.pintarResumen(document.getElementById('asResumen'), d.resumen, {}, {}, TC.sinDatos);
+
+            const kpis = document.getElementById('asKpis');
+            kpis.innerHTML = '';
+            d.kpis.forEach(k => A.tarjetaKpi(kpis, k, { codigo: 'as_' + k.codigo, titulo: T.kpis[k.codigo], textoAnterior: TC.antes }));
+
+            // Media por culto: línea de tendencia + el mismo periodo del año pasado
+            const medias = d.periodos.map(p => p.media);
+            const cfg = A.lineaTendencia(etiquetas, medias.map(v => v ?? null), { serie: T.kpis.media, media: TC.media, vsAnterior: TC.vsAnterior });
+            cfg.data.datasets[0].spanGaps = true;
+            cfg.data.datasets.push({
+                label: TC.anioAnterior, data: d.media_anio_anterior,
+                borderColor: C.serie[6], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, spanGaps: true, fill: false
+            });
+            A.grafico('asGraficoMedia', cfg, T.tituloMedia, () => ({
+                cabeceras: [TC.periodo, T.kpis.media, TC.anioAnterior],
+                filas: d.periodos.map((p, i) => [etiquetas[i], p.media ?? '', d.media_anio_anterior[i] ?? ''])
+            }));
+
+            A.grafico('asGraficoComposicion', {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: GRUPOS.map((g, i) => ({
+                        label: T.grupos[g], data: d.periodos.map(p => p[g]),
+                        backgroundColor: C.serie[i], borderColor: C.superficie, borderWidth: 2, borderRadius: 4, borderSkipped: false, maxBarThickness: 42
+                    }))
+                },
+                options: A.opcionesBase({
+                    scales: { x: { stacked: true }, y: { stacked: true } },
+                    plugins: { tooltip: { callbacks: { footer: it => `${TC.total}: ${A.fmtNumero(it.reduce((s, x) => s + x.parsed.y, 0))}` } } }
+                })
+            }, T.tituloComposicion, () => ({
+                cabeceras: [TC.periodo, ...GRUPOS.map(g => T.grupos[g]), TC.total],
+                filas: d.periodos.map((p, i) => [etiquetas[i], ...GRUPOS.map(g => p[g]), p.total])
+            }));
+
+            A.grafico('asGraficoTurnos', {
+                type: 'bar',
+                data: {
+                    labels: d.por_turno.map(t => t.turno),
+                    datasets: [
+                        { label: TC.periodoActual, data: d.por_turno.map(t => t.media), backgroundColor: C.serie[0], borderRadius: 4, borderSkipped: 'start', maxBarThickness: 22 },
+                        { label: TC.periodoAnterior, data: d.por_turno.map(t => t.media_anterior), backgroundColor: C.eje, borderRadius: 4, borderSkipped: 'start', maxBarThickness: 22 }
+                    ]
+                },
+                options: A.opcionesBase({
+                    indexAxis: 'y',
+                    interaction: { mode: 'index', axis: 'y', intersect: false },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: C.rejilla, display: true }, border: { display: false } },
+                        y: { grid: { display: false }, ticks: { color: C.tintaSecundaria } }
+                    },
+                    plugins: { tooltip: { callbacks: { afterTitle: it => `${A.fmtNumero(d.por_turno[it[0].dataIndex].cultos)} ${T.cultos.toLowerCase()}` } } }
+                })
+            }, T.tituloTurnos, () => ({
+                cabeceras: [T.turno, T.cultos, TC.periodoActual, TC.periodoAnterior],
+                filas: d.por_turno.map(t => [t.turno, t.cultos, t.media, t.media_anterior])
+            }));
+        }
+    })();
+</script>

@@ -1,0 +1,123 @@
+@*
+    Panel "Salud de la congregación" del inicio: los indicadores clave del año en
+    curso con semáforo y avance hacia los objetivos anuales (Ajustes > Informes).
+
+    Solo para quien puede ver informes. Datos: AnaliticaController.Salud.
+    Semáforo: ver CN_PanelSalud. El color nunca va solo: lleva icono y texto.
+*@
+@{
+    var permisosSalud = ViewBag.PermisosMiembro as CapaEntidad.Permisos;
+    if (permisosSalud?.VerInformes != true) { return; }
+    bool esPastor = CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User);
+}
+@await Html.PartialAsync("_RecursosAnalitica")
+
+<div class="card mb-4 analitica-panel" id="panelSalud">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-heart-pulse me-1"></i> @L["Salud de la congregación"] <span id="saludAnio"></span></span>
+        <div class="d-flex gap-2 analitica-no-imprimir">
+            <a class="btn btn-sm btn-outline-light" asp-controller="Analitica" asp-action="InformeMensual">
+                <i class="fas fa-file-lines me-1"></i> @L["Informe mensual"]
+            </a>
+            @if (esPastor)
+            {
+                <a class="btn btn-sm btn-outline-light" asp-controller="Ajustes" asp-action="Informes">
+                    <i class="fas fa-bullseye me-1"></i> @L["Objetivos y permisos"]
+                </a>
+            }
+        </div>
+    </div>
+    <div class="card-body d-grid gap-3">
+        <small class="text-muted" id="saludRango"></small>
+        <div class="salud-rejilla" id="saludIndicadores">
+            <div class="text-muted"><i class="fas fa-spinner fa-spin"></i> @L["Cargando..."]</div>
+        </div>
+        <div class="analitica-resumen">
+            <div class="fw-semibold mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i> @L["Lo más importante"]</div>
+            <ul id="saludResumen"></ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .salud-rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: .75rem; }
+    .salud-tile { border: 1px solid rgba(11,11,11,.10); border-radius: 10px; padding: .7rem .85rem; background: #fff; display: flex; flex-direction: column; gap: .2rem; text-decoration: none; color: inherit; }
+    .salud-tile:hover { border-color: rgba(11,11,11,.25); color: inherit; }
+    .salud-estado { font-size: .75rem; font-weight: 600; display: inline-flex; align-items: center; gap: .3rem; }
+    .salud-valor { font-size: 1.6rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .salud-barra { position: relative; height: 8px; background: #f0efec; border-radius: 4px; margin-top: .35rem; }
+    .salud-barra > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+    .salud-barra > i { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #0b0b0b; }
+</style>
+
+<script>
+    window.T = Object.assign(window.T || {}, {
+        salud: {
+            estados: {
+                verde: @Json.Serialize(L["En buen camino"].Value),
+                ambar: @Json.Serialize(L["Atención"].Value),
+                rojo:  @Json.Serialize(L["Por detrás"].Value),
+                neutro: @Json.Serialize(L["Sin comparación"].Value)
+            },
+            rango:    @Json.Serialize(L["Del {desde} al {hasta}, comparado con el mismo tramo del año anterior"].Value),
+            vsAnio:   @Json.Serialize(L["vs. año anterior"].Value),
+            objetivo: @Json.Serialize(L["Objetivo {objetivo} · esperado hoy {esperado}"].Value),
+            error:    @Json.Serialize(L["No se pudo cargar el panel de salud."].Value)
+        }
+    });
+
+    (function () {
+        'use strict';
+        const A = window.Analitica, T = window.T.salud, TC = window.T.analiticaComun;
+        const estilo = {
+            verde:  { color: '#006300', icono: 'fa-circle-check', barra: '#0ca30c' },
+            ambar:  { color: '#a86b00', icono: 'fa-circle-exclamation', barra: '#fab219' },
+            rojo:   { color: '#d03b3b', icono: 'fa-circle-xmark', barra: '#d03b3b' },
+            neutro: { color: '#52514e', icono: 'fa-circle-minus', barra: '#898781' }
+        };
+        const base = @Json.Serialize(Url.Content("~/"));
+
+        async function cargar() {
+            try {
+                const resp = await fetch(@Json.Serialize(Url.Action("Salud", "Analitica")), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                const json = await resp.json();
+                if (!json.ok) throw new Error(json.mensaje || json.message || T.error);
+                pintar(json.datos);
+            } catch (e) {
+                document.getElementById('saludIndicadores').innerHTML = `<div class="text-danger">${A.escapar(e.message || T.error)}</div>`;
+            }
+        }
+
+        function pintar(d) {
+            document.getElementById('saludAnio').textContent = `· ${d.anio}`;
+            document.getElementById('saludRango').textContent = A.plantilla(T.rango, { desde: A.fechaCorta(d.desde), hasta: A.fechaCorta(d.hasta) });
+
+            const fmt = (v, f) => f === 'moneda' ? A.fmtMoneda(v) : f === 'porcentaje' ? `${A.fmtNumero(v, 1)} %` : A.fmtNumero(v, 1);
+            document.getElementById('saludIndicadores').innerHTML = d.indicadores.map(i => {
+                const e = estilo[i.estado] || estilo.neutro;
+                const dif = i.valor - i.anterior;
+                const flecha = dif > 0 ? '▲' : dif < 0 ? '▼' : '■';
+                const pct = i.variacion == null ? '' : ` ${A.fmtNumero(Math.abs(i.variacion), 1)} %`;
+                let objetivo = '';
+                if (i.objetivo) {
+                    const ancho = Math.min(100, Math.max(0, (i.progreso || 0) * 100));
+                    const marca = Math.min(100, (i.esperado / i.objetivo) * 100);
+                    objetivo = `<div class="salud-barra" title="${A.escapar(A.plantilla(T.objetivo, { objetivo: fmt(i.objetivo, i.formato), esperado: fmt(i.esperado, i.formato) }))}">
+                                    <span style="width:${ancho}%;background:${e.barra}"></span><i style="left:${marca}%"></i></div>
+                                <small class="text-muted">${A.escapar(A.plantilla(T.objetivo, { objetivo: fmt(i.objetivo, i.formato), esperado: fmt(i.esperado, i.formato) }))}</small>`;
+                }
+                return `<a class="salud-tile" href="${base}${i.enlace || ''}">
+                            <span class="salud-estado" style="color:${e.color}"><i class="fas ${e.icono}"></i>${A.escapar(T.estados[i.estado] || '')}</span>
+                            <span class="text-muted small">${A.escapar(i.etiqueta || i.codigo)}</span>
+                            <span class="salud-valor">${fmt(i.valor, i.formato)}</span>
+                            <span class="small" style="color:${e.color}">${flecha}${pct} <span class="text-muted">${A.escapar(T.vsAnio)} (${fmt(i.anterior, i.formato)})</span></span>
+                            ${objetivo}
+                        </a>`;
+            }).join('');
+
+            A.pintarResumen(document.getElementById('saludResumen'), d.resumen, {}, {}, TC.sinDatos);
+        }
+
+        cargar();
+    })();
+</script>

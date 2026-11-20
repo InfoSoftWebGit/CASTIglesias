@@ -9,6 +9,9 @@
     <li class="breadcrumb-item active">@L["Asistencia"]</li>
 </ol>
 
+@* Informes y evolución (plegado; se carga al abrirlo). Ver _AnaliticaAsistencia. *@
+@await Html.PartialAsync("_AnaliticaAsistencia")
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-handshake me-1"></i> @L["Lista de Asistencias"]

@@ -82,13 +82,32 @@ namespace CASTIglesias.Models
 
         public ContextoIglesiaHttp(IHttpContextAccessor http) => _http = http;
 
+        /// <summary>
+        /// Iglesia fijada a mano para trabajos sin petición web (el envío del informe
+        /// mensual, que recorre las iglesias una a una). Solo lo usa
+        /// InformeMensualServicio, cada vez en un ámbito (scope) nuevo.
+        /// </summary>
+        public int? IdIglesiaForzada { get; set; }
+
         public int IdIglesia
+        {
+            get
+            {
+                if (IdIglesiaForzada is { } forzada) return forzada;
+                var usuario = _http.HttpContext?.User;
+                return usuario?.Identity?.IsAuthenticated == true
+                    ? SesionClaims.ObtenerIdIglesia(usuario)
+                    : 0;
+            }
+        }
+
+        public int IdUsuario
         {
             get
             {
                 var usuario = _http.HttpContext?.User;
                 return usuario?.Identity?.IsAuthenticated == true
-                    ? SesionClaims.ObtenerIdIglesia(usuario)
+                    ? SesionClaims.ObtenerIdUsuario(usuario)
                     : 0;
             }
         }

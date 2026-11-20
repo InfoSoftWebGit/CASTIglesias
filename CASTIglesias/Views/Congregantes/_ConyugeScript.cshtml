@@ -1,0 +1,332 @@
+@model string
+@*
+    Comportamiento del campo "Casado/a con" (_CampoConyuge) en las cuatro fichas de
+    congregante. Se incluye dentro de @section scripts, antes del <script> de la vista,
+    pasando el estado de la pantalla ("Visitante", "Simpatizante", "Proceso" o "Miembro").
+
+    Lo que espera de la vista (las cuatro lo tienen con estos nombres):
+      - el modal #FormModalMiembros con #txtid, #txtNombres, #txtApellido y #cboEstadoCivil;
+      - la función global abrirModalMiembros(data), que rellena y abre la ficha.
+
+    Lo que la vista tiene que llamar:
+      - Conyuge.cargar(data) al abrir la ficha (data vacío en un alta);
+      - Conyuge.idParaGuardar() para el campo id_conyuge del DTO;
+      - Conyuge.liberar() antes de cerrar el modal tras guardar bien, y después
+        Conyuge.trasGuardar(res, alTerminar), que abre la ficha de la pareja si
+        se acaba de vincular o, si no hay nada que hacer, llama a alTerminar.
+      - Conyuge.asignarDiezmoFamiliar(numeroPropio, aplicar) desde el botón de
+        "Agregar Diezmo Familiar" (solo Miembros y En proceso tienen diezmos).
+
+    Flujo: al guardar la ficha de Ruben con "Casado/a con: Sady", el servidor vincula
+    las dos fichas y devuelve la de Sady. Se abre la ficha de Sady (en esta pantalla o
+    en la de su estado, con ?fichaConyuge=id) y no se puede cerrar sin guardarla.
+*@
+@{
+    var estadoPagina = Model ?? string.Empty;
+}
+<script>
+    window.Conyuge = (function () {
+        const ESTADO_PAGINA = @Json.Serialize(estadoPagina);
+        const CASADO = "Casado/a";
+        const URL_BUSCAR = '@Url.Action("BuscarMiembros", "Congregantes")';
+        const URL_OBTENER = '@Url.Action("ObtenerMiembroPorID", "Congregantes")';
+        // Pantalla de cada estado, para abrir la ficha del cónyuge donde le corresponde
+        const PANTALLAS = {
+            Miembro: '@Url.Action("Miembros", "Congregantes")',
+            Proceso: '@Url.Action("Proceso", "Congregantes")',
+            Simpatizante: '@Url.Action("Simpatizantes", "Congregantes")',
+            Visitante: '@Url.Action("Visitantes", "Congregantes")'
+        };
+        const TX = {
+            matrimonioVinculado:  @Json.Serialize(L["Matrimonio vinculado"].Value),
+            abrirFicha:           @Json.Serialize(L["Abrir su ficha"].Value),
+            abrirFichaTexto:      @Json.Serialize(L["Se ha vinculado a {0} como cónyuge. Ahora se abrirá su ficha: revísala y guárdala para terminar."].Value),
+            diezmoCompartido:     @Json.Serialize(L["Diezmo familiar compartido"].Value),
+            diezmoCompartidoTexto:@Json.Serialize(L["{0} tiene ahora también el diezmo familiar {1}."].Value),
+            confirmarDiezmo:      @Json.Serialize(L["Se asignará el diezmo familiar {0} a esta ficha y a {1}, y se quitará el diezmo individual de los dos."].Value),
+            siAsignar:            @Json.Serialize(L["Sí, asignar"].Value),
+            cancelar:             @Json.Serialize(L["Cancelar"].Value),
+            avisoObligatorio:     @Json.Serialize(L["Completa y guarda la ficha de {0} para terminar de vincularla como cónyuge de {1}."].Value),
+            casadoConOtra:        @Json.Serialize(L["ya casado/a"].Value),
+            sinResultados:        @Json.Serialize(L["Sin resultados"].Value),
+            atencion:             @Json.Serialize(L["Atención"].Value),
+            error:                @Json.Serialize(L["Error"].Value),
+            exito:                @Json.Serialize(L["Éxito"].Value),
+            estados: {
+                Miembro:      @Json.Serialize(L["Miembro"].Value),
+                Proceso:      @Json.Serialize(L["En proceso"].Value),
+                Simpatizante: @Json.Serialize(L["Simpatizante"].Value),
+                Visitante:    @Json.Serialize(L["Visitante"].Value)
+            }
+        };
+
+        // Diezmo familiar que ya tiene el cónyuge elegido: si lo tiene, la pareja
+        // se queda con ese número en vez de generar otro.
+        let diezmoFamiliarConyuge = null;
+        // Ficha abierta como continuación del vínculo: no se puede cerrar sin guardar
+        let obligatorio = false;
+        let timerBusqueda;
+
+        function fmt(texto) {
+            const args = Array.prototype.slice.call(arguments, 1);
+            return String(texto).replace(/\{(\d+)\}/g, function (m, i) {
+                return args[i] !== undefined && args[i] !== null ? args[i] : "";
+            });
+        }
+
+        function nombreDe(m) {
+            return ((m.nombre_miembro || "") + " " + (m.apellidos_miembro || "")).trim();
+        }
+
+        function idFichaActual() {
+            return parseInt($("#txtid").val()) || 0;
+        }
+
+        function esCasado() {
+            return $("#cboEstadoCivil").val() === CASADO;
+        }
+
+        function mostrarSegunEstadoCivil() {
+            $("#divConyuge").toggle(esCasado());
+        }
+
+        function seleccionar(id, nombre, diezmoFamiliar) {
+            $("#txtIdConyuge").val(id || "");
+            // Con alguien elegido el texto no se edita: para cambiarlo se quita con la X
+            $("#txtConyuge").val(id ? (nombre || "") : "").prop("readonly", !!id);
+            diezmoFamiliarConyuge = id ? (diezmoFamiliar || null) : null;
+            $("#dropdownConyuge").hide().empty();
+        }
+
+        function cargar(data) {
+            if (data && data.id_conyuge) {
+                seleccionar(data.id_conyuge, data.nombre_conyuge, data.diezmo_familiar_conyuge);
+            } else {
+                seleccionar(null);
+            }
+            mostrarSegunEstadoCivil();
+        }
+
+        function idSeleccionado() {
+            return esCasado() ? (parseInt($("#txtIdConyuge").val()) || 0) : 0;
+        }
+
+        // 0 = sin pareja (si no está Casado/a, el vínculo se deshace al guardar)
+        function idParaGuardar() {
+            return idSeleccionado();
+        }
+
+        function buscar(term) {
+            $.ajax({
+                url: URL_BUSCAR,
+                type: "GET",
+                data: { term: term },
+                success: function (res) {
+                    const dropdown = $("#dropdownConyuge").empty();
+                    const idActual = idFichaActual();
+                    const lista = (res.data || []).filter(function (m) { return m.id_miembro !== idActual; });
+
+                    if (lista.length === 0) {
+                        $('<div class="list-group-item text-muted small">').text(TX.sinResultados).appendTo(dropdown);
+                        dropdown.show();
+                        return;
+                    }
+
+                    lista.forEach(function (m) {
+                        // Casado/a con otra persona: se ve pero no se puede elegir
+                        const ocupado = m.id_conyuge && m.id_conyuge !== idActual;
+                        const item = $('<button type="button">')
+                            .addClass("list-group-item list-group-item-action d-flex justify-content-between align-items-center")
+                            .prop("disabled", !!ocupado)
+                            .append($("<span>").text(nombreDe(m)))
+                            .append($('<span class="badge bg-secondary">').text(
+                                ocupado ? TX.casadoConOtra : (TX.estados[m.estado] || m.estado || "")));
+
+                        if (!ocupado) {
+                            item.on("click", function () {
+                                seleccionar(m.id_miembro, nombreDe(m), m.diezmo_familiar);
+                            });
+                        }
+                        item.appendTo(dropdown);
+                    });
+                    dropdown.show();
+                }
+            });
+        }
+
+        // ------- Diezmo familiar compartido -------
+
+        /// numeroPropio: el que tocaría a esta ficha (prefijo + nº de miembro), o null.
+        /// aplicar(numero): escribe el número en la ficha (null si no hay ninguno).
+        function asignarDiezmoFamiliar(numeroPropio, aplicar) {
+            const idConyuge = idSeleccionado();
+            if (!idConyuge) { aplicar(numeroPropio); return; }
+
+            // Si la pareja ya tiene diezmo familiar, se reutiliza: es el de la familia
+            const numero = diezmoFamiliarConyuge || numeroPropio;
+            if (!numero) { aplicar(null); return; }
+
+            Swal.fire({
+                title: TX.diezmoCompartido,
+                text: fmt(TX.confirmarDiezmo, numero, $("#txtConyuge").val()),
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: TX.siAsignar,
+                cancelButtonText: TX.cancelar
+            }).then(function (r) {
+                if (!r.isConfirmed) return;
+                $("#txtDiezmoIndividual").val("");
+                aplicar(numero);
+            });
+        }
+
+        // ------- Ficha obligatoria del cónyuge -------
+
+        function actualizarModoObligatorio(nombreFicha, conQuien) {
+            const modal = $("#FormModalMiembros");
+            modal.find('[data-bs-dismiss="modal"]').toggle(!obligatorio);
+
+            let aviso = $("#avisoConyugeObligatorio");
+            if (obligatorio) {
+                if (!aviso.length) {
+                    aviso = $('<div id="avisoConyugeObligatorio" class="alert alert-info d-flex align-items-center gap-2" role="alert">')
+                        .append('<i class="fas fa-ring"></i>')
+                        .append("<span></span>");
+                    modal.find(".modal-body").first().prepend(aviso);
+                }
+                aviso.find("span").text(fmt(TX.avisoObligatorio, nombreFicha, conQuien));
+                aviso.show();
+            } else {
+                aviso.hide();
+            }
+        }
+
+        function liberar() {
+            obligatorio = false;
+            actualizarModoObligatorio();
+        }
+
+        function abrirObligatorio(idMiembro, conQuien) {
+            $.ajax({
+                url: URL_OBTENER,
+                type: "GET",
+                data: { idMiembro: idMiembro },
+                beforeSend: function () { $.LoadingOverlay("show"); },
+                success: function (res) {
+                    $.LoadingOverlay("hide");
+                    if (!res.success || !res.data) {
+                        Swal.fire(TX.error, res.mensaje || "", "error");
+                        return;
+                    }
+                    window.abrirModalMiembros(res.data);
+                    obligatorio = true;
+                    actualizarModoObligatorio(nombreDe(res.data), conQuien);
+                },
+                error: function () {
+                    $.LoadingOverlay("hide");
+                }
+            });
+        }
+
+        function abrirFichaConyuge(idConyuge, estado, conQuien) {
+            if (estado === ESTADO_PAGINA) {
+                abrirObligatorio(idConyuge, conQuien);
+                return;
+            }
+            const url = PANTALLAS[estado];
+            if (!url) return;
+            window.location.href = url + "?fichaConyuge=" + encodeURIComponent(idConyuge)
+                + "&con=" + encodeURIComponent(conQuien || "");
+        }
+
+        /// Tras guardar bien la ficha. res es la respuesta del servidor; alTerminar,
+        /// lo que la vista haría normalmente (el aviso de "guardado").
+        function trasGuardar(res, alTerminar) {
+            const c = res && res.conyuge;
+            const conQuien = (($("#txtNombres").val() || "") + " " + ($("#txtApellido").val() || "")).trim();
+
+            if (c && c.aviso) {
+                Swal.fire(TX.atencion, c.aviso, "warning");
+                return;
+            }
+
+            if (c && c.abrir_ficha && c.id_conyuge) {
+                let texto = fmt(TX.abrirFichaTexto, c.nombre_conyuge);
+                if (c.diezmo_compartido) texto += " " + fmt(TX.diezmoCompartidoTexto, c.nombre_conyuge, c.diezmo_familiar);
+                Swal.fire({
+                    title: TX.matrimonioVinculado,
+                    text: texto,
+                    icon: "info",
+                    confirmButtonText: TX.abrirFicha,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then(function () {
+                    abrirFichaConyuge(c.id_conyuge, c.estado_conyuge, conQuien);
+                });
+                return;
+            }
+
+            if (c && c.diezmo_compartido) {
+                Swal.fire(TX.exito, fmt(TX.diezmoCompartidoTexto, c.nombre_conyuge, c.diezmo_familiar), "success");
+                return;
+            }
+
+            if (typeof alTerminar === "function") alTerminar();
+        }
+
+        // ------- Eventos -------
+        $(function () {
+            $(document).on("change", "#cboEstadoCivil", mostrarSegunEstadoCivil);
+
+            $(document).on("input", "#txtConyuge", function () {
+                if ($(this).prop("readonly")) return;
+                const term = $(this).val().trim();
+                clearTimeout(timerBusqueda);
+                if (term.length < 2) { $("#dropdownConyuge").hide().empty(); return; }
+                timerBusqueda = setTimeout(function () { buscar(term); }, 300);
+            });
+
+            $(document).on("click", "#btnQuitarConyuge", function () {
+                seleccionar(null);
+                $("#txtConyuge").trigger("focus");
+            });
+
+            $(document).on("click", function (e) {
+                if (!$(e.target).closest("#divBuscarConyuge").length) $("#dropdownConyuge").hide();
+            });
+
+            // Mientras sea obligatoria, la ficha del cónyuge no se cierra (ni con Esc)
+            $(document).on("hide.bs.modal", "#FormModalMiembros", function (e) {
+                if (obligatorio) e.preventDefault();
+            });
+
+            // Llegada desde otra pantalla para completar la ficha del cónyuge
+            const params = new URLSearchParams(window.location.search);
+            const idPendiente = parseInt(params.get("fichaConyuge")) || 0;
+            if (idPendiente) {
+                const conQuien = params.get("con") || "";
+                params.delete("fichaConyuge");
+                params.delete("con");
+                const resto = params.toString();
+                history.replaceState(null, "", window.location.pathname + (resto ? "?" + resto : ""));
+
+                // Se espera a que la pantalla termine de cargar sus selects (países,
+                // responsables, familias...) por AJAX: si la ficha se rellena antes,
+                // esos valores no encuentran su opción y se perderían al guardar.
+                // El setTimeout deja que el ready de la vista lance esas peticiones.
+                setTimeout(function () {
+                    const abrir = function () { abrirObligatorio(idPendiente, conQuien); };
+                    if ($.active > 0) $(document).one("ajaxStop", abrir); else abrir();
+                }, 0);
+            }
+        });
+
+        return {
+            cargar: cargar,
+            idParaGuardar: idParaGuardar,
+            asignarDiezmoFamiliar: asignarDiezmoFamiliar,
+            liberar: liberar,
+            trasGuardar: trasGuardar
+        };
+    })();
+</script>

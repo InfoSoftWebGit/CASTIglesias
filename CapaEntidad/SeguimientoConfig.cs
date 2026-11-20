@@ -6,10 +6,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace CapaEntidad
 {
     /// <summary>
-    /// Zona de la que un líder puede hacer seguimiento.
+    /// Zona que un líder supervisa: ve todos sus seguimientos.
     /// </summary>
     /// <remarks>
-    /// Solo se aceptan zonas a las que el propio líder pertenece (ver
+    /// Solo se aceptan zonas que el propio líder lidera (ver
     /// CD_SeguimientoConfig.ZonasDelLider). Las configura el pastor en
     /// Configuración → Seguimientos.
     /// </remarks>
@@ -56,10 +56,18 @@ namespace CapaEntidad
     /// Qué seguimientos puede ver y gestionar el usuario de la sesión.
     /// </summary>
     /// <remarks>
-    /// Pastores (PastorGeneral, PastorSede), AdminGlobal y el administrador de
-    /// plataforma tienen alcance total. El resto solo ve a los miembros de las
-    /// zonas que el pastor le haya asignado y a las personas de su lista.
-    /// Un usuario sin configuración (o que no es líder) no ve nada.
+    /// Tres niveles:
+    /// - Pastores (PastorGeneral, PastorSede), AdminGlobal y el administrador de
+    ///   plataforma: alcance total.
+    /// - Líder: ve y gestiona TODO el historial de sus personas a cargo
+    ///   (miembros.id_responsable apunta a una de sus filas de lideres) y de las
+    ///   personas que el pastor le ha puesto en su lista. Nada más: no ve los
+    ///   seguimientos de las personas de otros líderes.
+    /// - Supervisor de zona: líder al que el pastor, en Configuración →
+    ///   Seguimientos, le ha activado zonas (solo las que lidera: fila de lideres
+    ///   con zona y sin grupo ni ministerio). Además de lo anterior, VE todos los
+    ///   seguimientos de esas zonas, pero solo gestiona los de sus personas.
+    /// Un usuario sin vincular a un líder no ve nada.
     /// </remarks>
     public sealed class AlcanceSeguimiento
     {
@@ -68,12 +76,23 @@ namespace CapaEntidad
         // Miembro vinculado al usuario de la sesión (null si no está vinculado)
         public int? IdMiembroLider { get; init; }
 
+        /// <summary>Zonas que supervisa: solo lectura para personas que no son suyas.</summary>
         public IReadOnlyCollection<int> Zonas { get; init; } = Array.Empty<int>();
 
+        /// <summary>Personas de su lista (asignadas por el pastor).</summary>
         public IReadOnlyCollection<int> MiembrosAsignados { get; init; } = Array.Empty<int>();
+
+        /// <summary>Personas a su cargo (miembros.id_responsable).</summary>
+        public IReadOnlyCollection<int> MiembrosACargo { get; init; } = Array.Empty<int>();
 
         public static readonly AlcanceSeguimiento Completo = new() { Total = true };
 
-        public bool TieneAlgo => Total || Zonas.Count > 0 || MiembrosAsignados.Count > 0;
+        public bool EsSupervisor => Zonas.Count > 0;
+
+        public bool TieneAlgo => Total || Zonas.Count > 0 || MiembrosAsignados.Count > 0 || MiembrosACargo.Count > 0;
+
+        /// <summary>Puede registrar, editar o borrar seguimientos de este miembro.</summary>
+        public bool PuedeGestionar(int idMiembro) =>
+            Total || MiembrosACargo.Contains(idMiembro) || MiembrosAsignados.Contains(idMiembro);
     }
 }

@@ -14,6 +14,9 @@
     <li class="breadcrumb-item active">@L["Zonas"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("zn", "Pertenencia", L["Evolución de las zonas"].Value, "zona"))
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-sitemap me-1"></i> @L["Lista de Zonas"]

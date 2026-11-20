@@ -2691,7 +2691,7 @@
   <data name="Busca o selecciona un líder para configurar su seguimiento." xml:space="preserve"><value>Search or select a leader to configure their follow-up.</value></data>
   <data name="Usuario con el que entra" xml:space="preserve"><value>User account they sign in with</value></data>
   <data name="Vincular" xml:space="preserve"><value>Link</value></data>
-  <data name="Zonas de las que puede hacer seguimiento" xml:space="preserve"><value>Zones they can follow up</value></data>
+  <data name="Zonas que supervisa (ve todos sus seguimientos)" xml:space="preserve"><value>Zones they supervise (see all their follow-ups)</value></data>
   <data name="Guardar zonas" xml:space="preserve"><value>Save zones</value></data>
   <data name="Lista de personas asignadas" xml:space="preserve"><value>Assigned people list</value></data>
   <data name="Persona" xml:space="preserve"><value>Person</value></data>
@@ -2713,11 +2713,13 @@
   <data name="Nunca" xml:space="preserve"><value>Never</value></data>
   <data name="Registrar seguimiento" xml:space="preserve"><value>Record follow-up</value></data>
   <data name="Tu usuario no está vinculado a ningún líder. Pide a tu pastor que te configure en Configuración → Seguimientos." xml:space="preserve"><value>Your user is not linked to any leader. Ask your pastor to set you up in Settings → Follow-ups.</value></data>
-  <data name="Todavía no tienes zonas ni personas asignadas para hacer seguimiento. Pide a tu pastor que te las asigne." xml:space="preserve"><value>You don't have any zones or people assigned for follow-up yet. Ask your pastor to assign them.</value></data>
-  <data name="Solo los líderes pueden hacer seguimiento. Elige un líder e indica de qué zonas (de las que pertenece) puede hacer seguimiento y qué personas concretas tiene asignadas. Los pastores siguen viendo todos los seguimientos." xml:space="preserve"><value>Only leaders can do follow-up. Choose a leader and set which of their zones they can follow up and which specific people are assigned to them. Pastors still see all follow-ups.</value></data>
+  <data name="Todavía no tienes personas a cargo ni asignadas para hacer seguimiento. Pide a tu pastor que te las asigne." xml:space="preserve"><value>You don't have any people in your care or assigned for follow-up yet. Ask your pastor to assign them.</value></data>
+  <data name="Cada líder ve y gestiona solo el seguimiento de sus personas a cargo y de las que le asignes aquí. Si además le activas una zona que lidera, pasa a supervisarla: verá todos los seguimientos de esa zona (sin poder modificarlos). Los pastores siempre ven todo." xml:space="preserve"><value>Each leader sees and manages only the follow-up of the people in their care and those you assign here. If you also enable a zone they lead, they supervise it: they will see all follow-ups in that zone (without being able to change them). Pastors always see everything.</value></data>
   <data name="Sin un usuario vinculado el líder no podrá ver ningún seguimiento. Si su usuario tiene el mismo correo que su ficha de miembro se reconoce automáticamente." xml:space="preserve"><value>Without a linked user the leader won't see any follow-up. If their user has the same email as their member record, it is recognised automatically.</value></data>
-  <data name="Este líder no pertenece a ninguna zona. Asígnale zonas desde su ficha de miembro o usa la lista de personas." xml:space="preserve"><value>This leader doesn't belong to any zone. Assign zones from their member record or use the people list.</value></data>
-  <data name="Personas concretas a las que este líder debe hacer seguimiento (por ejemplo, de una campaña), aunque no sean de sus zonas." xml:space="preserve"><value>Specific people this leader must follow up (for example, from a campaign), even if they are not in their zones.</value></data>
+  <data name="Este líder no lidera ninguna zona. Para que pueda supervisar una, regístralo en Líderes con esa zona y sin grupo ni ministerio." xml:space="preserve"><value>This leader doesn't lead any zone. To let them supervise one, register them in Leaders with that zone and no group or ministry.</value></data>
+  <data name="Personas concretas a las que este líder debe hacer seguimiento (por ejemplo, de una campaña), además de sus personas a cargo." xml:space="preserve"><value>Specific people this leader must follow up (for example, from a campaign), in addition to the people in their care.</value></data>
+  <data name="Supervisas una o más zonas: ves todos sus seguimientos, pero solo puedes registrar, editar o borrar los de tus personas a cargo y tu lista." xml:space="preserve"><value>You supervise one or more zones: you see all their follow-ups, but you can only add, edit or delete those of the people in your care and your list.</value></data>
+  <data name="Solo lectura: esta persona no está a tu cargo" xml:space="preserve"><value>Read only: this person is not in your care</value></data>
   <data name="Tu privacidad" xml:space="preserve"><value>Your privacy</value></data>
   <data name="Usamos cookies propias necesarias para que la web funcione y, solo si nos das permiso, cookies de Google para medir las visitas y saber si nuestros anuncios funcionan. Puedes aceptarlas, rechazarlas o elegir cuáles." xml:space="preserve"><value>We use our own cookies that the website needs to work and, only if you allow it, Google cookies to measure visits and see whether our ads work. You can accept them, reject them or choose which ones.</value></data>
   <data name="Política de cookies" xml:space="preserve"><value>Cookie policy</value></data>
@@ -2775,4 +2777,286 @@
   <data name="Trabajan con Congrega" xml:space="preserve"><value>Working with Congrega</value></data>
   <data name="Digitaliza tu iglesia con Congrega CRM" xml:space="preserve"><value>Digitise your church with Congrega CRM</value></data>
   <data name="Vídeo editado por Ethereal Project." xml:space="preserve"><value>Video edited by Ethereal Project.</value></data>
+  <!-- Informes evolutivos de congregantes (_AnaliticaCongregantes) -->
+  <data name="Activas que llevan más tiempo del habitual en su estado" xml:space="preserve"><value>Active people who have spent longer than usual in their stage</value></data>
+  <data name="Agrupar por" xml:space="preserve"><value>Group by</value></data>
+  <data name="Avances de estado" xml:space="preserve"><value>Stage progressions</value></data>
+  <data name="Año anterior" xml:space="preserve"><value>Last year</value></data>
+  <data name="Casos" xml:space="preserve"><value>Cases</value></data>
+  <data name="Crecimiento neto" xml:space="preserve"><value>Net growth</value></data>
+  <data name="Cuántas personas pasaron a cada estado en cada periodo" xml:space="preserve"><value>How many people moved to each stage in each period</value></data>
+  <data name="De las {cohorte} personas que llegaron, el mayor atasco está en {desde} → {hasta}: solo avanza el {pct} %." xml:space="preserve"><value>Of the {cohorte} people who arrived, the biggest bottleneck is {desde} → {hasta}: only {pct}% move on.</value></data>
+  <data name="De las {n} personas que llegaron en el periodo, cuántas alcanzaron cada estado" xml:space="preserve"><value>Of the {n} people who arrived in the period, how many reached each stage</value></data>
+  <data name="Del {desde} al {hasta} · comparado con {desdeAnt} – {hastaAnt}" xml:space="preserve"><value>From {desde} to {hasta} · compared with {desdeAnt} – {hastaAnt}</value></data>
+  <data name="Descargar datos" xml:space="preserve"><value>Download data</value></data>
+  <data name="Descargar imagen" xml:space="preserve"><value>Download image</value></data>
+  <data name="Días que se tarda en dar cada paso (pasos dados en el periodo)" xml:space="preserve"><value>Days taken for each step (steps taken in the period)</value></data>
+  <data name="El número de personas activas no cambió en el periodo ({total})." xml:space="preserve"><value>The number of active people did not change in the period ({total}).</value></data>
+  <data name="El paso más lento es {desde} → {hasta}, con una mediana de {dias} días ({casos} casos)." xml:space="preserve"><value>The slowest step is {desde} → {hasta}, with a median of {dias} days ({casos} cases).</value></data>
+  <data name="Embudo de los que llegaron" xml:space="preserve"><value>Funnel of new arrivals</value></data>
+  <data name="Este año" xml:space="preserve"><value>This year</value></data>
+  <data name="Este mes" xml:space="preserve"><value>This month</value></data>
+  <data name="Este trimestre" xml:space="preserve"><value>This quarter</value></data>
+  <data name="Evolución de congregantes" xml:space="preserve"><value>Congregation trends</value></data>
+  <data name="Hay {n} personas activas menos que al empezar el periodo; ahora sois {total}." xml:space="preserve"><value>There are {n} fewer active people than at the start of the period; you are now {total}.</value></data>
+  <data name="Hubo {n} bajas, más que en el periodo anterior ({ant})." xml:space="preserve"><value>There were {n} departures, more than in the previous period ({ant}).</value></data>
+  <data name="Imprimir / PDF" xml:space="preserve"><value>Print / PDF</value></data>
+  <data name="Informes y evolución" xml:space="preserve"><value>Reports and trends</value></data>
+  <data name="La congregación creció en {n} personas activas y ahora sois {total}." xml:space="preserve"><value>The congregation grew by {n} active people and you are now {total}.</value></data>
+  <data name="Las llegadas llevan {n} periodos seguidos bajando." xml:space="preserve"><value>New arrivals have fallen for {n} periods in a row.</value></data>
+  <data name="Las llegadas llevan {n} periodos seguidos subiendo." xml:space="preserve"><value>New arrivals have risen for {n} periods in a row.</value></data>
+  <data name="Llegaron {n} personas nuevas, en línea con el periodo anterior ({ant})." xml:space="preserve"><value>{n} new people arrived, in line with the previous period ({ant}).</value></data>
+  <data name="Llegaron {n} personas nuevas, un {pct} % menos que en el periodo anterior ({ant})." xml:space="preserve"><value>{n} new people arrived, {pct}% fewer than in the previous period ({ant}).</value></data>
+  <data name="Llegaron {n} personas nuevas, un {pct} % más que en el periodo anterior ({ant})." xml:space="preserve"><value>{n} new people arrived, {pct}% more than in the previous period ({ant}).</value></data>
+  <data name="Llegaron {n} personas nuevas; en el periodo anterior no hubo ninguna." xml:space="preserve"><value>{n} new people arrived; there were none in the previous period.</value></data>
+  <data name="Media" xml:space="preserve"><value>Average</value></data>
+  <data name="Media (días)" xml:space="preserve"><value>Average (days)</value></data>
+  <data name="Mediana (días)" xml:space="preserve"><value>Median (days)</value></data>
+  <data name="Mes anterior" xml:space="preserve"><value>Last month</value></data>
+  <data name="Miembro oficial" xml:space="preserve"><value>Official member</value></data>
+  <data name="Mostrar gráficos" xml:space="preserve"><value>Show charts</value></data>
+  <data name="Más de" xml:space="preserve"><value>More than</value></data>
+  <data name="No se pudo cargar el informe." xml:space="preserve"><value>The report could not be loaded.</value></data>
+  <data name="No se registró ninguna persona nueva en este periodo." xml:space="preserve"><value>No new people were registered in this period.</value></data>
+  <data name="Ocultar gráficos" xml:space="preserve"><value>Hide charts</value></data>
+  <data name="Pasaron a miembro" xml:space="preserve"><value>Became members</value></data>
+  <data name="Pasaron a proceso" xml:space="preserve"><value>Moved to process</value></data>
+  <data name="Pasaron a simpatizante" xml:space="preserve"><value>Became sympathisers</value></data>
+  <data name="Paso" xml:space="preserve"><value>Step</value></data>
+  <data name="Periodo" xml:space="preserve"><value>Period</value></data>
+  <data name="Personalizado" xml:space="preserve"><value>Custom</value></data>
+  <data name="Personas" xml:space="preserve"><value>People</value></data>
+  <data name="Personas activas al cierre de cada periodo" xml:space="preserve"><value>Active people at the end of each period</value></data>
+  <data name="Personas activas al final del periodo menos las que había al empezar" xml:space="preserve"><value>Active people at the end of the period minus those at the start</value></data>
+  <data name="Personas nuevas" xml:space="preserve"><value>New people</value></data>
+  <data name="Personas por estado" xml:space="preserve"><value>People by stage</value></data>
+  <data name="Personas sin avanzar" xml:space="preserve"><value>People not progressing</value></data>
+  <data name="Resumen del periodo" xml:space="preserve"><value>Period summary</value></data>
+  <data name="S" xml:space="preserve"><value>W</value></data>
+  <data name="Semana" xml:space="preserve"><value>Week</value></data>
+  <data name="Sin casos" xml:space="preserve"><value>No cases</value></data>
+  <data name="T" xml:space="preserve"><value>Q</value></data>
+  <data name="Tiempo entre estados" xml:space="preserve"><value>Time between stages</value></data>
+  <data name="Todavía no hay datos en este periodo." xml:space="preserve"><value>There is no data for this period yet.</value></data>
+  <data name="Trimestre" xml:space="preserve"><value>Quarter</value></data>
+  <data name="Verde cuando sube respecto al periodo anterior, rojo cuando baja" xml:space="preserve"><value>Green when it rises from the previous period, red when it falls</value></data>
+  <data name="antes {n}" xml:space="preserve"><value>before {n}</value></data>
+  <data name="de la etapa anterior" xml:space="preserve"><value>of the previous stage</value></data>
+  <data name="del total" xml:space="preserve"><value>of the total</value></data>
+  <data name="respecto al periodo anterior" xml:space="preserve"><value>vs previous period</value></data>
+  <data name="{n} días" xml:space="preserve"><value>{n} days</value></data>
+  <data name="{n} personas llevan más de {dias} días en estado {estado} sin avanzar." xml:space="preserve"><value>{n} people have been at stage {estado} for more than {dias} days without progressing.</value></data>
+  <data name="{n} personas pasaron a ser miembros oficiales, más que en el periodo anterior ({ant})." xml:space="preserve"><value>{n} people became official members, more than in the previous period ({ant}).</value></data>
+  <data name="{n} personas pasaron a ser miembros oficiales." xml:space="preserve"><value>{n} people became official members.</value></data>
+  <data name="{n} personas ya estaban registradas antes de existir el historial: sus fechas son aproximadas y las cifras antiguas, orientativas." xml:space="preserve"><value>{n} people were registered before the history existed: their dates are approximate and older figures are indicative.</value></data>
+  <data name="Últimos 12 meses" xml:space="preserve"><value>Last 12 months</value></data>
+  <data name="Últimos 24 meses" xml:space="preserve"><value>Last 24 months</value></data>
+  <!-- Ficha del congregante: campo "Casado/a con" (_CampoConyuge / _ConyugeScript) -->
+  <data name="Casado/a con" xml:space="preserve"><value>Married to</value></data>
+  <data name="Quitar cónyuge" xml:space="preserve"><value>Remove spouse</value></data>
+  <data name="Al guardar se abrirá la ficha de la pareja para completarla." xml:space="preserve"><value>When you save, the spouse's record will open so you can complete it.</value></data>
+  <data name="Matrimonio vinculado" xml:space="preserve"><value>Marriage linked</value></data>
+  <data name="Abrir su ficha" xml:space="preserve"><value>Open their record</value></data>
+  <data name="Se ha vinculado a {0} como cónyuge. Ahora se abrirá su ficha: revísala y guárdala para terminar." xml:space="preserve"><value>{0} has been linked as spouse. Their record will now open: review it and save it to finish.</value></data>
+  <data name="Diezmo familiar compartido" xml:space="preserve"><value>Shared family tithe</value></data>
+  <data name="{0} tiene ahora también el diezmo familiar {1}." xml:space="preserve"><value>{0} now also has family tithe {1}.</value></data>
+  <data name="Se asignará el diezmo familiar {0} a esta ficha y a {1}, y se quitará el diezmo individual de los dos." xml:space="preserve"><value>Family tithe {0} will be assigned to this record and to {1}, and the individual tithe will be removed from both.</value></data>
+  <data name="Sí, asignar" xml:space="preserve"><value>Yes, assign</value></data>
+  <data name="Completa y guarda la ficha de {0} para terminar de vincularla como cónyuge de {1}." xml:space="preserve"><value>Complete and save {0}'s record to finish linking them as {1}'s spouse.</value></data>
+  <data name="ya casado/a" xml:space="preserve"><value>already married</value></data>
+  <data name="Sin resultados" xml:space="preserve"><value>No results</value></data>
+  <data name="Mediana" xml:space="preserve"><value>Median</value></data>
+  <!-- Informes evolutivos de asistencia y economía -->
+  <data name="Aportación media por persona" xml:space="preserve"><value>Average contribution per person</value></data>
+  <data name="Aportan por primera vez" xml:space="preserve"><value>First-time givers</value></data>
+  <data name="Aportaron {n} personas (en el periodo anterior, {ant})." xml:space="preserve"><value>{n} people gave (in the previous period, {ant}).</value></data>
+  <data name="Asistencia media por culto" xml:space="preserve"><value>Average attendance per service</value></data>
+  <data name="Asistencia total" xml:space="preserve"><value>Total attendance</value></data>
+  <data name="Cultos" xml:space="preserve"><value>Services</value></data>
+  <data name="Cultos registrados" xml:space="preserve"><value>Services recorded</value></data>
+  <data name="El culto con más asistencia fue el {fecha} ({turno}), con {n} personas." xml:space="preserve"><value>The best-attended service was on {fecha} ({turno}), with {n} people.</value></data>
+  <data name="El turno «{turno}» es el que más baja: un {pct} % menos, con {n} personas de media." xml:space="preserve"><value>The “{turno}” service fell the most: {pct}% down, averaging {n} people.</value></data>
+  <data name="El turno «{turno}» es el que más crece: un {pct} % más, con {n} personas de media." xml:space="preserve"><value>The “{turno}” service grew the most: {pct}% up, averaging {n} people.</value></data>
+  <data name="El {pct} % del gasto ({n}) no tiene zona asignada." xml:space="preserve"><value>{pct}% of spending ({n}) has no zone assigned.</value></data>
+  <data name="En este periodo se gastó {n} más de lo que se ingresó." xml:space="preserve"><value>In this period, spending exceeded income by {n}.</value></data>
+  <data name="En este periodo se ingresó {n} más de lo que se gastó." xml:space="preserve"><value>In this period, income exceeded spending by {n}.</value></data>
+  <data name="Este periodo" xml:space="preserve"><value>This period</value></data>
+  <data name="Este periodo frente al anterior" xml:space="preserve"><value>This period vs the previous one</value></data>
+  <data name="Evolución de la asistencia" xml:space="preserve"><value>Attendance trends</value></data>
+  <data name="Evolución económica" xml:space="preserve"><value>Financial trends</value></data>
+  <data name="Frente al mismo periodo del año pasado ({ant} de media), la asistencia ha bajado un {pct} %." xml:space="preserve"><value>Compared with the same period last year ({ant} on average), attendance is down {pct}%.</value></data>
+  <data name="Frente al mismo periodo del año pasado ({ant} de media), la asistencia ha crecido un {pct} %." xml:space="preserve"><value>Compared with the same period last year ({ant} on average), attendance is up {pct}%.</value></data>
+  <data name="Frente al mismo periodo del año pasado ({ant}), los ingresos han bajado un {pct} %." xml:space="preserve"><value>Compared with the same period last year ({ant}), income is down {pct}%.</value></data>
+  <data name="Frente al mismo periodo del año pasado ({ant}), los ingresos han crecido un {pct} %." xml:space="preserve"><value>Compared with the same period last year ({ant}), income is up {pct}%.</value></data>
+  <data name="Gasto más alto" xml:space="preserve"><value>Largest expense</value></data>
+  <data name="Gastos por cuenta" xml:space="preserve"><value>Spending by account</value></data>
+  <data name="Gastos por zona" xml:space="preserve"><value>Spending by zone</value></data>
+  <data name="Hay {n} meses sin ningún culto registrado: revisa si falta apuntar la asistencia." xml:space="preserve"><value>There are {n} months with no service recorded: check whether attendance is missing.</value></data>
+  <data name="Hay {n} semanas sin ningún culto registrado: revisa si falta apuntar la asistencia." xml:space="preserve"><value>There are {n} weeks with no service recorded: check whether attendance is missing.</value></data>
+  <data name="Ingresos frente a gastos" xml:space="preserve"><value>Income vs spending</value></data>
+  <data name="Ingresos − gastos" xml:space="preserve"><value>Income − spending</value></data>
+  <data name="Invitados / visitas" xml:space="preserve"><value>Guests / visitors</value></data>
+  <data name="La asistencia media fue de {n} personas por culto, estable respecto al periodo anterior ({ant})." xml:space="preserve"><value>Average attendance was {n} people per service, steady compared with the previous period ({ant}).</value></data>
+  <data name="La asistencia media fue de {n} personas por culto, un {pct} % menos que en el periodo anterior ({ant})." xml:space="preserve"><value>Average attendance was {n} people per service, {pct}% lower than in the previous period ({ant}).</value></data>
+  <data name="La asistencia media fue de {n} personas por culto, un {pct} % más que en el periodo anterior ({ant})." xml:space="preserve"><value>Average attendance was {n} people per service, {pct}% higher than in the previous period ({ant}).</value></data>
+  <data name="La asistencia media fue de {n} personas por culto." xml:space="preserve"><value>Average attendance was {n} people per service.</value></data>
+  <data name="La asistencia media lleva {n} periodos seguidos bajando." xml:space="preserve"><value>Average attendance has fallen for {n} periods in a row.</value></data>
+  <data name="La asistencia media lleva {n} periodos seguidos subiendo." xml:space="preserve"><value>Average attendance has risen for {n} periods in a row.</value></data>
+  <data name="La zona con más gasto es «{zona}»: {n} ({pct} % del total)." xml:space="preserve"><value>The zone with the most spending is “{zona}”: {n} ({pct}% of the total).</value></data>
+  <data name="Las zonas con más gasto en el periodo" xml:space="preserve"><value>Zones with the most spending in the period</value></data>
+  <data name="Lo que entra y lo que sale en cada periodo" xml:space="preserve"><value>What comes in and goes out in each period</value></data>
+  <data name="Los conceptos pequeños se agrupan en «Otros»" xml:space="preserve"><value>Small categories are grouped under “Other”</value></data>
+  <data name="Los gastos fueron {n}, un {pct} % menos que en el periodo anterior ({ant})." xml:space="preserve"><value>Spending was {n}, {pct}% less than in the previous period ({ant}).</value></data>
+  <data name="Los gastos fueron {n}, un {pct} % más que en el periodo anterior ({ant})." xml:space="preserve"><value>Spending was {n}, {pct}% more than in the previous period ({ant}).</value></data>
+  <data name="Los ingresos fueron {n}, en línea con el periodo anterior ({ant})." xml:space="preserve"><value>Income was {n}, in line with the previous period ({ant}).</value></data>
+  <data name="Los ingresos fueron {n}, un {pct} % menos que en el periodo anterior ({ant})." xml:space="preserve"><value>Income was {n}, {pct}% less than in the previous period ({ant}).</value></data>
+  <data name="Los ingresos fueron {n}, un {pct} % más que en el periodo anterior ({ant})." xml:space="preserve"><value>Income was {n}, {pct}% more than in the previous period ({ant}).</value></data>
+  <data name="Los ingresos llevan {n} periodos seguidos bajando." xml:space="preserve"><value>Income has fallen for {n} periods in a row.</value></data>
+  <data name="Media por culto" xml:space="preserve"><value>Average per service</value></data>
+  <data name="Media por turno" xml:space="preserve"><value>Average by service time</value></data>
+  <data name="Mismo periodo del año anterior" xml:space="preserve"><value>Same period last year</value></data>
+  <data name="Máximo en un culto" xml:space="preserve"><value>Highest in one service</value></data>
+  <data name="No hay ingresos registrados en este periodo." xml:space="preserve"><value>No income recorded in this period.</value></data>
+  <data name="No hay ningún culto registrado en este periodo." xml:space="preserve"><value>No services recorded in this period.</value></data>
+  <data name="Número de gastos" xml:space="preserve"><value>Number of expenses</value></data>
+  <data name="Otros" xml:space="preserve"><value>Other</value></data>
+  <data name="Periodo anterior" xml:space="preserve"><value>Previous period</value></data>
+  <data name="Personas distintas con al menos una aportación en cada periodo" xml:space="preserve"><value>Distinct people with at least one contribution in each period</value></data>
+  <data name="Personas que aportan" xml:space="preserve"><value>People giving</value></data>
+  <data name="Quién asiste" xml:space="preserve"><value>Who attends</value></data>
+  <data name="Se registraron {n} asistentes nuevos, el {pct} % del total." xml:space="preserve"><value>{n} new attendees were recorded, {pct}% of the total.</value></data>
+  <data name="Total de asistentes en cada periodo, por grupo" xml:space="preserve"><value>Total attendees in each period, by group</value></data>
+  <data name="Total gastado en cada periodo, por tipo de cuenta" xml:space="preserve"><value>Total spent in each period, by account type</value></data>
+  <data name="Verde cuando baja respecto al periodo anterior, rojo cuando sube" xml:space="preserve"><value>Green when it falls from the previous period, red when it rises</value></data>
+  <data name="{n} personas aportaron por primera vez." xml:space="preserve"><value>{n} people gave for the first time.</value></data>
+  <data name="{n} personas que aportaron en el periodo anterior no lo han hecho en este." xml:space="preserve"><value>{n} people who gave in the previous period have not given in this one.</value></data>
+  <data name="«{concepto}» supone el {pct} % de los ingresos." xml:space="preserve"><value>“{concepto}” accounts for {pct}% of income.</value></data>
+  <!-- Informes: seguimiento, pertenencia, líderes, jóvenes, salud, informe mensual y Ajustes > Informes -->
+  <data name="{encargado} hizo el {pct} % de los seguimientos: conviene repartir la carga." xml:space="preserve"><value>{encargado} made {pct}% of the follow-ups: consider sharing the load.</value></data>
+  <data name="{indicador} va por detrás del objetivo: {n} frente a {esperado} esperados a estas alturas (objetivo anual: {objetivo})." xml:space="preserve"><value>{indicador} is behind target: {n} against {esperado} expected by now (annual target: {objetivo}).</value></data>
+  <data name="{n} jóvenes pasaron a ser miembros oficiales." xml:space="preserve"><value>{n} young people became official members.</value></data>
+  <data name="{n} jóvenes superaron los {max} años y pasan al grupo de adultos." xml:space="preserve"><value>{n} young people turned older than {max} and move to the adult group.</value></data>
+  <data name="{n} jóvenes tienen ya {max} años: conviene preparar su paso al grupo de adultos." xml:space="preserve"><value>{n} young people are already {max}: start preparing their move to the adult group.</value></data>
+  <data name="{n} personas activas ({pct} %) no están asignadas en {tipo}." xml:space="preserve"><value>{n} active people ({pct}%) are not assigned to any {tipo}.</value></data>
+  <data name="{n} personas activas no tienen fecha de nacimiento ni edad y no se pueden clasificar." xml:space="preserve"><value>{n} active people have no date of birth or age and cannot be classified.</value></data>
+  <data name="{n} personas que llegaron en el periodo todavía no han recibido ningún seguimiento." xml:space="preserve"><value>{n} people who arrived in the period have not had any follow-up yet.</value></data>
+  <data name="{n} visitantes, simpatizantes o personas en proceso llevan más de {dias} días sin ningún seguimiento." xml:space="preserve"><value>{n} visitors, sympathisers or people in process have had no follow-up for more than {dias} days.</value></data>
+  <data name="«{destino}» es el que más baja: {n} personas menos." xml:space="preserve"><value>“{destino}” fell the most: {n} fewer people.</value></data>
+  <data name="«{destino}» es el que más crece: {n} personas más." xml:space="preserve"><value>“{destino}” grew the most: {n} more people.</value></data>
+  <data name="antes" xml:space="preserve"><value>before</value></data>
+  <data name="Asistencia media" xml:space="preserve"><value>Average attendance</value></data>
+  <data name="Bautismos" xml:space="preserve"><value>Baptisms</value></data>
+  <data name="Bautismos con fecha en el año" xml:space="preserve"><value>Baptisms dated in the year</value></data>
+  <data name="Cada líder tiene de media {n} personas activas, por encima de {max}: hacen falta más líderes." xml:space="preserve"><value>Each leader has {n} active people on average, above {max}: more leaders are needed.</value></data>
+  <data name="Cada líder tiene de media {n} personas activas." xml:space="preserve"><value>Each leader has {n} active people on average.</value></data>
+  <data name="Cambio" xml:space="preserve"><value>Change</value></data>
+  <data name="Cambio en el periodo" xml:space="preserve"><value>Change in the period</value></data>
+  <data name="Comparado con el mes anterior" xml:space="preserve"><value>Compared with the previous month</value></data>
+  <data name="Cuántos hay de cada edad al final del periodo" xml:space="preserve"><value>How many of each age at the end of the period</value></data>
+  <data name="Dejan el liderazgo" xml:space="preserve"><value>Leaving leadership</value></data>
+  <data name="Dejaron el liderazgo más personas ({salidas}) de las que entraron ({entradas})." xml:space="preserve"><value>More people left leadership ({salidas}) than joined it ({entradas}).</value></data>
+  <data name="Del {desde} al {hasta}, comparado con el mismo tramo del año anterior" xml:space="preserve"><value>From {desde} to {hasta}, compared with the same stretch last year</value></data>
+  <data name="Destinatarios (pastores generales con correo):" xml:space="preserve"><value>Recipients (senior pastors with email):</value></data>
+  <data name="Días hasta el primer contacto" xml:space="preserve"><value>Days to first contact</value></data>
+  <data name="El {pct} % de las {llegados} personas que llegaron recibió un primer seguimiento en {dias} días o menos." xml:space="preserve"><value>{pct}% of the {llegados} people who arrived had a first follow-up within {dias} days.</value></data>
+  <data name="El día 1 de cada mes se envía a los pastores generales un resumen del mes anterior: congregantes, asistencia, seguimiento y economía, con las mismas frases del resumen de cada panel. Todo se calcula en el servidor de Congrega; no se envían datos a servicios externos." xml:space="preserve"><value>On the 1st of each month, senior pastors receive a summary of the previous month: congregation, attendance, follow-up and finances, with the same summary sentences as each panel. Everything is calculated on the Congrega server; no data is sent to external services.</value></data>
+  <data name="El número de líderes aumentó en {n}; ahora hay {total}." xml:space="preserve"><value>The number of leaders rose by {n}; there are now {total}.</value></data>
+  <data name="El número de líderes bajó en {n}; ahora hay {total}." xml:space="preserve"><value>The number of leaders fell by {n}; there are now {total}.</value></data>
+  <data name="El número de líderes no cambió ({total})." xml:space="preserve"><value>The number of leaders did not change ({total}).</value></data>
+  <data name="El número de personas en {tipo} no cambió ({total})." xml:space="preserve"><value>The number of people in {tipo} did not change ({total}).</value></data>
+  <data name="El panel de salud del inicio compara cada indicador con su objetivo y con lo que debería llevarse a estas alturas del año. Deja vacío lo que no quieras fijar. Los objetivos son de la sede en la que estás trabajando; si una sede no tiene, se usan los de «Todas las sedes»." xml:space="preserve"><value>The health panel on the home page compares each indicator with its target and with what should have been reached by this point in the year. Leave empty anything you do not want to set. Targets belong to the site you are working in; if a site has none, those of “All sites” are used.</value></data>
+  <data name="En buen camino" xml:space="preserve"><value>On track</value></data>
+  <data name="Entradas" xml:space="preserve"><value>Joined</value></data>
+  <data name="Entradas hacia arriba, salidas hacia abajo" xml:space="preserve"><value>Joins upwards, departures downwards</value></data>
+  <data name="Entradas y salidas" xml:space="preserve"><value>Joins and departures</value></data>
+  <data name="Enviar el informe mensual por correo" xml:space="preserve"><value>Send the monthly report by email</value></data>
+  <data name="Enviarme una prueba" xml:space="preserve"><value>Send me a test</value></data>
+  <data name="Evolución de las zonas" xml:space="preserve"><value>Zone trends</value></data>
+  <data name="Evolución de los grupos" xml:space="preserve"><value>Group trends</value></data>
+  <data name="Evolución de los jóvenes" xml:space="preserve"><value>Youth trends</value></data>
+  <data name="Evolución de los ministerios" xml:space="preserve"><value>Ministry trends</value></data>
+  <data name="Evolución del liderazgo" xml:space="preserve"><value>Leadership trends</value></data>
+  <data name="Evolución del seguimiento" xml:space="preserve"><value>Follow-up trends</value></data>
+  <data name="Grupos con gente" xml:space="preserve"><value>Groups with people</value></data>
+  <data name="Guardar objetivos" xml:space="preserve"><value>Save targets</value></data>
+  <data name="Hay {n} {tipo} sin nadie asignado." xml:space="preserve"><value>There are {n} {tipo} with nobody assigned.</value></data>
+  <data name="Hay {n} jóvenes de {min} a {max} años, más que en el periodo anterior ({ant})." xml:space="preserve"><value>There are {n} young people aged {min} to {max}, more than in the previous period ({ant}).</value></data>
+  <data name="Hay {n} jóvenes de {min} a {max} años, menos que en el periodo anterior ({ant})." xml:space="preserve"><value>There are {n} young people aged {min} to {max}, fewer than in the previous period ({ant}).</value></data>
+  <data name="Hay {n} jóvenes de {min} a {max} años." xml:space="preserve"><value>There are {n} young people aged {min} to {max}.</value></data>
+  <data name="Hubo más salidas ({salidas}) que entradas ({entradas}) en {tipo}." xml:space="preserve"><value>There were more departures ({salidas}) than joins ({entradas}) in {tipo}.</value></data>
+  <data name="Informe mensual" xml:space="preserve"><value>Monthly report</value></data>
+  <data name="Informes" xml:space="preserve"><value>Reports</value></data>
+  <data name="Jóvenes activos al cierre de cada periodo" xml:space="preserve"><value>Active young people at the end of each period</value></data>
+  <data name="Jóvenes nuevos" xml:space="preserve"><value>New young people</value></data>
+  <data name="Jóvenes por edad" xml:space="preserve"><value>Young people by age</value></data>
+  <data name="Jóvenes por estado" xml:space="preserve"><value>Young people by stage</value></data>
+  <data name="Jóvenes que pasan a miembro" xml:space="preserve"><value>Young people becoming members</value></data>
+  <data name="Jóvenes sobre el total" xml:space="preserve"><value>Young people as share of total</value></data>
+  <data name="Las más grandes por separado; el resto en «Otros»" xml:space="preserve"><value>The largest shown separately; the rest under “Other”</value></data>
+  <data name="Las personas en {tipo} aumentaron en {n}; ahora hay {total}." xml:space="preserve"><value>People in {tipo} rose by {n}; there are now {total}.</value></data>
+  <data name="Las personas en {tipo} bajaron en {n}; ahora hay {total}." xml:space="preserve"><value>People in {tipo} fell by {n}; there are now {total}.</value></data>
+  <data name="Las pertenencias anteriores a la puesta en marcha del historial se cuentan como existentes desde siempre." xml:space="preserve"><value>Memberships from before the history was started are counted as having always existed.</value></data>
+  <data name="liderazgo" xml:space="preserve"><value>leadership</value></data>
+  <data name="Líderes al cierre de cada periodo" xml:space="preserve"><value>Leaders at the end of each period</value></data>
+  <data name="Llegaron {n} jóvenes nuevos." xml:space="preserve"><value>{n} new young people arrived.</value></data>
+  <data name="Lo más importante" xml:space="preserve"><value>Key points</value></data>
+  <data name="Los gráficos e informes de todas las pantallas y el panel de salud del inicio solo los ven los pastores. Marca aquí a las demás personas que también deben verlos (por ejemplo, el equipo de liderazgo). Cada persona solo verá los informes de las pantallas a las que ya tiene acceso." xml:space="preserve"><value>Charts and reports on every screen, and the health panel on the home page, are only visible to pastors. Tick here anyone else who should also see them (for example, the leadership team). Each person will only see reports for the screens they can already open.</value></data>
+  <data name="Los jóvenes son el {pct} % de las personas activas." xml:space="preserve"><value>Young people are {pct}% of active people.</value></data>
+  <data name="Media de personas por culto" xml:space="preserve"><value>Average people per service</value></data>
+  <data name="Mes siguiente" xml:space="preserve"><value>Next month</value></data>
+  <data name="ministerios" xml:space="preserve"><value>ministries</value></data>
+  <data name="Ministerios con gente" xml:space="preserve"><value>Ministries with people</value></data>
+  <data name="Ningún pastor general tiene correo: no se enviará a nadie." xml:space="preserve"><value>No senior pastor has an email address: it will not be sent to anyone.</value></data>
+  <data name="No hay ningún líder registrado." xml:space="preserve"><value>No leaders are registered.</value></data>
+  <data name="No se pudo cargar el panel de salud." xml:space="preserve"><value>The health panel could not be loaded.</value></data>
+  <data name="No se registró ningún seguimiento en este periodo." xml:space="preserve"><value>No follow-ups were recorded in this period.</value></data>
+  <data name="Nuevos líderes" xml:space="preserve"><value>New leaders</value></data>
+  <data name="Objetivo {objetivo} · esperado hoy {esperado}" xml:space="preserve"><value>Target {objetivo} · expected today {esperado}</value></data>
+  <data name="Objetivos anuales" xml:space="preserve"><value>Annual targets</value></data>
+  <data name="Objetivos y permisos" xml:space="preserve"><value>Targets and permissions</value></data>
+  <data name="Pasan a adultos" xml:space="preserve"><value>Moving to adults</value></data>
+  <data name="Personas activas de más al acabar el año" xml:space="preserve"><value>Additional active people by the end of the year</value></data>
+  <data name="Personas activas por líder" xml:space="preserve"><value>Active people per leader</value></data>
+  <data name="Personas atendidas" xml:space="preserve"><value>People followed up</value></data>
+  <data name="Personas de más o de menos en cada una" xml:space="preserve"><value>People gained or lost in each one</value></data>
+  <data name="Personas distintas al cierre de cada periodo" xml:space="preserve"><value>Distinct people at the end of each period</value></data>
+  <data name="Personas distintas que aportan en el año" xml:space="preserve"><value>Distinct people giving during the year</value></data>
+  <data name="Personas en grupos" xml:space="preserve"><value>People in groups</value></data>
+  <data name="Personas en ministerios" xml:space="preserve"><value>People in ministries</value></data>
+  <data name="Personas en zonas" xml:space="preserve"><value>People in zones</value></data>
+  <data name="Personas por grupo" xml:space="preserve"><value>People by group</value></data>
+  <data name="Personas por líder" xml:space="preserve"><value>People per leader</value></data>
+  <data name="Personas por ministerio" xml:space="preserve"><value>People by ministry</value></data>
+  <data name="Personas por zona" xml:space="preserve"><value>People by zone</value></data>
+  <data name="Personas que llegan en el año" xml:space="preserve"><value>People arriving during the year</value></data>
+  <data name="Personas que pasan a miembro oficial en el año" xml:space="preserve"><value>People becoming official members during the year</value></data>
+  <data name="Por detrás" xml:space="preserve"><value>Behind</value></data>
+  <data name="Primer contacto en 7 días" xml:space="preserve"><value>First contact within 7 days</value></data>
+  <data name="Quién ve los informes" xml:space="preserve"><value>Who sees reports</value></data>
+  <data name="Recibes este correo porque el envío mensual de informes está activado en Ajustes > Informes." xml:space="preserve"><value>You receive this email because monthly reports are enabled in Settings &gt; Reports.</value></data>
+  <data name="Resumen generado automáticamente en el servidor de Congrega, sin enviar datos a servicios externos." xml:space="preserve"><value>Summary generated automatically on the Congrega server, without sending data to external services.</value></data>
+  <data name="Salidas" xml:space="preserve"><value>Departures</value></data>
+  <data name="Salud de la congregación" xml:space="preserve"><value>Congregation health</value></data>
+  <data name="Se hicieron {n} seguimientos a {personas} personas." xml:space="preserve"><value>{n} follow-ups were made with {personas} people.</value></data>
+  <data name="Se hicieron {n} seguimientos, un {pct} % más que en el periodo anterior ({ant})." xml:space="preserve"><value>{n} follow-ups were made, {pct}% more than in the previous period ({ant}).</value></data>
+  <data name="Se hicieron {n} seguimientos, un {pct} % menos que en el periodo anterior ({ant})." xml:space="preserve"><value>{n} follow-ups were made, {pct}% fewer than in the previous period ({ant}).</value></data>
+  <data name="Seguimientos por encargado" xml:space="preserve"><value>Follow-ups by person in charge</value></data>
+  <data name="Seguimientos por tipo" xml:space="preserve"><value>Follow-ups by type</value></data>
+  <data name="Seguimientos realizados" xml:space="preserve"><value>Follow-ups made</value></data>
+  <data name="Seguimientos registrados en el año" xml:space="preserve"><value>Follow-ups recorded during the year</value></data>
+  <data name="Siempre (pastor)" xml:space="preserve"><value>Always (pastor)</value></data>
+  <data name="Sin comparación" xml:space="preserve"><value>No comparison</value></data>
+  <data name="Sin seguimiento en 60 días" xml:space="preserve"><value>No follow-up in 60 days</value></data>
+  <data name="Te hemos enviado el informe del mes pasado a {correo}." xml:space="preserve"><value>We have sent last month's report to {correo}.</value></data>
+  <data name="Todas las sedes" xml:space="preserve"><value>All sites</value></data>
+  <data name="Todavía no se ha enviado ningún informe." xml:space="preserve"><value>No report has been sent yet.</value></data>
+  <data name="Último informe enviado: {mes}" xml:space="preserve"><value>Last report sent: {mes}</value></data>
+  <data name="Ve los informes" xml:space="preserve"><value>Sees reports</value></data>
+  <data name="Ver el informe del mes pasado" xml:space="preserve"><value>View last month's report</value></data>
+  <data name="Ver los gráficos completos en Congrega" xml:space="preserve"><value>See the full charts in Congrega</value></data>
+  <data name="Verde cuando baja (menos carga por líder), rojo cuando sube" xml:space="preserve"><value>Green when it falls (less load per leader), red when it rises</value></data>
+  <data name="Visitas, llamadas, consejerías… en cada periodo" xml:space="preserve"><value>Visits, calls, counselling… in each period</value></data>
+  <data name="vs. año anterior" xml:space="preserve"><value>vs. last year</value></data>
+  <data name="zonas" xml:space="preserve"><value>zones</value></data>
+  <data name="Zonas con gente" xml:space="preserve"><value>Zones with people</value></data>
 </root>

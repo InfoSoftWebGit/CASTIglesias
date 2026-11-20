@@ -104,11 +104,14 @@
 
             var html = '<div class="card mb-2">' +
                 '<div class="card-header d-flex justify-content-between align-items-center' +
-                    (sinNadie ? ' bg-warning-subtle' : '') + '">' +
+                    (sinNadie ? ' bg-warning-subtle text-dark' : '') + '">' +
                   '<span>' +
-                    (encargado.es_pareja ? '<i class="fas fa-ring me-1 text-secondary"></i>' : '') +
+                    (encargado.es_pareja ? '<i class="fas fa-ring me-1" style="opacity:.85;"></i>' : '') +
                     '<strong>' + escaparTextoEncargados(encargado.titulo) + '</strong>' +
-                    (contexto ? ' <small class="text-muted">' + escaparTextoEncargados(contexto) + '</small>' : '') +
+                    // El subtítulo hereda el color de la cabecera (blanco sobre el azul
+                    // de site.css, oscuro sobre el ámbar) y solo se atenúa un poco:
+                    // text-muted era gris sobre azul y apenas se leía.
+                    (contexto ? ' <small class="fw-normal ms-1" style="opacity:.85;">' + escaparTextoEncargados(contexto) + '</small>' : '') +
                   '</span>' +
                   '<span class="badge ' + (sinNadie ? 'bg-warning text-dark' : 'bg-primary') + '">' +
                     escaparTextoEncargados(fmt(T.xTotalACargo, encargado.total_personas)) +

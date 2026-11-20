@@ -1,0 +1,31 @@
+@*
+    Lo que necesita cualquier panel de informes: estilos, Chart.js, el componente
+    común (wwwroot/js/analitica.js) y los textos compartidos (window.T.analiticaComun).
+*@
+<link rel="stylesheet" href="~/css/analitica.css" asp-append-version="true" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="~/js/analitica.js" asp-append-version="true"></script>
+<script>
+    window.T = Object.assign(window.T || {}, {
+        analiticaComun: {
+            mostrar:    @Json.Serialize(L["Mostrar gráficos"].Value),
+            ocultar:    @Json.Serialize(L["Ocultar gráficos"].Value),
+            cargando:   @Json.Serialize(L["Cargando..."].Value),
+            error:      @Json.Serialize(L["No se pudo cargar el informe."].Value),
+            sinDatos:   @Json.Serialize(L["Todavía no hay datos en este periodo."].Value),
+            rango:      @Json.Serialize(L["Del {desde} al {hasta} · comparado con {desdeAnt} – {hastaAnt}"].Value),
+            periodo:    @Json.Serialize(L["Periodo"].Value),
+            total:      @Json.Serialize(L["Total"].Value),
+            media:      @Json.Serialize(L["Media"].Value),
+            vsAnterior: @Json.Serialize(L["respecto al periodo anterior"].Value),
+            antes:      @Json.Serialize(L["antes {n}"].Value),
+            semana:     @Json.Serialize(L["S"].Value),
+            trimestre:  @Json.Serialize(L["T"].Value),
+            anioAnterior:     @Json.Serialize(L["Mismo periodo del año anterior"].Value),
+            periodoActual:    @Json.Serialize(L["Este periodo"].Value),
+            periodoAnterior:  @Json.Serialize(L["Periodo anterior"].Value),
+            otros:      @Json.Serialize(L["Otros"].Value),
+            sinZona:    @Json.Serialize(L["Sin zona"].Value)
+        }
+    });
+</script>

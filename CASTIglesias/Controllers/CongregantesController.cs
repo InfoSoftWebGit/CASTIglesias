@@ -172,23 +172,45 @@ namespace CASTIglesias.Controllers
                 string mensaje;
                 object resultado;
 
+                int idGuardado;
                 if (data.id_miembro == 0)
                 {
                     // Crear nuevo miembro
-                    resultado = _cnMiembros.RegistrarMiembro(data, sedeID, out mensaje);
+                    idGuardado = _cnMiembros.RegistrarMiembro(data, sedeID, out mensaje);
+                    resultado = idGuardado;
                 }
                 else
                 {
                     // Editar miembro existente
-                    resultado = _cnMiembros.EditarMiembro(data, sedeID, out mensaje);
+                    bool ok = _cnMiembros.EditarMiembro(data, sedeID, out mensaje);
+                    idGuardado = ok ? data.id_miembro : 0;
+                    resultado = ok;
                 }
 
-                return Json(new { resultado, mensaje });
+                var conyuge = VincularConyugeTrasGuardar(idGuardado, data, sedeID);
+                return Json(new { resultado, mensaje, conyuge });
             }
             catch (Exception ex)
             {
                 return Json(new { resultado = false, mensaje = $"Error interno: {ErrorHelper.Mensaje(ex)}" });
             }
+        }
+
+        /// <summary>
+        /// Después de guardar una ficha (de cualquier estado), deja vinculada a la
+        /// pareja elegida en "Casado/a con" y comparte el diezmo familiar.
+        /// </summary>
+        /// <returns>
+        /// Lo que la pantalla necesita para abrir la ficha del cónyuge, o null si no
+        /// se guardó la ficha.
+        /// </returns>
+        private ResultadoConyuge? VincularConyugeTrasGuardar(int idGuardado, MiembroDetalleDTO data, int sedeID)
+        {
+            if (idGuardado <= 0) return null;
+
+            var conyuge = _cnMiembros.VincularConyuge(idGuardado, data.id_conyuge, sedeID, out string error);
+            if (!string.IsNullOrEmpty(error)) conyuge.aviso = error;
+            return conyuge;
         }
 
 
@@ -619,18 +641,23 @@ namespace CASTIglesias.Controllers
                 string mensaje;
                 object resultado;
 
+                int idGuardado;
                 if (data.id_miembro == 0)
                 {
                     // Crear nuevo miembro
-                    resultado = _cnMiembros.RegistrarMiembroVisitante(data, sedeID, out mensaje);
+                    idGuardado = _cnMiembros.RegistrarMiembroVisitante(data, sedeID, out mensaje);
+                    resultado = idGuardado;
                 }
                 else
                 {
                     // Editar miembro existente
-                    resultado = _cnMiembros.EditarMiembroVisitante(data, sedeID, out mensaje);
+                    bool ok = _cnMiembros.EditarMiembroVisitante(data, sedeID, out mensaje);
+                    idGuardado = ok ? data.id_miembro : 0;
+                    resultado = ok;
                 }
 
-                return Json(new { resultado, mensaje });
+                var conyuge = VincularConyugeTrasGuardar(idGuardado, data, sedeID);
+                return Json(new { resultado, mensaje, conyuge });
             }
             catch (Exception ex)
             {
@@ -720,7 +747,8 @@ namespace CASTIglesias.Controllers
                     mensaje = "El ID del miembro es inválido para edición.";
                 }
 
-                return Json(new { resultado, mensaje });
+                var conyuge = VincularConyugeTrasGuardar(resultado ? data.id_miembro : 0, data, sedeID);
+                return Json(new { resultado, mensaje, conyuge });
             }
             catch (Exception ex)
             {
@@ -829,7 +857,8 @@ namespace CASTIglesias.Controllers
                     mensaje = "El ID del miembro es inválido para edición.";
                 }
 
-                return Json(new { resultado, mensaje });
+                var conyuge = VincularConyugeTrasGuardar(resultado ? data.id_miembro : 0, data, sedeID);
+                return Json(new { resultado, mensaje, conyuge });
             }
             catch (Exception ex)
             {
@@ -983,9 +1012,11 @@ namespace CASTIglesias.Controllers
 
         #region Seguimiento
 
-        // Pastores, AdminGlobal y admin de plataforma ven todo y tienen los filtros;
-        // el resto, solo las zonas y la lista que les asigna el pastor en
-        // Configuración → Seguimientos (ver AlcanceSeguimiento).
+        // Pastores, AdminGlobal y admin de plataforma ven todo y tienen los filtros.
+        // Un líder ve y gestiona solo a sus personas a cargo y su lista; el supervisor
+        // de zona (lo nombra el pastor en Configuración → Seguimientos) además VE toda
+        // su zona (ver AlcanceSeguimiento). Ver = MiembroEnAlcance; registrar, editar
+        // o borrar = AlcanceSeguimiento.PuedeGestionar.
         private bool EsPastorOAdmin => CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User);
 
         private AlcanceSeguimiento? _alcanceSeguimiento;
@@ -1007,6 +1038,7 @@ namespace CASTIglesias.Controllers
                 ViewBag.TieneAlcanceSeguimiento = alcance.TieneAlgo;
                 ViewBag.LiderVinculado = alcance.Total || alcance.IdMiembroLider != null;
                 ViewBag.TieneAsignados = alcance.MiembrosAsignados.Count > 0;
+                ViewBag.EsSupervisorSeguimiento = alcance.EsSupervisor;
             }
             catch (Exception)
             {
@@ -1029,7 +1061,14 @@ namespace CASTIglesias.Controllers
                     ids = _cnSeguimientoConfig.IdsMiembrosDeZona(zona);
 
                 var lista = _cnSeguimiento.ListarSeguimientos(sedeID, ids);
-                return Json(new { data = lista });
+
+                // Seguimientos que el supervisor ve por su zona pero no puede tocar:
+                // la vista oculta sus botones (el servidor lo vuelve a comprobar al guardar).
+                var soloLectura = alcance.Total
+                    ? new List<int>()
+                    : lista.Where(s => !alcance.PuedeGestionar(s.ID_miembro)).Select(s => s.ID).ToList();
+
+                return Json(new { data = lista, soloLectura });
             }
             catch (Exception ex)
             {
@@ -1097,12 +1136,16 @@ namespace CASTIglesias.Controllers
         /// </summary>
         [HttpGet]
         [RequierePermiso(nameof(Permisos.Seguimiento), nameof(Permisos.DetalleSeguimiento))]
-        public JsonResult BuscarMiembrosSeguimiento(string term)
+        /// <param name="gestionar">
+        /// true desde los modales de registrar: solo personas cuyo seguimiento puede
+        /// gestionar (un supervisor ve su zona, pero solo registra para sus personas).
+        /// </param>
+        public JsonResult BuscarMiembrosSeguimiento(string term, bool gestionar = false)
         {
             try
             {
                 int sedeID = ObtenerIdSedeUsuario();
-                var lista = _cnSeguimientoConfig.BuscarMiembrosEnAlcance(sedeID, AlcanceSeguimientoActual, term);
+                var lista = _cnSeguimientoConfig.BuscarMiembrosEnAlcance(sedeID, AlcanceSeguimientoActual, term, gestionar);
                 return Json(new { data = lista });
             }
             catch (Exception ex)
@@ -1124,13 +1167,14 @@ namespace CASTIglesias.Controllers
 
                 // Un líder solo puede registrar seguimientos de su alcance y, al editar,
                 // tampoco puede tocar uno ajeno cambiándole el miembro.
+                // Un supervisor de zona VE toda su zona, pero solo gestiona a sus personas.
                 var alcance = AlcanceSeguimientoActual;
-                if (!_cnSeguimientoConfig.MiembroEnAlcance(alcance, data.ID_miembro))
+                if (!alcance.PuedeGestionar(data.ID_miembro))
                     return SinPermiso();
                 if (data.ID != 0 && !alcance.Total)
                 {
                     var idMiembroActual = _cnSeguimiento.ObtenerIdMiembro(data.ID);
-                    if (idMiembroActual == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembroActual.Value))
+                    if (idMiembroActual == null || !alcance.PuedeGestionar(idMiembroActual.Value))
                         return SinPermiso();
                 }
 
@@ -1162,7 +1206,7 @@ namespace CASTIglesias.Controllers
                 if (!alcance.Total)
                 {
                     var idMiembro = _cnSeguimiento.ObtenerIdMiembro(id);
-                    if (idMiembro == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembro.Value))
+                    if (idMiembro == null || !alcance.PuedeGestionar(idMiembro.Value))
                         return SinPermiso();
                 }
 
@@ -1245,12 +1289,12 @@ namespace CASTIglesias.Controllers
                     return Json(new { resultado = 0, mensaje = "Los datos son inválidos." });
 
                 var alcance = AlcanceSeguimientoActual;
-                if (!_cnSeguimientoConfig.MiembroEnAlcance(alcance, data.ID_miembro))
+                if (!alcance.PuedeGestionar(data.ID_miembro))
                     return SinPermiso();
                 if (data.ID != 0 && !alcance.Total)
                 {
                     var idMiembroActual = _cnDetalleSeguimiento.ObtenerIdMiembro(data.ID);
-                    if (idMiembroActual == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembroActual.Value))
+                    if (idMiembroActual == null || !alcance.PuedeGestionar(idMiembroActual.Value))
                         return SinPermiso();
                 }
 
@@ -1282,7 +1326,7 @@ namespace CASTIglesias.Controllers
                 if (!alcance.Total)
                 {
                     var idMiembro = _cnDetalleSeguimiento.ObtenerIdMiembro(id);
-                    if (idMiembro == null || !_cnSeguimientoConfig.MiembroEnAlcance(alcance, idMiembro.Value))
+                    if (idMiembro == null || !alcance.PuedeGestionar(idMiembro.Value))
                         return SinPermiso();
                 }
 

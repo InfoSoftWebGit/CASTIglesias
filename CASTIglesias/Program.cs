@@ -159,6 +159,24 @@ builder.Services.AddScoped<CN_ReglasContabilizacion>();
 // Panel financiero: resume lo que ya calculan los informes y la tesorería
 builder.Services.AddScoped<CD_Panel>();
 builder.Services.AddScoped<CN_Panel>();
+// Informes evolutivos de congregantes (historial de estados + motor de resumen)
+builder.Services.AddScoped<CD_AnaliticaCongregantes>();
+builder.Services.AddScoped<CN_AnaliticaCongregantes>();
+builder.Services.AddScoped<CD_AnaliticaAsistencia>();
+builder.Services.AddScoped<CN_AnaliticaAsistencia>();
+builder.Services.AddScoped<CD_AnaliticaEconomia>();
+builder.Services.AddScoped<CN_AnaliticaEconomia>();
+builder.Services.AddScoped<CD_AnaliticaGrupos>();
+builder.Services.AddScoped<CN_AnaliticaSeguimiento>();
+builder.Services.AddScoped<CN_AnaliticaPertenencia>();
+builder.Services.AddScoped<CN_AnaliticaJovenes>();
+// Panel de salud, objetivos anuales, quién ve los informes e informe mensual
+builder.Services.AddScoped<CD_ConfigInformes>();
+builder.Services.AddScoped<CN_PanelSalud>();
+builder.Services.AddScoped<CASTIglesias.Models.FormateadorAnalitica>();
+builder.Services.AddScoped<CASTIglesias.Models.InformeMensualCorreo>();
+// Envío automático del informe mensual (solo a iglesias que lo activen)
+builder.Services.AddHostedService<CASTIglesias.Models.InformeMensualServicio>();
 // Auditoría (solo lectura) y numeración de documentos
 builder.Services.AddScoped<CD_Auditoria>();
 builder.Services.AddScoped<CN_Auditoria>();

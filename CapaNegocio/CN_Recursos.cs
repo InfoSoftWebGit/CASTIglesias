@@ -283,8 +283,9 @@ namespace CapaNegocio
         /// nombre y el correo de contacto también ayuda a no caer en spam: un correo sin
         /// identificación del remitente es sospechoso.
         /// </remarks>
-        public static string ComponerCorreo(string titulo, string contenidoHtml)
+        public static string ComponerCorreo(string titulo, string contenidoHtml, string? pie = null)
         {
+            pie ??= "Este es un correo automático del alta y la recuperación de acceso. Si no has solicitado\n    nada, avísanos respondiendo a este mensaje.";
             return $@"
 <div style=""font-family:Segoe UI,Arial,sans-serif;font-size:15px;color:#1f2937;line-height:1.6;max-width:560px"">
   <div style=""background:#1E3A8A;border-bottom:3px solid #00BFA5;padding:16px 20px"">
@@ -297,8 +298,7 @@ namespace CapaNegocio
   </div>
   <div style=""padding:0 20px 20px 20px;font-size:12px;color:#6B7280;border-top:1px solid #e5e7eb;padding-top:12px"">
     Congrega CRM &middot; <a href=""mailto:soporte@congrega.es"" style=""color:#1E3A8A"">soporte@congrega.es</a><br/>
-    Este es un correo automático del alta y la recuperación de acceso. Si no has solicitado
-    nada, avísanos respondiendo a este mensaje.
+    {WebUtility.HtmlEncode(pie)}
   </div>
 </div>";
         }

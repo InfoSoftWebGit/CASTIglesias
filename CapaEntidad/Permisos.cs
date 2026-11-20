@@ -225,5 +225,17 @@ namespace CapaEntidad
         public bool FinanzasVerReglas { get; set; }
         public bool FinanzasVerNumeraciones { get; set; }
         public bool FinanzasVerApertura { get; set; }
+
+        // ── Informes y gráficos ──────────────────────────────────────────────
+        /// <summary>
+        /// Ver los paneles de informes y evolución de todas las pantallas.
+        /// </summary>
+        /// <remarks>
+        /// Los pastores y AdminGlobal lo tienen siempre (reciben todos los permisos).
+        /// A los demás se lo da un pastor desde Ajustes > Informes, no desde la ficha
+        /// del usuario: por eso lleva [PermisoGestionadoAparte].
+        /// </remarks>
+        [PermisoGestionadoAparte]
+        public bool VerInformes { get; set; }
     }
 }

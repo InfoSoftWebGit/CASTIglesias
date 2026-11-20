@@ -1,0 +1,69 @@
+@using CASTIglesias.Models
+@model PanelAnaliticaModelo
+@*
+    Panel genérico "Informes y evolución" (seguimiento, zonas, grupos, ministerios,
+    líderes, jóvenes). Pinta lo que devuelva la acción: indicadores, gráficos y
+    resumen llegan ya con sus textos (FormateadorAnalitica), así que esta vista no
+    sabe nada de cada módulo.
+
+    Solo se muestra a quien puede ver informes (pastores y a quien ellos asignen).
+*@
+@{
+    if ((ViewBag.PermisosMiembro as CapaEntidad.Permisos)?.VerInformes != true) { return; }
+    var p = Model.Prefijo;
+}
+@await Html.PartialAsync("_RecursosAnalitica")
+
+<div class="card mb-4 analitica-panel" id="@(p)Panel">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-line me-1"></i> @L["Informes y evolución"]</span>
+        <button type="button" class="btn btn-sm btn-outline-light analitica-no-imprimir" id="@(p)Boton"
+                data-bs-toggle="collapse" data-bs-target="#@(p)Cuerpo" aria-expanded="false" aria-controls="@(p)Cuerpo">
+            <i class="fas fa-chart-area me-1"></i> <span>@L["Mostrar gráficos"]</span>
+        </button>
+    </div>
+
+    <div id="@(p)Cuerpo" class="collapse">
+        <div class="card-body d-grid gap-3">
+            @await Html.PartialAsync("_FiltrosAnalitica", p)
+
+            <div>
+                <h5 class="mb-0">@Model.Titulo</h5>
+                <small class="text-muted" id="@(p)RangoTexto"></small>
+            </div>
+
+            <div class="analitica-resumen">
+                <div class="fw-semibold mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i> @L["Resumen del periodo"]</div>
+                <ul id="@(p)Resumen"><li class="text-muted">@L["Cargando..."]</li></ul>
+            </div>
+
+            <div class="analitica-kpis" id="@(p)Kpis"></div>
+            <div class="analitica-rejilla" id="@(p)Graficos"></div>
+            <small class="text-muted" id="@(p)Nota" style="display:none;"></small>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        const A = window.Analitica, TC = window.T.analiticaComun, p = @Json.Serialize(p);
+        const tipo = @Json.Serialize(Model.Tipo);
+        const $ = s => document.getElementById(p + s);
+
+        A.panel({
+            prefijo: p,
+            panelId: p + 'Panel',
+            cuerpoId: p + 'Cuerpo',
+            botonId: p + 'Boton',
+            url: @Json.Serialize(Url.Action(Model.Accion, "Analitica")),
+            claveLocal: 'analitica_' + p + '_abierto',
+            textos: TC,
+            params: () => (tipo ? { tipo } : {}),
+            pintar: d => A.pintarGenerico(d, { kpis: $('Kpis'), graficos: $('Graficos'), resumen: $('Resumen'), nota: $('Nota') }, TC, p),
+            descargarTodo: d => A.descargarCSV(@Json.Serialize(Model.Titulo),
+                [TC.periodo, ...d.kpis.filter(k => k.serie && k.serie.length).map(k => k.etiqueta)],
+                d.periodos.map((per, i) => [A.etiquetaPeriodo(per, TC), ...d.kpis.filter(k => k.serie && k.serie.length).map(k => k.serie[i])]))
+        });
+    })();
+</script>

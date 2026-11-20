@@ -11,6 +11,9 @@
     <li class="breadcrumb-item active">@L["Ministerios"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("mi", "Pertenencia", L["Evolución de los ministerios"].Value, "ministerio"))
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-sitemap me-1"></i> @L["Lista de Ministerios"]

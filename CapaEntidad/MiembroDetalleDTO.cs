@@ -144,6 +144,17 @@ namespace CapaEntidad
         [Column("Tipo_relacion_familiar")]
         public string? tipo_relacion_familiar { get; set; }
 
+        // Al guardar: >0 = casado/a con ese congregante, 0 = sin pareja y null = la
+        // pantalla no tiene el campo, así que el vínculo se deja como estaba.
+        [Column("ID_conyuge")]
+        public int? id_conyuge { get; set; }
+
+        // Datos del cónyuge para la ficha: el nombre para mostrarlo en el campo
+        // "Casado/a con" y su diezmo familiar para reutilizar el mismo número si ya
+        // lo tiene. Solo de lectura: no se guardan desde aquí.
+        public string? nombre_conyuge { get; set; }
+        public string? diezmo_familiar_conyuge { get; set; }
+
         public string nombre_Provincia { get; set; } = string.Empty;
         public string nombre_Municipio { get; set; } = string.Empty;
         public string nombre_sede { get; set; } = string.Empty;

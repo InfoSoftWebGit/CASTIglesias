@@ -1,0 +1,19 @@
+@model CASTIglesias.Models.TarjetaGraficoModelo
+@*
+    Tarjeta de un gráfico: título, explicación, botones de descarga (imagen y
+    datos) y el lienzo. Analitica.grafico() engancha los botones al pintar.
+    El subtítulo tiene id (IdCanvas + "Sub") por si el panel lo rellena con datos.
+*@
+<div class="analitica-tarjeta" style="@(Model.Ancha ? "grid-column:1/-1" : null)">
+    <div class="analitica-tarjeta-cabecera">
+        <div>
+            <h6>@Model.Titulo</h6>
+            <small id="@(Model.IdCanvas)Sub">@Model.Subtitulo</small>
+        </div>
+        <div class="analitica-acciones analitica-no-imprimir">
+            <button type="button" class="btn btn-outline-secondary" data-descargar="png" title="@L["Descargar imagen"]"><i class="fas fa-image"></i></button>
+            <button type="button" class="btn btn-outline-secondary" data-descargar="csv" title="@L["Descargar datos"]"><i class="fas fa-table"></i></button>
+        </div>
+    </div>
+    <div class="analitica-lienzo @(Model.Bajo ? "bajo" : "")"><canvas id="@Model.IdCanvas" role="img" aria-label="@Model.Titulo"></canvas></div>
+</div>

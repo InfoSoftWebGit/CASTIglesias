@@ -29,8 +29,8 @@ namespace CapaNegocio
         public bool MiembroEnAlcance(AlcanceSeguimiento alcance, int idMiembro) =>
             _capaDatos.MiembroEnAlcance(alcance, idMiembro);
 
-        public List<object> BuscarMiembrosEnAlcance(int sedeID, AlcanceSeguimiento alcance, string term) =>
-            _capaDatos.BuscarMiembrosEnAlcance(sedeID, alcance, term);
+        public List<object> BuscarMiembrosEnAlcance(int sedeID, AlcanceSeguimiento alcance, string term, bool soloGestionables = false) =>
+            _capaDatos.BuscarMiembrosEnAlcance(sedeID, alcance, term, soloGestionables);
 
         public List<object> ListarSinSeguimiento(int sedeID, int? idZona) =>
             _capaDatos.ListarSinSeguimiento(sedeID, idZona);

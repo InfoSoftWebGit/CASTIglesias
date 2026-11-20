@@ -81,22 +81,36 @@ namespace CapaDatos
                 .Distinct()
                 .ToList();
 
+            // Personas a cargo: miembros.id_responsable apunta a una FILA de lideres
+            // (un mismo miembro puede ser líder en varias filas), no al miembro.
+            var filasLider = _context.Lideres.AsNoTracking()
+                .Where(l => l.ID_miembro == idLider)
+                .Select(l => l.ID)
+                .ToList();
+            var aCargo = _context.Miembros.AsNoTracking()
+                .Where(m => m.id_responsable != null && filasLider.Contains(m.id_responsable.Value))
+                .Select(m => m.id_miembro)
+                .ToList();
+
             return new AlcanceSeguimiento
             {
                 IdMiembroLider = idLider,
                 Zonas = zonas,
-                MiembrosAsignados = asignados
+                MiembrosAsignados = asignados,
+                MiembrosACargo = aCargo
             };
         }
 
         /// <summary>
-        /// IDs de los miembros que entran en el alcance. null = todos (alcance total).
+        /// IDs de los miembros cuyos seguimientos puede VER el usuario (sus personas
+        /// y, si es supervisor, las de sus zonas). null = todos (alcance total).
         /// </summary>
         public HashSet<int>? IdsMiembrosEnAlcance(AlcanceSeguimiento alcance)
         {
             if (alcance.Total) return null;
 
             var ids = new HashSet<int>(alcance.MiembrosAsignados);
+            ids.UnionWith(alcance.MiembrosACargo);
             if (alcance.Zonas.Count > 0)
             {
                 var zonas = alcance.Zonas.ToList();
@@ -109,10 +123,10 @@ namespace CapaDatos
             return ids;
         }
 
+        /// <summary>Puede VER los seguimientos de este miembro (para gestionar: AlcanceSeguimiento.PuedeGestionar).</summary>
         public bool MiembroEnAlcance(AlcanceSeguimiento alcance, int idMiembro)
         {
-            if (alcance.Total) return true;
-            if (alcance.MiembrosAsignados.Contains(idMiembro)) return true;
+            if (alcance.PuedeGestionar(idMiembro)) return true;
             if (alcance.Zonas.Count == 0) return false;
 
             var zonas = alcance.Zonas.ToList();
@@ -129,8 +143,20 @@ namespace CapaDatos
                 .ToHashSet();
 
         /// <summary>Buscador de miembros limitado al alcance (modal y detalle de seguimiento).</summary>
-        public List<object> BuscarMiembrosEnAlcance(int sedeID, AlcanceSeguimiento alcance, string term)
+        /// <param name="soloGestionables">
+        /// true en el modal de registrar: un supervisor no puede registrar seguimientos
+        /// de personas de su zona que no son suyas, aunque pueda verlos.
+        /// </param>
+        public List<object> BuscarMiembrosEnAlcance(int sedeID, AlcanceSeguimiento alcance, string term, bool soloGestionables = false)
         {
+            if (soloGestionables && !alcance.Total)
+                alcance = new AlcanceSeguimiento
+                {
+                    IdMiembroLider = alcance.IdMiembroLider,
+                    MiembrosAsignados = alcance.MiembrosAsignados,
+                    MiembrosACargo = alcance.MiembrosACargo
+                };
+
             if (string.IsNullOrWhiteSpace(term) || !alcance.TieneAlgo) return new List<object>();
 
             var termino = term.Trim().ToLower();
@@ -229,23 +255,19 @@ namespace CapaDatos
         #region Configuración (pantalla del pastor)
 
         /// <summary>
-        /// Zonas a las que pertenece un líder: las de su ficha de miembro
-        /// (miembro_zona_grupo_ministerio) y la que tenga en la tabla de líderes.
+        /// Zonas que LIDERA un líder: sus filas de lideres con zona y sin grupo ni
+        /// ministerio. Son las únicas que el pastor le puede dar a supervisar.
         /// </summary>
-        public HashSet<int> ZonasDelLider(int idMiembro)
-        {
-            var zonas = _context.Miembros_Zona_Grupo_Ministerio.AsNoTracking()
-                .Where(x => x.ID_miembro == idMiembro && x.ID_zona > 0)
-                .Select(x => x.ID_zona)
-                .ToHashSet();
-
-            zonas.UnionWith(_context.Lideres.AsNoTracking()
-                .Where(l => l.ID_miembro == idMiembro && l.ID_zona > 0)
+        /// <remarks>
+        /// Antes valía cualquier zona a la que perteneciera (ficha de miembro), lo que
+        /// permitía que un líder de grupo viera los seguimientos de toda su zona. Pertenecer
+        /// a una zona, o liderar un grupo dentro de ella, ya no basta.
+        /// </remarks>
+        public HashSet<int> ZonasDelLider(int idMiembro) =>
+            _context.Lideres.AsNoTracking()
+                .Where(l => l.ID_miembro == idMiembro && l.ID_zona > 0 && l.ID_grupo == 0 && l.ID_ministerio == 0)
                 .Select(l => l.ID_zona)
-                .ToList());
-
-            return zonas;
-        }
+                .ToHashSet();
 
         public bool EsLider(int idMiembro) => _context.Lideres.Any(l => l.ID_miembro == idMiembro);
 
@@ -399,7 +421,7 @@ namespace CapaDatos
                 var pedidas = (zonas ?? new List<int>()).Distinct().ToList();
                 if (pedidas.Any(z => !permitidas.Contains(z)))
                 {
-                    mensaje = "Solo se pueden asignar zonas a las que pertenece el líder.";
+                    mensaje = "Solo se pueden asignar zonas que el líder lidera (fila de líder con zona y sin grupo ni ministerio).";
                     return false;
                 }
 

@@ -12,6 +12,9 @@
     <li class="breadcrumb-item active">@L["Diezmos"]</li>
 </ol>
 
+@* Informes y evolución (plegado; se carga al abrirlo). Ver _AnaliticaEconomia. *@
+@await Html.PartialAsync("_AnaliticaEconomia", "diezmos")
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-users me-1"></i> @L["Lista de Diezmos"]

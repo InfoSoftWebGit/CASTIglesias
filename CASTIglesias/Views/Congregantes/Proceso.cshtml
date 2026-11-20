@@ -15,6 +15,8 @@
     <li class="breadcrumb-item"><a href="index.html">@L["Resumen"]</a></li>
     <li class="breadcrumb-item active">@L["Miembros en proceso"]</li>
 </ol>
+@* Informes y evolución (plegado; se carga al abrirlo). Ver _AnaliticaCongregantes. *@
+@await Html.PartialAsync("_AnaliticaCongregantes", "Proceso")
 
 <div class="card">
     <div class="card-header">
@@ -243,6 +245,7 @@
                             <option value="Unión de hecho/a">@L["Unión de hecho/a"]</option>
                         </select>
                     </div>
+                    @await Html.PartialAsync("_CampoConyuge")
                     <div class="col-sm-6 mb-3">
                         <label for="cboResponsable" class="form-label">@L["Responsable"]</label>
                         <select class="form-select" id="cboResponsable">
@@ -445,6 +448,9 @@
 
     @* Columnas que se pueden descargar (comunes a los cuatro listados) *@
     @await Html.PartialAsync("_ColumnasExportacion")
+
+    @* Campo "Casado/a con": vínculo con el cónyuge y diezmo familiar compartido *@
+    @await Html.PartialAsync("_ConyugeScript", "Proceso")
 
     <script>
         // Textos traducidos que consume el JavaScript de esta vista.
@@ -768,6 +774,7 @@
                 $("#cboTipoRelacionFamiliar").val("");
                 cargarFamilias("");
                 // FIN FAMILIA
+                Conyuge.cargar(null);
             }
                else {
                 // IDENTIFICADORES
@@ -834,6 +841,7 @@
                 $("#cboTipoRelacionFamiliar").val(data.tipo_relacion_familiar || "");
                 cargarFamilias(data.grupo_familiar || "");
                 // FIN FAMILIA
+                Conyuge.cargar(data);
                 if (provinciaId > 0) {
                     cargarMunicipios(provinciaId, municipioId);
                 }
@@ -904,6 +912,7 @@
                 id_familia: parseInt($("#cboGrupoFamiliar option:selected").data("id-familia")) || null,
                 relacion_con: $("#txtRelacionCon").val() || null,
                 tipo_relacion_familiar: $("#cboTipoRelacionFamiliar").val() || null,
+                id_conyuge: Conyuge.idParaGuardar(),
             };
         }
 
@@ -922,13 +931,17 @@
                 success: function (res) {
                     $.LoadingOverlay("hide");
                     if (res.resultado) {
+                        Conyuge.liberar();
                         if (typeof onSuccess === "function") {
-                            onSuccess();
+                            onSuccess(res);
                             return;
                         }
                         $("#FormModalMiembros").modal("hide");
                         tabladata.ajax.reload(null, false);
-                        Swal.fire(T.exito, T.miembroGuardado, "success");
+                        // Si se acaba de vincular un cónyuge, abre su ficha; si no, el aviso de siempre
+                        Conyuge.trasGuardar(res, function () {
+                            Swal.fire(T.exito, T.miembroGuardado, "success");
+                        });
                     } else {
                         $("#mensajeError").text(res.mensaje).show();
                     }
@@ -1170,7 +1183,7 @@
             }).then(result => {
                 if (result.isConfirmed) {
                     // Primero se guardan los cambios del formulario y, si todo va bien, se avanza el estado
-                    GuardarMiembro(function () {
+                    GuardarMiembro(function (resGuardado) {
                         $.ajax({
                             url: '@Url.Action("AvanzarEstado", "Congregantes")',
                             type: "POST",
@@ -1182,7 +1195,10 @@
                                     $("#FormModalMiembros").modal("hide");
                                     tabladata.ajax.reload(null, false);
                                     const numero = res.data && res.data.numero_miembro ? " " + fmt(T.numeroDeMiembro, formatearNumeroMiembro(res.data.numero_miembro)) : "";
-                                    Swal.fire(T.perfecto, `${T.cambiosGuardadosYAvanzado}${numero}`, "success");
+                                    // El guardado previo puede haber vinculado a un cónyuge: se abre su ficha
+                                    Conyuge.trasGuardar(resGuardado, function () {
+                                        Swal.fire(T.perfecto, `${T.cambiosGuardadosYAvanzado}${numero}`, "success");
+                                    });
                                 } else {
                                     Swal.fire(T.error, res.mensaje, "error");
                                 }
@@ -1300,11 +1316,16 @@
 
         function agregarDiezmoFamiliar() {
             const num = parseInt($("#txtNumeroMiembro").val()) || 0;
-            if (!num) {
-                Swal.fire(T.aviso, T.primeroAsignaNumero, "warning");
-                return;
-            }
-            $("#txtDiezmoFamiliar").val(configDiezmo.prefijo_familiar + String(num).padStart(4, '0'));
+            const numeroPropio = num ? configDiezmo.prefijo_familiar + String(num).padStart(4, '0') : null;
+            // Con cónyuge: se reutiliza su número si ya lo tiene, se pide confirmación
+            // y se quita el individual (al guardar, la pareja recibe el mismo número)
+            Conyuge.asignarDiezmoFamiliar(numeroPropio, function (numero) {
+                if (!numero) {
+                    Swal.fire(T.aviso, T.primeroAsignaNumero, "warning");
+                    return;
+                }
+                $("#txtDiezmoFamiliar").val(numero);
+            });
         }
 
         // --- Familia ---

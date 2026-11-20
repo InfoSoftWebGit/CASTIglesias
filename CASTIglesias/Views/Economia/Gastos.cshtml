@@ -22,6 +22,9 @@
     <li class="breadcrumb-item active">@L["Gastos"]</li>
 </ol>
 
+@* Informes y evolución (plegado; se carga al abrirlo). Ver _AnaliticaEconomia. *@
+@await Html.PartialAsync("_AnaliticaEconomia", "gastos")
+
 <!-- ══ TABLA 1: GASTOS (cabecera) ══════════════════════════════════════ -->
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">

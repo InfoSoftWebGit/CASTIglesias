@@ -41,9 +41,17 @@ namespace CapaDatos
                             from p in provGroup.DefaultIfEmpty()
                             join mun in _context.Municipio on m.idMunicipio equals mun.idMunicipio into munGroup
                             from mun in munGroup.DefaultIfEmpty()
+                            join c in _context.Miembros on m.id_conyuge equals (int?)c.id_miembro into conyGroup
+                            from c in conyGroup.DefaultIfEmpty()
 
                             select new MiembroDetalleDTO
                             {
+                                id_conyuge = m.id_conyuge,
+                                nombre_conyuge = c != null ? c.nombre_miembro + " " + c.apellidos_miembro : null,
+                                diezmo_familiar_conyuge = c != null ? c.diezmo_familiar : null,
+                                // La ficha marca el check "Fallecido" con este campo: sin él,
+                                // cualquier guardado lo dejaba en false.
+                                fallecido = m.fallecido,
                                 id_miembro = m.id_miembro,
                                 diezmo_individual = m.diezmo_individual,
                                 diezmo_familiar = m.diezmo_familiar,
@@ -223,8 +231,10 @@ namespace CapaDatos
                     return 0;
                 }
 
+                // El diezmo familiar sí puede repetirse con el cónyuge: es el de la pareja
                 if (!string.IsNullOrEmpty(obj.diezmo_familiar) &&
-                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro))
+                    _context.Miembros.Any(m => m.diezmo_familiar == obj.diezmo_familiar && m.id_sede == obj.id_sede && m.id_miembro != obj.id_miembro
+                                               && (obj.id_conyuge == null || m.id_miembro != obj.id_conyuge)))
                 {
                     mensaje = "El número de diezmo familiar ya está asignado a otro miembro en esta sede.";
                     return 0;
@@ -512,6 +522,10 @@ namespace CapaDatos
                 }
                 // Si sedeID es 1000, el AdminGlobal puede eliminar.
 
+                // Su pareja deja de apuntar a una ficha que ya no existe
+                foreach (var pareja in _context.Miembros.Where(m => m.id_conyuge == miembro.id_miembro))
+                    pareja.id_conyuge = null;
+
                 _context.Miembros.Remove(miembro);
                 _context.SaveChanges();
                 mensaje = "Miembro eliminado correctamente.";
@@ -685,6 +699,193 @@ namespace CapaDatos
             }
         }
         #endregion
+
+        #region CÓNYUGES
+        private const string EstadoCivilCasado = "Casado/a";
+
+        /// <summary>
+        /// Comprueba, antes de guardar la ficha, que se puede vincular a esa pareja.
+        /// </summary>
+        /// <param name="idMiembro">Ficha que se guarda (0 si es un alta).</param>
+        /// <param name="idConyuge">Cónyuge elegido; 0 si no tiene y null si la pantalla no lo envía.</param>
+        /// <returns>El motivo por el que no se puede, o null si es válido.</returns>
+        public string? ValidarConyuge(int idMiembro, int? idConyuge, int sedeID)
+        {
+            if (idConyuge is null or <= 0) return null;
+
+            if (idConyuge == idMiembro)
+                return "Una persona no puede figurar casada consigo misma.";
+
+            var conyuge = _context.Miembros
+                .Where(m => m.id_miembro == idConyuge)
+                .Select(m => new { m.id_sede, m.id_conyuge, m.nombre_miembro, m.apellidos_miembro })
+                .FirstOrDefault();
+
+            if (conyuge == null || (sedeID != 1000 && conyuge.id_sede != sedeID))
+                return "El cónyuge seleccionado no existe en esta sede.";
+
+            // Si ya está casado/a con un tercero no se le cambia la pareja por detrás:
+            // dejaría a esa tercera persona apuntando a alguien que ya no es su pareja.
+            if (conyuge.id_conyuge != null && conyuge.id_conyuge != idMiembro)
+                return $"{conyuge.nombre_miembro} {conyuge.apellidos_miembro}".Trim()
+                     + " ya figura casado/a con otra persona. Quita primero ese vínculo desde su ficha.";
+
+            return null;
+        }
+
+        /// <summary>
+        /// Deja la pareja coherente después de guardar la ficha de <paramref name="idMiembro"/>.
+        /// </summary>
+        /// <remarks>
+        /// Es el único sitio que escribe ID_conyuge, para que las dos fichas apunten
+        /// siempre la una a la otra:
+        ///  - Si cambia la pareja, se suelta a la anterior y se vincula a la nueva,
+        ///    marcándola como Casado/a (y con la fecha de boda si no tenía) y
+        ///    creando la fila en Matrimonios si aún no existe.
+        ///  - Si no se elige pareja, se deshace el vínculo en las dos fichas.
+        ///  - Si la ficha tiene diezmo familiar, el cónyuge pasa a tener el mismo
+        ///    número y los dos pierden el individual (o individual o familiar).
+        /// </remarks>
+        public ResultadoConyuge VincularConyuge(int idMiembro, int? idConyuge, int sedeID, out string mensaje)
+        {
+            mensaje = string.Empty;
+            var resultado = new ResultadoConyuge();
+
+            try
+            {
+                var miembro = _context.Miembros.FirstOrDefault(m => m.id_miembro == idMiembro);
+                if (miembro == null) return resultado;
+
+                // null = la pantalla no envía el campo (se deja como está); 0 = sin pareja
+                int? anterior = miembro.id_conyuge;
+                int? nuevo = idConyuge == null ? anterior : (idConyuge > 0 ? idConyuge : null);
+
+                if (anterior != nuevo)
+                {
+                    // La pareja anterior deja de apuntar a esta ficha
+                    if (anterior != null)
+                    {
+                        var exConyuge = _context.Miembros.FirstOrDefault(m => m.id_miembro == anterior);
+                        if (exConyuge != null && exConyuge.id_conyuge == miembro.id_miembro)
+                            exConyuge.id_conyuge = null;
+                    }
+
+                    miembro.id_conyuge = nuevo;
+                }
+
+                Miembro? conyuge = null;
+                if (nuevo != null)
+                {
+                    conyuge = _context.Miembros.FirstOrDefault(m =>
+                        m.id_miembro == nuevo && (sedeID == 1000 || m.id_sede == sedeID));
+
+                    if (conyuge == null)
+                    {
+                        // Validado antes de guardar; solo llega aquí si lo han borrado entre medias
+                        miembro.id_conyuge = null;
+                    }
+                    else
+                    {
+                        if (anterior != nuevo)
+                        {
+                            conyuge.id_conyuge = miembro.id_miembro;
+                            conyuge.estado_Civil = EstadoCivilCasado;
+                            miembro.estado_Civil = EstadoCivilCasado;
+                            if (conyuge.fecha_boda == null) conyuge.fecha_boda = miembro.fecha_boda;
+
+                            SincronizarMatrimonio(miembro, conyuge);
+                            resultado.abrir_ficha = true;
+                        }
+
+                        // Diezmo familiar compartido: mismo número para los dos y sin individual
+                        if (!string.IsNullOrWhiteSpace(miembro.diezmo_familiar) &&
+                            (conyuge.diezmo_familiar != miembro.diezmo_familiar ||
+                             !string.IsNullOrEmpty(conyuge.diezmo_individual) ||
+                             !string.IsNullOrEmpty(miembro.diezmo_individual)))
+                        {
+                            conyuge.diezmo_familiar = miembro.diezmo_familiar;
+                            conyuge.diezmo_individual = null;
+                            miembro.diezmo_individual = null;
+                            resultado.diezmo_compartido = true;
+                            resultado.diezmo_familiar = miembro.diezmo_familiar;
+                        }
+
+                        resultado.id_conyuge = conyuge.id_miembro;
+                        resultado.nombre_conyuge = $"{conyuge.nombre_miembro} {conyuge.apellidos_miembro}".Trim();
+                        resultado.estado_conyuge = conyuge.estado;
+                    }
+                }
+
+                _context.SaveChanges();
+                return resultado;
+            }
+            catch (Exception ex)
+            {
+                mensaje = $"La ficha se guardó, pero no se pudo vincular al cónyuge: {ErrorHelper.Mensaje(ex)}";
+                return new ResultadoConyuge();
+            }
+        }
+
+        /// <summary>
+        /// Crea la fila de la pareja en Matrimonios si todavía no está.
+        /// </summary>
+        /// <remarks>
+        /// Matrimonios guarda los nombres en texto (ver Matrimonio), así que se busca
+        /// la pareja exacta en cualquier orden. No se reutiliza una fila en la que
+        /// solo coincida uno de los dos: podría ser un matrimonio anterior (viudo/a)
+        /// y se perdería. No guarda: lo hace VincularConyuge junto con el resto.
+        /// </remarks>
+        private void SincronizarMatrimonio(Miembro a, Miembro b)
+        {
+            // Esposo y esposa según el sexo; si no se sabe, en el orden recibido
+            var (esposo, esposa) = a.sexo == "Mujer" && b.sexo != "Mujer" ? (b, a) : (a, b);
+            string nombreEsposo = $"{esposo.nombre_miembro} {esposo.apellidos_miembro}".Trim();
+            string nombreEsposa = $"{esposa.nombre_miembro} {esposa.apellidos_miembro}".Trim();
+
+            bool existe = _context.Matrimonios.Any(x =>
+                (x.Esposo == nombreEsposo && x.Esposa == nombreEsposa) ||
+                (x.Esposo == nombreEsposa && x.Esposa == nombreEsposo));
+
+            if (!existe)
+            {
+                _context.Matrimonios.Add(new Matrimonio
+                {
+                    Esposo = nombreEsposo,
+                    Esposa = nombreEsposa,
+                    ID_sede = a.id_sede
+                });
+            }
+        }
+
+        /// <summary>
+        /// Copia los campos del apartado Familia de la ficha, con la misma
+        /// sincronización ID_familia ↔ Grupo_familiar que hace EditarMiembro.
+        /// </summary>
+        /// <remarks>
+        /// Para las fichas de visitante y simpatizante, que tienen el apartado
+        /// Familia en pantalla pero no lo guardaban.
+        /// </remarks>
+        private void AsignarCamposFamilia(Miembro destino, MiembroDetalleDTO obj, int sedeID)
+        {
+            if (obj.id_familia > 0 && string.IsNullOrWhiteSpace(obj.grupo_familiar))
+            {
+                var fam = _context.Familia.FirstOrDefault(f => f.ID_familia == obj.id_familia);
+                if (fam != null) obj.grupo_familiar = fam.Nombre_familia;
+            }
+            else if ((obj.id_familia == null || obj.id_familia == 0) && !string.IsNullOrWhiteSpace(obj.grupo_familiar))
+            {
+                var fam = _context.Familia.FirstOrDefault(f =>
+                    f.Nombre_familia == obj.grupo_familiar &&
+                    (sedeID == 1000 || f.ID_sede == sedeID));
+                if (fam != null) obj.id_familia = fam.ID_familia;
+            }
+
+            destino.grupo_familiar = obj.grupo_familiar;
+            destino.id_familia = obj.id_familia;
+            destino.relacion_con = obj.relacion_con;
+            destino.tipo_relacion_familiar = obj.tipo_relacion_familiar;
+        }
+        #endregion CÓNYUGES
 
         #region ZONAS, GRUPOS Y MINISTERIOS
         /// <summary>
@@ -1011,6 +1212,8 @@ namespace CapaDatos
                     from p_join in provincias.DefaultIfEmpty()
                     join mun in _context.Municipio on m.idMunicipio equals mun.idMunicipio into municipios
                     from mun_join in municipios.DefaultIfEmpty()
+                    join c in _context.Miembros on m.id_conyuge equals (int?)c.id_miembro into conyGroup
+                    from c in conyGroup.DefaultIfEmpty()
 
                     select new MiembroDetalleDTO
                     {
@@ -1027,6 +1230,15 @@ namespace CapaDatos
                         idMunicipio = m.idMunicipio,
                         fecha_llegada_iglesia = m.fecha_llegada_iglesia,
                         pais_nacimiento = m.pais_nacimiento,
+                        estado_Civil = m.estado_Civil,
+                        estado = m.estado,
+                        grupo_familiar = m.grupo_familiar,
+                        id_familia = m.id_familia,
+                        relacion_con = m.relacion_con,
+                        tipo_relacion_familiar = m.tipo_relacion_familiar,
+                        id_conyuge = m.id_conyuge,
+                        nombre_conyuge = c != null ? c.nombre_miembro + " " + c.apellidos_miembro : null,
+                        diezmo_familiar_conyuge = c != null ? c.diezmo_familiar : null,
                         acepta_LOPD = m.acepta_LOPD,
                         miembro_activo = m.miembro_activo,
                         fecha_baja = m.fecha_baja,
@@ -1073,7 +1285,9 @@ namespace CapaDatos
                         fecha_llegada_iglesia = obj.fecha_llegada_iglesia,
                         pais_nacimiento = obj.pais_nacimiento,
                         acepta_LOPD = obj.acepta_LOPD,
+                        estado_Civil = obj.estado_Civil,
                     };
+                    AsignarCamposFamilia(nuevoVisitante, obj, obj.id_sede);
 
                     _context.Miembros.Add(nuevoVisitante);
                     _context.SaveChanges();
@@ -1138,6 +1352,9 @@ namespace CapaDatos
                 miembroExistente.fecha_llegada_iglesia = obj.fecha_llegada_iglesia;
                 miembroExistente.pais_nacimiento = obj.pais_nacimiento;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
+                // Estado civil y familia: la ficha los enviaba pero no se guardaban
+                miembroExistente.estado_Civil = obj.estado_Civil;
+                AsignarCamposFamilia(miembroExistente, obj, sedeID);
 
                 // Forzar a EF que es una entidad modificada
                 _context.Entry(miembroExistente).State = EntityState.Modified;
@@ -1177,10 +1394,20 @@ namespace CapaDatos
                     from p_join in provincias.DefaultIfEmpty()
                     join mun in _context.Municipio on m.idMunicipio equals mun.idMunicipio into municipios
                     from mun_join in municipios.DefaultIfEmpty()
+                    join c in _context.Miembros on m.id_conyuge equals (int?)c.id_miembro into conyGroup
+                    from c in conyGroup.DefaultIfEmpty()
 
                     select new MiembroDetalleDTO
                     {
                         id_miembro = m.id_miembro,
+                        estado = m.estado,
+                        grupo_familiar = m.grupo_familiar,
+                        id_familia = m.id_familia,
+                        relacion_con = m.relacion_con,
+                        tipo_relacion_familiar = m.tipo_relacion_familiar,
+                        id_conyuge = m.id_conyuge,
+                        nombre_conyuge = c != null ? c.nombre_miembro + " " + c.apellidos_miembro : null,
+                        diezmo_familiar_conyuge = c != null ? c.diezmo_familiar : null,
                         nombre_miembro = m.nombre_miembro,
                         apellidos_miembro = m.apellidos_miembro,
                         correo_electronico = m.correo_electronico,
@@ -1344,6 +1571,8 @@ namespace CapaDatos
                 miembroExistente.id_responsable = obj.id_responsable;
                 miembroExistente.numero_hijos = obj.numero_hijos;
                 miembroExistente.acepta_LOPD = obj.acepta_LOPD;
+                // Familia: la ficha la enviaba pero no se guardaba
+                AsignarCamposFamilia(miembroExistente, obj, sedeID);
 
                 // Forzar a EF que es una entidad modificada
                 _context.Entry(miembroExistente).State = EntityState.Modified;
@@ -1381,10 +1610,22 @@ namespace CapaDatos
                         from p in provGroup.DefaultIfEmpty()
                         join mun in _context.Municipio on m.idMunicipio equals mun.idMunicipio into munGroup
                         from mun in munGroup.DefaultIfEmpty()
+                        join c in _context.Miembros on m.id_conyuge equals (int?)c.id_miembro into conyGroup
+                        from c in conyGroup.DefaultIfEmpty()
 
                         select new MiembroDetalleDTO
                         {
                             id_miembro = m.id_miembro,
+                            // Familia: la ficha de En proceso guarda por EditarMiembro, que
+                            // escribe estos campos; si no se cargan, se borraban al guardar.
+                            grupo_familiar = m.grupo_familiar,
+                            id_familia = m.id_familia,
+                            relacion_con = m.relacion_con,
+                            tipo_relacion_familiar = m.tipo_relacion_familiar,
+                            fallecido = m.fallecido,
+                            id_conyuge = m.id_conyuge,
+                            nombre_conyuge = c != null ? c.nombre_miembro + " " + c.apellidos_miembro : null,
+                            diezmo_familiar_conyuge = c != null ? c.diezmo_familiar : null,
                             diezmo_individual = m.diezmo_individual,
                             diezmo_familiar = m.diezmo_familiar,
                             numero_miembro = m.numero_miembro,
@@ -1675,10 +1916,24 @@ namespace CapaDatos
 
                     join mun in _context.Municipio on m.idMunicipio equals mun.idMunicipio into munGroup
                     from mun in munGroup.DefaultIfEmpty()
+                    join c in _context.Miembros on m.id_conyuge equals (int?)c.id_miembro into conyGroup
+                    from c in conyGroup.DefaultIfEmpty()
 
                     select new MiembroDetalleDTO
                     {
                         id_miembro = m.id_miembro,
+                        // La ficha del cónyuge se abre con estos datos: tienen que ir
+                        // completos para que al guardarla no se pierda nada.
+                        grupo_familiar = m.grupo_familiar,
+                        id_familia = m.id_familia,
+                        relacion_con = m.relacion_con,
+                        tipo_relacion_familiar = m.tipo_relacion_familiar,
+                        miembro_activo = m.miembro_activo,
+                        fallecido = m.fallecido,
+                        esLider = m.esLider,
+                        id_conyuge = m.id_conyuge,
+                        nombre_conyuge = c != null ? c.nombre_miembro + " " + c.apellidos_miembro : null,
+                        diezmo_familiar_conyuge = c != null ? c.diezmo_familiar : null,
                         diezmo_individual = m.diezmo_individual,
                         diezmo_familiar = m.diezmo_familiar,
                         numero_miembro = m.numero_miembro,

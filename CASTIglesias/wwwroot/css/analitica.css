@@ -1,0 +1,113 @@
+/* Paneles de informes evolutivos (ver wwwroot/js/analitica.js). */
+
+.analitica-panel {
+    --an-tinta: #0b0b0b;
+    --an-tinta-2: #52514e;
+    --an-apagado: #898781;
+    --an-borde: rgba(11, 11, 11, 0.10);
+    --an-superficie: #ffffff;
+    --an-plano: #f9f9f7;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.analitica-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    align-items: end;
+}
+
+.analitica-filtros .form-label { font-size: .8rem; color: var(--an-tinta-2); margin-bottom: .15rem; }
+
+.analitica-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 1rem;
+}
+
+.analitica-tarjeta {
+    background: var(--an-superficie);
+    border: 1px solid var(--an-borde);
+    border-radius: 10px;
+    padding: .9rem 1rem 1rem;
+    min-width: 0;
+}
+
+.analitica-tarjeta-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: .5rem;
+    margin-bottom: .5rem;
+}
+
+.analitica-tarjeta-cabecera h6 { margin: 0; font-weight: 600; color: var(--an-tinta); }
+.analitica-tarjeta-cabecera small { color: var(--an-tinta-2); display: block; margin-top: .1rem; }
+
+.analitica-acciones { display: flex; gap: .25rem; flex-shrink: 0; }
+.analitica-acciones .btn { padding: .15rem .45rem; font-size: .75rem; }
+
+.analitica-lienzo { position: relative; height: 290px; }
+.analitica-lienzo.bajo { height: 230px; }
+
+/* Indicadores */
+.analitica-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: .75rem;
+}
+
+.analitica-kpi {
+    background: var(--an-superficie);
+    border: 1px solid var(--an-borde);
+    border-radius: 10px;
+    padding: .7rem .85rem .5rem;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.analitica-kpi-titulo { font-size: .8rem; color: var(--an-tinta-2); display: flex; align-items: center; gap: .35rem; }
+.analitica-kpi-valor { font-size: 1.75rem; font-weight: 600; color: var(--an-tinta); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.analitica-kpi-delta { font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.analitica-kpi-anterior { font-weight: 400; color: var(--an-apagado); margin-left: .3rem; }
+.analitica-kpi-spark { height: 34px; margin-top: .35rem; }
+
+.analitica-punto { width: 9px; height: 9px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+/* Resumen del motor de reglas */
+.analitica-resumen {
+    background: var(--an-plano);
+    border: 1px solid var(--an-borde);
+    border-radius: 10px;
+    padding: .8rem 1rem;
+}
+
+.analitica-resumen ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; }
+.analitica-resumen li { display: flex; gap: .55rem; align-items: baseline; color: var(--an-tinta); }
+.analitica-resumen li i { width: 1rem; text-align: center; flex-shrink: 0; }
+.analitica-resumen .nivel-positivo i { color: #006300; }
+.analitica-resumen .nivel-negativo i { color: #d03b3b; }
+.analitica-resumen .nivel-alerta i { color: #c98500; }
+.analitica-resumen .nivel-neutro i { color: var(--an-apagado); }
+
+/* Tablas compactas: el estilo general de la app (cabecera azul con mucho relleno)
+   desbordaba en tarjetas de un tercio de ancho */
+.analitica-tabla { font-size: .85rem; margin: 0; width: 100%; }
+.analitica-tabla td, .analitica-tabla th { font-variant-numeric: tabular-nums; padding: .4rem .5rem !important; }
+.analitica-tabla th { white-space: nowrap; }
+.analitica-tabla td:first-child { white-space: normal; }
+
+.analitica-vacio { color: var(--an-apagado); font-size: .9rem; padding: 2rem 0; text-align: center; }
+
+/* Impresión: solo el panel, sin menús ni botones */
+@media print {
+    body.analitica-modo-impresion * { visibility: hidden; }
+    body.analitica-modo-impresion .analitica-imprimiendo,
+    body.analitica-modo-impresion .analitica-imprimiendo * { visibility: visible; }
+    body.analitica-modo-impresion .analitica-imprimiendo { position: absolute; left: 0; top: 0; width: 100%; }
+    .analitica-imprimiendo .analitica-no-imprimir { display: none !important; }
+    .analitica-imprimiendo .analitica-tarjeta,
+    .analitica-imprimiendo .analitica-kpi { break-inside: avoid; }
+    .analitica-imprimiendo .collapse:not(.show) { display: block !important; }
+}

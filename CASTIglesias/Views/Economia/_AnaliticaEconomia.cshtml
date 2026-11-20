@@ -1,0 +1,239 @@
+@using CASTIglesias.Models
+@model string
+@*
+    Panel "Informes y evolución" de Economía (diezmos/ofrendas y gastos).
+
+    Model: "diezmos" o "gastos", la vista que lo incluye; decide qué bloque va
+    primero. Qué bloques se ven lo decide el servidor según los permisos: quien
+    solo puede ver gastos no recibe los ingresos (AnaliticaController.Economia).
+    Solo cifras agregadas: ningún nombre ni importe por persona.
+*@
+@{
+    // Solo para quien puede ver informes: pastores y a quien ellos asignen (Ajustes > Informes)
+    if ((ViewBag.PermisosMiembro as CapaEntidad.Permisos)?.VerInformes != true) { return; }
+    var foco = Model == "gastos" ? "gastos" : "ingresos";
+}
+@await Html.PartialAsync("_RecursosAnalitica")
+
+<div class="card mb-4 analitica-panel" id="panelAnaliticaEconomia" data-foco="@foco">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-line me-1"></i> @L["Informes y evolución"]</span>
+        <button type="button" class="btn btn-sm btn-outline-light analitica-no-imprimir" id="btnAnaliticaEconomia"
+                data-bs-toggle="collapse" data-bs-target="#cuerpoAnaliticaEconomia" aria-expanded="false" aria-controls="cuerpoAnaliticaEconomia">
+            <i class="fas fa-chart-area me-1"></i> <span>@L["Mostrar gráficos"]</span>
+        </button>
+    </div>
+
+    <div id="cuerpoAnaliticaEconomia" class="collapse">
+        <div class="card-body d-grid gap-3">
+            @await Html.PartialAsync("_FiltrosAnalitica", "ec")
+
+            <div>
+                <h5 class="mb-0">@L["Evolución económica"]</h5>
+                <small class="text-muted" id="ecRangoTexto"></small>
+            </div>
+
+            <div class="analitica-resumen">
+                <div class="fw-semibold mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i> @L["Resumen del periodo"]</div>
+                <ul id="ecResumen"><li class="text-muted">@L["Cargando..."]</li></ul>
+            </div>
+
+            <div class="analitica-kpis" id="ecKpis"></div>
+
+            @* Los dos bloques; el del foco se coloca primero al pintar *@
+            <div class="d-grid gap-3" id="ecBloques">
+                <div class="analitica-rejilla" data-seccion="ingresos" style="display:none;">
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoIngresos", L["Ingresos"].Value,
+                        L["Verde cuando sube respecto al periodo anterior, rojo cuando baja"].Value))
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoConceptos", L["Ingresos por concepto"].Value,
+                        L["Los conceptos pequeños se agrupan en «Otros»"].Value))
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoDonantes", L["Personas que aportan"].Value,
+                        L["Personas distintas con al menos una aportación en cada periodo"].Value, Bajo: true))
+                </div>
+                <div class="analitica-rejilla" data-seccion="gastos" style="display:none;">
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoGastos", L["Gastos"].Value,
+                        L["Verde cuando baja respecto al periodo anterior, rojo cuando sube"].Value))
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoCuentas", L["Gastos por cuenta"].Value,
+                        L["Total gastado en cada periodo, por tipo de cuenta"].Value))
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoZonas", L["Gastos por zona"].Value,
+                        L["Las zonas con más gasto en el periodo"].Value, Bajo: true))
+                </div>
+                <div class="analitica-rejilla" data-seccion="balance" style="display:none;">
+                    @await Html.PartialAsync("_TarjetaGrafico", new TarjetaGraficoModelo("ecGraficoBalance", L["Ingresos frente a gastos"].Value,
+                        L["Lo que entra y lo que sale en cada periodo"].Value, Ancha: true))
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.T = Object.assign(window.T || {}, {
+        analiticaEconomia: {
+            nombreInforme: @Json.Serialize(L["Evolución económica"].Value),
+            ingresos:   @Json.Serialize(L["Ingresos"].Value),
+            gastos:     @Json.Serialize(L["Gastos"].Value),
+            donantes:   @Json.Serialize(L["Personas que aportan"].Value),
+            concepto:   @Json.Serialize(L["Concepto"].Value),
+            cuenta:     @Json.Serialize(L["Cuenta"].Value),
+            zona:       @Json.Serialize(L["Zona"].Value),
+            tituloConceptos: @Json.Serialize(L["Ingresos por concepto"].Value),
+            tituloCuentas:   @Json.Serialize(L["Gastos por cuenta"].Value),
+            tituloZonas:     @Json.Serialize(L["Gastos por zona"].Value),
+            tituloBalance:   @Json.Serialize(L["Ingresos frente a gastos"].Value),
+            kpis: {
+                ingresos:         @Json.Serialize(L["Ingresos"].Value),
+                donantes:         @Json.Serialize(L["Personas que aportan"].Value),
+                donantes_nuevos:  @Json.Serialize(L["Aportan por primera vez"].Value),
+                aportacion_media: @Json.Serialize(L["Aportación media por persona"].Value),
+                gastos:           @Json.Serialize(L["Gastos"].Value),
+                num_gastos:       @Json.Serialize(L["Número de gastos"].Value),
+                gasto_mayor:      @Json.Serialize(L["Gasto más alto"].Value),
+                balance:          @Json.Serialize(L["Ingresos − gastos"].Value)
+            }
+        }
+    });
+
+    (function () {
+        'use strict';
+        const A = window.Analitica, TC = window.T.analiticaComun, T = window.T.analiticaEconomia, C = A.colores;
+        const panelEl = document.getElementById('panelAnaliticaEconomia');
+        const foco = panelEl.dataset.foco;
+        const nombre = n => n === 'Otros' ? TC.otros : n === '' ? TC.sinZona : n;
+        const color = (n, i) => n === 'Otros' ? C.otros : C.serie[i % C.serie.length];
+
+        A.panel({
+            prefijo: 'ec',
+            panelId: 'panelAnaliticaEconomia',
+            cuerpoId: 'cuerpoAnaliticaEconomia',
+            botonId: 'btnAnaliticaEconomia',
+            url: '@Url.Action("Economia", "Analitica")',
+            claveLocal: 'analiticaEconomiaAbierto',
+            textos: TC,
+            pintar,
+            descargarTodo: d => {
+                const cab = [TC.periodo];
+                if (d.incluye_ingresos) cab.push(T.ingresos, T.donantes, ...d.conceptos.map(nombre));
+                if (d.incluye_gastos) cab.push(T.gastos, ...d.cuentas.map(nombre));
+                A.descargarCSV(T.nombreInforme, cab, d.periodos.map(p => {
+                    const f = [A.etiquetaPeriodo(p.etiqueta, TC)];
+                    if (d.incluye_ingresos) f.push(p.ingresos, p.donantes, ...d.conceptos.map(c => p.ingresos_por_concepto[c] || 0));
+                    if (d.incluye_gastos) f.push(p.gastos, ...d.cuentas.map(c => p.gastos_por_cuenta[c] || 0));
+                    return f;
+                }));
+            }
+        });
+
+        // Barras apiladas por categoría (conceptos o cuentas), en euros
+        function apiladas(id, etiquetas, periodos, categorias, campo, titulo, cabecera) {
+            const opciones = A.opcionesBase({
+                scales: { x: { stacked: true }, y: { stacked: true } },
+                plugins: { tooltip: { callbacks: { footer: it => `${TC.total}: ${A.fmtMoneda(it.reduce((s, x) => s + x.parsed.y, 0))}` } } }
+            });
+            A.aplicarMoneda(opciones);
+            A.grafico(id, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: categorias.map((c, i) => ({
+                        label: nombre(c), data: periodos.map(p => p[campo][c] || 0),
+                        backgroundColor: color(c, i), borderColor: C.superficie, borderWidth: 2, borderRadius: 4, borderSkipped: false, maxBarThickness: 42
+                    }))
+                },
+                options: opciones
+            }, titulo, () => ({
+                cabeceras: [TC.periodo, ...categorias.map(nombre)],
+                filas: periodos.map((p, i) => [etiquetas[i], ...categorias.map(c => p[campo][c] || 0)])
+            }));
+        }
+
+        function pintar(d) {
+            const etiquetas = d.periodos.map(p => A.etiquetaPeriodo(p.etiqueta, TC));
+
+            // Bloques visibles según permisos, con el del foco primero
+            const bloques = document.getElementById('ecBloques');
+            const sec = s => bloques.querySelector(`[data-seccion="${s}"]`);
+            sec('ingresos').style.display = d.incluye_ingresos ? '' : 'none';
+            sec('gastos').style.display = d.incluye_gastos ? '' : 'none';
+            sec('balance').style.display = d.incluye_ingresos && d.incluye_gastos ? '' : 'none';
+            if (foco === 'gastos') bloques.prepend(sec('gastos'));
+
+            A.pintarResumen(document.getElementById('ecResumen'), d.resumen, {}, {
+                moneda: (codigo, clave) => ['n', 'ant'].includes(clave) && !codigo.startsWith('eco_donantes')
+            }, TC.sinDatos);
+
+            const kpis = document.getElementById('ecKpis');
+            kpis.innerHTML = '';
+            const orden = foco === 'gastos'
+                ? [...d.kpis].sort((a, b) => (['gastos', 'num_gastos', 'gasto_mayor'].includes(b.codigo)) - (['gastos', 'num_gastos', 'gasto_mayor'].includes(a.codigo)))
+                : d.kpis;
+            orden.forEach(k => A.tarjetaKpi(kpis, k, { codigo: 'ec_' + k.codigo, titulo: T.kpis[k.codigo], textoAnterior: TC.antes, signo: k.codigo === 'balance' }));
+
+            if (d.incluye_ingresos) {
+                const cfg = A.lineaTendencia(etiquetas, d.periodos.map(p => p.ingresos), { serie: T.ingresos, media: TC.media, vsAnterior: TC.vsAnterior, moneda: true });
+                cfg.data.datasets.push({ label: TC.anioAnterior, data: d.ingresos_anio_anterior, borderColor: C.serie[6], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, fill: false });
+                A.grafico('ecGraficoIngresos', cfg, T.ingresos, () => ({
+                    cabeceras: [TC.periodo, T.ingresos, TC.anioAnterior],
+                    filas: d.periodos.map((p, i) => [etiquetas[i], p.ingresos, d.ingresos_anio_anterior[i]])
+                }));
+
+                apiladas('ecGraficoConceptos', etiquetas, d.periodos, d.conceptos, 'ingresos_por_concepto', T.tituloConceptos);
+
+                A.grafico('ecGraficoDonantes', {
+                    type: 'line',
+                    data: { labels: etiquetas, datasets: [{ label: T.donantes, data: d.periodos.map(p => p.donantes), borderColor: C.serie[0], backgroundColor: C.serie[0] + '22', fill: true, borderWidth: 2, pointRadius: 3, tension: 0.25 }] },
+                    options: A.opcionesBase({ plugins: { legend: { display: false } } })
+                }, T.donantes, () => ({ cabeceras: [TC.periodo, T.donantes], filas: d.periodos.map((p, i) => [etiquetas[i], p.donantes]) }));
+            }
+
+            if (d.incluye_gastos) {
+                const cfg = A.lineaTendencia(etiquetas, d.periodos.map(p => p.gastos), { serie: T.gastos, media: TC.media, vsAnterior: TC.vsAnterior, moneda: true, invertir: true });
+                cfg.data.datasets.push({ label: TC.anioAnterior, data: d.gastos_anio_anterior, borderColor: C.serie[6], borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, fill: false });
+                A.grafico('ecGraficoGastos', cfg, T.gastos, () => ({
+                    cabeceras: [TC.periodo, T.gastos, TC.anioAnterior],
+                    filas: d.periodos.map((p, i) => [etiquetas[i], p.gastos, d.gastos_anio_anterior[i]])
+                }));
+
+                apiladas('ecGraficoCuentas', etiquetas, d.periodos, d.cuentas, 'gastos_por_cuenta', T.tituloCuentas);
+
+                const opZonas = A.opcionesBase({
+                    indexAxis: 'y',
+                    interaction: { mode: 'nearest', intersect: true, axis: 'y' },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: C.rejilla, display: true }, border: { display: false } },
+                        y: { grid: { display: false }, ticks: { color: C.tintaSecundaria } }
+                    }
+                });
+                A.aplicarMoneda(opZonas, 'x');
+                A.grafico('ecGraficoZonas', {
+                    type: 'bar',
+                    data: {
+                        labels: d.gastos_por_zona.map(z => nombre(z.nombre)),
+                        datasets: [{ label: T.gastos, data: d.gastos_por_zona.map(z => z.importe), backgroundColor: C.serie[1], borderRadius: 4, borderSkipped: 'start', maxBarThickness: 24 }]
+                    },
+                    options: opZonas
+                }, T.tituloZonas, () => ({ cabeceras: [T.zona, T.gastos], filas: d.gastos_por_zona.map(z => [nombre(z.nombre), z.importe]) }));
+            }
+
+            if (d.incluye_ingresos && d.incluye_gastos) {
+                const op = A.opcionesBase({});
+                A.aplicarMoneda(op);
+                A.grafico('ecGraficoBalance', {
+                    type: 'bar',
+                    data: {
+                        labels: etiquetas,
+                        datasets: [
+                            { label: T.ingresos, data: d.periodos.map(p => p.ingresos), backgroundColor: C.serie[0], borderRadius: 4, maxBarThickness: 28 },
+                            { label: T.gastos, data: d.periodos.map(p => p.gastos), backgroundColor: C.serie[1], borderRadius: 4, maxBarThickness: 28 }
+                        ]
+                    },
+                    options: op
+                }, T.tituloBalance, () => ({
+                    cabeceras: [TC.periodo, T.ingresos, T.gastos, T.kpis.balance],
+                    filas: d.periodos.map((p, i) => [etiquetas[i], p.ingresos, p.gastos, p.ingresos - p.gastos])
+                }));
+            }
+        }
+    })();
+</script>

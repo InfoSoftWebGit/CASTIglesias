@@ -444,3 +444,11 @@ FodyWeavers.xsd
 # (git rm --cached) para que estas reglas empiecen a aplicarse.
 Queries/
 *.sql
+
+# Nada de base de datos se publica en GitHub, tampoco los scripts del migrador
+# ni sus copias de seguridad o exportaciones.
+Congrega.Migrator/Scripts/
+Congrega.Migrator/Manual/
+*.bak
+*.bacpac
+*.dacpac

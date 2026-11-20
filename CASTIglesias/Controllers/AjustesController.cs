@@ -240,6 +240,125 @@ namespace CASTIglesias.Controllers
 
         #endregion
 
+        #region Informes
+
+        // Quién ve los gráficos, objetivos anuales e informe mensual. Solo pastores
+        // (y AdminGlobal / admin de plataforma): ellos deciden quién más ve los informes.
+        // Se pide al contenedor para no alargar el constructor, como en BaseController.
+        private CapaDatos.CD_ConfigInformes ConfigInformes =>
+            HttpContext.RequestServices.GetRequiredService<CapaDatos.CD_ConfigInformes>();
+
+        public IActionResult Informes()
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User))
+                return RequierePermisoAttribute.RespuestaSinPermiso(HttpContext, this);
+            ViewBag.Indicadores = ObjetivoAnual.Indicadores;
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult ListarUsuariosInformes()
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try { return Json(new { success = true, data = ConfigInformes.ListarUsuarios() }); }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult GuardarVerInformes(int idUsuario, bool valor)
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try
+            {
+                var ok = ConfigInformes.GuardarVerInformes(idUsuario, valor, out var mensaje);
+                return Json(new { success = ok, mensaje });
+            }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        /// <summary>Objetivos del año para la sede activa (1000 = toda la iglesia).</summary>
+        [HttpGet]
+        public JsonResult ObtenerObjetivos(int anio)
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try
+            {
+                int sede = ObtenerIdSedeUsuario();
+                return Json(new { success = true, sede, nombreSede = ObtenerNombreSede(sede), data = ConfigInformes.ListarObjetivos(anio, sede) });
+            }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        public sealed class ObjetivosRequest
+        {
+            public int anio { get; set; }
+            public Dictionary<string, decimal?> valores { get; set; } = new();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult GuardarObjetivos([FromBody] ObjetivosRequest req)
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            if (req == null || req.anio < 2000 || req.anio > 2100) return Json(new { success = false, mensaje = "Año no válido." });
+            try
+            {
+                ConfigInformes.GuardarObjetivos(req.anio, ObtenerIdSedeUsuario(), req.valores ?? new());
+                return Json(new { success = true });
+            }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        [HttpGet]
+        public JsonResult ObtenerConfigInformes()
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try
+            {
+                var cfg = ConfigInformes.ObtenerConfig();
+                return Json(new
+                {
+                    success = true,
+                    envio_mensual = cfg.envio_mensual,
+                    ultimo_envio = cfg.ultimo_envio,
+                    destinatarios = ConfigInformes.CorreosPastoresGenerales()
+                });
+            }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult GuardarEnvioMensual(bool activo)
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try { ConfigInformes.GuardarEnvioMensual(activo); return Json(new { success = true }); }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        /// <summary>Envía el informe del mes pasado solo al pastor que lo pide, para ver cómo llega.</summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult EnviarInformePrueba()
+        {
+            if (!CASTIglesias.Models.SesionClaims.EsPastorOAdmin(User)) return SinPermiso();
+            try
+            {
+                var correo = ConfigInformes.CorreoDeUsuario(CASTIglesias.Models.SesionClaims.ObtenerIdUsuario(User));
+                if (string.IsNullOrWhiteSpace(correo)) return Json(new { success = false, mensaje = "Tu usuario no tiene correo electrónico." });
+
+                var mes = DateTime.Today.AddMonths(-1);
+                var enviador = HttpContext.RequestServices.GetRequiredService<CASTIglesias.Models.InformeMensualCorreo>();
+                int enviados = enviador.Enviar(CASTIglesias.Models.SesionClaims.ObtenerIdIglesia(User), ObtenerIdSedeUsuario(), mes.Year, mes.Month, new[] { correo },
+                    TienePermiso(nameof(Permisos.Diezmos)), TienePermiso(nameof(Permisos.Gastos)));
+                return Json(new { success = enviados > 0, correo, mensaje = enviados > 0 ? "" : "No se pudo enviar el correo. Revisa la configuración de la cuenta de correo." });
+            }
+            catch (Exception ex) { return Json(new { success = false, mensaje = ErrorHelper.Mensaje(ex) }); }
+        }
+
+        #endregion
+
         #region Seguimientos
 
         // Lo configura el pastor (o AdminGlobal / admin de plataforma). No basta con el

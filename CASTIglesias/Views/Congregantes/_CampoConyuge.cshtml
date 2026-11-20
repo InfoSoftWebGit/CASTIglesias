@@ -1,0 +1,21 @@
+@*
+    Campo "Casado/a con" de la ficha del congregante. Va justo después del select
+    #cboEstadoCivil y solo se ve cuando el estado civil es Casado/a.
+
+    Es un parcial porque Visitantes, Simpatizantes, En proceso y Miembros llevan el
+    mismo campo; el comportamiento está en _ConyugeScript (objeto Conyuge).
+*@
+<div class="col-sm-6 mb-3" id="divConyuge" style="display:none;">
+    <label for="txtConyuge" class="form-label">@L["Casado/a con"]</label>
+    <div id="divBuscarConyuge" class="position-relative">
+        <div class="input-group">
+            <input type="text" class="form-control" id="txtConyuge" autocomplete="off" placeholder="@L["Escribe un nombre para buscar..."]">
+            <button type="button" class="btn btn-outline-secondary" id="btnQuitarConyuge" title="@L["Quitar cónyuge"]" aria-label="@L["Quitar cónyuge"]">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <input type="hidden" id="txtIdConyuge" value="" />
+        <div id="dropdownConyuge" class="list-group position-absolute w-100 shadow" style="display:none; z-index:9999; max-height:200px; overflow-y:auto;"></div>
+    </div>
+    <div class="form-text">@L["Al guardar se abrirá la ficha de la pareja para completarla."]</div>
+</div>

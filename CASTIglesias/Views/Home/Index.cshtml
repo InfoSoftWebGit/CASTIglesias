@@ -8,6 +8,9 @@
     <li class="breadcrumb-item active"></li>
 </ol>
 
+@* Salud de la congregación: indicadores del año y objetivos (solo quien ve informes) *@
+@await Html.PartialAsync("_PanelSalud")
+
 @{
     // Permisos de la sesión que prepara BaseController. Ocultar una tarjeta solo evita
     // enseñar enlaces inútiles: la seguridad real está en [RequierePermiso], que vuelve

@@ -16,6 +16,9 @@
     <li class="breadcrumb-item active">@L["Visitantes"]</li>
 </ol>
 
+@* Informes y evolución (plegado; se carga al abrirlo). Ver _AnaliticaCongregantes. *@
+@await Html.PartialAsync("_AnaliticaCongregantes", "Visitante")
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-users me-1"></i> @L["Lista de visitantes"]
@@ -180,6 +183,21 @@
                             <option value="">@L["-- Sin responsable --"]</option>
                         </select>
                     </div>
+                    @* Estado civil: necesario para poder vincular al cónyuge también desde
+                       un visitante (o abrir su ficha cuando su pareja lo elige). *@
+                    <div class="col-sm-6 mb-3">
+                        <label for="cboEstadoCivil" class="form-label">@L["Estado civil"]</label>
+                        <select id="cboEstadoCivil" class="form-select">
+                            <option value="" disabled selected>@L["Selecciona un valor"]</option>
+                            <option value="Soltero/a">@L["Soltero/a"]</option>
+                            <option value="Casado/a">@L["Casado/a"]</option>
+                            <option value="Viudo/a">@L["Viudo/a"]</option>
+                            <option value="Divorciado/a">@L["Divorciado/a"]</option>
+                            <option value="Separado/a">@L["Separado/a"]</option>
+                            <option value="Unión de hecho/a">@L["Unión de hecho/a"]</option>
+                        </select>
+                    </div>
+                    @await Html.PartialAsync("_CampoConyuge")
                 </div>
                 @*--------------FIN APARTADO DE INFORMACIÓN ADICIONAL-------------------*@
                 @*--------------APARTADO DE FAMILIA-------------------*@
@@ -250,6 +268,7 @@
                     </div>
                 </div>
                 @*--------------FIN APARTADO DE PRIVACIDAD-------------------*@
+                <div id="mensajeError" class="alert alert-danger" role="alert" style="display:none;"></div>
             </div>
             <div class="modal-footer d-flex justify-content-between w-100">
 
@@ -283,6 +302,9 @@
 
     @* Columnas que se pueden descargar (comunes a los cuatro listados) *@
     @await Html.PartialAsync("_ColumnasExportacion")
+
+    @* Campo "Casado/a con": vínculo con el cónyuge *@
+    @await Html.PartialAsync("_ConyugeScript", "Visitante")
 
     <script>
         // Textos traducidos que consume el JavaScript de esta vista.
@@ -544,12 +566,14 @@
                 //FIN FECHAS
                 //INFORMACIÓN ADICIONAL
                 $("#chkAceptaLOPD").prop("checked", false);
+                $("#cboEstadoCivil").val("");
                 //FIN INFORMACIÓN ADICIONAL
                 // FAMILIA
                 $("#txtRelacionCon").val("");
                 $("#cboTipoRelacionFamiliar").val("");
                 cargarFamilias("");
                 // FIN FAMILIA
+                Conyuge.cargar(null);
             }
                else {
                 // IDENTIFICADORES
@@ -594,6 +618,7 @@
                 $("#cboTipoRelacionFamiliar").val(data.tipo_relacion_familiar || "");
                 cargarFamilias(data.grupo_familiar || "");
                 // FIN FAMILIA
+                Conyuge.cargar(data);
                 if (provinciaId > 0) {
                     cargarMunicipios(provinciaId, municipioId);
                 }
@@ -674,6 +699,7 @@
                 id_familia: parseInt($("#cboGrupoFamiliar option:selected").data("id-familia")) || null,
                 relacion_con: $("#txtRelacionCon").val() || null,
                 tipo_relacion_familiar: $("#cboTipoRelacionFamiliar").val() || null,
+                id_conyuge: Conyuge.idParaGuardar(),
             };
             $.ajax({
                 url: '@Url.Action("RegistrarMiembroVisitante", "Congregantes")',
@@ -687,9 +713,13 @@
                 success: function (res) {
                     $.LoadingOverlay("hide");
                     if (res.resultado) {
+                        Conyuge.liberar();
                         $("#FormModalMiembros").modal("hide");
                         tabladata.ajax.reload(null, false);
-                        Swal.fire(T.exito, T.miembroGuardado, "success");
+                        // Si se acaba de vincular un cónyuge, abre su ficha; si no, el aviso de siempre
+                        Conyuge.trasGuardar(res, function () {
+                            Swal.fire(T.exito, T.miembroGuardado, "success");
+                        });
                     } else {
                         $("#mensajeError").text(res.mensaje).show();
                     }

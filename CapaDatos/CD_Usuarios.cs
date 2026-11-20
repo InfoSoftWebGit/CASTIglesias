@@ -141,6 +141,14 @@ namespace CapaDatos
             {
                 if (permisoExistente == null)
                 {
+                    // Lo gestionado aparte no se puede dar desde la ficha del usuario:
+                    // VerInformes solo lo concede un pastor (Ajustes > Informes).
+                    foreach (var prop in typeof(Permisos).GetProperties())
+                    {
+                        if (prop.PropertyType == typeof(bool) && prop.CanWrite &&
+                            Attribute.IsDefined(prop, typeof(PermisoGestionadoAparteAttribute)))
+                            prop.SetValue(objPermisosDTO, false);
+                    }
                     _context.Permisos.Add(objPermisosDTO);
                     _context.SaveChanges();
                     return objPermisosDTO.ID_permiso;
@@ -151,9 +159,12 @@ namespace CapaDatos
                     // ObtenerPermisosTotales: con la copia campo a campo, cada permiso
                     // nuevo que no se añadía aquí se guardaba al crear el usuario pero
                     // se perdía en silencio al editarlo.
+                    // Los marcados [PermisoGestionadoAparte] (VerInformes) se saltan: la
+                    // ficha del usuario no los envía y los dejaría siempre a false.
                     foreach (var prop in typeof(Permisos).GetProperties())
                     {
-                        if (prop.PropertyType == typeof(bool) && prop.CanWrite)
+                        if (prop.PropertyType == typeof(bool) && prop.CanWrite &&
+                            !Attribute.IsDefined(prop, typeof(PermisoGestionadoAparteAttribute)))
                             prop.SetValue(permisoExistente, prop.GetValue(objPermisosDTO));
                     }
 

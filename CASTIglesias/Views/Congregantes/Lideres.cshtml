@@ -36,6 +36,9 @@
     <li class="breadcrumb-item active">@L["Líderes"]</li>
 </ol>
 
+@* Informes y evolución (solo quien puede verlos). Ver _PanelAnalitica. *@
+@await Html.PartialAsync("_PanelAnalitica", new CASTIglesias.Models.PanelAnaliticaModelo("ld", "Pertenencia", L["Evolución del liderazgo"].Value, "lider"))
+
 <div class="card">
     <div class="card-header">
         <i class="fas fa-user-tie me-1"></i> @L["Gestión de líderes"]

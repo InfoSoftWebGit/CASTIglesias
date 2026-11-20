@@ -1,0 +1,485 @@
+@model string
+@*
+    Panel "Informes y evolución" de los listados de congregantes.
+
+    Model: el estado del listado que lo incluye (Visitante, Simpatizante, Proceso
+    o Miembro). Hoy solo decide qué indicador va primero; el panel enseña siempre
+    el recorrido completo, porque "cuántos visitantes llegaron" no se entiende sin
+    "cuántos siguieron".
+
+    Datos: AnaliticaController.Congregantes (solo cifras, ningún nombre).
+    Gráficos y descargas: wwwroot/js/analitica.js.
+    Se carga al abrir el panel por primera vez, no al entrar en el listado.
+*@
+@* Solo para quien puede ver informes: pastores y a quien ellos asignen (Ajustes > Informes) *@
+@{ if ((ViewBag.PermisosMiembro as CapaEntidad.Permisos)?.VerInformes != true) { return; } }
+@await Html.PartialAsync("_RecursosAnalitica")
+
+<div class="card mb-4 analitica-panel" id="panelAnalitica" data-estado-foco="@Model">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="fas fa-chart-line me-1"></i> @L["Informes y evolución"]</span>
+        @* outline-light: la cabecera de las tarjetas es azul oscuro y el azul primario no se leía *@
+        <button type="button" class="btn btn-sm btn-outline-light analitica-no-imprimir" id="btnAnaliticaMostrar"
+                data-bs-toggle="collapse" data-bs-target="#cuerpoAnalitica" aria-expanded="false" aria-controls="cuerpoAnalitica">
+            <i class="fas fa-chart-area me-1"></i> <span>@L["Mostrar gráficos"]</span>
+        </button>
+    </div>
+
+    <div id="cuerpoAnalitica" class="collapse">
+        <div class="card-body d-grid gap-3">
+
+            @* Filtros: en una sola fila, encima de todo *@
+            <div class="analitica-filtros analitica-no-imprimir">
+                <div>
+                    <label class="form-label" for="anRango">@L["Periodo"]</label>
+                    <select id="anRango" class="form-select form-select-sm">
+                        <option value="mes">@L["Este mes"]</option>
+                        <option value="mes_anterior">@L["Mes anterior"]</option>
+                        <option value="trimestre">@L["Este trimestre"]</option>
+                        <option value="anio">@L["Este año"]</option>
+                        <option value="12m" selected>@L["Últimos 12 meses"]</option>
+                        <option value="24m">@L["Últimos 24 meses"]</option>
+                        <option value="anio_anterior">@L["Año anterior"]</option>
+                        <option value="personalizado">@L["Personalizado"]</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" for="anDesde">@L["Desde"]</label>
+                    <input type="date" id="anDesde" class="form-control form-control-sm" />
+                </div>
+                <div>
+                    <label class="form-label" for="anHasta">@L["Hasta"]</label>
+                    <input type="date" id="anHasta" class="form-control form-control-sm" />
+                </div>
+                <div>
+                    <label class="form-label" for="anAgrupacion">@L["Agrupar por"]</label>
+                    <select id="anAgrupacion" class="form-select form-select-sm">
+                        <option value="semana">@L["Semana"]</option>
+                        <option value="mes" selected>@L["Mes"]</option>
+                        <option value="trimestre">@L["Trimestre"]</option>
+                    </select>
+                </div>
+                <div class="ms-auto d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-success" id="anDescargarDatos">
+                        <i class="fas fa-file-excel me-1"></i> @L["Descargar datos"]
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="anImprimir">
+                        <i class="fas fa-file-pdf me-1"></i> @L["Imprimir / PDF"]
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <h5 class="mb-0">@L["Evolución de congregantes"]</h5>
+                <small class="text-muted" id="anRangoTexto"></small>
+            </div>
+
+            @* Resumen escrito por el motor de reglas (sin IA externa) *@
+            <div class="analitica-resumen">
+                <div class="fw-semibold mb-2"><i class="fas fa-lightbulb me-1 text-warning"></i> @L["Resumen del periodo"]</div>
+                <ul id="anResumen"><li class="text-muted">@L["Cargando..."]</li></ul>
+            </div>
+
+            <div class="analitica-kpis" id="anKpis"></div>
+
+            <div class="analitica-rejilla">
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Personas por estado"]</h6>
+                            <small>@L["Personas activas al cierre de cada periodo"]</small>
+                        </div>
+                        <div class="analitica-acciones analitica-no-imprimir">
+                            <button class="btn btn-outline-secondary" data-descargar="png" title="@L["Descargar imagen"]"><i class="fas fa-image"></i></button>
+                            <button class="btn btn-outline-secondary" data-descargar="csv" title="@L["Descargar datos"]"><i class="fas fa-table"></i></button>
+                        </div>
+                    </div>
+                    <div class="analitica-lienzo"><canvas id="anGraficoEstados" role="img" aria-label="@L["Personas por estado"]"></canvas></div>
+                </div>
+
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Personas nuevas"]</h6>
+                            <small>@L["Verde cuando sube respecto al periodo anterior, rojo cuando baja"]</small>
+                        </div>
+                        <div class="analitica-acciones analitica-no-imprimir">
+                            <button class="btn btn-outline-secondary" data-descargar="png" title="@L["Descargar imagen"]"><i class="fas fa-image"></i></button>
+                            <button class="btn btn-outline-secondary" data-descargar="csv" title="@L["Descargar datos"]"><i class="fas fa-table"></i></button>
+                        </div>
+                    </div>
+                    <div class="analitica-lienzo"><canvas id="anGraficoNuevos" role="img" aria-label="@L["Personas nuevas"]"></canvas></div>
+                </div>
+
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Avances de estado"]</h6>
+                            <small>@L["Cuántas personas pasaron a cada estado en cada periodo"]</small>
+                        </div>
+                        <div class="analitica-acciones analitica-no-imprimir">
+                            <button class="btn btn-outline-secondary" data-descargar="png" title="@L["Descargar imagen"]"><i class="fas fa-image"></i></button>
+                            <button class="btn btn-outline-secondary" data-descargar="csv" title="@L["Descargar datos"]"><i class="fas fa-table"></i></button>
+                        </div>
+                    </div>
+                    <div class="analitica-lienzo"><canvas id="anGraficoAvances" role="img" aria-label="@L["Avances de estado"]"></canvas></div>
+                </div>
+
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Embudo de los que llegaron"]</h6>
+                            <small id="anEmbudoSubtitulo"></small>
+                        </div>
+                        <div class="analitica-acciones analitica-no-imprimir">
+                            <button class="btn btn-outline-secondary" data-descargar="png" title="@L["Descargar imagen"]"><i class="fas fa-image"></i></button>
+                            <button class="btn btn-outline-secondary" data-descargar="csv" title="@L["Descargar datos"]"><i class="fas fa-table"></i></button>
+                        </div>
+                    </div>
+                    <div class="analitica-lienzo bajo"><canvas id="anGraficoEmbudo" role="img" aria-label="@L["Embudo de los que llegaron"]"></canvas></div>
+                </div>
+
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Tiempo entre estados"]</h6>
+                            <small>@L["Días que se tarda en dar cada paso (pasos dados en el periodo)"]</small>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm analitica-tabla">
+                            <thead><tr><th>@L["Paso"]</th><th class="text-end">@L["Casos"]</th><th class="text-end">@L["Mediana"]</th><th class="text-end">@L["Media"]</th></tr></thead>
+                            <tbody id="anTiempos"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="analitica-tarjeta">
+                    <div class="analitica-tarjeta-cabecera">
+                        <div>
+                            <h6>@L["Personas sin avanzar"]</h6>
+                            <small>@L["Activas que llevan más tiempo del habitual en su estado"]</small>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm analitica-tabla">
+                            <thead><tr><th>@L["Estado"]</th><th class="text-end">@L["Más de"]</th><th class="text-end">@L["Personas"]</th></tr></thead>
+                            <tbody id="anEstancados"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <small class="text-muted" id="anNotaAproximados" style="display:none;"></small>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Textos del panel. Las frases del resumen no están aquí: llegan ya redactadas
+    // del servidor (Models/TextosAnalitica.cs + FormateadorAnalitica).
+    window.T = Object.assign(window.T || {}, {
+        analitica: {
+            mostrar:   @Json.Serialize(L["Mostrar gráficos"].Value),
+            ocultar:   @Json.Serialize(L["Ocultar gráficos"].Value),
+            rango:     @Json.Serialize(L["Del {desde} al {hasta} · comparado con {desdeAnt} – {hastaAnt}"].Value),
+            error:     @Json.Serialize(L["No se pudo cargar el informe."].Value),
+            sinDatos:  @Json.Serialize(L["Todavía no hay datos en este periodo."].Value),
+            periodo:   @Json.Serialize(L["Periodo"].Value),
+            total:     @Json.Serialize(L["Total"].Value),
+            media:     @Json.Serialize(L["Media"].Value),
+            vsAnterior: @Json.Serialize(L["respecto al periodo anterior"].Value),
+            antes:     @Json.Serialize(L["antes {n}"].Value),
+            semana:    @Json.Serialize(L["S"].Value),
+            trimestre: @Json.Serialize(L["T"].Value),
+            personas:  @Json.Serialize(L["Personas"].Value),
+            pasoAnterior: @Json.Serialize(L["de la etapa anterior"].Value),
+            delTotal:  @Json.Serialize(L["del total"].Value),
+            embudoSub: @Json.Serialize(L["De las {n} personas que llegaron en el periodo, cuántas alcanzaron cada estado"].Value),
+            sinCasos:  @Json.Serialize(L["Sin casos"].Value),
+            dias:      @Json.Serialize(L["{n} días"].Value),
+            nombreInforme: @Json.Serialize(L["Evolución de congregantes"].Value),
+            columnaEstado: @Json.Serialize(L["Estado"].Value),
+            tituloEstados: @Json.Serialize(L["Personas por estado"].Value),
+            tituloAvances: @Json.Serialize(L["Avances de estado"].Value),
+            tituloEmbudo:  @Json.Serialize(L["Embudo de los que llegaron"].Value),
+            // Plural para leyendas y ejes; singular para las frases
+            estados: {
+                Visitante:    @Json.Serialize(L["Visitantes"].Value),
+                Simpatizante: @Json.Serialize(L["Simpatizantes"].Value),
+                Proceso:      @Json.Serialize(L["En proceso"].Value),
+                Miembro:      @Json.Serialize(L["Miembros"].Value)
+            },
+            estado: {
+                Visitante:    @Json.Serialize(L["Visitante"].Value),
+                Simpatizante: @Json.Serialize(L["Simpatizante"].Value),
+                Proceso:      @Json.Serialize(L["Proceso"].Value),
+                Miembro:      @Json.Serialize(L["Miembro oficial"].Value)
+            },
+            kpis: {
+                nuevos:         @Json.Serialize(L["Personas nuevas"].Value),
+                a_simpatizante: @Json.Serialize(L["Pasaron a simpatizante"].Value),
+                a_proceso:      @Json.Serialize(L["Pasaron a proceso"].Value),
+                a_miembro:      @Json.Serialize(L["Pasaron a miembro"].Value),
+                bajas:          @Json.Serialize(L["Bajas"].Value),
+                crecimiento:    @Json.Serialize(L["Crecimiento neto"].Value)
+            },
+            kpisAyuda: {
+                crecimiento: @Json.Serialize(L["Personas activas al final del periodo menos las que había al empezar"].Value)
+            }
+        }
+    });
+
+    (function () {
+        'use strict';
+        const A = window.Analitica, T = window.T.analitica, C = A.colores;
+        const ESTADOS = ['Visitante', 'Simpatizante', 'Proceso', 'Miembro'];
+        const panel = document.getElementById('panelAnalitica');
+        const cuerpo = document.getElementById('cuerpoAnalitica');
+        const $ = id => document.getElementById(id);
+        let ultimo = null, cargado = false;
+
+        // ── Filtros ────────────────────────────────────────────────────────
+        function aplicarRango(codigo) {
+            if (codigo === 'personalizado') return;
+            const r = A.rango(codigo);
+            $('anDesde').value = r.desde;
+            $('anHasta').value = r.hasta;
+        }
+        $('anRango').addEventListener('change', e => { aplicarRango(e.target.value); cargar(); });
+        ['anDesde', 'anHasta'].forEach(id => $(id).addEventListener('change', () => { $('anRango').value = 'personalizado'; cargar(); }));
+        $('anAgrupacion').addEventListener('change', cargar);
+        $('anImprimir').addEventListener('click', () => A.imprimir(panel));
+        $('anDescargarDatos').addEventListener('click', descargarTodo);
+        aplicarRango('12m');
+
+        // Abrir/cerrar: se recuerda por navegador, y los datos se piden la primera vez
+        const claveAbierto = 'analiticaCongregantesAbierto';
+        const textoBoton = $('btnAnaliticaMostrar').querySelector('span');
+        cuerpo.addEventListener('shown.bs.collapse', () => {
+            textoBoton.textContent = T.ocultar;
+            try { localStorage.setItem(claveAbierto, '1'); } catch (e) { }
+            if (!cargado) cargar();
+        });
+        cuerpo.addEventListener('hidden.bs.collapse', () => {
+            textoBoton.textContent = T.mostrar;
+            try { localStorage.removeItem(claveAbierto); } catch (e) { }
+        });
+        let abrir = false;
+        try { abrir = localStorage.getItem(claveAbierto) === '1'; } catch (e) { }
+        if (abrir) document.addEventListener('DOMContentLoaded', () => bootstrap.Collapse.getOrCreateInstance(cuerpo).show());
+
+        // ── Carga ──────────────────────────────────────────────────────────
+        async function cargar() {
+            cargado = true;
+            const q = new URLSearchParams({ desde: $('anDesde').value, hasta: $('anHasta').value, agrupacion: $('anAgrupacion').value });
+            $('anResumen').innerHTML = `<li class="text-muted"><i class="fas fa-spinner fa-spin"></i> ${A.escapar(@Json.Serialize(L["Cargando..."].Value))}</li>`;
+            try {
+                const resp = await fetch(`@Url.Action("Congregantes", "Analitica")?${q}`, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                const json = await resp.json();
+                if (!json.ok) throw new Error(json.mensaje || json.message || T.error);
+                ultimo = json.datos;
+                pintar(ultimo);
+            } catch (e) {
+                $('anResumen').innerHTML = `<li class="nivel-negativo"><i class="fas fa-triangle-exclamation"></i> ${A.escapar(e.message || T.error)}</li>`;
+            }
+        }
+
+        // ── Pintado ────────────────────────────────────────────────────────
+        function pintar(d) {
+            const etiquetas = d.periodos.map(p => A.etiquetaPeriodo(p.etiqueta, T));
+
+            $('anRangoTexto').textContent = A.plantilla(T.rango, {
+                desde: A.fechaCorta(d.desde), hasta: A.fechaCorta(d.hasta),
+                desdeAnt: A.fechaCorta(d.desde_anterior), hastaAnt: A.fechaCorta(d.hasta_anterior)
+            });
+            if (d.agrupacion !== $('anAgrupacion').value) $('anAgrupacion').value = d.agrupacion;
+
+            pintarResumen(d.resumen);
+            pintarKpis(d.kpis);
+            pintarEstados(d, etiquetas);
+            pintarNuevos(d, etiquetas);
+            pintarAvances(d, etiquetas);
+            pintarEmbudo(d.embudo);
+            pintarTiempos(d.tiempos);
+            pintarEstancados(d.estancados);
+
+            const nota = $('anNotaAproximados');
+            nota.style.display = d.personas_con_fecha_aproximada > 0 ? '' : 'none';
+            const aprox = d.resumen.find(f => f.codigo === 'datos_aproximados');
+            nota.textContent = aprox ? aprox.texto : '';
+        }
+
+        // Las frases llegan ya redactadas del servidor (FormateadorAnalitica)
+        function pintarResumen(frases) {
+            A.pintarResumen($('anResumen'), frases.filter(f => f.codigo !== 'datos_aproximados'), {}, {}, T.sinDatos);
+        }
+
+        function pintarKpis(kpis) {
+            const cont = $('anKpis');
+            cont.innerHTML = '';
+            const color = { nuevos: C.estados.Visitante, a_simpatizante: C.estados.Simpatizante, a_proceso: C.estados.Proceso, a_miembro: C.estados.Miembro };
+            // El indicador del listado en el que estamos va primero
+            const foco = { Visitante: 'nuevos', Simpatizante: 'a_simpatizante', Proceso: 'a_proceso', Miembro: 'a_miembro' }[panel.dataset.estadoFoco];
+            const ordenados = [...kpis].sort((a, b) => (b.codigo === foco) - (a.codigo === foco));
+            ordenados.forEach(k => A.tarjetaKpi(cont, k, {
+                codigo: k.codigo,
+                titulo: T.kpis[k.codigo] || k.codigo,
+                ayuda: T.kpisAyuda[k.codigo],
+                textoAnterior: T.antes,
+                color: color[k.codigo],
+                signo: k.codigo === 'crecimiento'
+            }));
+        }
+
+        function pintarEstados(d, etiquetas) {
+            // Miembros abajo (la base estable) y visitantes arriba (lo que más cambia)
+            const orden = [...ESTADOS].reverse();
+            A.grafico('anGraficoEstados', {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: orden.map(e => ({
+                        label: T.estados[e],
+                        data: d.periodos.map(p => p.total_por_estado[e] || 0),
+                        borderColor: C.estados[e],
+                        backgroundColor: C.estados[e] + 'd9',
+                        borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.25, fill: true
+                    }))
+                },
+                options: A.opcionesBase({
+                    scales: { y: { stacked: true } },
+                    plugins: {
+                        legend: { reverse: true },
+                        tooltip: {
+                            itemSort: (a, b) => b.datasetIndex - a.datasetIndex,
+                            callbacks: { footer: items => `${T.total}: ${A.fmtNumero(items.reduce((s, i) => s + i.parsed.y, 0))}` }
+                        }
+                    }
+                })
+            }, T.tituloEstados, () => ({
+                cabeceras: [T.periodo, ...ESTADOS.map(e => T.estados[e]), T.total],
+                filas: d.periodos.map((p, i) => [etiquetas[i], ...ESTADOS.map(e => p.total_por_estado[e] || 0), p.total_activos])
+            }));
+        }
+
+        function pintarNuevos(d, etiquetas) {
+            const valores = d.periodos.map(p => p.altas);
+            A.grafico('anGraficoNuevos',
+                A.lineaTendencia(etiquetas, valores, { serie: T.kpis.nuevos, media: T.media, vsAnterior: T.vsAnterior }),
+                T.kpis.nuevos, () => ({ cabeceras: [T.periodo, T.kpis.nuevos], filas: d.periodos.map((p, i) => [etiquetas[i], p.altas]) }));
+        }
+
+        function pintarAvances(d, etiquetas) {
+            const series = [['a_simpatizante', 'Simpatizante'], ['a_proceso', 'Proceso'], ['a_miembro', 'Miembro']];
+            A.grafico('anGraficoAvances', {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: series.map(([campo, estado]) => ({
+                        label: T.kpis[campo],
+                        data: d.periodos.map(p => p[campo]),
+                        backgroundColor: C.estados[estado],
+                        borderColor: C.superficie, borderWidth: 2, borderRadius: 4, borderSkipped: false,
+                        maxBarThickness: 42
+                    }))
+                },
+                options: A.opcionesBase({ scales: { x: { stacked: true }, y: { stacked: true } } })
+            }, T.tituloAvances, () => ({
+                cabeceras: [T.periodo, ...series.map(([c]) => T.kpis[c]), T.kpis.bajas],
+                filas: d.periodos.map((p, i) => [etiquetas[i], p.a_simpatizante, p.a_proceso, p.a_miembro, p.bajas])
+            }));
+        }
+
+        function pintarEmbudo(embudo) {
+            const total = embudo.length ? embudo[0].personas : 0;
+            $('anEmbudoSubtitulo').textContent = A.plantilla(T.embudoSub, { n: A.fmtNumero(total) });
+
+            // Rótulo al final de cada barra: "12 · 40 %" (personas y % sobre la etapa anterior)
+            const rotulos = {
+                id: 'rotulosEmbudo',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    ctx.save();
+                    ctx.font = '600 12px system-ui, -apple-system, "Segoe UI", sans-serif';
+                    ctx.fillStyle = C.tinta;
+                    ctx.textBaseline = 'middle';
+                    chart.getDatasetMeta(0).data.forEach((barra, i) => {
+                        const e = embudo[i];
+                        const texto = A.fmtNumero(e.personas) + (e.paso != null ? ` · ${A.fmtNumero(e.paso, 1)} %` : '');
+                        ctx.fillText(texto, barra.x + 6, barra.y);
+                    });
+                    ctx.restore();
+                }
+            };
+
+            A.grafico('anGraficoEmbudo', {
+                type: 'bar',
+                data: {
+                    labels: embudo.map(e => T.estados[e.estado]),
+                    datasets: [{
+                        label: T.personas,
+                        data: embudo.map(e => e.personas),
+                        backgroundColor: embudo.map(e => C.estados[e.estado]),
+                        borderRadius: 4, borderSkipped: 'start', maxBarThickness: 34
+                    }]
+                },
+                plugins: [rotulos],
+                options: A.opcionesBase({
+                    indexAxis: 'y',
+                    interaction: { mode: 'nearest', intersect: true, axis: 'y' },
+                    layout: { padding: { right: 70 } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: ctx => {
+                                    const e = embudo[ctx.dataIndex];
+                                    return [e.paso != null ? `${A.fmtNumero(e.paso, 1)} % ${T.pasoAnterior}` : '',
+                                            e.sobre_total != null ? `${A.fmtNumero(e.sobre_total, 1)} % ${T.delTotal}` : ''].filter(Boolean);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: C.rejilla, display: true }, border: { display: false }, ticks: { precision: 0 } },
+                        y: { grid: { display: false }, ticks: { color: C.tintaSecundaria } }
+                    }
+                })
+            }, T.tituloEmbudo, () => ({
+                cabeceras: [T.columnaEstado, T.personas, `% ${T.pasoAnterior}`, `% ${T.delTotal}`],
+                filas: embudo.map(e => [T.estados[e.estado], e.personas, e.paso ?? '', e.sobre_total ?? ''])
+            }));
+        }
+
+        function pintarTiempos(tiempos) {
+            $('anTiempos').innerHTML = tiempos.map(t => `
+                <tr>
+                    <td><span class="analitica-punto me-1" style="background:${C.estados[t.desde]}"></span>${A.escapar(T.estado[t.desde])}
+                        → <span class="analitica-punto mx-1" style="background:${C.estados[t.hasta]}"></span>${A.escapar(T.estado[t.hasta])}</td>
+                    <td class="text-end">${A.fmtNumero(t.casos)}</td>
+                    <td class="text-end">${t.dias_mediana != null ? A.fmtNumero(t.dias_mediana) : `<span class="text-muted">${A.escapar(T.sinCasos)}</span>`}</td>
+                    <td class="text-end">${t.dias_media != null ? A.fmtNumero(t.dias_media) : '—'}</td>
+                </tr>`).join('');
+        }
+
+        function pintarEstancados(estancados) {
+            $('anEstancados').innerHTML = estancados.map(e => `
+                <tr>
+                    <td><span class="analitica-punto me-1" style="background:${C.estados[e.estado]}"></span>${A.escapar(T.estado[e.estado])}</td>
+                    <td class="text-end">${A.escapar(A.plantilla(T.dias, { n: A.fmtNumero(e.dias) }))}</td>
+                    <td class="text-end fw-semibold">${e.personas > 0 ? `<i class="fas fa-triangle-exclamation me-1" style="color:#c98500"></i>` : ''}${A.fmtNumero(e.personas)}</td>
+                </tr>`).join('');
+        }
+
+        /** Todas las cifras por periodo en un solo CSV. */
+        function descargarTodo() {
+            if (!ultimo) return;
+            const d = ultimo;
+            A.descargarCSV(T.nombreInforme,
+                [T.periodo, ...ESTADOS.map(e => T.estados[e]), T.total, T.kpis.nuevos, T.kpis.a_simpatizante, T.kpis.a_proceso, T.kpis.a_miembro, T.kpis.bajas],
+                d.periodos.map(p => [A.etiquetaPeriodo(p.etiqueta, T), ...ESTADOS.map(e => p.total_por_estado[e] || 0), p.total_activos,
+                                     p.altas, p.a_simpatizante, p.a_proceso, p.a_miembro, p.bajas]));
+        }
+    })();
+</script>
