@@ -437,4 +437,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-Queries/IglesiasEnTablasPastorales1609.sql
+# Consultas y scripts sueltos de base de datos: son de uso puntual, suelen
+# llevar datos reales de las iglesias y no forman parte de la aplicación, así
+# que no se publican en GitHub. Ojo: .gitignore solo afecta a los ficheros que
+# git todavía no sigue; uno ya versionado hay que sacarlo antes del índice
+# (git rm --cached) para que estas reglas empiecen a aplicarse.
+Queries/
+*.sql
